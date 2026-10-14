@@ -1,0 +1,25 @@
+{
+  "name": "yooickuu",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Anime catalogue and personal lists for GitHub Pages with Supabase auth",
+  "scripts": {
+    "dev": "python3 -m http.server 4173 --bind 127.0.0.1 --directory dist",
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.js",
+    "check": "node --check src/app.js && node --check src/backend.js && node --check src/state.js",
+    "configure": "node scripts/configure.mjs",
+    "audit:catalog": "node scripts/audit-catalog.mjs",
+    "audit:video": "node scripts/audit-video.mjs",
+    "audit:animevost": "node scripts/audit-animevost.mjs",
+    "update:animevost": "node scripts/update-animevost.mjs && node scripts/link-catalogues.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.99.2",
+    "hls.js": "1.7.3"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  }
+}

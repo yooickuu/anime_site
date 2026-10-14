@@ -1,0 +1,70 @@
+import {fetchCatalogue,fetchRelease} from './provider.js';
+import {fetchKitsuCatalogue,fetchKitsuRelease} from './kitsu.js';
+import {fetchVostCatalogue,vostIndex,normalizeVost,fetchVostRelease,vostEpisode,cleanTitle,animeType} from './animevost.js';
+import {identityIndex,exactIdentity} from './catalog-match.js';
+import {providerEpisode} from './provider.js';
+import {registerAnime,byId} from './catalog.js';
+let indexPromise=null;
+async function sourceIndex(){
+  if(!indexPromise)indexPromise=fetch('data/liberty-index.json').then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>new Map(d.items.filter(a=>a.malId).map(a=>[Number(a.malId),a]))).catch(()=>{indexPromise=null;return new Map();});
+  return indexPromise;
+}
+export function mergeCatalogues(liberty,kitsu,knownLiberty=new Map()){
+  const map=new Map(liberty.map(a=>[a.id,a]));
+  for(const a of kitsu){
+    if(map.has(a.id)||a.malId&&knownLiberty.has(a.malId))continue;
+    map.set(a.id,a);
+  }
+  return [...map.values()];
+}
+export async function combinedCatalogue(options){
+  const tasks=[fetchCatalogue(options),fetchVostCatalogue(options),...(options.scope==='watchable'?[]:[fetchKitsuCatalogue(options)])];
+  const results=await Promise.allSettled(tasks);
+  if(results.every(r=>r.status==='rejected'))throw results[0].reason;
+  const [l,v,k]=results.map(r=>r.status==='fulfilled'?r.value:{items:[],total:0,pages:1});
+  const av=await vostIndex().catch(()=>[]);
+  const avIdentities=identityIndex(av.map(a=>({...a,names:cleanTitle(a.title).split(/\s+\/\s+/),type:animeType(a.type)})));
+  const libItems=l.items.map(a=>{const match=av.find(v=>v.libertyId===a.providerId);return match?registerAnime({...a,animeVostId:match.id}):a;});
+  const filtered=!!options.query?.trim()||!!options.ongoing||(options.genre&&options.genre!=='all')||(options.type&&options.type!=='all');
+  const known=results[0].status==='rejected'||filtered?new Map():await sourceIndex();
+  const extra=(k?.items||[]).flatMap(a=>{
+    const match=exactIdentity({names:[a.title,...Object.values(a.translations||{}).map(x=>x[0])],year:a.year,type:a.type},avIdentities);
+    if(!match)return [a];
+    // A provider variant has one canonical card throughout the catalogue.
+    return filtered?[normalizeVost(match)]:[];
+  });
+  const items=mergeCatalogues([...libItems,...v.items],extra,known);
+  return {items,total:null,pages:Math.max(l.pages,v.pages,k?.pages||1),totals:{...(results[0].status==='fulfilled'?{AniLiberty:l.total}:{}),...(results[1].status==='fulfilled'?{AnimeVost:v.total}:{}),...(k&&results[2]?.status==='fulfilled'?{Kitsu:k.total}:{})},partial:results.some(r=>r.status==='rejected')};
+}
+export async function resolveRelease(a){
+  if(a.providerId){
+    const av=await vostIndex().catch(()=>[]),match=av.find(v=>v.libertyId===a.providerId);
+    let loaded;
+    try{loaded=await fetchRelease(a.id);}catch(error){if(!match)throw error;return fetchVostRelease({...a,animeVostId:match.id,videoProvider:'AnimeVost',episodeNumbers:null});}
+    if(!match)return loaded;
+    const linked=registerAnime({...loaded,animeVostId:match.id});
+    if(!linked.blocked&&!linked.episodes)return fetchVostRelease({...linked,videoProvider:'AnimeVost',episodeNumbers:null});
+    return linked;
+  }
+  if(a.animeVostId)return fetchVostRelease(a);
+  const index=await sourceIndex(),match=index.get(a.malId);
+  if(match){
+    const linked=registerAnime({...a,providerId:match.id,catalogOnly:false});
+    return resolveRelease(linked);
+  }
+  // Index may be older than a new release: search by canonical title, then require exact ID.
+  if(a.malId){
+    try{
+      const result=await fetchCatalogue({query:a.title});
+      const exact=result.items.find(v=>v.malId===a.malId);
+      if(exact)return resolveRelease(exact);
+    }catch{}
+  }
+  const av=await vostIndex().catch(()=>[]);
+  const matches=identityIndex(av.map(v=>({...v,names:cleanTitle(v.title).split(/\s+\/\s+/),type:animeType(v.type)})));
+  const found=exactIdentity({names:[a.title,...Object.values(a.translations||{}).map(x=>x[0])],year:a.year,type:a.type},matches);
+  if(found)return fetchVostRelease({...a,animeVostId:found.id,catalogOnly:false});
+  return a.kitsuId?fetchKitsuRelease(a):a;
+}
+
+export async function videoEpisode(a,index,refresh=false,alternate=false){return a.animeVostId&&(!a.providerId||a.videoProvider==='AnimeVost'||alternate)?vostEpisode(a,index,refresh,alternate?(a.episodeNumbers?.[index-1]??index):null):providerEpisode(a.id,index,refresh);}
