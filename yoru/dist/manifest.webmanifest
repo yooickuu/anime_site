@@ -1,1 +1,1 @@
-{"name":"yooickuu","short_name":"yooickuu","start_url":"./","scope":"./","display":"standalone","background_color":"#f9f9fc","theme_color":"#7862c9","icons":[{"src":"assets/yooickuu-icon.png","type":"image/png","purpose":"any"}]}
+{"name":"yooickuu","short_name":"yooickuu","start_url":"./","scope":"./","display":"standalone","background_color":"#f9f9fc","theme_color":"#7862c9","icons":[{"src":"assets/yooickuu-mark.svg","type":"image/svg+xml","purpose":"any","sizes":"any"}]}

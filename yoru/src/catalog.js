@@ -163,7 +163,8 @@ const translations = {
     ],
   },
 };
-for (const a of anime) a.translations = translations[a.id];
+const canonicalSeeds={frieren:[52991,9542],demon:[38000,8325],jujutsu:[40748,8789],yourname:[32281,6826],haikyu:[20583,1337],bocchi:[47917,9293]};
+for (const a of anime){a.translations=translations[a.id];if(canonicalSeeds[a.id]){[a.malId,a.providerId]=canonicalSeeds[a.id];a.image='assets/'+a.id+'.jpg';}}
 export const demo = {
   id: "sintel",
   title: "Sintel",

@@ -1,8 +1,11 @@
+import {watchView} from './watch-view.js';
+import {automaticSkipTimes} from './autoskip.js';
+import {discoveryChoice,watchRoute,audioChoices} from './discovery.js';
 import {initSelectMenus, enhanceSelects, closeSelectMenu} from './select-menu.js';
 import {createPlayback} from './playback.js';
 import {cropAvatar} from './avatar-crop.js';
 import {authErrorKey} from "./public-config.js";
-import {combinedCatalogue, resolveRelease, videoEpisode} from "./sources.js";
+import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex} from "./sources.js";
 import {icon} from "./icons.js";
 import {controlsHTML, attachControls} from "./player-controls.js";
 import { fetchCatalogue, fetchRelease, providerEpisode, chooseQuality, releaseSeasons } from "./provider.js";
@@ -57,6 +60,7 @@ let onlineItems = [],
   typeFilter = "all",
   ongoingOnly = false,
   playback = null,
+  controlsCleanup = null,
   playerSeasons = [],
   providerTiming = null,
   endingSkipped = false;
@@ -98,12 +102,14 @@ let operations = [],
   skipDone = false,
   lastProgress = 0,
   playerOpening = false,
-  mediaFiles = new Map();
+  selectedAudio = '',
+  authResolved = !client,
+  heroTimer = null, heroIndex = 0, randomBusy = false, randomHistory = [];
 const t = (key) => dictionaries[lang][key] || key;
 const title = (a) => (a?.id === "sintel" ? t("demo") : titleFor(a, lang));
 const statusName = (s) => s.name || t(s.key || s.id);
 const brand = () =>
-  '<a href="#home" class="brand"><img class="brand-mark brand-icon" src="assets/yooickuu-icon.png" alt=""><span>yooickuu<span class="brand-dot">.</span></span></a>';
+  '<a href="#home" class="brand"><img class="brand-mark brand-icon" src="assets/yooickuu-mark.svg" alt=""><span>yooickuu<span class="brand-dot">.</span></span></a>';
 const closeButton = (id) =>
   `<button class="dialog-close icon-button" data-close="${id}" aria-label="${t("close")}">${icon("close")}</button>`;
 function toast(message) {
@@ -122,6 +128,7 @@ function applyAppearance() {
   } catch {}
 }
 function navigate(next, selected = "all") {
+  if(page==='watch')stopWatching();
   page = next;
   list = selected;
   query = "";
@@ -134,22 +141,27 @@ function navigate(next, selected = "all") {
   if (next !== "library" && next !== "profile") loadCatalogue();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
-function fromHash() {
-  const hash = location.hash.slice(1).split("/");
-  if (["home", "catalog", "library", "profile"].includes(hash[0])) {
-    page = hash[0];
-    try {
-      list = decodeURIComponent(hash[1] || "all");
-    } catch {
-      list = "all";
-    }
+async function fromHash() {
+  const route=watchRoute(location.hash);
+  if(route){
+    page='watch';
+    if(current?.id===route.id && $('#video')){if(episode!==route.episode)await switchEpisode(route.episode,false);return;}
+    render();
+    if(authResolved && user && ready)await openPlayer(route.id,route.episode,false);
+    return;
   }
+  if(current)stopWatching();
+  const hash=location.hash.slice(1).split('/');
+  page=['home','catalog','library','profile'].includes(hash[0])?hash[0]:'home';
+  try{list=decodeURIComponent(hash[1]||'all');}catch{list='all';}
   render();
 }
 function savedCount() {
   return Object.keys(state.entries).length;
 }
-function render() {
+function render(newWatch=false) {
+  const preservedWatch=page==='watch'&&!newWatch?$('#watch-page'):null;
+  clearInterval(heroTimer);
   applyAppearance();
   $("#app").innerHTML =
     `<header class="header">${brand()}<nav aria-label="${t("catalog")}">${["home", "catalog", "library"].map((v) => `<button class="nav-link ${page === v ? "active" : ""}" data-nav="${v}">${t(v)}${v === "library" && user ? ` <span id="list-count">${savedCount()}</span>` : ""}</button>`).join("")}</nav><div class="header-tools"><label class="search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"><kbd>⌘ K</kbd></label><select id="language" aria-label="${t("language")}">${[
@@ -163,12 +175,36 @@ function render() {
       )
       .join(
         "",
-      )}</select><button class="icon-button" data-action="theme" aria-label="${t("theme")}">${icon(theme === "dark" ? "sun" : "moon")}</button>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main>${page === "home" ? homeHTML() : ""}${page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
-  if (page !== "profile" && !(page === "library" && !user)) renderGrid();
+      )}</select><button class="icon-button" data-action="theme" aria-label="${t("theme")}">${icon(theme === "dark" ? "sun" : "moon")}</button>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="${page==='watch'?'watch-container':''}">${page === "home" ? homeHTML() : ""}${page==='watch' ? (current ? playerHTML() : (authResolved ? guestHTML() : `<p class="watch-loading">${t('loading')}</p>`)) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
+  if(preservedWatch && $('#watch-page'))$('#watch-page').replaceWith(preservedWatch);
+  if(page==='home')startHero();
+  if (page !== 'watch' && page !== "profile" && !(page === "library" && !user)) renderGrid();
   updateSync();
 }
 function homeHTML() {
-  return `<section class="quiet-hero"><div><span class="overline">${t("tagline")}</span><h1>${t("heroTitle")}</h1><p>${t("heroCopy")}</p><div class="hero-buttons"><button class="button primary" data-action="explore">${t("explore")} ${icon("arrow")}</button><button class="button soft" data-action="random">${icon("shuffle")} ${t("random")}</button></div></div><div class="hero-book"><img src="assets/frieren.jpg" alt="${esc(title(anime[0]))}"><span>yooickuu<br>アニメと日常</span></div></section><section class="section"><div class="section-head"><h2>${t("continue")}</h2>${user ? '<button class="sync-state" id="sync-state" data-action="retry-sync"></button>' : ""}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
+  return `<section class="quiet-hero"><div><span class="overline">${t("tagline")}</span><h1>${t("heroTitle")}</h1><p>${t("heroCopy")}</p><div class="hero-buttons"><button class="button primary" data-action="explore">${t("explore")} ${icon("arrow")}</button><button class="button soft" data-action="random">${icon("shuffle")} ${t("random")}</button></div></div><div class="hero-art" id="hero-art">${heroArtHTML()}</div></section><section class="section"><div class="section-head"><h2>${t("continue")}</h2>${user ? '<button class="sync-state" id="sync-state" data-action="retry-sync"></button>' : ""}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
+}
+function heroPool(){return anime.filter(a=>a.providerId);}
+function heroArtHTML(){
+ const pool=heroPool(),front=pool[heroIndex%pool.length],left=pool[(heroIndex+pool.length-1)%pool.length],right=pool[(heroIndex+1)%pool.length];
+ return `<div class="hero-stage"><img class="hero-side hero-side-left" src="${esc(cover(left))}" alt=""><img class="hero-side hero-side-right" src="${esc(cover(right))}" alt=""><button class="hero-featured" data-details="${front.id}" aria-label="${t('details')}: ${esc(title(front))}"><img src="${esc(cover(front))}" alt="${esc(title(front))}"></button></div><div class="hero-caption"><span>${esc(title(front))}</span><div class="hero-navigation"><button class="icon-button" data-action="hero-previous" aria-label="${t('previousPoster')}">${icon('previous')}</button><span class="hero-counter">${heroIndex%pool.length+1} / ${pool.length}</span><button class="icon-button" data-action="hero-next" aria-label="${t('nextPoster')}">${icon('next')}</button></div></div>`;
+}
+async function rotateHero(direction=1){
+ const node=$('#hero-art');if(!node||node.dataset.rotating)return;
+ node.dataset.rotating='true';
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ try{
+  if(!reduced)await node.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(-5px)'}],{duration:220,easing:'ease-in',fill:'forwards'}).finished;
+  if(!node.isConnected)return;
+  heroIndex=(heroIndex+direction+heroPool().length)%heroPool().length;
+  node.innerHTML=heroArtHTML();node.getAnimations().forEach(a=>a.cancel());
+  if(!reduced)await node.animate([{opacity:0,transform:'translateY(7px)'},{opacity:1,transform:'translateY(0)'}],{duration:480,easing:'cubic-bezier(.2,.7,.2,1)'}).finished;
+ }catch{}finally{delete node.dataset.rotating;}
+}
+function startHero(){
+ for(const a of heroPool()){const preload=new Image();preload.src=cover(a);}
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ heroTimer=setInterval(()=>{const node=$('#hero-art');if(node&&!document.hidden&&!node.matches(':hover,:focus-within')&&!$('dialog[open]'))rotateHero();},7000);
 }
 function continueHTML() {
   const map = new Map();
@@ -308,19 +344,20 @@ function preferencesHTML() {
 async function openDetails(id) {
   let a = byId(id);
   if (!a) return;
-  if (a.providerId || a.animeVostId || a.kitsuId) {
+  if (a.providerId || a.animeVostId || a.kitsuId || a.malId) {
     try {
       a = await resolveRelease(a);
     } catch {
       toast(t("providerError"));
     }
   }
+  id = a.id;
   detailId = id;
   const e = state.entries[id] || {};
   $("#details").className = "details-dialog";
   $("#details").innerHTML =
     closeButton("details") +
-    `<div class="details-layout"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}"><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2><div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><p class="details-description">${esc(descriptionFor(a, lang))}</p>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : `<button class="button primary" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`}${
+    `<div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2><div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
       user && ready
         ? `<div class="detail-library"><label>${t("status")}<select id="detail-status"><option value="">${t("none")}</option>${state.statuses
             .filter((s) => s.id !== "favorites")
@@ -575,19 +612,17 @@ async function loadProfile() {
     toast(t("readError"));
   }
 }
-function clearMedia() {
-  for (const file of mediaFiles.values()) URL.revokeObjectURL(file.url);
-  mediaFiles.clear();
-}
 async function handleSession(session, event) {
   const next = session?.user || null;
+  authResolved=true;
   if (next?.id === user?.id) {
     if (event === "PASSWORD_RECOVERY") authDialog("newPassword");
+    if(page==='watch'&&!current)fromHash();
     return;
   }
-  if ($("#player-dialog").open) $("#player-dialog").close();
+  if(current)stopWatching();
   ++sourceGeneration;
-  clearMedia();
+
   user = next;
   state = defaults();
   operations = [];
@@ -597,7 +632,7 @@ async function handleSession(session, event) {
   syncFailure = false;
   ++authGeneration;
   render();
-  if (user) await loadProfile();
+  if (user) {await loadProfile();if(page==='watch')await fromHash();}
   if (event === "PASSWORD_RECOVERY") authDialog("newPassword");
 }
 function collectionDialog(mode, id) {
@@ -647,14 +682,17 @@ function latestProgress(id) {
     .sort((a, b) => b.updated - a.updated)[0];
 }
 function playerHTML() {
-  return `<div class="player-top"><h2 id="player-title"></h2><button class="icon-button" data-close="player-dialog" aria-label="${t("close")}">${icon("close")}</button></div><div class="player-pickers"><span id="season-control" hidden><select id="season-picker" aria-label="${t('season')}"></select></span><span id="episode-control"><select id="episode-picker" aria-label="${t('episode')}"></select></span></div><div class="player-layout"><div class="player-main"><div class="video-shell" tabindex="0" aria-label="${t('videoControls')}"><div class="video-wrap"><video id="video" playsinline preload="metadata"></video><div id="source-empty" hidden><h3>${t('videoError')}</h3><button class="button primary" data-action="retry-video">${t('retry')}</button></div></div>${controlsHTML(t,{speed:state.preferences.speed})}</div><div class="episode-nav"><button class="button soft" id="previous-episode" data-action="previous">${icon('previous')} ${t('previousEpisode')}</button><button class="button soft" id="next-episode" data-action="next">${t('next')} ${icon('next')}</button></div><p id="source-status" class="notice" aria-live="polite"></p><details class="player-settings"><summary>${t('playerSettings')}</summary>${preferencesHTML()}${current.id==='sintel'?'':`<button class="text-button" data-action="choose-file">${t('chooseFile')}</button>`}</details><button class="sync-state" id="sync-state" data-action="retry-sync"></button></div></div><input type="file" id="video-file" accept="video/*,.mkv" multiple hidden>`;
+  const related=[...new Map([...playerSeasons,...onlineItems].filter(a=>a.id!==current.id&&!a.catalogOnly).map(a=>[a.id,a])).values()].slice(0,5);
+  return watchView({a:current,t,title,cover,speed:state.preferences.speed,preferencesHTML:preferencesHTML(),related});
 }
-async function openPlayer(id, requested) {
+async function openPlayer(id, requested, pushRoute=true) {
   if (!requireUser() || playerOpening) return;
-  let a = byId(id);
-  if (!a) return;
   playerOpening = true;
-  if (a.providerId || a.animeVostId || a.kitsuId) {
+  const openingHash=location.hash;
+  let a;
+  try{a=await findWatchRelease(id);}catch{toast(t("providerError"));}
+  if(!a){playerOpening=false;return;}
+  if (a.providerId || a.animeVostId || a.kitsuId || a.malId) {
     try {
       a = await resolveRelease(a);
     } catch {
@@ -670,24 +708,28 @@ async function openPlayer(id, requested) {
     }
   }
   if ((a.providerId || a.animeVostId) && !a.episodes) {toast(t("noReleasedEpisodes"));playerOpening=false;return;}
-  if (!user || !ready) {playerOpening=false;return;}
+  if (!user || !ready || location.hash!==openingHash) {playerOpening=false;return;}
   try {
     recordProgress();
-    $$("dialog[open]:not(#player-dialog)").forEach((d) => d.close());
+    $$("dialog[open]").forEach((d) => d.close());
+    controlsCleanup?.();controlsCleanup=null;
     playback?.destroy();
     playback = null;
     current = a;
+    page='watch';
+    selectedAudio=audioChoices(a).find(x=>x.id===state.preferences.audio)?.id || (a.videoProvider==='AnimeVost'?'vost':audioChoices(a)[0]?.id||'');
     playerSeasons = [a];
     episode = Math.min(
       a.episodes,
       Math.max(1, requested || latestProgress(id)?.episode || 1),
     );
-    $("#player-dialog").innerHTML = playerHTML();
-    if (!$("#player-dialog").open) $("#player-dialog").showModal();
+    const hash=`#watch/${a.id}/${episode}`;
+    if(pushRoute && location.hash!==hash)history.pushState(null,'',hash);else history.replaceState(null,'',hash);
+    render(true);window.scrollTo({top:0,behavior:'instant'});
     attachVideo();
     renderEpisodes();
     const playerId = current.id;
-    releaseSeasons(a).then(items=>{if(current?.id===playerId && $("#player-dialog").open){playerSeasons=items;renderEpisodes();}}).catch(()=>{});
+    releaseSeasons(a).then(items=>{if(current?.id===playerId && (page==='watch' && !!$('#video'))){playerSeasons=items;renderEpisodes();}}).catch(()=>{});
     await updateSource(true);
   } finally {
     playerOpening = false;
@@ -699,13 +741,17 @@ function renderEpisodes() {
   $("#episode-picker").innerHTML = Array.from({length:current.episodes},(_,i)=>`<option value="${i+1}" ${i+1===episode?'selected':''}>${t('episode')} ${esc(current.episodeNumbers?.[i] ?? i+1)}</option>`).join('');
   $("#season-control").hidden = playerSeasons.length <= 1;
   $("#season-picker").innerHTML = playerSeasons.map(a=>`<option value="${esc(a.id)}" ${a.id===current.id?'selected':''}>${esc(title(a))}</option>`).join('');
+  $('#watch-episode-label').textContent=current.episodes===1&&current.type==='MOVIE'?t('movie'):t('episode')+' '+(current.episodeNumbers?.[episode-1]??episode);
+  const audio=audioChoices(current);
+  $('#audio-control').hidden=!audio.length;
+  $('#audio-picker').innerHTML=audio.map(x=>`<option value="${x.id}" ${x.id===selectedAudio?'selected':''}>${x.label} · ${t('audioRussian')}</option>`).join('');
   const navigation=episodeNavigation(episode,current.episodes);
   $("#previous-episode").hidden=!navigation.previous;
   $("#next-episode").hidden=!navigation.next;
-  enhanceSelects($("#player-dialog"));
+  enhanceSelects($("#watch-page"));
 }
 let recordReady = false;
-async function updateSource(play = false, refresh = false, alternate = false) {
+async function updateSource(play = false, refresh = false) {
   const generation = ++sourceGeneration;
   sourceKey = null;
   recordReady = false;
@@ -717,18 +763,17 @@ async function updateSource(play = false, refresh = false, alternate = false) {
   playback?.destroy();
   let availableSources=[],attemptedURLs=new Set();
   playback = createPlayback(video, status=>{
-    if(generation!==sourceGeneration || !$("#player-dialog").open)return;
+    if(generation!==sourceGeneration || page!=='watch' || !$('#video'))return;
     const loading=$(".video-loading");
     if(loading)loading.hidden=!['loading','buffering'].includes(status);
     if(['error','unsupported'].includes(status)){
       const fallback=availableSources.find(s=>!attemptedURLs.has(s.url));
       if(fallback){
         attemptedURLs.add(fallback.url);
-        $('#quality').value=String(fallback.quality);enhanceSelects($('#player-dialog'));
+        $('#quality').value=String(fallback.quality);enhanceSelects($('#watch-page'));
         const saved=state.progress[sourceKey];
         playback.load({url:fallback.url,stream:fallback.url.includes('.m3u8'),autoplay:play,startAt:video.currentTime||(saved&&!saved.completed?saved.time:0),speed:Number(state.preferences.speed)||1});return;
       }
-      if(current.providerId && current.animeVostId && !alternate && !mediaFiles.has(sourceKey)){recordProgress();updateSource(play,true,true);return;}
       $("#source-empty").hidden=false;
       $("#source-status").textContent=t(status==='unsupported'?'videoUnsupported':'videoError');
     }else if(status==='autoplayBlocked'){
@@ -739,7 +784,7 @@ async function updateSource(play = false, refresh = false, alternate = false) {
     }
   });
   sourceKey = `${current.id}:${episode}`;
-  const file = mediaFiles.get(sourceKey);
+
   $("#player-title").textContent=title(current);
   $("#source-status").textContent='';
   $("#source-empty").hidden=true;
@@ -748,10 +793,9 @@ async function updateSource(play = false, refresh = false, alternate = false) {
   renderEpisodes();
   let url=null,stream=false;
   try {
-    if(file)url=file.url;
-    else if(current.id==='sintel')url='assets/sintel-trailer.mp4';
+    if(current.id==='sintel')url='assets/sintel-trailer.mp4';
     else if(current.providerId || current.animeVostId){
-      const info=await videoEpisode(current,episode,refresh,alternate);
+      const info=await videoEpisode(current,episode,refresh,selectedAudio);
       if(generation!==sourceGeneration)return;
       providerTiming=info;
       availableSources=info?.sources||[];
@@ -760,7 +804,7 @@ async function updateSource(play = false, refresh = false, alternate = false) {
       if(info?.sources?.length){
         $("#quality-control").hidden=false;
         $("#quality").innerHTML=info.sources.map(q=>`<option value="${q.quality}" ${q.quality===selected?.quality?'selected':''}>${q.quality}p</option>`).join('');
-        enhanceSelects($("#player-dialog"));
+        enhanceSelects($("#watch-page"));
       }
     }else url=await mediaSource(current.id,episode);
     if(generation!==sourceGeneration || !user)return;
@@ -809,11 +853,13 @@ async function switchEpisode(n, play = false) {
   if (!current || n < 1 || n > current.episodes) return;
   recordProgress();
   episode = n;
+  history.replaceState(null,'',`#watch/${current.id}/${episode}`);
   await updateSource(play);
 }
 function attachVideo() {
   const video = $("#video");
-  attachControls($(".video-shell"), video, t, () => toast(t("playerActionError")));
+  controlsCleanup?.();
+  controlsCleanup=attachControls($(".video-shell"), video, t, () => toast(t("playerActionError")));
   video.addEventListener("loadedmetadata", () => {
     if (!sourceKey) return;
     const p = state.progress[sourceKey];
@@ -821,6 +867,7 @@ function attachVideo() {
       video.currentTime = p.time;
     video.playbackRate = Number(state.preferences.speed) || 1;
     recordReady = true;
+    loadAutomaticSkips();
   });
   video.addEventListener("play", () => {
     if (!current || current.id === "sintel") return;
@@ -863,7 +910,7 @@ function attachVideo() {
     recordProgress();
     renderEpisodes();
     if (
-      current.id !== "sintel" && !current.ongoing &&
+      current && current.id !== "sintel" && !current.ongoing &&
       Array.from(
         { length: current.episodes },
         (_, i) => state.progress[`${current.id}:${i + 1}`]?.completed,
@@ -875,8 +922,7 @@ function attachVideo() {
       state.preferences,
       episode,
       current.episodes,
-      mediaFiles.has(`${current.id}:${episode + 1}`) ||
-        hasRemoteSource(current.id, episode + 1) ||
+      hasRemoteSource(current.id, episode + 1) ||
         !!(current.providerId || current.animeVostId),
     );
     if (next) switchEpisode(next.episode, next.play);
@@ -888,43 +934,20 @@ function attachVideo() {
     }
   });
 }
-$("#player-dialog").addEventListener("close", () => {
-  recordProgress();
-  sourceKey = null;
-  recordReady = false;
-  ++sourceGeneration;
-  playback?.destroy();
-  playback = null;
-  closeSelectMenu();
-  const v = $("#video");
-  if (v) v.pause();
-  $("#player-dialog").classList.remove("cinema");
-  if ($("#continue-grid")) $("#continue-grid").innerHTML = continueHTML();
-});
-function chooseFiles() {
-  if (current?.id === "sintel") {
-    toast(t("contentNotice"));
-    return;
-  }
-  $("#video-file")?.click();
+function stopWatching(){
+  recordProgress();controlsCleanup?.();controlsCleanup=null;sourceKey=null;recordReady=false;++sourceGeneration;
+  playback?.destroy();playback=null;current=null;closeSelectMenu();
 }
-function selectFiles(input) {
-  if (!user || !current) return;
-  const selected = Array.from(input.files).slice(
-    0,
-    current.episodes - episode + 1,
-  );
-  if (!selected.length) return;
-  recordProgress();
-  selected.forEach((file, i) => {
-    const key = `${current.id}:${episode + i}`,
-      old = mediaFiles.get(key);
-    if (old) URL.revokeObjectURL(old.url);
-    mediaFiles.set(key, { name: file.name, url: URL.createObjectURL(file) });
-  });
-  input.value = "";
-  updateSource();
-  toast(t("filesLoaded") + ": " + selected.length);
+async function loadAutomaticSkips(){
+  const video=$('#video'),own=sourceGeneration,key=sourceKey;
+  if(!video||!current)return;
+  const notice=$('#skip-availability');
+  if(!state.preferences.autoSkip){if(notice)notice.textContent='';return;}
+  if(notice)notice.textContent=t('skipLoading');
+  const fallback=(!providerTiming?.opening||!providerTiming?.ending)?await automaticSkipTimes(current.malId,Number(current.episodeNumbers?.[episode-1]??episode),video.duration):{};
+  if(own!==sourceGeneration||key!==sourceKey)return;
+  providerTiming={...providerTiming,opening:providerTiming?.opening||fallback.opening,ending:providerTiming?.ending||fallback.ending};
+  if(notice)notice.textContent=providerTiming.opening||providerTiming.ending?'':t('skipUnavailable');
 }
 async function uploadAvatar(file) {
   if (!requireUser() || !file) return;
@@ -1050,10 +1073,20 @@ document.addEventListener("click", async (event) => {
         break;
       case "random":
         {
-          const pool = onlineItems.length ? onlineItems : anime;
-          openDetails(pool[Math.floor(Math.random() * pool.length)].id);
+          if(randomBusy)break;randomBusy=true;b.disabled=true;
+          try{
+            const pool=await discoveryIndex();let found=null;
+            for(let attempt=0;attempt<5;attempt++){
+              const candidate=discoveryChoice(pool,state.entries,randomHistory);
+              if(!candidate)break;randomHistory=[...randomHistory.slice(-19),candidate.id];
+              try{const a=await resolveRelease(candidate);if(!a.blocked&&!a.catalogOnly&&a.episodes>0){found=a;break;}}catch{}
+            }
+            if(found)await openDetails(found.id);else toast(t('randomUnavailable'));
+          }finally{randomBusy=false;b.disabled=false;}
         }
         break;
+      case 'hero-previous':rotateHero(-1);break;
+      case 'hero-next':rotateHero(1);break;
       case "about":
         showAbout();
         break;
@@ -1099,12 +1132,9 @@ document.addEventListener("click", async (event) => {
         )
           toast(t("saved"));
         break;
-      case "choose-file":
-        chooseFiles();
-        break;
       case "cinema":
-        $("#player-dialog").classList.toggle("cinema");
-        b.setAttribute('aria-pressed',String($("#player-dialog").classList.contains('cinema')));
+        $("#watch-page").classList.toggle("cinema");
+        b.setAttribute('aria-pressed',String($("#watch-page").classList.contains('cinema')));
         break;
       case "retry-video":
         recordProgress();
@@ -1152,8 +1182,10 @@ document.addEventListener("click", async (event) => {
 document.addEventListener("input", (event) => {
   if (["search", "catalog-search"].includes(event.target.id)) {
     query = event.target.value;
-    if (page === "profile" || page === "library") {
+    if (page === "profile" || page === "library" || page === "watch") {
+      if(current)stopWatching();
       page = "catalog";
+      history.pushState(null,'','#catalog');
       render();
       const input = $("#search");
       input.focus();
@@ -1171,7 +1203,8 @@ document.addEventListener("change", (event) => {
     lang = input.value;
     if (user && ready)
       mutate({ type: "preferences", patch: { language: lang } });
-    render();
+    if(page==='watch'&&current){const playing=!$('#video').paused;recordProgress();playback?.destroy();render(true);attachVideo();renderEpisodes();updateSource(playing);}else render();
+    if($('#details').open&&detailId)openDetails(detailId);
   }
   if (input.id === "sort") {
     sort = input.value;
@@ -1216,6 +1249,11 @@ document.addEventListener("change", (event) => {
       type: "preferences",
       patch: { [input.dataset.preference]: input.checked },
     });
+  if(input.dataset.preference==='autoSkip')loadAutomaticSkips();
+  if(input.id==='audio-picker'){
+    const playing=!$('#video').paused;recordProgress();selectedAudio=input.value;
+    mutate({type:'preferences',patch:{audio:selectedAudio}});updateSource(playing);
+  }
   if (input.id === "episode-picker") switchEpisode(Number(input.value),!!state.preferences.autoPlay);
   if (input.id === "season-picker") openPlayer(input.value);
   if (input.id === "quality") {
@@ -1228,7 +1266,7 @@ document.addEventListener("change", (event) => {
     if ($("#video")) $("#video").playbackRate = speed;
     mutate({ type: "preferences", patch: { speed } });
   }
-  if (input.id === "video-file") selectFiles(input);
+
   if (input.id === "avatar-file") { const file=input.files[0];input.value="";uploadAvatar(file); }
 });
 document.addEventListener("submit", (event) => {
@@ -1263,7 +1301,7 @@ document.addEventListener("keydown", (event) => {
   }
   const v = $("#video");
   if (
-    !$("#player-dialog").open ||
+    !(page==='watch' && !!$('#video')) ||
     !v ||
     event.ctrlKey ||
     event.metaKey ||
@@ -1329,7 +1367,7 @@ if (client) {
 
 async function loadCatalogue(more = false, targetPage = 1) {
   clearTimeout(searchTimer);
-  if (page === "library" || page === "profile") return;
+  if (page === "watch" || page === "library" || page === "profile") return;
   const generation = ++catalogGeneration;
   catalogBusy = true;
   catalogError = false;

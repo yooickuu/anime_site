@@ -1,3 +1,4 @@
+import {idleControls} from './idle-controls.js';
 import {icon} from './icons.js';
 import {timeLabel} from './state.js';
 export function controlsHTML(t, {speed = 1} = {}) {
@@ -8,7 +9,21 @@ export function attachControls(root, video, t, onError) {
   const seek=root.querySelector('.video-seek'),volume=root.querySelector('.video-volume'),time=root.querySelector('[data-video-time]');
   const pip=root.querySelector('[data-video="pip"]'),full=root.querySelector('[data-video="fullscreen"]');
   const loading=root.querySelector('.video-loading');
-  let dragging=false,lastVolume=video.volume || 1;
+  let dragging=false,lastVolume=video.volume || 1,keyboardFocus=false;
+  const idle=idleControls({
+    active:()=>root.isConnected&&document.fullscreenElement===root&&!video.paused&&!video.ended,
+    blocked:()=>dragging||keyboardFocus||!!root.querySelector('[aria-expanded="true"]'),
+    show:()=>root.classList.remove('controls-idle'),
+    hide:()=>root.classList.add('controls-idle'),
+  });
+  root.addEventListener('pointermove',()=>{keyboardFocus=false;idle.reveal();});
+  root.addEventListener('pointerdown',()=>{keyboardFocus=false;idle.reveal();});
+  root.addEventListener('pointerup',()=>idle.reveal());
+  root.addEventListener('keydown',()=>{keyboardFocus=true;idle.reveal();});
+  root.addEventListener('focusout',()=>{keyboardFocus=false;idle.reveal();});
+  root.addEventListener('change',()=>idle.reveal());
+  root.addEventListener('fullscreenchange',()=>idle.reveal());
+  for(const event of ['play','playing','pause','ended','waiting','seeking','error'])video.addEventListener(event,()=>idle.reveal());
   const togglePlay=()=>{if(!video.currentSrc)return;video.paused?video.play().catch(onError):video.pause();};
   const toggleMute=()=>{if(video.muted || video.volume===0){video.volume=lastVolume || 1;video.muted=false;}else{lastVolume=video.volume;video.muted=true;}};
   const fullscreen=async()=>{
@@ -37,7 +52,11 @@ export function attachControls(root, video, t, onError) {
     mute.setAttribute('aria-label',mute.title);mute.setAttribute('aria-pressed',String(silent));
     volume.value=String(silent?0:video.volume);
   }
-  play.addEventListener('click',togglePlay);video.addEventListener('click',togglePlay);
+  play.addEventListener('click',togglePlay);
+  // The first tap reveals hidden controls without unexpectedly pausing the episode.
+  let touchReveal=false;
+  video.addEventListener('pointerdown',event=>{touchReveal=event.pointerType==='touch'&&root.classList.contains('controls-idle');});
+  video.addEventListener('click',()=>{if(touchReveal){touchReveal=false;idle.reveal();return;}togglePlay();});
   mute.addEventListener('click',toggleMute);full.addEventListener('click',fullscreen);pip.addEventListener('click',pictureInPicture);
   seek.addEventListener('pointerdown',()=>{dragging=true;});
   seek.addEventListener('pointerup',()=>{dragging=false;});seek.addEventListener('pointercancel',()=>{dragging=false;});
@@ -55,4 +74,5 @@ export function attachControls(root, video, t, onError) {
     if(Number.isFinite(video.duration)&&key.startsWith('arrow'))video.currentTime=Math.min(video.duration,Math.max(0,video.currentTime+(key==='arrowleft'?-10:10)));
   });
   update();
+  return ()=>idle.dispose();
 }

@@ -584,3 +584,16 @@ const playerRefinements={
  averageRating:['Средняя оценка','Average rating','平均評価'],
 };
 for(const [key,values] of Object.entries(playerRefinements))['ru','en','ja'].forEach((lang,index)=>{dictionaries[lang][key]=values[index];});
+const watchRefresh={
+ heroTitle:['Аниме под твоё настроение.','Anime for every mood.','今の気分に、ぴったりのアニメ。'],
+ heroCopy:['Знакомые миры и неожиданные открытия. Выбирай аниме — мы запомним, где ты остановился.','Familiar worlds and unexpected discoveries. Find your next anime. We’ll remember where you left off.','大好きな世界も、思いがけない出会いも。次に観たいアニメを見つけよう。続きはいつでもここから。'],
+ season:['Сезон','Season','シーズン'],audio:['Озвучка','Audio','音声'],audioRussian:['русская','Russian','ロシア語'],audioJapanese:['японская · оригинал','Japanese · original','日本語・オリジナル'],
+ backToCatalogue:['К каталогу','Back to catalogue','作品一覧へ'],moreStories:['Ещё истории','More to discover','ほかの作品もチェック'],synopsis:['О сюжете','The story','あらすじ'],
+ previousPoster:['Предыдущий постер','Previous poster','前のポスター'],nextPoster:['Следующий постер','Next poster','次のポスター'],
+ skipLoading:['Ищем отметки заставок…','Finding opening and ending timestamps…','OP・EDの区間を確認中…'],
+ skipUnavailable:['Для этой версии серии отметки заставок пока не найдены.','Opening and ending timestamps aren’t available for this cut yet.','このバージョンのOP・ED区間はまだ登録されていません。'],
+ randomUnavailable:['Сейчас не удалось подобрать доступное видео. Попробуй ещё раз.','Couldn’t find an available video right now. Try again.','再生できる作品が見つかりませんでした。もう一度お試しください。'],
+ sourceNotice:['Каталог и обложки: AniLiberty, AnimeVost и Kitsu. Видео: AniLiberty и AnimeVost. Таймкоды: источник видео и AniSkip.','Catalogue and posters: AniLiberty, AnimeVost and Kitsu. Video: AniLiberty and AnimeVost. Skip times: the video provider and AniSkip.','作品情報・画像：AniLiberty、AnimeVost、Kitsu。動画：AniLiberty、AnimeVost。スキップ区間：配信元、AniSkip。'],
+};
+for(const [k,v] of Object.entries(watchRefresh))['ru','en','ja'].forEach((l,i)=>dictionaries[l][k]=v[i]);
+for(const l of ['ru','en','ja'])dictionaries[l].aboutCopy=dictionaries[l].sourceNotice;

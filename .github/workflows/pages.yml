@@ -1,0 +1,52 @@
+name: Deploy yooickuu to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "35 4 * * *"
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: yoru
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: yoru/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Refresh catalogue ID index
+        if: github.event_name == 'schedule'
+        run: node scripts/audit-catalog.mjs
+        continue-on-error: true
+      - name: Refresh additional video catalogue
+        if: github.event_name == 'schedule'
+        run: npm run update:animevost
+        continue-on-error: true
+      - run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: yoru/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

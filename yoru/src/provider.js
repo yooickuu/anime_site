@@ -81,20 +81,23 @@ export async function fetchCatalogue({
     pages: data.meta?.pagination?.total_pages || 1,
   };
 }
-export async function fetchRelease(id) {
+export async function fetchRelease(id, refresh = false) {
+  const cached=releases.get(id) || releases.get('lib-'+byId(id)?.providerId);
+  if(!refresh && cached?.model && Date.now()-cached.loadedAt<300000)return byId(cached.model.id)||cached.model;
   const raw = await request(
     "/anime/releases/" + encodeURIComponent(String(byId(id)?.providerId || id).replace("lib-", "")),
   );
   const model = normalizeRelease(raw);
   await enrichPosters([model]);
-  releases.set(model.id, { raw, loadedAt: Date.now() });
-  releases.set("lib-"+raw.id, {raw,loadedAt:Date.now()});
+  const entry={raw,model,loadedAt:Date.now()};
+  releases.set(model.id,entry);
+  releases.set("lib-"+raw.id,entry);
   return model;
 }
 export async function releaseEpisodes(id, refresh = false) {
   let cached = releases.get(id);
   if (refresh || !cached || Date.now() - cached.loadedAt > 300000) {
-    await fetchRelease(id);
+    await fetchRelease(id, refresh);
     cached = releases.get(id);
   }
   if (cached.raw.is_blocked_by_geo || cached.raw.is_blocked_by_copyrights)

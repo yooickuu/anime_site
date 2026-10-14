@@ -38,6 +38,7 @@ export async function combinedCatalogue(options){
 }
 export async function resolveRelease(a){
   if(a.providerId){
+    registerAnime(a);
     const av=await vostIndex().catch(()=>[]),match=av.find(v=>v.libertyId===a.providerId);
     let loaded;
     try{loaded=await fetchRelease(a.id);}catch(error){if(!match)throw error;return fetchVostRelease({...a,animeVostId:match.id,videoProvider:'AnimeVost',episodeNumbers:null});}
@@ -67,4 +68,23 @@ export async function resolveRelease(a){
   return a.kitsuId?fetchKitsuRelease(a):a;
 }
 
-export async function videoEpisode(a,index,refresh=false,alternate=false){return a.animeVostId&&(!a.providerId||a.videoProvider==='AnimeVost'||alternate)?vostEpisode(a,index,refresh,alternate?(a.episodeNumbers?.[index-1]??index):null):providerEpisode(a.id,index,refresh);}
+export async function videoEpisode(a,index,refresh=false,audio=''){
+ const vost=audio==='vost'||(!audio&&(!a.providerId||a.videoProvider==='AnimeVost'));
+ if(vost&&a.animeVostId)return vostEpisode(a,index,refresh,a.episodeNumbers?.[index-1]??null);
+ if(a.providerId)return providerEpisode(a.id,index,refresh);
+ return null;
+}
+
+export async function discoveryIndex(){
+ const [lib,av]=await Promise.all([sourceIndex(),vostIndex().catch(()=>[])]);
+ const liberty=[...lib.values()].map(x=>({id:'mal-'+x.malId,malId:x.malId,providerId:x.id,title:x.title,year:x.year,type:x.type}));
+ const extra=av.filter(x=>!x.libertyId).map(x=>normalizeVost(x));
+ return [...liberty,...extra];
+}
+export async function findWatchRelease(id){
+ const cached=byId(id);if(cached)return cached;
+ if(/^lib-\d+$/.test(id))return fetchRelease(id);
+ if(/^kitsu-\d+$/.test(id))return fetchKitsuRelease({kitsuId:id.slice(6)});
+ const pool=await discoveryIndex();const a=pool.find(x=>x.id===id);
+ return a?registerAnime(a):null;
+}
