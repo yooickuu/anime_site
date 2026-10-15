@@ -121,7 +121,7 @@ function toast(message) {
 function applyAppearance() {
   document.documentElement.lang = lang;
   document.body.classList.toggle("dark", theme === "dark");
-  document.title = "yooickuu — " + t("tagline");
+  document.title = "yooickuu — " + ({ru:"аниме, фильмы и личные списки",en:"anime, films and personal lists",ja:"アニメ・映画・マイリスト"}[lang]);
   try {
     localStorage.setItem("yooickuu.language", JSON.stringify(lang));
     localStorage.setItem("yooickuu.theme", JSON.stringify(theme));

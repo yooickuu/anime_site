@@ -44,3 +44,5 @@
 - 46/46 тестов, check/build проходят. Исправлена модель таймера в новом тесте (она не очищала уже отработавший callback).
 - Пользователь создал git и origin https://github.com/yooickuu/yooickuu.com.git; main f8b3238 содержал вчерашние изменения. Последняя Actions-сборка 38607557066 провалилась; legacy Pages job 38607553524 успешен.
 - Workflow теперь в корневой .github/workflows, рабочая папка yoru, публикация yoru/dist; корневой index — запасной redirect для branch deployment. Пакетное обновление каталогов оставлено ежедневному запуску, не задерживает каждую публикацию.
+- 15 октября: cfd0465 отправлен в origin/main. GitHub Actions 38671378036: build успешен, deploy запущен. Добавлены SEO title/description/canonical/OpenGraph/WebSite JSON-LD, видимый начальный текст HTML и sitemap.xml с главной страницей. Поиск не гарантирован, Search Console ещё не подключена.
+- Попытка переключить Pages build_type через скрипт с git credential fill отклонена автоматической проверкой (не выполнена). Не повторять/обходить извлечение учётных данных. Обычный git push разрешён и работает. Проверить итоговый публичный адрес и что legacy/job не перезаписывает artifact.
