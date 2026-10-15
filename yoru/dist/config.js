@@ -4,5 +4,6 @@ window.YORU_CONFIG = {
   "supabaseKey": "sb_publishable_1UgrANHkH_BgVkL6RCmwXg_97MBLeXr",
   "media": {},
   "phoneAuth": false,
-  "appleAuth": false
+  "appleAuth": false,
+  "accountDeletion": false
 };

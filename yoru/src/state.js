@@ -1,9 +1,8 @@
 export const statuses = [
   "watching",
-  "completed",
   "planned",
-  "onhold",
   "dropped",
+  "completed",
   "ongoing",
 ];
 export const initialStatuses = () =>
@@ -61,6 +60,26 @@ export function applyOperation(value, op) {
       if (op.patch.status && !s.statuses.some((v) => v.id === op.patch.status))
         throw Error("invalidStatus");
       s.entries[op.id] = { ...e, ...op.patch };
+      if (Object.hasOwn(op.patch,'status')) s.entries[op.id].legacyLists = [];
+      break;
+    }
+    case "unifyLists": {
+      // Preserve all memberships from the old multi-list model during migration.
+      for(const c of s.collections) {
+        if(!s.statuses.some(v=>v.id===c.id))s.statuses.push({id:c.id,name:c.name});
+        for(const id of c.items) {
+          const e=s.entries[id] ||= {status:null,favorite:false};
+          e.legacyLists=[...new Set([...(e.legacyLists||[]),c.id])];
+          if(!e.status)e.status=c.id;
+        }
+      }
+      s.collections=[];
+      if(s.statuses.some(v=>v.id==='onhold'&&v.key==='onhold')) {
+        s.statuses=s.statuses.filter(v=>v.id!=='onhold');
+        for(const e of Object.values(s.entries))if(e.status==='onhold')e.status=null;
+      }
+      const order=['favorites','watching','planned','dropped','completed','ongoing'];
+      s.statuses.sort((a,b)=>(order.includes(a.id)?order.indexOf(a.id):99)-(order.includes(b.id)?order.indexOf(b.id):99));
       break;
     }
     case "createStatus": {
@@ -76,6 +95,7 @@ export function applyOperation(value, op) {
       s.statuses = s.statuses.filter((v) => v.id !== op.id);
       for (const e of Object.values(s.entries)) {
         if (e.status === op.id) e.status = null;
+        e.legacyLists=(e.legacyLists||[]).filter(id=>id!==op.id);
         if (op.id === "favorites") e.favorite = false;
       }
       break;

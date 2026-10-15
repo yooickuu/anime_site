@@ -31,11 +31,23 @@
     <h2>2. Разреши возврат из письма на сайт</h2>
     <ol>
       <li>В Supabase открой <strong>Authentication → URL Configuration</strong>.</li>
-      <li>В <strong>Site URL</strong> укажи <code>http://127.0.0.1:4173/</code> и сохрани.</li>
+      <li>В <strong>Site URL</strong> укажи <code>https://yooickuu.github.io/yooickuu.com/</code> и сохрани.</li>
       <li>В <strong>Redirect URLs</strong> нажми <strong>Add URL</strong> и добавь адреса ниже <strong>по одному</strong>.</li>
     </ol>
     <div id="redirects"></div>
-    <p class="muted">После публикации добавим настоящий адрес GitHub Pages. Подтверждение email оставь включённым.</p>
+    <p class="muted">Публичный адрес сайта уже включён в список ниже. Подтверждение email оставь включённым.</p>
+  </section>
+  <section>
+    <h2>Удаление аккаунта и пауза повторной регистрации</h2>
+    <p>Это отдельное обновление. Оно само по себе не удаляет аккаунты.</p>
+    <ol>
+      <li>Нажми «Скопировать SQL удаления», открой SQL Editor, вставь в новый запрос и нажми Run.</li>
+      <li>Открой в Supabase <strong>Edge Functions → Deploy a new function → Via Editor</strong>. Назови функцию <code>delete-account</code>.</li>
+      <li>Нажми «Скопировать функцию», замени содержимое <code>index.ts</code> в редакторе и нажми <strong>Deploy function</strong>.</li>
+      <li>В настройках функции выключи только <strong>Verify JWT with legacy secret</strong>: функция сама проверяет вход через Supabase Auth. Иначе новый Publishable key может не проходить старую проверку.</li>
+    </ol>
+    <div class="actions"><button data-copy-file="account-deletion.sql">Скопировать SQL удаления</button><button data-copy-file="delete-account.ts">Скопировать функцию</button></div>
+    <p class="muted">Секретный ключ в сайт вставлять не нужно: функция получает его внутри Supabase. Сначала проверяй удаление на отдельном тестовом аккаунте, не на основном. Удаление необратимо.</p>
   </section>
   <section>
     <h2>3. Проверь подключение</h2>

@@ -1,4 +1,6 @@
 const paths = {
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  eyeOff: '<path d="m3 3 18 18M10 5a11 11 0 0 1 12 7 17 17 0 0 1-4 5M6 6a20 20 0 0 0-4 6s3.5 7 10 7c2 0 4-.8 5-1.5"/>',
   chevron: '<path d="m6 9 6 6 6-6"/>',
   previous: '<path d="M5 5v14m14-14L8 12l11 7z"/>',
   next: '<path d="M19 5v14M5 5l11 7L5 19z"/>',

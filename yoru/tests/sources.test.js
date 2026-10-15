@@ -64,3 +64,16 @@ test('one failed catalogue keeps the other results and reports partial availabil
   assert.equal(result.partial,true);
  }finally{globalThis.fetch=old;}
 });
+
+test('audience ratings come from actual Kitsu scores and remain absent when unscored',()=>{
+ const rated=normalizeKitsu({id:'rating-check',attributes:{canonicalTitle:'A',averageRating:'87.35'}});
+ assert.equal(rated.audienceRating,8.735);assert.equal(rated.audienceRatingSource,'Kitsu');
+ assert.equal(normalizeKitsu({id:'no-rating',attributes:{canonicalTitle:'B'}}).audienceRating,null);
+});
+test('discovery modes send actual popularity, rating, airing and film filters',async()=>{
+ const {discoveryOptions}=await import('../src/sources.js');
+ assert.equal(discoveryOptions({view:'popular',sort:'latest'}).sort,'popular');
+ assert.equal(discoveryOptions({view:'topRated'}).sort,'topRated');
+ assert.equal(discoveryOptions({view:'airingNow'}).ongoing,true);
+ assert.equal(discoveryOptions({view:'films'}).type,'MOVIE');
+});

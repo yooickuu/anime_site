@@ -25,7 +25,7 @@ try {
     document.querySelector('#sql-editor').href = 'https://supabase.com/dashboard/project/' + project.split('.')[0] + '/sql/new';
   }
 } catch {}
-const redirects = new Set(['http://127.0.0.1:4173/', 'http://127.0.0.1:4173/index.html', 'http://localhost:4173/', 'http://localhost:4173/index.html', 'http://127.0.0.1:5500/yoru/dist/index.html', 'http://localhost:5500/yoru/dist/index.html']);
+const redirects = new Set(['https://yooickuu.github.io/yooickuu.com/','http://127.0.0.1:4173/', 'http://127.0.0.1:4173/index.html', 'http://localhost:4173/', 'http://localhost:4173/index.html', 'http://127.0.0.1:5500/yoru/dist/index.html', 'http://localhost:5500/yoru/dist/index.html']);
 if (['localhost', '127.0.0.1'].includes(location.hostname)) {
   redirects.add(new URL('index.html', location.href).href);
 }
@@ -58,4 +58,8 @@ document.querySelector('#check').addEventListener('click', async event => {
     status.textContent = 'Проект доступен. Таблица найдена. ' + (settings.external?.email && !settings.disable_signup ? 'Регистрация по email включена.' : 'Регистрация по email отключена в настройках проекта.') + '\nТеперь проверь регистрацию, подтверждение письма и сохранение списка на самом сайте.';
   } catch (error) { status.textContent = error.message || 'Не удалось подключиться. Проверь интернет и повтори.'; }
   finally { button.disabled = false; }
+});
+
+for(const button of document.querySelectorAll('[data-copy-file]'))button.addEventListener('click',async()=>{
+  try{button.dataset.label=button.textContent;const response=await fetch(button.dataset.copyFile);if(!response.ok)throw Error();await copy(await response.text(),button);}catch{status.textContent='Не удалось загрузить файл. Обнови страницу и повтори.';}
 });

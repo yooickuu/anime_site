@@ -17,7 +17,20 @@ export function mergeCatalogues(liberty,kitsu,knownLiberty=new Map()){
   }
   return [...map.values()];
 }
+export function discoveryOptions(options) {
+ const view=options.view;
+ return {...options,
+   sort:view==='popular'||view==='topRated'?view:view==='hiddenGems'?'hiddenGems':options.sort,
+   ongoing:view==='airingNow'||options.ongoing,
+   type:view==='films'?'MOVIE':options.type};
+}
 export async function combinedCatalogue(options){
+  options=discoveryOptions(options);
+  if(options.scope!=='watchable' && ['popular','topRated','airingNow','films'].includes(options.view)){
+    const result=await fetchKitsuCatalogue(options),known=await sourceIndex();
+    result.items=result.items.map(a=>{const linked=known.get(a.malId);return linked?registerAnime({...a,providerId:linked.id,catalogOnly:false}):a;});
+    return {...result,partial:false};
+  }
   const tasks=[fetchCatalogue(options),fetchVostCatalogue(options),...(options.scope==='watchable'?[]:[fetchKitsuCatalogue(options)])];
   const results=await Promise.allSettled(tasks);
   if(results.every(r=>r.status==='rejected'))throw results[0].reason;

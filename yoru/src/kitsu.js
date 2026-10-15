@@ -20,11 +20,12 @@ export function normalizeKitsu(item,included=[]){
     genres:refs('genres').map(g=>genres[g.attributes?.name]||g.attributes?.name).filter(Boolean),
     description:a.synopsis||'',descriptionLanguage:'en',image:ownImage,posterFallback:a.posterImage?.large||ownImage,
     translations:{en:[a.titles?.en||a.canonicalTitle||name,a.synopsis||''],ja:[a.titles?.ja_jp||name,a.synopsis||'']},
+    audienceRating:Number(a.averageRating)>0?Number(a.averageRating)/10:null, audienceRatingSource:'Kitsu',
     provider:'Kitsu',officialPoster:!!ownImage,catalogOnly:true};
-  return registerAnime(old?.providerId?{...model,...old,kitsuId:item.id,image:ownImage||old.image,translations:model.translations}:model);
+  return registerAnime(old?.providerId?{...model,...old,kitsuId:item.id,image:ownImage||old.image,translations:model.translations,audienceRating:model.audienceRating,audienceRatingSource:"Kitsu"}:model);
 }
 export async function fetchKitsuCatalogue({query='',page=1,genre='all',sort='picked',type='all',ongoing=false}={}){
-  const sorts={picked:'-userCount',hiddenGems:'userCount',newest:'-startDate',oldest:'startDate',latest:'-updatedAt',alphabetical:'canonicalTitle'};
+  const sorts={popular:'-userCount',topRated:'-averageRating',picked:'-userCount',hiddenGems:'userCount',newest:'-startDate',oldest:'startDate',latest:'-updatedAt',alphabetical:'canonicalTitle'};
   const p=new URLSearchParams({'page[limit]':String(KITSU_PAGE_SIZE),'page[offset]':String((page-1)*KITSU_PAGE_SIZE),include:'mappings,genres',sort:sorts[sort]||sorts.picked});
   if(query.trim())p.set('filter[text]',query.trim());
   if(ongoing)p.set('filter[status]','current');

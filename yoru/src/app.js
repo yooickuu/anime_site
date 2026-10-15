@@ -52,7 +52,7 @@ const esc = (value) =>
 let onlineItems = [],
   catalogPage = 1,
   catalogTotal = 0,
-  catalogPartial = false, catalogScope = "all",
+  catalogPartial = false, catalogScope = "all", catalogueView = "all",
   catalogPages = 1,
   catalogBusy = false,
   catalogError = false,
@@ -235,7 +235,7 @@ function catalogShell() {
     page === "library"
       ? collection?.name || (status ? statusName(status) : t("library"))
       : t("catalog");
-  return `<div class="library-layout ${page === "library" ? "with-sidebar" : ""}">${page === "library" ? `<aside class="library-sidebar"><h3>${t("library")}</h3><button class="list-nav ${list === "all" ? "active" : ""}" data-list="all">${t("allStories")} <span>${savedCount()}</span></button>${state.statuses.map((s) => `<button class="list-nav ${list === s.id ? "active" : ""}" data-list="${esc(s.id)}">${esc(statusName(s))}<span>${Object.values(state.entries).filter((e) => (s.id === "favorites" ? e.favorite : e.status === s.id)).length}</span></button>`).join("")}<button class="text-button" data-action="manage-statuses">${icon("settings")} ${t("manageStatuses")}</button><div class="sidebar-heading">${t("myCollections")}</div>${state.collections.map((c) => `<button class="list-nav ${list === c.id ? "active" : ""}" data-list="${esc(c.id)}">${esc(c.name)} <span>${c.items.length}</span></button>`).join("")}<button class="text-button" data-action="create-collection">${icon("plus")} ${t("createCollection")}</button></aside>` : ""}<section class="section catalog-section" id="catalog"><div class="section-head"><div><h2>${esc(heading)}</h2></div>${collection ? `<div><button class="text-button" data-edit-collection="${esc(collection.id)}">${t("rename")}</button><button class="text-button danger" data-delete-collection="${esc(collection.id)}">${t("remove")}</button></div>` : `<label class="sort-label">${t("order")} <select id="sort" aria-label="${t("order")}">${(page === "library" ? ["picked", "newest", "alphabetical"] : ["picked", "hiddenGems", "latest", "newest", "oldest"]).map((v) => `<option value="${v}" ${sort === v ? "selected" : ""}>${t(v)}</option>`).join("")}</select></label>`}</div>${list === "ongoing" ? `<p class="notice">${t("ongoingHint")}</p>` : ""}<label class="catalog-search"><input id="catalog-search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"></label><div class="catalog-options">${page !== "library" ? `<select id="catalog-scope" aria-label="${t("catalogScope")}"><option value="all" ${catalogScope==="all"?"selected":""}>${t("allCatalogues")}</option><option value="watchable" ${catalogScope==="watchable"?"selected":""}>${t("videoCatalogue")}</option></select>` : ""}<select id="type-filter" aria-label="${t("allTypes")}">${[
+  return `${page==='catalog'?discoveryHTML():''}<div class="library-layout ${page === "library" ? "with-sidebar" : ""}">${page === "library" ? `<aside class="library-sidebar"><h3>${t("library")}</h3><button class="list-nav ${list === "all" ? "active" : ""}" data-list="all">${t("allStories")} <span>${savedCount()}</span></button>${state.statuses.map((s) => `<button class="list-nav ${list === s.id ? "active" : ""}" data-list="${esc(s.id)}">${esc(statusName(s))}<span>${Object.values(state.entries).filter((e) => (s.id === "favorites" ? e.favorite : (e.status === s.id || e.legacyLists?.includes(s.id)))).length}</span></button>`).join("")}<button class="text-button" data-action="manage-statuses">${icon("settings")} ${t("manageStatuses")}</button><button class="text-button" data-action="create-status">${icon("plus")} ${t("createCollection")}</button></aside>` : ""}<section class="section catalog-section" id="catalog"><div class="section-head"><div><h2>${esc(heading)}</h2></div>${collection ? `<div><button class="text-button" data-edit-collection="${esc(collection.id)}">${t("rename")}</button><button class="text-button danger" data-delete-collection="${esc(collection.id)}">${t("remove")}</button></div>` : `<label class="sort-label">${t("order")} <select id="sort" aria-label="${t("order")}">${(page === "library" ? ["picked", "newest", "alphabetical"] : ["picked", "hiddenGems", "latest", "newest", "oldest"]).map((v) => `<option value="${v}" ${sort === v ? "selected" : ""}>${t(v)}</option>`).join("")}</select></label>`}</div>${list === "ongoing" ? `<p class="notice">${t("ongoingHint")}</p>` : ""}<label class="catalog-search"><input id="catalog-search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"></label><div class="catalog-options">${page !== "library" ? `<select id="catalog-view" aria-label="${t('discover')}">${['all','popular','topRated','airingNow','films','hiddenGems'].map(v=>`<option value="${v}" ${catalogueView===v?'selected':''}>${t(v==='all'?'allAnime':v)}</option>`).join('')}</select><label class="available-filter"><input type="checkbox" id="catalog-available" ${catalogScope==='watchable'?'checked':''}>${t('availableOnly')}</label>` : ""}<select id="type-filter" aria-label="${t("allTypes")}">${[
     ["all", "allTypes"],
     ["series", "series"],
     ["MOVIE", "movies"],
@@ -289,7 +289,7 @@ function renderGrid() {
             ? c.items.includes(a.id)
             : list === "favorites"
               ? !!e?.favorite
-              : e?.status === list)) &&
+              : (e?.status === list || e?.legacyLists?.includes(list)))) &&
       (page !== "library" && !catalogError || (
         (genre === "all" || a.genres.includes(genre)) &&
         (!ongoingOnly || a.ongoing) &&
@@ -304,7 +304,7 @@ function renderGrid() {
   grid.innerHTML = items
     .map((a) => {
       const e = state.entries[a.id];
-      return `<article class="anime-card"><button class="poster-button" data-details="${a.id}" aria-label="${t("details")}: ${esc(title(a))}"><img src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}" loading="lazy">${a.ongoing ? `<span class="ongoing-badge" title="${t("ongoingTooltip")}" aria-label="${t("ongoingTooltip")}"><i></i>${t("airing")}</span>` : ""}${a.catalogOnly ? `<span class="catalog-only-badge">${t("catalogOnly")}</span>` : ""}<span class="poster-play">${icon("play")}</span><span class="poster-label">${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span></button><button class="save-button ${e ? "saved" : ""}" data-details="${a.id}" aria-label="${t("status")}: ${esc(title(a))}">${bookmark}</button><button class="anime-title" data-details="${a.id}">${esc(title(a))}</button><p class="anime-meta">${a.year} · ${esc(genreText(a.genres[0]))}${e?.rating ? " · " + e.rating + "/10" : ""}</p></article>`;
+      return `<article class="anime-card"><button class="poster-button" data-details="${a.id}" aria-label="${t("details")}: ${esc(title(a))}"><img src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}" loading="lazy">${a.ongoing ? `<span class="ongoing-badge" title="${t("ongoingTooltip")}" aria-label="${t("ongoingTooltip")}"><i></i>${t("airing")}</span>` : ""}${a.catalogOnly ? `<span class="catalog-only-badge">${t("catalogOnly")}</span>` : ""}<span class="poster-play">${icon("play")}</span><span class="poster-label">${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span></button><button class="save-button ${e ? "saved" : ""}" data-details="${a.id}" aria-label="${t("status")}: ${esc(title(a))}">${bookmark}</button><button class="anime-title" data-details="${a.id}">${esc(title(a))}</button>${audienceHTML(a)}<p class="anime-meta">${a.year} · ${esc(genreText(a.genres[0]))}${e?.rating ? " · " + e.rating + "/10" : ""}</p></article>`;
     })
     .join("");
   $("#empty").hidden = items.length > 0 || catalogBusy;
@@ -329,18 +329,18 @@ function profileHTML() {
   if (!ready && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
   const p = state.preferences, stats = profileStats(state);
   const draft = {...p, name:p.name || user.user_metadata?.name || "", language:lang, theme, ...profileDraft.get(user.id)};
-  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><button class="button soft" data-action="logout">${t("logout")}</button></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-grid"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("library")}</span><span><strong>${state.collections.length}</strong>${t("myCollections")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-fields"><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><div class="form-row"><label>${t("language")}<select name="language">${[
-    ["ru", "Русский"],
-    ["en", "English"],
-    ["ja", "日本語"],
-  ]
-    .map(
-      ([v, n]) =>
-        `<option value="${v}" ${draft.language === v ? "selected" : ""}>${n}</option>`,
-    )
-    .join(
-      "",
-    )}</select></label><label>${t("theme")}<select name="theme"><option value="light" ${draft.theme === "light" ? "selected" : ""}>${t("light")}</option><option value="dark" ${draft.theme === "dark" ? "selected" : ""}>${t("dark")}</option></select></label></div><button class="button primary">${t("save")}</button></form><h3>${t("playerSettings")}</h3>${preferencesHTML()}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div></section>`;
+  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><button class="button soft" data-action="logout">${t("logout")}</button></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-grid"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-fields"><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form><h3>${t("playerSettings")}</h3>${preferencesHTML()}${historyHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div></section>`;
+}
+function historyHTML() {
+  const history=Object.values(state.progress).filter(p=>p.id!=='sintel'&&byId(p.id)).sort((a,b)=>(b.updated||0)-(a.updated||0)).slice(0,8);
+  return `<section class="profile-history"><h3>${t('history')}</h3>${history.length?history.map(p=>{const a=byId(p.id);return `<button class="history-item" data-watch="${esc(a.id)}" data-episode="${Number(p.episode)||1}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t('episode')} ${Number(p.episode)||1} · ${timeLabel(p.time)}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('historyEmpty')}</p>`}</section>`;
+}
+function discoveryHTML(){
+  return `<section class="discovery-panel"><h1>${t('discover')}</h1><p>${t('discoveryCopy')}</p><div class="discovery-grid">${[['popular','play'],['topRated','star'],['airingNow','screen'],['films','moon']].map(([key,i])=>`<button class="discovery-tile ${catalogueView===key?'selected':''}" data-discover="${key}">${icon(i)}<span>${t(key)}</span>${icon('arrow')}</button>`).join('')}</div></section>`;
+}
+function audienceHTML(a){
+  const score=Number(a.audienceRating);
+  return `<span class="audience-rating" title="${t('audienceRating')}">${icon('star')} ${score>0&&score<=10?score.toLocaleString(lang,{minimumFractionDigits:1,maximumFractionDigits:1})+' / 10':t('noAudienceRating')}</span>`;
 }
 function preferencesHTML() {
   return `<div class="preferences-list">${["autoSkip", "autoNext", "autoPlay"].map((k) => `<label class="toggle-row"><span>${t(k)}</span><input type="checkbox" data-preference="${k}" ${state.preferences[k] ? "checked" : ""}><span class="toggle-track"></span></label>`).join("")}</div>`;
@@ -360,8 +360,8 @@ async function openDetails(id) {
   const e = state.entries[id] || {};
   $("#details").className = "details-dialog";
   $("#details").innerHTML =
-    closeButton("details") +
-    `<div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2><div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
+    `<div class="details-toolbar">${closeButton("details")}</div>` +
+    `<div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
       user && ready
         ? `<div class="detail-library"><label>${t("status")}<select id="detail-status"><option value="">${t("none")}</option>${state.statuses
             .filter((s) => s.id !== "favorites")
@@ -371,7 +371,7 @@ async function openDetails(id) {
             )
             .join(
               "",
-            )}</select></label>${state.statuses.some((s) => s.id === "favorites") ? `<button class="button soft" data-favorite="${id}" aria-pressed="${!!e.favorite}">${icon("star") + " " + t(e.favorite ? "removeFavorite" : "addFavorite")}</button>` : ""}<label>${t("rating")}<select id="detail-rating"><option value="0">${t("notRated")}</option>${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}" ${e.rating === i + 1 ? "selected" : ""}>${i + 1} / 10</option>`).join("")}</select></label><label>${t("notes")}<textarea id="detail-notes" maxlength="500" rows="2" placeholder="${t("notesHint")}">${esc(e.notes || "")}</textarea></label><button class="text-button" data-action="save-notes">${t("save")}</button><h4>${t("addCollection")}</h4>${state.collections.length ? state.collections.map((c) => `<label class="collection-check"><input type="checkbox" data-collection-item="${esc(c.id)}" ${c.items.includes(id) ? "checked" : ""}>${esc(c.name)}</label>`).join("") : `<p class="notice">${t("noCollections")}</p>`}${state.entries[id] ? `<button class="text-button danger" data-remove-entry="${id}">${t("removeFromList")}</button>` : ""}</div>`
+            )}</select></label>${state.statuses.some((s) => s.id === "favorites") ? `<button class="button soft" data-favorite="${id}" aria-pressed="${!!e.favorite}">${icon("star") + " " + t(e.favorite ? "removeFavorite" : "addFavorite")}</button>` : ""}<label>${t("rating")}<select id="detail-rating"><option value="0">${t("notRated")}</option>${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}" ${e.rating === i + 1 ? "selected" : ""}>${i + 1} / 10</option>`).join("")}</select></label><label>${t("notes")}<textarea id="detail-notes" maxlength="500" rows="2" placeholder="${t("notesHint")}">${esc(e.notes || "")}</textarea></label><button class="text-button" data-action="save-notes">${t("save")}</button>${state.entries[id] ? `<button class="text-button danger" data-remove-entry="${id}">${t("removeFromList")}</button>` : ""}</div>`
         : `<button class="text-button" data-action="login">${t("authRequired")} ${icon("arrow")}</button>`
     }</div></div>`;
   if (!$("#details").open) $("#details").showModal();
@@ -389,7 +389,7 @@ function drawAuth() {
   $("#auth-dialog").className = "auth-dialog";
   $("#auth-dialog").innerHTML =
     closeButton("auth-dialog") +
-    `<span class="overline">yooickuu</span><h2>${t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "newPassword" : "login")}</h2>${disabled ? `<div class="setup-notice"><strong>${t("authNotConfigured")}</strong><p>${t("authSetupHint")}</p>${["localhost","127.0.0.1"].includes(location.hostname)?`<a class="text-button" href="setup.html" target="_blank" rel="noopener">${t("setupGuide")}</a>`:""}</div>` : ""}<div class="auth-tabs"><button class="chip ${authMethod === "email" ? "selected" : ""}" data-auth-method="email">${t("email")}</button><button class="chip ${authMethod === "phone" ? "selected" : ""}" data-auth-method="phone">${t("phone")}</button></div><form id="auth-form">${authMethod === "phone" ? `<label>${t("phone")}<input name="phone" type="tel" autocomplete="tel" placeholder="+7 700 123 45 67" value="${esc(phoneNumber)}" required ${authMode === "otp" ? "readonly" : ""}></label><p class="notice">${t("phoneHint")}</p>${!cfg.phoneAuth ? `<p class="form-error">${t("phoneDisabled")}</p>` : ""}${authMode === "otp" ? `<label>${t("code")}<input name="token" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" minlength="6" maxlength="10" required></label>` : ""}` : `${authMode === "register" ? `<label>${t("nickname")}<input name="name" autocomplete="nickname" maxlength="40" required></label>` : ""}${authMode !== "newPassword" ? `<label>${t("email")}<input name="email" type="email" autocomplete="email" placeholder="you@icloud.com" required></label>` : ""}${authMode !== "reset" ? `<label>${t(authMode === "newPassword" ? "newPassword" : "password")}<input name="password" type="password" autocomplete="${authMode === "login" ? "current-password" : "new-password"}" minlength="${authMode === "login" ? "1" : "8"}" maxlength="128" required></label>${authMode !== "login" ? `<p class="notice">${t("passwordHint")}</p>` : ""}` : ""}`}<p class="form-error" id="auth-message" role="status"></p><button class="button primary full-width" ${disabled || (authMethod === "phone" && !cfg.phoneAuth) ? "disabled" : ""}>${authMethod === "phone" ? t(authMode === "otp" ? "verifyCode" : "sendCode") : t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "save" : "login")}</button></form>${authMethod === "email" && authMode !== "newPassword" ? `<div class="auth-links"><button class="text-button" data-auth-mode="${authMode === "register" ? "login" : "register"}">${t(authMode === "register" ? "login" : "register")}</button><button class="text-button" data-auth-mode="reset">${t("forgot")}</button></div>` : ""}<button class="button apple-button full-width" data-action="apple" ${disabled ? "disabled" : ""}>${t("apple")}</button>${!cfg.appleAuth ? `<p class="notice">${t("appleDisabled")}</p>` : ""}`;
+    `<span class="overline">yooickuu</span><h2>${t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "newPassword" : "login")}</h2>${disabled ? `<div class="setup-notice"><strong>${t("authNotConfigured")}</strong><p>${t("authSetupHint")}</p>${["localhost","127.0.0.1"].includes(location.hostname)?`<a class="text-button" href="setup.html" target="_blank" rel="noopener">${t("setupGuide")}</a>`:""}</div>` : ""}<div class="auth-tabs"><button class="chip ${authMethod === "email" ? "selected" : ""}" data-auth-method="email">${t("email")}</button><button class="chip ${authMethod === "phone" ? "selected" : ""}" data-auth-method="phone">${t("phone")}</button></div><form id="auth-form">${authMethod === "phone" ? `<label>${t("phone")}<input name="phone" type="tel" autocomplete="tel" placeholder="+7 700 123 45 67" value="${esc(phoneNumber)}" required ${authMode === "otp" ? "readonly" : ""}></label><p class="notice">${t("phoneHint")}</p>${!cfg.phoneAuth ? `<p class="form-error">${t("phoneDisabled")}</p>` : ""}${authMode === "otp" ? `<label>${t("code")}<input name="token" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" minlength="6" maxlength="10" required></label>` : ""}` : `${authMode === "register" ? `<label>${t("nickname")}<input name="name" autocomplete="nickname" maxlength="40" required></label>` : ""}${authMode !== "newPassword" ? `<label>${t("email")}<input name="email" type="email" autocomplete="email" placeholder="you@icloud.com" required></label>` : ""}${authMode !== "reset" ? `<label>${t(authMode === "newPassword" ? "newPassword" : "password")}<span class="password-field"><input name="password" type="password" autocomplete="${authMode === "login" ? "current-password" : "new-password"}" minlength="${authMode === "login" ? "1" : "8"}" maxlength="128" required><button type="button" class="password-toggle icon-button" data-action="toggle-password" aria-label="${t("showPassword")}" aria-pressed="false">${icon("eye")}</button></span></label>${authMode !== "login" ? `<p class="notice">${t("passwordHint")}</p>` : ""}` : ""}`}<p class="form-error" id="auth-message" role="status"></p><button class="button primary full-width" ${disabled || (authMethod === "phone" && !cfg.phoneAuth) ? "disabled" : ""}>${authMethod === "phone" ? t(authMode === "otp" ? "verifyCode" : "sendCode") : t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "save" : "login")}</button></form>${authMethod === "email" && authMode !== "newPassword" ? `<div class="auth-links"><button class="text-button" data-auth-mode="${authMode === "register" ? "login" : "register"}">${t(authMode === "register" ? "login" : "register")}</button><button class="text-button" data-auth-mode="reset">${t("forgot")}</button></div>` : ""}<button class="button apple-button full-width" data-action="apple" ${disabled ? "disabled" : ""}>${t("apple")}</button>${!cfg.appleAuth ? `<p class="notice">${t("appleDisabled")}</p>` : ""}`;
 }
 function requireUser() {
   if (!user) {
@@ -411,7 +411,7 @@ async function submitAuth(form) {
   if (authBusy || !configured) return;
   authBusy = true;
   const data = new FormData(form),
-    button = form.querySelector("button");
+    button = form.querySelector('button:not([type="button"])');
   button.disabled = true;
   button.textContent = t("loading");
   let result;
@@ -471,7 +471,7 @@ async function submitAuth(form) {
     $("#auth-message").textContent = errorText(error);
   } finally {
     authBusy = false;
-    const b = $("#auth-form button");
+    const b = $('#auth-form button:not([type="button"])');
     if (b) {
       b.disabled = false;
       b.textContent =
@@ -601,6 +601,7 @@ async function loadProfile() {
       }
     }
     ready = true;
+    if(state.collections.length || state.statuses.some(s=>s.id==='onhold'&&s.key==='onhold'))mutate({type:'unifyLists'});
     dataError = false;
     lang = dictionaries[state.preferences.language]
       ? state.preferences.language
@@ -681,7 +682,7 @@ function submitCollection(form) {
     if (mode.startsWith("delete") && list === id) list = "all";
     $("#collection-dialog").close();
     render();
-    toast(t("saved"));
+
   }
 }
 function latestProgress(id) {
@@ -981,6 +982,36 @@ async function uploadAvatar(file) {
     if(user?.id===uid)render();
   } catch { if(user?.id===uid)toast(t('requestError')); }
 }
+let deletionBusy=false;
+function deleteAccountDialog(){
+  if(!requireUser())return;
+  const dialog=$('#collection-dialog');dialog.className='small-dialog';
+  dialog.innerHTML=closeButton('collection-dialog')+`<h2>${t('deleteAccount')}</h2><p class="account-delete-copy">${t('deleteAccountCopy')}</p><form id="delete-account-form"><label class="delete-confirm"><input type="checkbox" name="confirm" required><span>${t('deleteAccountConfirm')}</span></label><p class="form-error" role="alert" id="delete-account-error"></p><div class="form-actions"><button type="button" class="button soft" data-close="collection-dialog">${t('cancel')}</button><button class="button danger">${t('deleteAccount')}</button></div></form>`;
+  dialog.showModal();
+}
+async function submitAccountDeletion(form){
+  if(deletionBusy||!requireUser()||!form.elements.confirm.checked)return;
+  deletionBusy=true;
+  const uid=user.id,button=form.querySelector('button:not([type="button"])');
+  button.disabled=true;button.textContent=t('deletingAccount');
+  try{
+    stopWatching();await flush();
+    if(user?.id!==uid)throw Error('deleteAccountFailed');
+    const {data,error}=await client.functions.invoke('delete-account',{body:{confirm:true,expectedUserId:uid}});
+    if(error||!data?.deleted){
+      const status=error?.context?.status;
+      throw Error([404,503].includes(status)?'deleteAccountUnavailable':'deleteAccountFailed');
+    }
+    try{sessionStorage.removeItem('yooickuu.pending.'+uid);}catch{}
+    operations=[];profileDraft.clear();avatarLoader.reset();
+    await client.auth.signOut({scope:'local'});
+    await handleSession(null,'SIGNED_OUT');
+    $('#collection-dialog').close();navigate('home');
+  }catch(error){
+    const message=$('#delete-account-error');
+    if(message)message.textContent=t(error.message==='deleteAccountUnavailable'?'deleteAccountUnavailable':'deleteAccountFailed');
+  }finally{deletionBusy=false;button.disabled=false;button.textContent=t('deleteAccount');}
+}
 function showAbout() {
   $("#about-dialog").className = "about-dialog";
   $("#about-dialog").innerHTML =
@@ -993,6 +1024,7 @@ document.addEventListener("click", async (event) => {
   if (!b) return;
   try {
     if (b.dataset.close) $("#" + b.dataset.close).close();
+    if(b.dataset.discover){catalogueView=b.dataset.discover;catalogScope='all';query='';genre='all';typeFilter='all';ongoingOnly=false;navigate('catalog');}
     if (b.dataset.nav) navigate(b.dataset.nav);
     if (b.dataset.list) navigate("library", b.dataset.list);
     if (b.dataset.details) {b.disabled=true;try{await openDetails(b.dataset.details);}finally{b.disabled=false;}}
@@ -1078,6 +1110,13 @@ document.addEventListener("click", async (event) => {
       case "explore":
         $("#catalog")?.scrollIntoView({ behavior: "smooth" });
         break;
+      case 'toggle-password': {
+        const input=b.parentElement.querySelector('input');
+        const show=input.type==='password';input.type=show?'text':'password';
+        b.setAttribute('aria-pressed',String(show));b.setAttribute('aria-label',t(show?'hidePassword':'showPassword'));
+        b.innerHTML=icon(show?'eyeOff':'eye');break;
+      }
+      case 'delete-account':deleteAccountDialog();break;
       case "random":
         {
           if(randomBusy)break;randomBusy=true;b.disabled=true;
@@ -1108,6 +1147,7 @@ document.addEventListener("click", async (event) => {
         genre = "all";
         typeFilter = "all";
         ongoingOnly = false;
+        catalogueView = "all";
         loadCatalogue();
         const search = $("#search");
         if (search) search.value = "";
@@ -1130,14 +1170,7 @@ document.addEventListener("click", async (event) => {
         await loadProfile();
         break;
       case "save-notes":
-        if (
-          mutate({
-            type: "entry",
-            id: detailId,
-            patch: { notes: $("#detail-notes").value },
-          })
-        )
-          toast(t("saved"));
+        mutate({type:'entry',id:detailId,patch:{notes:$('#detail-notes').value}});
         break;
       case "cinema":
         $("#watch-page").classList.toggle("cinema");
@@ -1205,7 +1238,8 @@ document.addEventListener("input", (event) => {
 });
 document.addEventListener("change", (event) => {
   const input = event.target;
-  if (input.id === "catalog-scope") {catalogScope=input.value;loadCatalogue();}
+  if(input.id==='catalog-view'){catalogueView=input.value;loadCatalogue();}
+  if(input.id==='catalog-available'){catalogScope=input.checked?'watchable':'all';loadCatalogue();}
   if (input.id === "language") {
     lang = input.value;
     if (user && ready)
@@ -1285,14 +1319,15 @@ document.addEventListener("submit", async (event) => {
   const form = event.target,
     data = new FormData(form);
   if (form.id === "catalog-page-form") {const n=Number(data.get("page"));if(Number.isInteger(n)&&n>=1&&n<=catalogPages){loadCatalogue(false,n);$("#catalog")?.scrollIntoView({behavior:"smooth"});}return;}
+  if(form.id==='delete-account-form'){await submitAccountDeletion(form);return;}
   if (form.id === "auth-form") submitAuth(form);
   if (form.id === "collection-form") submitCollection(form);
   if (form.id === "profile-form") {
     const patch = {
       name: String(data.get("name")).trim(),
       bio: String(data.get("bio")).trim(),
-      language: String(data.get("language")),
-      theme: String(data.get("theme")),
+      language: lang,
+      theme,
     };
     if (!patch.name) {toast(t('invalidName')); return;}
     const uid=user?.id, op={type:'preferences',patch};
@@ -1393,6 +1428,7 @@ async function loadCatalogue(more = false, targetPage = 1) {
   try {
     const result = await combinedCatalogue({
       scope: catalogScope,
+      view: catalogueView,
       query,
       page: more ? catalogPage + 1 : targetPage,
       genre,

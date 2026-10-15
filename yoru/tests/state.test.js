@@ -255,3 +255,22 @@ test('a delayed device cannot overwrite newer playback progress',()=>{
  const next=applyOperation(s,{type:'progress',key:'a:1',value:{time:20,updated:100}});
  assert.equal(next.progress['a:1'].time,100);
 });
+
+test('default lists match the requested order with no on-hold entry',()=>{
+ assert.deepEqual(defaults().statuses.map(s=>s.id),['favorites','watching','planned','dropped','completed','ongoing']);
+});
+test('unified lists preserve all legacy memberships and ratings, and migrate idempotently',()=>{
+ let s=defaults();s.statuses.push({id:'onhold',key:'onhold'});
+ s.collections=[{id:'friends',name:'С друзьями',items:['a','b']},{id:'weekend',name:'Выходные',items:['a']}];
+ s.entries={a:{status:'watching',rating:9},b:{status:'onhold'}};
+ const next=applyOperation(s,{type:'unifyLists'});
+ assert.deepEqual(next.collections,[]);assert.equal(next.entries.a.rating,9);
+ assert.deepEqual(next.entries.a.legacyLists,['friends','weekend']);
+ assert.equal(next.entries.b.status,null);assert.ok(next.statuses.some(v=>v.id==='friends'));
+ assert.deepEqual(applyOperation(next,{type:'unifyLists'}),next);
+ const changed=applyOperation(next,{type:'entry',id:'a',patch:{status:'weekend'}});
+ assert.deepEqual(changed.entries.a.legacyLists,[]);assert.equal(changed.entries.a.status,'weekend');
+ const removed=applyOperation(next,{type:'deleteStatus',id:'friends'});
+ assert.deepEqual(removed.entries.a.legacyLists,['weekend']);
+ assert.equal(s.collections.length,2);
+});

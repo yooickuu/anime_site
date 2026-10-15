@@ -1,0 +1,3 @@
+[functions.delete-account]
+# The function verifies the JWT with auth.getUser; supports publishable keys.
+verify_jwt = false

@@ -597,3 +597,24 @@ const watchRefresh={
 };
 for(const [k,v] of Object.entries(watchRefresh))['ru','en','ja'].forEach((l,i)=>dictionaries[l][k]=v[i]);
 for(const l of ['ru','en','ja'])dictionaries[l].aboutCopy=dictionaries[l].sourceNotice;
+const releasePolish = {
+ library:['Списки','Lists','リスト'],allStories:['Все','All','すべて'],
+ dropped:['Брошено','Dropped','視聴中止'],planned:['Запланировано','Plan to watch','視聴予定'],
+ createStatus:['Создать список','Create list','リストを作成'],manageStatuses:['Управление списками','Manage lists','リストを管理'],
+ statusName:['Название списка','List name','リスト名'],savedAnime:['Аниме в списках','Saved anime','登録作品'],
+ showPassword:['Показать пароль','Show password','パスワードを表示'],hidePassword:['Скрыть пароль','Hide password','パスワードを隠す'],
+ history:['История просмотра','Watch history','視聴履歴'],historyEmpty:['Здесь появятся просмотренные серии.','Your watched episodes will appear here.','視聴したエピソードがここに表示されます。'],
+ discover:['Что посмотреть','Discover','作品を探す'],discoveryCopy:['Найди своё следующее аниме: по настроению, оценкам или формату.','Find your next anime by mood, rating or format.','気分・評価・形式から、次に見る作品を探そう。'],
+ allAnime:['Все аниме','All anime','すべてのアニメ'],popular:['Популярное у зрителей','Popular with viewers','視聴者に人気'],
+ topRated:['Высокие оценки','Top rated','高評価'],airingNow:['Сейчас выходит','Currently airing','現在放送中'],films:['На один вечер','Movie night','映画を楽しむ'],
+ availableOnly:['С доступным источником','With a video source','配信元がある作品'],
+ audienceRating:['Оценка зрителей','Audience rating','視聴者評価'],noAudienceRating:['Пока без оценки','Not rated yet','評価はまだありません'],
+ deleteAccount:['Удалить аккаунт','Delete account','アカウントを削除'],
+ deleteAccountCopy:['Профиль, списки, история и аватар будут удалены. Это нельзя отменить. После двух удалений с одной почтой за 3 дня новая регистрация будет доступна через 3 дня. На этот срок останется только защищённая отметка почты.','Your profile, lists, history and avatar will be deleted permanently. After two deletions using the same email within 3 days, registration is paused for 3 days. Only a protected email fingerprint is retained for this period.','プロフィール・リスト・履歴・アバターは完全に削除され、元に戻せません。同じメールアドレスで3日以内に2回削除すると、再登録は3日間停止されます。その期間はメールアドレスの保護された識別情報のみ保持されます。'],
+ deleteAccountConfirm:['Я понимаю, что восстановить данные будет нельзя','I understand my data cannot be restored','データを復元できないことを理解しました'],
+ deleteAccountUnavailable:['Удаление аккаунта пока не подключено. Попробуй позже.','Account deletion is not available yet. Please try later.','アカウント削除はまだ利用できません。後でもう一度お試しください。'],
+ deleteAccountFailed:['Не удалось завершить удаление. Попробуй ещё раз.','Could not finish deleting the account. Please retry.','アカウントを削除できませんでした。もう一度お試しください。'],
+ deletingAccount:['Удаляем аккаунт…','Deleting account…','アカウントを削除中…'],
+ registrationCooldown:['После повторного удаления нужно подождать 3 дня перед новой регистрацией.','Please wait 3 days after repeated account deletion before registering again.','アカウントを繰り返し削除した場合、再登録まで3日間お待ちください。'],
+};
+for(const [key,values] of Object.entries(releasePolish))['ru','en','ja'].forEach((l,i)=>dictionaries[l][key]=values[i]);
