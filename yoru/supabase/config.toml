@@ -1,3 +1,7 @@
 [functions.delete-account]
 # The function verifies the JWT with auth.getUser; supports publishable keys.
 verify_jwt = false
+
+[functions.anime-source]
+# Auth is verified with /auth/v1/user inside the function; no service-role operations.
+verify_jwt = false

@@ -33,6 +33,23 @@ jobs:
       - name: Refresh additional video catalogue
         run: npm run update:animevost
         continue-on-error: true
+      - name: Restore additional source progress
+        uses: actions/cache/restore@v4
+        with:
+          path: yoru/dist/data/animego-index.json
+          key: animego-v1-${{ github.run_id }}
+          restore-keys: animego-v1-
+      - name: Refresh multi-audio source in bounded batches
+        if: github.event_name != 'push'
+        run: node scripts/update-animego.mjs
+        env:
+          SCAN_LIMIT: '300'
+        continue-on-error: true
+      - name: Preserve additional source progress
+        uses: actions/cache/save@v4
+        with:
+          path: yoru/dist/data/animego-index.json
+          key: animego-v1-${{ github.run_id }}
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

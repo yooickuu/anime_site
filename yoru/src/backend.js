@@ -1,3 +1,4 @@
+import {configureAnimeGo} from './animego.js';
 import {validPublicConfig} from "./public-config.js";
 import { createClient } from "@supabase/supabase-js";
 import { applyOperation, normalize } from "./state.js";
@@ -68,3 +69,5 @@ export async function mediaSource(id, episode) {
   if (error) throw error;
   return data.signedUrl;
 }
+
+configureAnimeGo(async body=>{if(!client)throw Error('loginRequired');const {data,error}=await client.functions.invoke('anime-source',{body});if(error||data?.error)throw Error('providerError');return data;});

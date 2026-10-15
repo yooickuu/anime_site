@@ -7,8 +7,14 @@ export function discoveryChoice(items,entries={},recent=[],random=Math.random){
  return weighted[Math.min(weighted.length-1,Math.floor(random()*weighted.length))];
 }
 export function watchRoute(hash){
- const match=hash.match(/^#watch\/((?:mal|lib|vost|kitsu)-\d+|sintel)\/([1-9]\d*)$/);
+ const match=hash.match(/^#watch\/((?:mal|lib|vost|kitsu|go)-\d+|sintel)\/([1-9]\d*)$/);
  if(!match||!Number.isSafeInteger(Number(match[2])))return null;
  return {id:match[1],episode:Number(match[2])};
 }
-export function audioChoices(a,episode=null){const allowed=episode!==null&&a.episodeManifest?a.episodeManifest[episode-1]?.audio:null;return [a.providerId&&{id:'liberty',label:'AniLiberty',language:'ru'},a.animeVostId&&{id:'vost',label:'AnimeVost',language:'ru'}].filter(x=>x&&(!allowed||allowed.includes(x.id)));}
+export function audioChoices(a,episode=null){
+ const row=episode!==null?a.episodeManifest?.[episode-1]:null,allowed=row?.audio;
+ const base=[a.providerId&&{id:'liberty',label:'AniLiberty',language:'ru'},a.animeVostId&&{id:'vost',label:'AnimeVost',language:'ru'}].filter(x=>x&&(!allowed||allowed.includes(x.id)));
+ const go=(episode===null?(a.goVoices||[]):a.goVoiceOrdinal===row?.ordinal?(a.currentGoVoices||[]):[]);
+ // Keep quality variants of a dub as distinct options when backed by different providers.
+ return [...base,...go.map(v=>({...v,label:base.some(b=>b.label.toLowerCase()===v.label.toLowerCase())?v.label+' · Kodik':v.label}))];
+}

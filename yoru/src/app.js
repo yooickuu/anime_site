@@ -8,7 +8,7 @@ import {initSelectMenus, enhanceSelects, closeSelectMenu} from './select-menu.js
 import {createPlayback} from './playback.js';
 import {cropAvatar} from './avatar-crop.js';
 import {authErrorKey} from "./public-config.js";
-import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex} from "./sources.js";
+import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio} from "./sources.js";
 import {icon} from "./icons.js";
 import {controlsHTML, attachControls} from "./player-controls.js";
 import { fetchCatalogue, fetchRelease, providerEpisode, chooseQuality, releaseSeasons } from "./provider.js";
@@ -354,7 +354,7 @@ function preferencesHTML() {
 async function openDetails(id) {
   let a = byId(id);
   if (!a) return;
-  if (a.providerId || a.animeVostId || a.kitsuId || a.malId) {
+  if (a.providerId || a.animeVostId || a.animeGoId || a.kitsuId || a.malId) {
     try {
       a = await resolveRelease(a);
     } catch {
@@ -516,7 +516,7 @@ function updateSync() {
   }
 }
 function accountAnimeSnapshot(a) {
-  const {episodeManifest,episodeNumbers,description,...snapshot}=a;
+  const {episodeManifest,episodeNumbers,goVoices,currentGoVoices,goVoiceOrdinal,description,...snapshot}=a;
   return {...snapshot,translations:Object.fromEntries(Object.entries(a.translations||{}).map(([language,value])=>[language,[value[0],'']]))};
 }
 function mutate(op) {
@@ -715,7 +715,7 @@ async function openPlayer(id, requested, pushRoute=true) {
   let a;
   try{a=await findWatchRelease(id);}catch{toast(t("providerError"));}
   if(!a){playerOpening=false;return;}
-  if (a.providerId || a.animeVostId || a.kitsuId || a.malId) {
+  if (a.providerId || a.animeVostId || a.animeGoId || a.kitsuId || a.malId) {
     try {
       a = await resolveRelease(a);
     } catch {
@@ -730,7 +730,7 @@ async function openPlayer(id, requested, pushRoute=true) {
       return;
     }
   }
-  if ((a.providerId || a.animeVostId) && !a.episodes) {toast(t("noReleasedEpisodes"));playerOpening=false;return;}
+  if ((a.providerId || a.animeVostId || a.animeGoId) && !a.episodes) {toast(t("noReleasedEpisodes"));playerOpening=false;return;}
   if (!user || !ready || location.hash!==openingHash) {playerOpening=false;return;}
   try {
     recordProgress();
@@ -772,7 +772,7 @@ function renderEpisodes() {
   const audio=audioChoices(current,episode);
   if(!audio.some(x=>x.id===selectedAudio))selectedAudio=audio.find(x=>x.id===state.preferences.audio)?.id||audio[0]?.id||'';
   $('#audio-control').hidden=!audio.length;
-  $('#audio-picker').innerHTML=audio.map(x=>`<option value="${x.id}" ${x.id===selectedAudio?'selected':''}>${x.label} · ${t('audioRussian')}</option>`).join('');
+  $('#audio-picker').innerHTML=audio.map(x=>`<option value="${x.id}" ${x.id===selectedAudio?'selected':''}>${esc(x.label)} · ${t(x.language==='ja'?'audioJapanese':'audioRussian')}</option>`).join('');
   const navigation=episodeNavigation(episode,current.episodes);
   $("#previous-episode").hidden=!navigation.previous;
   $("#next-episode").hidden=!navigation.next;
@@ -821,8 +821,9 @@ async function updateSource(play = false, refresh = false) {
   renderEpisodes();
   let url=null,stream=false;
   try {
+    if(current.animeGoId){const loadingAnime=current;await prepareEpisodeAudio(loadingAnime,episode).catch(()=>{loadingAnime.currentGoVoices=[];loadingAnime.goVoiceOrdinal=null;});if(generation!==sourceGeneration)return;renderEpisodes();}
     if(current.id==='sintel')url='assets/sintel-trailer.mp4';
-    else if(current.providerId || current.animeVostId){
+    else if(current.providerId || current.animeVostId || current.animeGoId){
       const info=await videoEpisode(current,episode,refresh,selectedAudio);
       if(generation!==sourceGeneration)return;
       providerTiming=info;
@@ -952,7 +953,7 @@ function attachVideo() {
       episode,
       current.episodes,
       hasRemoteSource(current.id, episode + 1) ||
-        !!(current.providerId || current.animeVostId),
+        !!(current.providerId || current.animeVostId || current.animeGoId),
     );
     if (next) switchEpisode(next.episode, next.play);
   });

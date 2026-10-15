@@ -49,6 +49,17 @@
     <div class="actions"><button data-copy-file="account-deletion.sql">Скопировать SQL удаления</button><button data-copy-file="delete-account.ts">Скопировать функцию</button></div>
     <p class="muted">Секретный ключ в сайт вставлять не нужно: функция получает его внутри Supabase. Сначала проверяй удаление на отдельном тестовом аккаунте, не на основном. Удаление необратимо.</p>
   </section>
+  <section id="anime-source">
+    <h2>Новые озвучки и серии</h2>
+    <p>Функция получает ссылки на видео для плеера yooickuu. Сами видео в Supabase не загружаются.</p>
+    <ol>
+      <li>Нажми «Скопировать подключение видео».</li>
+      <li>В Supabase открой Edge Functions → Deploy a new function → Via Editor. Имя: <code>anime-source</code>.</li>
+      <li>Замени содержимое index.ts скопированным кодом и нажми Deploy function.</li>
+      <li>Выключи Verify JWT with legacy secret и сохрани. Вход пользователя проверяет сама функция.</li>
+    </ol>
+    <button data-copy-file="anime-source.ts">Скопировать подключение видео</button>
+  </section>
   <section id="nicknames">
     <h2>Уникальные никнеймы</h2>
     <p>Нажми кнопку ниже, открой SQL Editor в Supabase, вставь в новый запрос и нажми Run. Функцию Edge Functions для этого создавать не нужно.</p>

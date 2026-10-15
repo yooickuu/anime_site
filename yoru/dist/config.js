@@ -5,5 +5,6 @@ window.YORU_CONFIG = {
   "media": {},
   "phoneAuth": false,
   "appleAuth": false,
-  "accountDeletion": true
+  "accountDeletion": true,
+  "animeGo": true
 };
