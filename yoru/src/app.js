@@ -1,3 +1,4 @@
+import {createProfileDraft, createAvatarLoader} from './profile.js';
 import {watchView} from './watch-view.js';
 import {automaticSkipTimes} from './autoskip.js';
 import {discoveryChoice,watchRoute,audioChoices} from './discovery.js';
@@ -182,7 +183,7 @@ function render(newWatch=false) {
   updateSync();
 }
 function homeHTML() {
-  return `<section class="quiet-hero"><div><span class="overline">${t("tagline")}</span><h1>${t("heroTitle")}</h1><p>${t("heroCopy")}</p><div class="hero-buttons"><button class="button primary" data-action="explore">${t("explore")} ${icon("arrow")}</button><button class="button soft" data-action="random">${icon("shuffle")} ${t("random")}</button></div></div><div class="hero-art" id="hero-art">${heroArtHTML()}</div></section><section class="section"><div class="section-head"><h2>${t("continue")}</h2>${user ? '<button class="sync-state" id="sync-state" data-action="retry-sync"></button>' : ""}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
+  return `<section class="quiet-hero"><div><span class="overline">${t("tagline")}</span><h1>${t("heroTitle")}</h1><p>${t("heroCopy")}</p><div class="hero-buttons"><button class="button primary" data-action="explore">${t("explore")} ${icon("arrow")}</button><button class="button soft" data-action="random">${icon("shuffle")} ${t("random")}</button></div></div><div class="hero-art" id="hero-art">${heroArtHTML()}</div></section><section class="section"><div class="section-head"><h2>${t("continue")}</h2>${user ? '<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button>' : ""}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
 }
 function heroPool(){return anime.filter(a=>a.providerId);}
 function heroArtHTML(){
@@ -322,21 +323,24 @@ function renderGrid() {
       ? `${t("found")}: ${page === "library" || catalogError ? items.length : (catalogTotal ?? items.length).toLocaleString(lang)}`
       : "";
 }
+const profileDraft = createProfileDraft();
 function profileHTML() {
   if (!user) return guestHTML();
+  if (!ready && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
   const p = state.preferences, stats = profileStats(state);
-  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><button class="button soft" data-action="logout">${t("logout")}</button></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-grid"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("library")}</span><span><strong>${state.collections.length}</strong>${t("myCollections")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-fields"><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(p.name || user.user_metadata?.name || "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(p.bio)}</textarea></label><div class="form-row"><label>${t("language")}<select name="language">${[
+  const draft = {...p, name:p.name || user.user_metadata?.name || "", language:lang, theme, ...profileDraft.get(user.id)};
+  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><button class="button soft" data-action="logout">${t("logout")}</button></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-grid"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("library")}</span><span><strong>${state.collections.length}</strong>${t("myCollections")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-fields"><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><div class="form-row"><label>${t("language")}<select name="language">${[
     ["ru", "Русский"],
     ["en", "English"],
     ["ja", "日本語"],
   ]
     .map(
       ([v, n]) =>
-        `<option value="${v}" ${lang === v ? "selected" : ""}>${n}</option>`,
+        `<option value="${v}" ${draft.language === v ? "selected" : ""}>${n}</option>`,
     )
     .join(
       "",
-    )}</select></label><label>${t("theme")}<select name="theme"><option value="light" ${theme === "light" ? "selected" : ""}>${t("light")}</option><option value="dark" ${theme === "dark" ? "selected" : ""}>${t("dark")}</option></select></label></div><button class="button primary">${t("save")}</button></form><h3>${t("playerSettings")}</h3>${preferencesHTML()}<button class="sync-state" id="sync-state" data-action="retry-sync"></button></div></div></section>`;
+    )}</select></label><label>${t("theme")}<select name="theme"><option value="light" ${draft.theme === "light" ? "selected" : ""}>${t("light")}</option><option value="dark" ${draft.theme === "dark" ? "selected" : ""}>${t("dark")}</option></select></label></div><button class="button primary">${t("save")}</button></form><h3>${t("playerSettings")}</h3>${preferencesHTML()}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div></section>`;
 }
 function preferencesHTML() {
   return `<div class="preferences-list">${["autoSkip", "autoNext", "autoPlay"].map((k) => `<label class="toggle-row"><span>${t(k)}</span><input type="checkbox" data-preference="${k}" ${state.preferences[k] ? "checked" : ""}><span class="toggle-track"></span></label>`).join("")}</div>`;
@@ -496,11 +500,8 @@ function persistDraft() {
 function updateSync() {
   const el = $("#sync-state");
   if (el) {
-    el.textContent = syncFailure
-      ? t("syncError")
-      : syncBusy || operations.length
-        ? t("syncing")
-        : t("synced");
+    el.hidden = !syncFailure;
+    el.textContent = syncFailure ? t('syncError') : '';
     el.classList.toggle("error", syncFailure);
   }
 }
@@ -549,26 +550,31 @@ function flush() {
         persistDraft();
       }
     } catch {
-      syncFailure = true;
+      if(user?.id === uid)syncFailure = true;
     } finally {
       syncBusy = false;
       flushing = null;
       updateSync();
+      if(user?.id !== uid && user && ready && operations.length)queueMicrotask(flush);
     }
   })();
   return flushing;
 }
-async function avatarLoad() {
-  if (!user || !state.preferences.avatar) {
-    avatarUrl = "";
-    return;
-  }
-  const uid = user.id;
-  const { data } = await client.storage
-    .from("avatars")
-    .createSignedUrl(state.preferences.avatar, 3600);
-  if (user?.id === uid) avatarUrl = data?.signedUrl || "";
-}
+const avatarLoader = createAvatarLoader({
+  identity: () => ({uid:user?.id, path:state.preferences.avatar}),
+  sign: async path => {
+    const {data,error} = await client.storage.from('avatars').createSignedUrl(path,3600);
+    if(error)throw error;
+    return data?.signedUrl;
+  },
+  display: url => {
+    avatarUrl = url;
+    for(const node of $$('.avatar, .profile-avatar')) {
+      node.innerHTML = url ? `<img src="${esc(url)}" alt="">` : esc((state.preferences.name || user?.email || 'u').slice(0,1).toUpperCase());
+    }
+  },
+});
+const avatarLoad = () => avatarLoader.refresh();
 async function loadProfile() {
   const generation = ++authGeneration;
   try {
@@ -623,6 +629,8 @@ async function handleSession(session, event) {
   if(current)stopWatching();
   ++sourceGeneration;
 
+  profileDraft.clear();
+  avatarLoader.reset();
   user = next;
   state = defaults();
   operations = [];
@@ -964,15 +972,14 @@ async function uploadAvatar(file) {
   if(!cropped || user?.id!==uid)return;
   if(cropped.size>2097152){toast(t('avatarError'));return;}
   const path=`${uid}/${crypto.randomUUID()}.png`;
-  const {error}=await client.storage.from('avatars').upload(path,cropped,{contentType:'image/png',upsert:false});
-  if (error) {
-    toast(t("requestError"));
-    return;
-  }
-  if (user?.id !== uid) return;
-  mutate({ type: "preferences", patch: { avatar: path } });
-  await avatarLoad();
-  render();
+  try {
+    const {error}=await client.storage.from('avatars').upload(path,cropped,{contentType:'image/png',upsert:false});
+    if(error)throw error;
+    if (user?.id !== uid) return;
+    mutate({ type: "preferences", patch: { avatar: path } });
+    await avatarLoad();
+    if(user?.id===uid)render();
+  } catch { if(user?.id===uid)toast(t('requestError')); }
 }
 function showAbout() {
   $("#about-dialog").className = "about-dialog";
@@ -1269,7 +1276,11 @@ document.addEventListener("change", (event) => {
 
   if (input.id === "avatar-file") { const file=input.files[0];input.value="";uploadAvatar(file); }
 });
-document.addEventListener("submit", (event) => {
+for (const eventName of ['input','change']) document.addEventListener(eventName, event => {
+  const input=event.target;
+  if(user && input.closest('#profile-form') && input.name)profileDraft.set(user.id,input.name,input.value);
+});
+document.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.target,
     data = new FormData(form);
@@ -1283,12 +1294,15 @@ document.addEventListener("submit", (event) => {
       language: String(data.get("language")),
       theme: String(data.get("theme")),
     };
-    if (!patch.name) return;
-    if (mutate({ type: "preferences", patch })) {
+    if (!patch.name) {toast(t('invalidName')); return;}
+    const uid=user?.id, op={type:'preferences',patch};
+    if (mutate(op)) {
+      profileDraft.clear();
       lang = patch.language;
       theme = patch.theme;
       render();
-      toast(t("profileSaved"));
+      await flush();
+      if(user?.id===uid && operations.includes(op))toast(t('syncError'));
     }
   }
 
@@ -1351,7 +1365,8 @@ document.addEventListener("visibilitychange", () => {
     persistDraft();
   }
 });
-window.addEventListener("online", flush);
+window.addEventListener("online", () => {flush();avatarLoad();});
+document.addEventListener("visibilitychange", () => {if(!document.hidden)avatarLoad();});
 initSelectMenus();
 fromHash();
 loadCatalogue();

@@ -33,3 +33,18 @@ test('profile statistics exclude the demo and unrated titles',()=>{
  const s=defaults();s.progress={a:{id:'anime',completed:true},b:{id:'anime',completed:false},c:{id:'sintel',completed:true}};s.entries={a:{rating:9},b:{rating:7},c:{rating:0}};
  assert.deepEqual(profileStats(s),{completedEpisodes:1,averageRating:'8.0'});
 });
+
+test('cached full releases survive a sparse discovery catalogue overwrite',async()=>{
+ const {fetchRelease}=await import('../src/provider.js');
+ const {registerAnime}=await import('../src/catalog.js');
+ const original=globalThis.fetch;
+ globalThis.fetch=async url=>({ok:true,json:async()=>String(url).includes('/mappings?')?{data:[]}:{id:998877,name:{main:'Cache regression'},mal:{id:998877},episodes:[{id:'e1',ordinal:1,hls_720:'https://media.example/1.m3u8'}]}});
+ try {
+  const full=await fetchRelease('lib-998877');
+  registerAnime({id:full.id,providerId:998877,animeVostId:123,episodes:99});
+  const cached=await fetchRelease(full.id);
+  assert.equal(cached.episodes,1);
+  assert.deepEqual(cached.episodeNumbers,[1]);
+  assert.equal(cached.animeVostId,123);
+ } finally {globalThis.fetch=original;}
+});

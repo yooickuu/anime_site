@@ -2701,3 +2701,7 @@ main.watch-container{width:calc(100% - 64px);max-width:1480px;margin:28px auto 7
 .video-shell:fullscreen.controls-idle{cursor:none}
 .video-shell:fullscreen.controls-idle .video-controls{opacity:0;transform:translateY(8px);pointer-events:none}
 @media(prefers-reduced-motion:reduce){.video-shell:fullscreen .video-controls{transition:none}}
+
+/* Profile fields must fit narrow screens and preserve user-entered line breaks. */
+.profile-grid > *, .profile-fields, .profile-fields label {min-width:0}
+.sync-state[hidden] {display:none}

@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="19" fill="#7862c9"/><g fill="#f9edff" transform="translate(32 32)"><path id="petal" d="M0 2C-12-7-12-19-5-23L0-19 5-23C12-19 12-7 0 2Z"/><use href="#petal" transform="rotate(72)"/><use href="#petal" transform="rotate(144)"/><use href="#petal" transform="rotate(216)"/><use href="#petal" transform="rotate(288)"/></g><circle cx="32" cy="32" r="10" fill="#7862c9"/><path d="m29 26 9 6-9 6Z" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="18" fill="#6550a4"/>
+  <path d="M12 12 27 21Q32 19 37 21L52 12 49 36Q46 47 32 55 18 47 15 36Z" fill="#fff5e8"/>
+  <path d="m16 18 4 15 5-9Z M48 18l-4 15-5-9Z" fill="#ed857c"/>
+  <path d="m19 35 9 4-8 2 M45 35l-9 4 8 2" fill="none" stroke="#c85763" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m28 45 4 3 4-3" fill="none" stroke="#6550a4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m32 24-3 7 3 4 3-4Z" fill="#c85763"/>
+</svg>

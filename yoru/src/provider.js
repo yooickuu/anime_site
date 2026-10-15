@@ -83,7 +83,7 @@ export async function fetchCatalogue({
 }
 export async function fetchRelease(id, refresh = false) {
   const cached=releases.get(id) || releases.get('lib-'+byId(id)?.providerId);
-  if(!refresh && cached?.model && Date.now()-cached.loadedAt<300000)return byId(cached.model.id)||cached.model;
+  if(!refresh && cached?.model && Date.now()-cached.loadedAt<300000)return registerAnime({...byId(cached.model.id),...cached.model});
   const raw = await request(
     "/anime/releases/" + encodeURIComponent(String(byId(id)?.providerId || id).replace("lib-", "")),
   );
