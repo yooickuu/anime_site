@@ -110,7 +110,7 @@ const t = (key) => dictionaries[lang][key] || key;
 const title = (a) => (a?.id === "sintel" ? t("demo") : titleFor(a, lang));
 const statusName = (s) => s.name || t(s.key || s.id);
 const brand = () =>
-  '<a href="#home" class="brand"><img class="brand-mark brand-icon" src="assets/yooickuu-mark.svg" alt=""><span>yooickuu<span class="brand-dot">.</span></span></a>';
+  `<a href="#home" class="brand"><img class="brand-mark brand-icon" src="assets/yooickuu-mark${theme==='dark'?'-dark':''}.svg?v=2" alt=""><span>yooickuu<span class="brand-dot">.</span></span></a>`;
 const closeButton = (id) =>
   `<button class="dialog-close icon-button" data-close="${id}" aria-label="${t("close")}">${icon("close")}</button>`;
 function toast(message) {
@@ -122,6 +122,10 @@ function toast(message) {
 function applyAppearance() {
   document.documentElement.lang = lang;
   document.body.classList.toggle("dark", theme === "dark");
+  const mark=`assets/yooickuu-mark${theme==='dark'?'-dark':''}.svg?v=2`;
+  document.querySelector('link[rel="icon"]')?.setAttribute('href',mark);
+  document.querySelector('link[rel="apple-touch-icon"]')?.setAttribute('href',`assets/yooickuu-touch${theme==='dark'?'-dark':''}.png?v=2`);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='dark'?'#191522':'#f8f6fc');
   document.title = "yooickuu — " + ({ru:"аниме, фильмы и личные списки",en:"anime, films and personal lists",ja:"アニメ・映画・マイリスト"}[lang]);
   try {
     localStorage.setItem("yooickuu.language", JSON.stringify(lang));

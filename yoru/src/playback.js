@@ -1,10 +1,11 @@
 import Hls from 'hls.js';
 
 // One transport for the application and the browser playback checks.
-export function createPlayback(video, onState = () => {}) {
-  let hls = null, generation = 0, events = null;
+export function createPlayback(video, onState = () => {}, {schedule=setTimeout,cancel=clearTimeout,startupTimeout=20000} = {}) {
+  let hls = null, generation = 0, events = null, startupTimer;
   function stop() {
     generation++;
+    cancel(startupTimer);startupTimer=null;
     events?.abort();
     events = null;
     hls?.destroy();
@@ -17,11 +18,16 @@ export function createPlayback(video, onState = () => {}) {
     stop();
     const own = generation;
     events = new AbortController();
-    const emit = state => { if (own === generation) onState(state); };
+    const emit = state => { if (own !== generation)return;
+      if(['ready','playing','error','unsupported','autoplayBlocked'].includes(state)){cancel(startupTimer);startupTimer=null;}
+      onState(state);
+    };
     const listen = (name, fn) => video.addEventListener(name, fn, { signal: events.signal });
     let mediaRetries = 0, networkRetries = 0;
     emit('loading');
+    startupTimer=schedule(()=>{if(own===generation && video.readyState<2)emit('error');},startupTimeout);
     listen('loadedmetadata', () => {
+      if(!autoplay){cancel(startupTimer);startupTimer=null;}
       if (startAt > 0 && Number.isFinite(video.duration)) video.currentTime = Math.min(startAt, Math.max(0, video.duration - 0.1));
       video.playbackRate = speed;
       if (autoplay) video.play().catch(() => emit('autoplayBlocked'));

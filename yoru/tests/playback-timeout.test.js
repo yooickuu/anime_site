@@ -1,0 +1,28 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createPlayback} from '../src/playback.js';
+class Video extends EventTarget {
+ readyState=0;src='';duration=1200;
+ pause(){}load(){}removeAttribute(){this.src='';}getAttribute(){return this.src;}
+}
+function harness(){
+ let next=0;const timers=new Map(),states=[],video=new Video();
+ const player=createPlayback(video,state=>states.push(state),{schedule:fn=>{timers.set(++next,fn);return next;},cancel:id=>timers.delete(id)});
+ return {player,states,video,timers};
+}
+test('a silent initial video stall reaches the existing quality fallback',()=>{
+ const h=harness();h.player.load({url:'https://example.test/stalled.mp4'});
+ assert.deepEqual(h.states,['loading']);
+ [...h.timers.values()][0]();assert.deepEqual(h.states,['loading','error']);assert.equal(h.timers.size,0);
+});
+test('playable, replaced and destroyed video loads cannot time out later',()=>{
+ const h=harness();h.player.load({url:'https://example.test/first.mp4'});const old=[...h.timers.values()][0];
+ h.player.load({url:'https://example.test/second.mp4'});old();assert.deepEqual(h.states,['loading','loading']);
+ h.video.readyState=3;h.video.dispatchEvent(new Event('canplay'));assert.equal(h.timers.size,0);
+ h.player.load({url:'https://example.test/third.mp4'});h.player.destroy();assert.equal(h.timers.size,0);
+});
+test('paused metadata-only preload is not treated as a broken video',()=>{
+ const h=harness();h.player.load({url:'https://example.test/paused.mp4',autoplay:false});
+ h.video.readyState=1;h.video.dispatchEvent(new Event('loadedmetadata'));
+ assert.equal(h.timers.size,0);assert.deepEqual(h.states,['loading']);
+});
