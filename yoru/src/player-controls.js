@@ -12,7 +12,7 @@ export function attachControls(root, video, t, onError) {
   let dragging=false,lastVolume=video.volume || 1,keyboardFocus=false;
   const idle=idleControls({
     active:()=>root.isConnected&&document.fullscreenElement===root&&!video.paused&&!video.ended,
-    blocked:()=>dragging||keyboardFocus||!!root.querySelector('[aria-expanded="true"]'),
+    blocked:()=>dragging||(keyboardFocus&&!!document.activeElement?.closest('.video-controls'))||!!root.querySelector('[aria-expanded="true"]'),
     show:()=>root.classList.remove('controls-idle'),
     hide:()=>root.classList.add('controls-idle'),
   });
