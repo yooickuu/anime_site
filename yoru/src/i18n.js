@@ -609,6 +609,8 @@ const releasePolish = {
  topRated:['Высокие оценки','Top rated','高評価'],airingNow:['Сейчас выходит','Currently airing','現在放送中'],films:['На один вечер','Movie night','映画を楽しむ'],
  availableOnly:['С доступным источником','With a video source','配信元がある作品'],
  audienceRating:['Оценка зрителей','Audience rating','視聴者評価'],noAudienceRating:['Пока без оценки','Not rated yet','評価はまだありません'],
+ nicknameTaken:['Этот ник уже занят','This nickname is already taken','このニックネームは使用されています'],
+ nicknameCheckFailed:['Не удалось проверить ник. Попробуй ещё раз.','Could not check the nickname. Please try again.','ニックネームを確認できませんでした。もう一度お試しください。'],
  deleteAccount:['Удалить аккаунт','Delete account','アカウントを削除'],
  deleteAccountCopy:['Профиль, списки, история и аватар будут удалены. Это нельзя отменить. После двух удалений с одной почтой за 3 дня новая регистрация будет доступна через 3 дня. На этот срок останется только защищённая отметка почты.','Your profile, lists, history and avatar will be deleted permanently. After two deletions using the same email within 3 days, registration is paused for 3 days. Only a protected email fingerprint is retained for this period.','プロフィール・リスト・履歴・アバターは完全に削除され、元に戻せません。同じメールアドレスで3日以内に2回削除すると、再登録は3日間停止されます。その期間はメールアドレスの保護された識別情報のみ保持されます。'],
  deleteAccountConfirm:['Я понимаю, что восстановить данные будет нельзя','I understand my data cannot be restored','データを復元できないことを理解しました'],

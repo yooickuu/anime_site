@@ -27,4 +27,3 @@ if(ids.size!==expected||duplicates.length)throw Error('Incomplete catalogue; kee
 await writeFile('dist/data/liberty-index.json.tmp',JSON.stringify({updatedAt:report.checkedAt,items:releaseIndex}));
 await rename('dist/data/liberty-index.json.tmp','dist/data/liberty-index.json');
 console.log(JSON.stringify({...report,examples:undefined},null,2));
-

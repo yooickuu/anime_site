@@ -49,6 +49,12 @@
     <div class="actions"><button data-copy-file="account-deletion.sql">Скопировать SQL удаления</button><button data-copy-file="delete-account.ts">Скопировать функцию</button></div>
     <p class="muted">Секретный ключ в сайт вставлять не нужно: функция получает его внутри Supabase. Сначала проверяй удаление на отдельном тестовом аккаунте, не на основном. Удаление необратимо.</p>
   </section>
+  <section id="nicknames">
+    <h2>Уникальные никнеймы</h2>
+    <p>Нажми кнопку ниже, открой SQL Editor в Supabase, вставь в новый запрос и нажми Run. Функцию Edge Functions для этого создавать не нужно.</p>
+    <button data-copy-file="unique-nicknames.sql">Скопировать SQL никнеймов</button>
+    <p class="muted">Ники сравниваются без учёта регистра и лишних пробелов. Если старые аккаунты уже имеют одинаковые ники, запрос остановится без изменений: пришли текст ошибки. После удаления аккаунта его ник освобождается.</p>
+  </section>
   <section>
     <h2>3. Проверь подключение</h2>
     <button id="check">Проверить подключение</button>

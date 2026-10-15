@@ -1,3 +1,4 @@
+import {checkNickname,nicknameErrorKey,nicknameChecker} from './nicknames.js';
 import {savedEpisodeNumber} from './episode-manifest.js';
 import {createProfileDraft, createAvatarLoader} from './profile.js';
 import {watchView} from './watch-view.js';
@@ -334,7 +335,7 @@ function profileHTML() {
   if (!ready && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
   const p = state.preferences, stats = profileStats(state);
   const draft = {...p, name:p.name || user.user_metadata?.name || "", language:lang, theme, ...profileDraft.get(user.id)};
-  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><button class="button soft" data-action="logout">${t("logout")}</button></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-grid"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-fields"><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form><h3>${t("playerSettings")}</h3>${preferencesHTML()}${historyHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div></section>`;
+  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><button class="button soft" data-action="logout">${t("logout")}</button></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-grid"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-fields"><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form><h3>${t("playerSettings")}</h3>${preferencesHTML()}${historyHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div></section>`;
 }
 function historyHTML() {
   const history=Object.values(state.progress).filter(p=>p.id!=='sintel'&&byId(p.id)).sort((a,b)=>(b.updated||0)-(a.updated||0)).slice(0,8);
@@ -394,7 +395,7 @@ function drawAuth() {
   $("#auth-dialog").className = "auth-dialog";
   $("#auth-dialog").innerHTML =
     closeButton("auth-dialog") +
-    `<span class="overline">yooickuu</span><h2>${t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "newPassword" : "login")}</h2>${disabled ? `<div class="setup-notice"><strong>${t("authNotConfigured")}</strong><p>${t("authSetupHint")}</p>${["localhost","127.0.0.1"].includes(location.hostname)?`<a class="text-button" href="setup.html" target="_blank" rel="noopener">${t("setupGuide")}</a>`:""}</div>` : ""}<div class="auth-tabs"><button class="chip ${authMethod === "email" ? "selected" : ""}" data-auth-method="email">${t("email")}</button><button class="chip ${authMethod === "phone" ? "selected" : ""}" data-auth-method="phone">${t("phone")}</button></div><form id="auth-form">${authMethod === "phone" ? `<label>${t("phone")}<input name="phone" type="tel" autocomplete="tel" placeholder="+7 700 123 45 67" value="${esc(phoneNumber)}" required ${authMode === "otp" ? "readonly" : ""}></label><p class="notice">${t("phoneHint")}</p>${!cfg.phoneAuth ? `<p class="form-error">${t("phoneDisabled")}</p>` : ""}${authMode === "otp" ? `<label>${t("code")}<input name="token" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" minlength="6" maxlength="10" required></label>` : ""}` : `${authMode === "register" ? `<label>${t("nickname")}<input name="name" autocomplete="nickname" maxlength="40" required></label>` : ""}${authMode !== "newPassword" ? `<label>${t("email")}<input name="email" type="email" autocomplete="email" placeholder="you@icloud.com" required></label>` : ""}${authMode !== "reset" ? `<label>${t(authMode === "newPassword" ? "newPassword" : "password")}<span class="password-field"><input name="password" type="password" autocomplete="${authMode === "login" ? "current-password" : "new-password"}" minlength="${authMode === "login" ? "1" : "8"}" maxlength="128" required><button type="button" class="password-toggle icon-button" data-action="toggle-password" aria-label="${t("showPassword")}" aria-pressed="false">${icon("eye")}</button></span></label>${authMode !== "login" ? `<p class="notice">${t("passwordHint")}</p>` : ""}` : ""}`}<p class="form-error" id="auth-message" role="status"></p><button class="button primary full-width" ${disabled || (authMethod === "phone" && !cfg.phoneAuth) ? "disabled" : ""}>${authMethod === "phone" ? t(authMode === "otp" ? "verifyCode" : "sendCode") : t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "save" : "login")}</button></form>${authMethod === "email" && authMode !== "newPassword" ? `<div class="auth-links"><button class="text-button" data-auth-mode="${authMode === "register" ? "login" : "register"}">${t(authMode === "register" ? "login" : "register")}</button><button class="text-button" data-auth-mode="reset">${t("forgot")}</button></div>` : ""}<button class="button apple-button full-width" data-action="apple" ${disabled ? "disabled" : ""}>${t("apple")}</button>${!cfg.appleAuth ? `<p class="notice">${t("appleDisabled")}</p>` : ""}`;
+    `<span class="overline">yooickuu</span><h2>${t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "newPassword" : "login")}</h2>${disabled ? `<div class="setup-notice"><strong>${t("authNotConfigured")}</strong><p>${t("authSetupHint")}</p>${["localhost","127.0.0.1"].includes(location.hostname)?`<a class="text-button" href="setup.html" target="_blank" rel="noopener">${t("setupGuide")}</a>`:""}</div>` : ""}<div class="auth-tabs"><button class="chip ${authMethod === "email" ? "selected" : ""}" data-auth-method="email">${t("email")}</button><button class="chip ${authMethod === "phone" ? "selected" : ""}" data-auth-method="phone">${t("phone")}</button></div><form id="auth-form">${authMethod === "phone" ? `<label>${t("phone")}<input name="phone" type="tel" autocomplete="tel" placeholder="+7 700 123 45 67" value="${esc(phoneNumber)}" required ${authMode === "otp" ? "readonly" : ""}></label><p class="notice">${t("phoneHint")}</p>${!cfg.phoneAuth ? `<p class="form-error">${t("phoneDisabled")}</p>` : ""}${authMode === "otp" ? `<label>${t("code")}<input name="token" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" minlength="6" maxlength="10" required></label>` : ""}` : `${authMode === "register" ? `<label>${t("nickname")}<input name="name" autocomplete="nickname" maxlength="40" required></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p>` : ""}${authMode !== "newPassword" ? `<label>${t("email")}<input name="email" type="email" autocomplete="email" placeholder="you@icloud.com" required></label>` : ""}${authMode !== "reset" ? `<label>${t(authMode === "newPassword" ? "newPassword" : "password")}<span class="password-field"><input name="password" type="password" autocomplete="${authMode === "login" ? "current-password" : "new-password"}" minlength="${authMode === "login" ? "1" : "8"}" maxlength="128" required><button type="button" class="password-toggle icon-button" data-action="toggle-password" aria-label="${t("showPassword")}" aria-pressed="false">${icon("eye")}</button></span></label>${authMode !== "login" ? `<p class="notice">${t("passwordHint")}</p>` : ""}` : ""}`}<p class="form-error" id="auth-message" role="status"></p><button class="button primary full-width" ${disabled || (authMethod === "phone" && !cfg.phoneAuth) ? "disabled" : ""}>${authMethod === "phone" ? t(authMode === "otp" ? "verifyCode" : "sendCode") : t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "save" : "login")}</button></form>${authMethod === "email" && authMode !== "newPassword" ? `<div class="auth-links"><button class="text-button" data-auth-mode="${authMode === "register" ? "login" : "register"}">${t(authMode === "register" ? "login" : "register")}</button><button class="text-button" data-auth-mode="reset">${t("forgot")}</button></div>` : ""}<button class="button apple-button full-width" data-action="apple" ${disabled ? "disabled" : ""}>${t("apple")}</button>${!cfg.appleAuth ? `<p class="notice">${t("appleDisabled")}</p>` : ""}`;
 }
 function requireUser() {
   if (!user) {
@@ -408,7 +409,7 @@ function requireUser() {
   return true;
 }
 function errorText(error) {
-  const key=authErrorKey(error);
+  const key=nicknameErrorKey(error)||authErrorKey(error);
   if(key)return t(key);
   return dictionaries[lang][error?.message] || t("requestError");
 }
@@ -439,14 +440,18 @@ async function submitAuth(form) {
         return;
       }
     } else if (authMode === "register") {
+      const name=await checkNickname(client,data.get("name"));
       result = await client.auth.signUp({
         email: String(data.get("email")),
         password: String(data.get("password")),
         options: {
-          data: { name: String(data.get("name")) },
+          data: { name },
           emailRedirectTo: redirect,
         },
       });
+      if(result.error&&/database error saving new user/i.test(result.error.message||'')) {
+        try{await checkNickname(client,name);}catch(error){if(error.message==='nicknameTaken')throw error;}
+      }
       if (!result.error && !result.data.session) {
         $("#auth-message").textContent = t("checkEmail");
         return;
@@ -1329,6 +1334,15 @@ for (const eventName of ['input','change']) document.addEventListener(eventName,
   const input=event.target;
   if(user && input.closest('#profile-form') && input.name)profileDraft.set(user.id,input.name,input.value);
 });
+const nicknameFeedback=nicknameChecker(value=>checkNickname(client,value),(input,key)=>{
+  const message=input.form?.querySelector('[data-nickname-message]');
+  if(message)message.textContent=key?t(key):'';
+  input.setAttribute('aria-invalid',key==='nicknameTaken'?'true':'false');
+});
+document.addEventListener('input',event=>{
+  const input=event.target;
+  if(configured&&input.name==='name'&&['auth-form','profile-form'].includes(input.form?.id))nicknameFeedback.schedule(input);
+});
 document.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.target,
@@ -1345,15 +1359,20 @@ document.addEventListener("submit", async (event) => {
       theme,
     };
     if (!patch.name) {toast(t('invalidName')); return;}
-    const uid=user?.id, op={type:'preferences',patch};
-    if (mutate(op)) {
-      profileDraft.clear();
-      lang = patch.language;
-      theme = patch.theme;
-      render();
+    const uid=user?.id, button=form.querySelector('button:not([type="button"])');
+    button.disabled=true;
+    try {
+      patch.name=await checkNickname(client,patch.name);
       await flush();
-      if(user?.id===uid && operations.includes(op))toast(t('syncError'));
-    }
+      if(user?.id!==uid)return;
+      if(operations.length)throw Error('syncError');
+      const next=await saveOperation(uid,{type:'preferences',patch});
+      if(user?.id!==uid)return;
+      state=operations.reduce((s,o)=>applyOperation(s,o),next);
+      profileDraft.clear();persistDraft();render();
+    }catch(error){
+      if(user?.id===uid){const message=form.querySelector('[data-nickname-message]');if(message)message.textContent=errorText(error);}
+    }finally{button.disabled=false;}
   }
 
 });
