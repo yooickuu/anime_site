@@ -25,7 +25,7 @@ try {
     document.querySelector('#sql-editor').href = 'https://supabase.com/dashboard/project/' + project.split('.')[0] + '/sql/new';
   }
 } catch {}
-const redirects = new Set(['https://yooickuu.github.io/yooickuu.com/','http://127.0.0.1:4173/', 'http://127.0.0.1:4173/index.html', 'http://localhost:4173/', 'http://localhost:4173/index.html', 'http://127.0.0.1:5500/yoru/dist/index.html', 'http://localhost:5500/yoru/dist/index.html']);
+const redirects = new Set(['https://yooickuu.github.io/anime_site/','http://127.0.0.1:4173/', 'http://127.0.0.1:4173/index.html', 'http://localhost:4173/', 'http://localhost:4173/index.html', 'http://127.0.0.1:5500/yoru/dist/index.html', 'http://localhost:5500/yoru/dist/index.html']);
 if (['localhost', '127.0.0.1'].includes(location.hostname)) {
   redirects.add(new URL('index.html', location.href).href);
 }
