@@ -1,3 +1,4 @@
+import {savedEpisodeNumber} from './episode-manifest.js';
 import {createProfileDraft, createAvatarLoader} from './profile.js';
 import {watchView} from './watch-view.js';
 import {automaticSkipTimes} from './autoskip.js';
@@ -224,7 +225,7 @@ function continueHTML() {
     ? entries
         .map((p) => {
           const a = byId(p.id);
-          return `<button class="continue-card" data-watch="${a.id}" data-episode="${p.episode}"><img class="continue-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt=""><div class="continue-info"><h3>${esc(title(a))}</h3><p>${t("episode")} ${p.episode} · ${p.completed ? t("viewed") : timeLabel(p.time) + " / " + timeLabel(p.duration)}</p><div class="progress-track"><span style="width:${Math.min(100, Math.max(0, (p.time / p.duration) * 100))}%"></span></div></div><span class="resume-play">${icon("play")}</span></button>`;
+          return `<button class="continue-card" data-watch="${a.id}" data-episode="${p.episode}"><img class="continue-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt=""><div class="continue-info"><h3>${esc(title(a))}</h3><p>${t("episode")} ${esc(savedEpisodeNumber(p))} · ${p.completed ? t("viewed") : timeLabel(p.time) + " / " + timeLabel(p.duration)}</p><div class="progress-track"><span style="width:${Math.min(100, Math.max(0, (p.time / p.duration) * 100))}%"></span></div></div><span class="resume-play">${icon("play")}</span></button>`;
         })
         .join("")
     : `<div class="welcome-card"><div class="welcome-icon">${icon("play")}</div><div><h3>${t("continueEmpty")}</h3><p>${t("continueHint")}</p><button class="text-button" data-watch="sintel">${t("tryPlayer")} ${icon("arrow")}</button></div></div><div class="welcome-card tip"><div class="welcome-icon">${icon("bookmark")}</div><div><h3>${t("libraryGuest")}</h3><p>${t("privateLists")}</p><button class="text-button" data-nav="library">${t("library")} ${icon("arrow")}</button></div></div>`;
@@ -337,7 +338,7 @@ function profileHTML() {
 }
 function historyHTML() {
   const history=Object.values(state.progress).filter(p=>p.id!=='sintel'&&byId(p.id)).sort((a,b)=>(b.updated||0)-(a.updated||0)).slice(0,8);
-  return `<section class="profile-history"><h3>${t('history')}</h3>${history.length?history.map(p=>{const a=byId(p.id);return `<button class="history-item" data-watch="${esc(a.id)}" data-episode="${Number(p.episode)||1}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t('episode')} ${Number(p.episode)||1} · ${timeLabel(p.time)}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('historyEmpty')}</p>`}</section>`;
+  return `<section class="profile-history"><h3>${t('history')}</h3>${history.length?history.map(p=>{const a=byId(p.id);return `<button class="history-item" data-watch="${esc(a.id)}" data-episode="${Number(p.episode)||1}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t('episode')} ${esc(savedEpisodeNumber(p))} · ${timeLabel(p.time)}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('historyEmpty')}</p>`}</section>`;
 }
 function discoveryHTML(){
   return `<section class="discovery-panel"><h1>${t('discover')}</h1><p>${t('discoveryCopy')}</p><div class="discovery-grid">${[['popular','play'],['topRated','star'],['airingNow','screen'],['films','moon']].map(([key,i])=>`<button class="discovery-tile ${catalogueView===key?'selected':''}" data-discover="${key}">${icon(i)}<span>${t(key)}</span>${icon('arrow')}</button>`).join('')}</div></section>`;
@@ -509,6 +510,10 @@ function updateSync() {
     el.classList.toggle("error", syncFailure);
   }
 }
+function accountAnimeSnapshot(a) {
+  const {episodeManifest,episodeNumbers,description,...snapshot}=a;
+  return {...snapshot,translations:Object.fromEntries(Object.entries(a.translations||{}).map(([language,value])=>[language,[value[0],'']]))};
+}
 function mutate(op) {
   if (!requireUser()) return false;
   if (
@@ -520,9 +525,9 @@ function mutate(op) {
     mutate({ type: "entry", id: op.id, patch: { anime: byId(op.id) } });
   }
   if (op.type === "entry" && (byId(op.id)?.providerId || byId(op.id)?.animeVostId || byId(op.id)?.kitsuId))
-    op.patch = { ...op.patch, anime: byId(op.id) };
+    op.patch = { ...op.patch, anime: accountAnimeSnapshot(byId(op.id)) };
   if (op.type === "progress" && (byId(op.value.id)?.providerId || byId(op.value.id)?.animeVostId || byId(op.value.id)?.kitsuId))
-    op.value.anime = byId(op.value.id);
+    op.value.anime = accountAnimeSnapshot(byId(op.value.id));
   try {
     state = applyOperation(state, op);
   } catch (error) {
@@ -728,13 +733,17 @@ async function openPlayer(id, requested, pushRoute=true) {
     controlsCleanup?.();controlsCleanup=null;
     playback?.destroy();
     playback = null;
+    const previous=latestProgress(id);
+    const requestedProgress=requested?state.progress[`${id}:${requested}`]:previous;
+    const resumeIndex=requestedProgress&&a.episodeNumbers?a.episodeNumbers.indexOf(Number(savedEpisodeNumber(requestedProgress)))+1:0;
+    if(a.episodeNumbers)mutate({type:'rebaseEpisodes',id:a.id,numbers:a.episodeNumbers});
     current = a;
     page='watch';
     selectedAudio=audioChoices(a).find(x=>x.id===state.preferences.audio)?.id || (a.videoProvider==='AnimeVost'?'vost':audioChoices(a)[0]?.id||'');
     playerSeasons = [a];
     episode = Math.min(
       a.episodes,
-      Math.max(1, requested || latestProgress(id)?.episode || 1),
+      Math.max(1, resumeIndex || requested || latestProgress(id)?.episode || 1),
     );
     const hash=`#watch/${a.id}/${episode}`;
     if(pushRoute && location.hash!==hash)history.pushState(null,'',hash);else history.replaceState(null,'',hash);
@@ -755,7 +764,8 @@ function renderEpisodes() {
   $("#season-control").hidden = playerSeasons.length <= 1;
   $("#season-picker").innerHTML = playerSeasons.map(a=>`<option value="${esc(a.id)}" ${a.id===current.id?'selected':''}>${esc(title(a))}</option>`).join('');
   $('#watch-episode-label').textContent=current.episodes===1&&current.type==='MOVIE'?t('movie'):t('episode')+' '+(current.episodeNumbers?.[episode-1]??episode);
-  const audio=audioChoices(current);
+  const audio=audioChoices(current,episode);
+  if(!audio.some(x=>x.id===selectedAudio))selectedAudio=audio.find(x=>x.id===state.preferences.audio)?.id||audio[0]?.id||'';
   $('#audio-control').hidden=!audio.length;
   $('#audio-picker').innerHTML=audio.map(x=>`<option value="${x.id}" ${x.id===selectedAudio?'selected':''}>${x.label} · ${t('audioRussian')}</option>`).join('');
   const navigation=episodeNavigation(episode,current.episodes);
@@ -848,6 +858,7 @@ function recordProgress() {
   const value = {
     id: current.id,
     episode,
+    ordinal: current.episodeNumbers?.[episode-1]??episode,
     time: video.currentTime,
     duration: video.duration,
     completed: video.ended || video.currentTime >= video.duration - 0.5,

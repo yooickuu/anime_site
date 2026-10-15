@@ -111,9 +111,9 @@ export function episodeSources(e) {
 export function chooseQuality(sources, preferred = 720) {
   return sources.find(s=>s.quality===Number(preferred)) || sources.find(s=>s.quality===720) || sources[0] || null;
 }
-export async function providerEpisode(id, index, refresh = false) {
+export async function providerEpisode(id, index, refresh = false, ordinal = null) {
   const episodes = await releaseEpisodes(id, refresh);
-  const e = episodes[index - 1];
+  const e = ordinal===null?episodes[index - 1]:episodes.find(e=>Number(e.ordinal)===Number(ordinal));
   if (!e) return null;
   const sources = episodeSources(e);
   return {

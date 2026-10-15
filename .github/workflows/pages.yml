@@ -28,11 +28,9 @@ jobs:
       - run: npm ci
       - run: npm test
       - name: Refresh catalogue ID index
-        if: github.event_name == 'schedule'
         run: node scripts/audit-catalog.mjs
         continue-on-error: true
       - name: Refresh additional video catalogue
-        if: github.event_name == 'schedule'
         run: npm run update:animevost
         continue-on-error: true
       - run: npm run build

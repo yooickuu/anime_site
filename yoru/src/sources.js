@@ -1,12 +1,13 @@
+import {episodeManifest} from './episode-manifest.js';
 import {fetchCatalogue,fetchRelease} from './provider.js';
 import {fetchKitsuCatalogue,fetchKitsuRelease} from './kitsu.js';
 import {fetchVostCatalogue,vostIndex,normalizeVost,fetchVostRelease,vostEpisode,cleanTitle,animeType} from './animevost.js';
 import {identityIndex,exactIdentity} from './catalog-match.js';
 import {providerEpisode} from './provider.js';
 import {registerAnime,byId} from './catalog.js';
-let indexPromise=null;
+let indexPromise=null,allLiberty=[];
 async function sourceIndex(){
-  if(!indexPromise)indexPromise=fetch('data/liberty-index.json').then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>new Map(d.items.filter(a=>a.malId).map(a=>[Number(a.malId),a]))).catch(()=>{indexPromise=null;return new Map();});
+  if(!indexPromise)indexPromise=fetch('data/liberty-index.json').then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>{allLiberty=d.items;return new Map(d.items.filter(a=>a.malId).map(a=>[Number(a.malId),a]));}).catch(()=>{indexPromise=null;return new Map();});
   return indexPromise;
 }
 export function mergeCatalogues(liberty,kitsu,knownLiberty=new Map()){
@@ -34,7 +35,8 @@ export async function combinedCatalogue(options){
   const tasks=[fetchCatalogue(options),fetchVostCatalogue(options),...(options.scope==='watchable'?[]:[fetchKitsuCatalogue(options)])];
   const results=await Promise.allSettled(tasks);
   if(results.every(r=>r.status==='rejected'))throw results[0].reason;
-  const [l,v,k]=results.map(r=>r.status==='fulfilled'?r.value:{items:[],total:0,pages:1});
+  let [l,v,k]=results.map(r=>r.status==='fulfilled'?r.value:{items:[],total:0,pages:1});
+  if(results[0].status==='rejected'&&results[1].status==='fulfilled')v=await fetchVostCatalogue({...options,includeLinked:true});
   const av=await vostIndex().catch(()=>[]);
   const avIdentities=identityIndex(av.map(a=>({...a,names:cleanTitle(a.title).split(/\s+\/\s+/),type:animeType(a.type)})));
   const libItems=l.items.map(a=>{const match=av.find(v=>v.libertyId===a.providerId);return match?registerAnime({...a,animeVostId:match.id}):a;});
@@ -53,12 +55,14 @@ export async function resolveRelease(a){
   if(a.providerId){
     registerAnime(a);
     const av=await vostIndex().catch(()=>[]),match=av.find(v=>v.libertyId===a.providerId);
-    let loaded;
-    try{loaded=await fetchRelease(a.id);}catch(error){if(!match)throw error;return fetchVostRelease({...a,animeVostId:match.id,videoProvider:'AnimeVost',episodeNumbers:null});}
-    if(!match)return loaded;
-    const linked=registerAnime({...loaded,animeVostId:match.id});
-    if(!linked.blocked&&!linked.episodes)return fetchVostRelease({...linked,videoProvider:'AnimeVost',episodeNumbers:null});
-    return linked;
+    if(!match)return fetchRelease(a.id);
+    const [lib,vost]=await Promise.allSettled([fetchRelease(a.id),fetchVostRelease({...a,animeVostId:match.id})]);
+    if(lib.status==='rejected'&&vost.status==='rejected')throw lib.reason;
+    const loaded=lib.status==='fulfilled'?lib.value:a;
+    const manifest=episodeManifest(lib.status==='fulfilled'&&!loaded.blocked?(loaded.episodeNumbers||[]):[],vost.status==='fulfilled'?vost.value.episodeNumbers:[],loaded.announcedEpisodes);
+    return registerAnime({...loaded,animeVostId:match.id,episodeManifest:manifest,
+      episodeNumbers:manifest.map(e=>e.ordinal),episodes:manifest.length,
+      catalogOnly:false,blocked:manifest.length?false:loaded.blocked});
   }
   if(a.animeVostId)return fetchVostRelease(a);
   const index=await sourceIndex(),match=index.get(a.malId);
@@ -83,14 +87,14 @@ export async function resolveRelease(a){
 
 export async function videoEpisode(a,index,refresh=false,audio=''){
  const vost=audio==='vost'||(!audio&&(!a.providerId||a.videoProvider==='AnimeVost'));
- if(vost&&a.animeVostId)return vostEpisode(a,index,refresh,a.episodeNumbers?.[index-1]??null);
- if(a.providerId)return providerEpisode(a.id,index,refresh);
+ if(vost&&a.animeVostId)return vostEpisode(a,index,refresh,a.episodeManifest?.[index-1]?.sources.vost??a.episodeNumbers?.[index-1]??null);
+ if(a.providerId)return providerEpisode(a.id,index,refresh,a.episodeManifest?.[index-1]?.sources.liberty??a.episodeNumbers?.[index-1]??null);
  return null;
 }
 
 export async function discoveryIndex(){
  const [lib,av]=await Promise.all([sourceIndex(),vostIndex().catch(()=>[])]);
- const liberty=[...lib.values()].map(x=>({id:'mal-'+x.malId,malId:x.malId,providerId:x.id,title:x.title,year:x.year,type:x.type}));
+ const liberty=allLiberty.map(x=>({id:x.malId?'mal-'+x.malId:'lib-'+x.id,malId:x.malId,providerId:x.id,title:x.title,year:x.year,type:x.type}));
  const extra=av.filter(x=>!x.libertyId).map(x=>normalizeVost(x));
  return [...liberty,...extra];
 }

@@ -1,5 +1,5 @@
 // Read-only provider audit. Does not download episodes or publish any data.
-import {writeFile,mkdir} from 'node:fs/promises';
+import {writeFile,mkdir,rename} from 'node:fs/promises';
 const base='https://api.anilibria.app/api/v1/anime/catalog/releases';
 const releaseIndex=[];
 const ids=new Set(),missingPosters=[],duplicates=[],types={},examples=[];
@@ -23,6 +23,8 @@ for(let page=1;page<=pages;page++){
 const report={checkedAt:new Date().toISOString(),provider:base,expected,uniqueReleases:ids.size,pages,duplicates,missingPosters,ongoing,types,examples};
 await mkdir('checks',{recursive:true});await writeFile('checks/catalog-audit.json',JSON.stringify(report,null,2)+'\n');
 await mkdir('dist/data',{recursive:true});
-await writeFile('dist/data/liberty-index.json',JSON.stringify({updatedAt:report.checkedAt,items:releaseIndex}));
+if(ids.size!==expected||duplicates.length)throw Error('Incomplete catalogue; keeping previous index');
+await writeFile('dist/data/liberty-index.json.tmp',JSON.stringify({updatedAt:report.checkedAt,items:releaseIndex}));
+await rename('dist/data/liberty-index.json.tmp','dist/data/liberty-index.json');
 console.log(JSON.stringify({...report,examples:undefined},null,2));
-if(ids.size!==expected||duplicates.length||missingPosters.length)process.exitCode=1;
+

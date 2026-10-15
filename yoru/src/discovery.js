@@ -11,4 +11,4 @@ export function watchRoute(hash){
  if(!match||!Number.isSafeInteger(Number(match[2])))return null;
  return {id:match[1],episode:Number(match[2])};
 }
-export function audioChoices(a){return [a.providerId&&{id:'liberty',label:'AniLiberty',language:'ru'},a.animeVostId&&{id:'vost',label:'AnimeVost',language:'ru'}].filter(Boolean);}
+export function audioChoices(a,episode=null){const allowed=episode!==null&&a.episodeManifest?a.episodeManifest[episode-1]?.audio:null;return [a.providerId&&{id:'liberty',label:'AniLiberty',language:'ru'},a.animeVostId&&{id:'vost',label:'AnimeVost',language:'ru'}].filter(x=>x&&(!allowed||allowed.includes(x.id)));}

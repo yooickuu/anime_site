@@ -1,3 +1,4 @@
+import {rebaseProgress} from './episode-manifest.js';
 export const statuses = [
   "watching",
   "planned",
@@ -168,6 +169,9 @@ export function applyOperation(value, op) {
       break;
     case "preferences":
       s.preferences = { ...s.preferences, ...op.patch };
+      break;
+    case "rebaseEpisodes":
+      s.progress=rebaseProgress(s.progress,op.id,op.numbers);
       break;
     case "progress":
       if ((s.progress[op.key]?.updated || 0) > (op.value.updated || 0)) break;

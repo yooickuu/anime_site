@@ -5,5 +5,5 @@ window.YORU_CONFIG = {
   "media": {},
   "phoneAuth": false,
   "appleAuth": false,
-  "accountDeletion": false
+  "accountDeletion": true
 };
