@@ -1,6 +1,6 @@
 import {readFile,writeFile,mkdir,rename} from 'node:fs/promises';
 import {parseCatalogue,parsePlayer,goJSON} from '../server/animego.js';
-import {identityIndex,exactIdentity,identityKeys} from '../src/catalog-match.js';
+import {identityIndex,exactIdentity,identityKeys,adjacentMovieIdentity} from '../src/catalog-match.js';
 import {cleanTitle,animeType} from '../src/animevost.js';
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 let nextRequest=0;
@@ -22,7 +22,8 @@ await pool(scanOrder,async x=>{try{const cached=old.get(x.id);if(cached?.checked
 const lib=JSON.parse(await readFile('dist/data/liberty-index.json','utf8')).items,vost=JSON.parse(await readFile('dist/data/animevost-index.json','utf8')).items;
 const canonical=[...lib.map(x=>({...x,id:x.malId?'mal-'+x.malId:'lib-'+x.id,providerId:x.id})),...vost.filter(x=>!x.libertyId).map(x=>({id:'vost-'+x.id,animeVostId:x.id,names:cleanTitle(x.title).split(/\s+\/\s+/),year:Number(x.year),type:animeType(x.type)}))];
 const identities=identityIndex(canonical),goIdentities=identityIndex(items.map(x=>({...x,names:[x.english]})));let linked=0,ambiguous=0;
-for(const x of items){const a={...x,names:[x.title,x.english]},match=exactIdentity(a,identities);if(match){x.canonicalId=match.id;x.providerId=match.providerId||null;x.animeVostId=match.animeVostId||null;x.malId=match.malId||null;linked++;}else if(identityKeys(a).some(k=>(identities.get(k)||[]).length>1)){x.ambiguous=true;ambiguous++;}if(!exactIdentity(a,goIdentities)){x.ambiguous=true;ambiguous++;}}
+for(const x of items){const a={...x,names:[x.title,x.english]},match=exactIdentity(a,identities)||(!identityKeys(a).some(k=>identities.has(k))?adjacentMovieIdentity(a,canonical):null);if(match){x.canonicalId=match.id;x.providerId=match.providerId||null;x.animeVostId=match.animeVostId||null;x.malId=match.malId||null;linked++;}else if(identityKeys(a).some(k=>(identities.get(k)||[]).length>1)){x.ambiguous=true;ambiguous++;}if(!exactIdentity(a,goIdentities)){x.ambiguous=true;ambiguous++;}}
+for(const x of items){const prior=old.get(x.id);if(prior?.snapshotAt&&prior.snapshotEpisodes===x.episodes){x.snapshotAt=prior.snapshotAt;x.snapshotEpisodes=prior.snapshotEpisodes;x.completeAudio=prior.completeAudio;}}
 const summary={checkedAt:new Date().toISOString(),total:items.length,linked,withKodik:items.filter(x=>x.hasKodik).length,additional:items.filter(x=>x.hasKodik&&!x.canonicalId&&!x.ambiguous).length,ambiguous,errors:errors.length};
 await writeFile('checks/animego-import.json',JSON.stringify({summary,errors},null,2));
 if(errors.length>items.length*.1)throw Error('Too many unavailable player responses; previous index preserved');

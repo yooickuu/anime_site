@@ -36,9 +36,9 @@ jobs:
       - name: Restore additional source progress
         uses: actions/cache/restore@v4
         with:
-          path: yoru/checks/animego-cache.json
-          key: animego-v2-${{ github.run_id }}
-          restore-keys: animego-v2-
+          path: yoru/checks/animego-cache
+          key: animego-v3-${{ github.run_id }}
+          restore-keys: animego-v3-
       - run: node scripts/source-cache.mjs restore
       - name: Refresh multi-audio source in bounded batches
         if: github.event_name != 'push'
@@ -46,12 +46,19 @@ jobs:
         env:
           SCAN_LIMIT: '300'
         continue-on-error: true
+      - name: Refresh complete episode and audio catalogues
+        if: github.event_name != 'push'
+        run: node scripts/snapshot-animego.mjs
+        env:
+          SNAPSHOT_LIMIT: '60'
+          SNAPSHOT_REQUEST_LIMIT: '240'
+        continue-on-error: true
       - run: node scripts/source-cache.mjs save
       - name: Preserve additional source progress
         uses: actions/cache/save@v4
         with:
-          path: yoru/checks/animego-cache.json
-          key: animego-v2-${{ github.run_id }}
+          path: yoru/checks/animego-cache
+          key: animego-v3-${{ github.run_id }}
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

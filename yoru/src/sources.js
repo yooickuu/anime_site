@@ -119,7 +119,7 @@ export async function discoveryIndex(){
  const liberty=allLiberty.map(x=>({id:x.malId?'mal-'+x.malId:'lib-'+x.id,malId:x.malId,providerId:x.id,title:x.title,year:x.year,type:x.type}));
  const extra=av.filter(x=>!x.libertyId).map(x=>normalizeVost(x));
  const go=await animeGoReady()?await goIndex().catch(()=>[]):[];
- return mergeCatalogues([...liberty,...extra,...go.filter(x=>x.hasKodik&&!x.canonicalId).map(normalizeGo)],[]);
+ return mergeCatalogues([...liberty,...extra,...go.filter(x=>x.hasKodik&&x.completeAudio&&!x.canonicalId).map(normalizeGo)],[]);
 }
 export async function findWatchRelease(id){
  const cached=byId(id);if(cached)return cached;

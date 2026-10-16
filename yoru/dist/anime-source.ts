@@ -1,61 +1,6 @@
 // server/animego.js
-var GO_ORIGIN = "https://animego.me";
-function decodeHTML(s = "") {
-  return s.replace(/&#(x[0-9a-f]+|\d+);|&(amp|quot|apos|lt|gt|nbsp);/gi, (_, n, k) => {
-    if (n) {
-      const c = n[0].toLowerCase() === "x" ? parseInt(n.slice(1), 16) : Number(n);
-      return c <= 1114111 ? String.fromCodePoint(c) : "";
-    }
-    return { amp: "&", quot: '"', apos: "'", lt: "<", gt: ">", nbsp: " " }[k.toLowerCase()];
-  });
-}
-function plain(s = "") {
-  return decodeHTML(s.replace(/<[^>]*>/g, " ")).replace(/\s+/g, " ").trim();
-}
-function attrs(tag) {
-  return Object.fromEntries([...tag.matchAll(/([\w-]+)\s*=\s*"([^"]*)"/g)].map((m) => [m[1], decodeHTML(m[2])]));
-}
-function tags(html) {
-  return html.match(/<(?:[^>"']|"[^"]*"|'[^']*')+>/g) || [];
-}
 function positiveID(n) {
   return Number.isSafeInteger(Number(n)) && Number(n) > 0 && Number(n) < 1e8;
-}
-function parseEpisodes(html) {
-  const map = /* @__PURE__ */ new Map();
-  for (const tag of tags(html).filter((t) => t.includes('data-episode-number="'))) {
-    const a = attrs(tag), ordinal = Number(a["data-episode-number"]), id = Number(a["data-episode"]);
-    if (Number.isFinite(ordinal) && ordinal >= 0 && positiveID(id)) {
-      if (map.has(ordinal) && map.get(ordinal).id !== id) throw Error("ambiguous_episode");
-      map.set(ordinal, { ordinal, id });
-    }
-  }
-  return [...map.values()].sort((a, b) => a.ordinal - b.ordinal);
-}
-function parseVoices(html) {
-  const map = /* @__PURE__ */ new Map();
-  for (const tag of tags(html).filter((t) => t.includes('data-player="'))) {
-    const a = attrs(tag);
-    if (a["data-provider-slug"] !== "kodik" || !positiveID(a["data-ptranslation"])) continue;
-    let u;
-    try {
-      u = new URL(a["data-player"], GO_ORIGIN);
-    } catch {
-      continue;
-    }
-    if (u.protocol !== "https:" || u.hostname !== "kodikplayer.com" || u.port || u.username || u.password || !/^\/(?:seria|serial|video)\/\d+\/[a-z0-9]+\//.test(u.pathname)) continue;
-    const label = plain(a["data-translation-title"]).slice(0, 100), id = "go-" + a["data-ptranslation"];
-    map.set(id, { id, label, language: /субтитр/i.test(label) ? "ja" : "ru", subtitles: /субтитр/i.test(label), url: u.href });
-  }
-  return [...map.values()];
-}
-function parsePlayer(html) {
-  const tag = tags(html).find((t) => t.includes('data-anime-player-episodes-total-value="')) || "";
-  const a = attrs(tag), episodes = parseEpisodes(html), voices = parseVoices(html);
-  const total = Number(a["data-anime-player-episodes-total-value"]);
-  const ranges = JSON.parse(a["data-anime-player-episodes-pages-value"] || "[]");
-  if (!Number.isSafeInteger(total) || total < 0 || total > 1e4 || !Array.isArray(ranges) || ranges.length > 100) throw Error("invalid_episode_count");
-  return { total, ranges, episodes, voices };
 }
 function decodeStream(value) {
   if (/^https?:|^\/\//.test(value)) return value;
@@ -124,46 +69,10 @@ async function textFetch(url, options = {}) {
   }
   return new TextDecoder().decode(bytes);
 }
-async function goJSON(path) {
-  if (!/^\/player\/(?:\d+(?:\/episodes\?page=\d+)?|videos\/\d+)$/.test(path)) throw Error("invalid_path");
-  const raw = await textFetch(GO_ORIGIN + path, { headers: { "X-Requested-With": "XMLHttpRequest", Accept: "application/json" } });
-  const d = JSON.parse(raw);
-  if (d.status !== "success" || typeof d.data?.content !== "string") throw Error("invalid_player");
-  return d.data;
-}
-async function goRelease(id) {
-  if (!positiveID(id)) throw Error("invalid_id");
-  return cached("release:" + id, 3e5, async () => {
-    const d = await goJSON("/player/" + id), p = parsePlayer(d.content);
-    const map = new Map(p.episodes.map((e) => [e.ordinal, e]));
-    const pages = p.ranges.filter((r) => r.page > 0);
-    for (let start = 0; start < pages.length; start += 3) {
-      const batch = await Promise.all(pages.slice(start, start + 3).map(async (r) => {
-        if (!Number.isSafeInteger(r.page) || r.page < 1 || r.page > 100) throw Error("invalid_page");
-        const d2 = await goJSON("/player/" + id + "/episodes?page=" + r.page);
-        if (Number(d2.page) !== r.page || Number(d2.total) !== p.total) throw Error("changed_playlist");
-        return parseEpisodes(d2.content);
-      }));
-      for (const list of batch) for (const e of list) {
-        if (map.has(e.ordinal) && map.get(e.ordinal).id !== e.id) throw Error("ambiguous_episode");
-        map.set(e.ordinal, e);
-      }
-    }
-    if (map.size !== p.total) throw Error("incomplete_playlist");
-    return { episodes: [...map.values()].sort((a, b) => a.ordinal - b.ordinal), voices: p.voices.map(({ url, ...v }) => v) };
-  });
-}
-async function goVoices(animeId, ordinal) {
-  const release = await goRelease(animeId);
-  const episode = release.episodes.find((e) => e.ordinal === Number(ordinal));
-  if (!episode) throw Error("episode_missing");
-  return cached("voices:" + episode.id, 12e4, async () => parseVoices((await goJSON("/player/videos/" + episode.id)).content));
-}
-async function goVideo(animeId, ordinal, audio) {
-  const voices = await goVoices(animeId, ordinal), voice = voices.find((v) => v.id === audio);
-  if (!voice) throw Error("audio_missing");
-  return cached("stream:" + animeId + ":" + ordinal + ":" + audio, 45e3, async () => {
-    const html = await textFetch(voice.url);
+async function kodikVideo(url, ordinal) {
+  if (!validEmbed(url)) throw Error("invalid_embed");
+  return cached("stream:" + url, 45e3, async () => {
+    const html = await textFetch(url);
     const params = JSON.parse(html.match(/var\s+urlParams\s*=\s*'([^']+)'/)?.[1] || "null");
     const script = html.match(/src="(\/assets\/js\/app\.player_single\.[a-z0-9]+\.js)"/)?.[1];
     if (!params || !script) throw Error("player_changed");
@@ -187,6 +96,55 @@ async function goVideo(animeId, ordinal, audio) {
     return { sources, url: (sources.find((s) => s.quality === 720) || sources[0]).url, stream: true, ordinal: Number(ordinal), opening: null, ending: null };
   });
 }
+function validEmbed(value) {
+  try {
+    const u = new URL(value);
+    return u.protocol === "https:" && u.hostname === "kodikplayer.com" && !u.port && !u.username && !u.password && /^\/(?:seria|serial|video)\/\d+\/[a-z0-9]+\//.test(u.pathname);
+  } catch {
+    return false;
+  }
+}
+var SNAPSHOT_BASE = "https://yooickuu.github.io/anime_site/data/animego-episodes/";
+function validateSnapshot(data, id) {
+  if (!data || data.id !== Number(id) || !Array.isArray(data.episodes) || !Number.isInteger(data.total) || data.total < 1 || data.total > 1e4 || data.total !== data.episodes.length) throw Error("invalid_snapshot");
+  const ordinals = /* @__PURE__ */ new Set();
+  for (const e of data.episodes) {
+    if (!Number.isFinite(e.ordinal) || e.ordinal < 0 || e.ordinal > 1e4 || ordinals.has(e.ordinal) || !positiveID(e.id) || !Array.isArray(e.voices) || e.voices.length > 100) throw Error("invalid_snapshot");
+    ordinals.add(e.ordinal);
+    const voices = /* @__PURE__ */ new Set();
+    for (const v of e.voices) {
+      if (!/^go-\d+$/.test(v.id) || voices.has(v.id) || !validEmbed(v.url) || typeof v.label !== "string" || v.label.length > 100 || !["ru", "ja"].includes(v.language)) throw Error("invalid_snapshot");
+      voices.add(v.id);
+    }
+  }
+  return data;
+}
+async function goSnapshot(id) {
+  if (!positiveID(id)) throw Error("invalid_id");
+  return cached("snapshot:" + id, 12e4, async () => validateSnapshot(JSON.parse(await textFetch(SNAPSHOT_BASE + id + ".json")), id));
+}
+async function snapshotRelease(id) {
+  const d = await goSnapshot(id);
+  return { episodes: d.episodes.map(({ id: id2, ordinal }) => ({ id: id2, ordinal })), voices: d.episodes[0].voices.map(({ url, ...v }) => v) };
+}
+async function snapshotVoices(id, ordinal) {
+  const d = await goSnapshot(id), e = d.episodes.find((e2) => e2.ordinal === Number(ordinal));
+  if (!e) throw Error("episode_missing");
+  return e.voices;
+}
+async function snapshotVideo(id, ordinal, audio) {
+  const v = (await snapshotVoices(id, ordinal)).find((v2) => v2.id === audio);
+  if (!v) throw Error("audio_missing");
+  return kodikVideo(v.url, ordinal);
+}
+async function snapshotHealth() {
+  const d = await goSnapshot(4013), e = d.episodes[0], v = e.voices.find((v2) => v2.language === "ja") || e.voices[0];
+  if (!v) throw Error("audio_missing");
+  const video = await kodikVideo(v.url, e.ordinal);
+  const manifest = await textFetch(video.url);
+  if (!manifest.startsWith("#EXTM3U")) throw Error("invalid_manifest");
+  return true;
+}
 
 // supabase/functions/anime-source/index.ts
 var origins = /* @__PURE__ */ new Set(["https://yooickuu.github.io", "http://127.0.0.1:4173", "http://localhost:4173", "http://127.0.0.1:5500", "http://localhost:5500"]);
@@ -201,14 +159,14 @@ Deno.serve(async (req) => {
   if (req.method === "GET") {
     if (!healthCache || Date.now() - healthCache.at > 6e4) {
       try {
-        await goJSON("/player/65");
+        await snapshotHealth();
         healthCache = { at: Date.now(), ready: true, status: "ok" };
       } catch (e) {
         const m = e instanceof Error ? e.message : "unknown";
         healthCache = { at: Date.now(), ready: false, status: /^[a-z_]+(?:_\d+)?$/.test(m) ? m : "source_unavailable" };
       }
     }
-    return reply({ ready: healthCache.ready, version: 2, sourceStatus: healthCache.status });
+    return reply({ ready: healthCache.ready, version: 4, sourceStatus: healthCache.status });
   }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   const authorization = req.headers.get("Authorization");
@@ -234,10 +192,10 @@ Deno.serve(async (req) => {
     if (raw.length > 512) return reply({ error: "invalid_request" }, 400);
     const body = JSON.parse(raw), id = Number(body.id), ordinal = Number(body.ordinal);
     if (!positiveID(id)) return reply({ error: "invalid_id" }, 400);
-    if (body.action === "release") return reply(await goRelease(id));
+    if (body.action === "release") return reply(await snapshotRelease(id));
     if (!Number.isFinite(ordinal) || ordinal < 0 || ordinal > 1e4) return reply({ error: "invalid_episode" }, 400);
-    if (body.action === "voices") return reply({ voices: (await goVoices(id, ordinal)).map(({ url, ...v }) => v) });
-    if (body.action === "video" && /^go-\d+$/.test(body.audio || "")) return reply(await goVideo(id, ordinal, body.audio));
+    if (body.action === "voices") return reply({ voices: (await snapshotVoices(id, ordinal)).map(({ url, ...v }) => v) });
+    if (body.action === "video" && /^go-\d+$/.test(body.audio || "")) return reply(await snapshotVideo(id, ordinal, body.audio));
     return reply({ error: "invalid_request" }, 400);
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
