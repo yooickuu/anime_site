@@ -1,5 +1,6 @@
-import {goRelease,goVoices,goVideo,positiveID} from '../../../server/animego.js';
+import {goRelease,goVoices,goVideo,goJSON,positiveID} from '../../../server/animego.js';
 const origins=new Set(['https://yooickuu.github.io','http://127.0.0.1:4173','http://localhost:4173','http://127.0.0.1:5500','http://localhost:5500']);
+let healthCache:{at:number,ready:boolean,status:string}|null=null;
 const limits=new Map<string,{at:number,count:number}>();
 Deno.serve(async req=>{
  const origin=req.headers.get('Origin')||'';
@@ -7,7 +8,7 @@ Deno.serve(async req=>{
  const reply=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers});
  if(origin&&!origins.has(origin))return reply({error:'origin_not_allowed'},403);
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'GET, POST, OPTIONS'}});
- if(req.method==='GET')return reply({ready:true,version:1});
+ if(req.method==='GET'){if(!healthCache||Date.now()-healthCache.at>60000){try{await goJSON('/player/65');healthCache={at:Date.now(),ready:true,status:'ok'};}catch(e){const m=e instanceof Error?e.message:'unknown';healthCache={at:Date.now(),ready:false,status:/^[a-z_]+(?:_\d+)?$/.test(m)?m:'source_unavailable'};}}return reply({ready:healthCache.ready,version:2,sourceStatus:healthCache.status});}
  if(req.method!=='POST')return reply({error:'method_not_allowed'},405);
  const authorization=req.headers.get('Authorization');
  if(!authorization?.startsWith('Bearer '))return reply({error:'unauthorized'},401);
@@ -25,5 +26,5 @@ Deno.serve(async req=>{
   if(body.action==='voices')return reply({voices:(await goVoices(id,ordinal)).map(({url,...v})=>v)});
   if(body.action==='video'&&/^go-\d+$/.test(body.audio||''))return reply(await goVideo(id,ordinal,body.audio));
   return reply({error:'invalid_request'},400);
- }catch(error){const message=error instanceof Error?error.message:'';return reply({error:['episode_missing','audio_missing','incomplete_playlist','changed_playlist'].includes(message)?message:'source_unavailable'},502);}
+ }catch(error){const message=error instanceof Error?error.message:'';console.warn('anime-source failure',/^[a-z_]+(?:_\d+)?$/.test(message)?message:(error instanceof Error?error.name:'unknown'));return reply({error:['episode_missing','audio_missing','incomplete_playlist','changed_playlist'].includes(message)?message:'source_unavailable'},502);}
 });

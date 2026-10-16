@@ -12,6 +12,28 @@ test('cross-provider duplicates use exact MAL IDs; similarly named seasons remai
  assert.deepEqual(mergeCatalogues([a],[b,sequel]),[a,sequel]);
  assert.deepEqual(mergeCatalogues([],[b,sequel],new Map([[1,{id:10}]])),[sequel]);
 });
+test('matching cards from multiple video sources retain one card and all source references',()=>{
+ const a={id:'lib-10',providerId:10,title:'Твоё имя!',year:2016,type:'MOVIE',translations:{en:['Your Name','']}};
+ const b={id:'vost-20',animeVostId:20,title:'Твое имя',year:2016,type:'MOVIE'};
+ const c={id:'go-30',animeGoId:30,title:'Your Name',year:2016,type:'MOVIE'};
+ const sequel={id:'go-31',animeGoId:31,title:'Your Name 2',year:2016,type:'MOVIE'};
+ assert.deepEqual(mergeCatalogues([a,b,c,sequel],[]),[{...a,animeVostId:20,animeGoId:30},sequel]);
+});
+test('deduplication preserves different years, media types and conflicting release IDs',()=>{
+ const a={id:'a',providerId:10,malId:1,title:'Title',year:2020,type:'TV'};
+ for(const b of [
+  {id:'b',animeVostId:20,title:'Title',year:2021,type:'TV'},
+  {id:'b',animeVostId:20,title:'Title',year:2020,type:'MOVIE'},
+  {id:'b',animeVostId:20,malId:2,title:'Title',year:2020,type:'TV'},
+  {id:'b',providerId:11,title:'Title',year:2020,type:'TV'}
+ ])assert.equal(mergeCatalogues([a,b],[]).length,2);
+});
+test('an ambiguous title cannot attach a third source to the wrong release',()=>{
+ const a={id:'a',providerId:10,title:'Title',year:2020,type:'TV'};
+ const b={...a,id:'b',providerId:11};
+ const c={id:'c',animeVostId:20,title:'Title',year:2020,type:'TV'};
+ assert.equal(mergeCatalogues([a,b,c],[]).length,3);
+});
 test('Kitsu ID mappings and original posters remain tied to the correct release',()=>{
  const a=normalizeKitsu({id:'1000',attributes:{canonicalTitle:'Exact season',subtype:'TV',posterImage:{original:'https://media.kitsu.app/anime/poster_images/1000/original.jpg'},status:'current'},relationships:{mappings:{data:[{type:'mappings',id:'mapping'}]}}},[{type:'mappings',id:'mapping',attributes:{externalSite:'myanimelist/anime',externalId:'900001'}}]);
  assert.equal(a.id,'mal-900001');assert.equal(a.malId,900001);assert.equal(a.ongoing,true);assert.equal(a.catalogOnly,true);assert.ok(a.image.includes('/1000/'));

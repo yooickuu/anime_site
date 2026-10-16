@@ -4,7 +4,7 @@ import {episodeManifest} from './episode-manifest.js';
 import {fetchCatalogue,fetchRelease} from './provider.js';
 import {fetchKitsuCatalogue,fetchKitsuRelease} from './kitsu.js';
 import {fetchVostCatalogue,vostIndex,normalizeVost,fetchVostRelease,vostEpisode,cleanTitle,animeType} from './animevost.js';
-import {identityIndex,exactIdentity} from './catalog-match.js';
+import {identityIndex,exactIdentity,identityKeys} from './catalog-match.js';
 import {providerEpisode} from './provider.js';
 import {registerAnime,byId} from './catalog.js';
 let indexPromise=null,allLiberty=[];
@@ -13,10 +13,26 @@ async function sourceIndex(){
   return indexPromise;
 }
 export function mergeCatalogues(liberty,kitsu,knownLiberty=new Map()){
-  const map=new Map(liberty.map(a=>[a.id,a]));
-  for(const a of kitsu){
-    if(map.has(a.id)||a.malId&&knownLiberty.has(a.malId))continue;
-    map.set(a.id,a);
+  const map=new Map(),identities=new Map();
+  const identity=a=>({...a,names:[...(a.names||[]),...Object.values(a.translations||{}).map(x=>x[0])]});
+  const sourceKeys=['providerId','animeVostId','animeGoId'];
+  for(const [items,additional] of [[liberty,false],[kitsu,true]])for(const a of items){
+    if(additional&&a.malId&&knownLiberty.has(a.malId))continue;
+    const candidate=exactIdentity(identity(a),identities);
+    const match=map.get(a.id)||(candidate&&map.get(candidate.id));
+    // Conflicting release IDs must never silently merge separate seasons or editions.
+    const conflict=match&&((a.malId&&match.malId&&a.malId!==match.malId)||sourceKeys.some(k=>a[k]&&match[k]&&a[k]!==match[k]));
+    if(match&&!conflict){
+      const linked={...match};
+      for(const key of sourceKeys)if(!linked[key]&&a[key])linked[key]=a[key];
+      map.set(match.id,linked);
+    }else if(!map.has(a.id))map.set(a.id,a);
+    const target=match&&!conflict?match.id:a.id;
+    for(const key of identityKeys(identity(a))){
+      const entries=identities.get(key)||[];
+      if(!entries.some(x=>x.id===target))entries.push({id:target});
+      identities.set(key,entries);
+    }
   }
   return [...map.values()];
 }
@@ -52,14 +68,14 @@ export async function combinedCatalogue(options){
   });
   const goItems=await animeGoReady()?await goIndex().catch(()=>[]):[];
   const linkedExtras=extra.map(a=>{const match=matchGo(a,goItems);return match?normalizeGo({...match,...(a.malId?{malId:a.malId}: {})}):a;});
-  const items=mergeCatalogues([...libItems,...v.items,...g.items],linkedExtras,known);
+  const items=mergeCatalogues([...libItems,...v.items,...g.items],linkedExtras,known).map(registerAnime);
   return {items,total:null,pages:Math.max(l.pages,v.pages,k?.pages||1,g.pages||1),totals:{...(results[0].status==='fulfilled'?{AniLiberty:l.total}:{}),...(results[1].status==='fulfilled'?{AnimeVost:v.total}:{}),...(k&&results[2]?.status==='fulfilled'?{Kitsu:k.total}:{}),...(g.total?{AnimeGO:g.total}:{})},partial:results.some(r=>r.status==='rejected')};
 }
 export async function resolveRelease(a){let base;try{base=await baseRelease(a);}catch(error){const recovered=await attachGoRelease(a).catch(()=>null);if(recovered?.episodeManifest?.some(e=>e.sources.go!==undefined))return recovered;throw error;}return attachGoRelease(base).catch(()=>base);}
 async function baseRelease(a){
   if(a.providerId){
     registerAnime(a);
-    const av=await vostIndex().catch(()=>[]),match=av.find(v=>v.libertyId===a.providerId);
+    const av=await vostIndex().catch(()=>[]),match=av.find(v=>a.animeVostId?v.id===a.animeVostId:v.libertyId===a.providerId);
     if(!match)return fetchRelease(a.id);
     const [lib,vost]=await Promise.allSettled([fetchRelease(a.id),fetchVostRelease({...a,animeVostId:match.id})]);
     if(lib.status==='rejected'&&vost.status==='rejected')throw lib.reason;
@@ -103,7 +119,7 @@ export async function discoveryIndex(){
  const liberty=allLiberty.map(x=>({id:x.malId?'mal-'+x.malId:'lib-'+x.id,malId:x.malId,providerId:x.id,title:x.title,year:x.year,type:x.type}));
  const extra=av.filter(x=>!x.libertyId).map(x=>normalizeVost(x));
  const go=await animeGoReady()?await goIndex().catch(()=>[]):[];
- return [...liberty,...extra,...go.filter(x=>x.hasKodik&&!x.canonicalId).map(normalizeGo)];
+ return mergeCatalogues([...liberty,...extra,...go.filter(x=>x.hasKodik&&!x.canonicalId).map(normalizeGo)],[]);
 }
 export async function findWatchRelease(id){
  const cached=byId(id);if(cached)return cached;

@@ -11,3 +11,11 @@ test('video resolver checks session, origin and input before upstream access',as
  assert.equal((await call({action:'video',id:65,ordinal:1,audio:'http://evil.test'},{Authorization:'Bearer good'})).status,400);
  assert.ok(calls.every(x=>x==='https://project.supabase.co/auth/v1/user'));
 });
+
+test('source health remains false when the upstream catalogue rejects server requests',async()=>{
+ const result=await build({entryPoints:['supabase/functions/anime-source/index.ts'],bundle:true,write:false,format:'iife',platform:'neutral',target:'es2022'});let handler,requests=0;
+ const ctx={Request,Response,Headers,URL,URLSearchParams,AbortSignal,TextDecoder,Uint8Array,atob,fetch:async()=>{requests++;return new Response('Unavailable',{status:500});},Deno:{env:{get:()=>''},serve:fn=>handler=fn}};
+ vm.runInNewContext(result.outputFiles[0].text,ctx);
+ for(let i=0;i<2;i++){const r=await handler(new Request('https://project.supabase.co/functions/v1/anime-source'));const d=await r.json();assert.equal(d.ready,false);assert.equal(d.sourceStatus,'upstream_500');}
+ assert.equal(requests,1);
+});

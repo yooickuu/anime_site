@@ -98,7 +98,7 @@ async function cached(key, ttl, load) {
   }
 }
 async function textFetch(url, options = {}) {
-  const r = await fetch(url, { ...options, redirect: "error", signal: AbortSignal.timeout(15e3) });
+  const r = await fetch(url, { ...options, headers: { "User-Agent": "yooickuu/1.0 (+https://yooickuu.github.io/anime_site/)", ...options.headers }, redirect: "error", signal: AbortSignal.timeout(15e3) });
   if (!r.ok) {
     await r.body?.cancel();
     throw Error("upstream_" + r.status);
@@ -190,6 +190,7 @@ async function goVideo(animeId, ordinal, audio) {
 
 // supabase/functions/anime-source/index.ts
 var origins = /* @__PURE__ */ new Set(["https://yooickuu.github.io", "http://127.0.0.1:4173", "http://localhost:4173", "http://127.0.0.1:5500", "http://localhost:5500"]);
+var healthCache = null;
 var limits = /* @__PURE__ */ new Map();
 Deno.serve(async (req) => {
   const origin = req.headers.get("Origin") || "";
@@ -197,7 +198,18 @@ Deno.serve(async (req) => {
   const reply = (body, status = 200) => new Response(JSON.stringify(body), { status, headers });
   if (origin && !origins.has(origin)) return reply({ error: "origin_not_allowed" }, 403);
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: { ...headers, "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info", "Access-Control-Allow-Methods": "GET, POST, OPTIONS" } });
-  if (req.method === "GET") return reply({ ready: true, version: 1 });
+  if (req.method === "GET") {
+    if (!healthCache || Date.now() - healthCache.at > 6e4) {
+      try {
+        await goJSON("/player/65");
+        healthCache = { at: Date.now(), ready: true, status: "ok" };
+      } catch (e) {
+        const m = e instanceof Error ? e.message : "unknown";
+        healthCache = { at: Date.now(), ready: false, status: /^[a-z_]+(?:_\d+)?$/.test(m) ? m : "source_unavailable" };
+      }
+    }
+    return reply({ ready: healthCache.ready, version: 2, sourceStatus: healthCache.status });
+  }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   const authorization = req.headers.get("Authorization");
   if (!authorization?.startsWith("Bearer ")) return reply({ error: "unauthorized" }, 401);
@@ -229,6 +241,7 @@ Deno.serve(async (req) => {
     return reply({ error: "invalid_request" }, 400);
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
+    console.warn("anime-source failure", /^[a-z_]+(?:_\d+)?$/.test(message) ? message : error instanceof Error ? error.name : "unknown");
     return reply({ error: ["episode_missing", "audio_missing", "incomplete_playlist", "changed_playlist"].includes(message) ? message : "source_unavailable" }, 502);
   }
 });
