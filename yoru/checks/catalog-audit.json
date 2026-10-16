@@ -1,16 +1,16 @@
 {
-  "checkedAt": "2026-10-14T05:28:20.135Z",
+  "checkedAt": "2026-10-15T11:43:21.683Z",
   "provider": "https://api.anilibria.app/api/v1/anime/catalog/releases",
-  "expected": 1879,
-  "uniqueReleases": 1879,
+  "expected": 1878,
+  "uniqueReleases": 1878,
   "pages": 38,
   "duplicates": [],
   "missingPosters": [],
-  "ongoing": 32,
+  "ongoing": 33,
   "types": {
     "OVA": 72,
     "MOVIE": 146,
-    "TV": 1508,
+    "TV": 1507,
     "SPECIAL": 30,
     "ONA": 92,
     "WEB": 12,
@@ -268,11 +268,6 @@
       "id": 8922,
       "title": "Любовные неприятности",
       "year": 2008
-    },
-    {
-      "id": 10309,
-      "title": "Не слишком ли ты сладкая, Бог соли Сато?",
-      "year": 2026
     },
     {
       "id": 10329,
