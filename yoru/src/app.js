@@ -1,3 +1,4 @@
+import {playerShortcut} from './player-shortcuts.js';
 import {signInIdentifier} from './login.js';
 import {checkNickname,nicknameErrorKey,nicknameChecker} from './nicknames.js';
 import {savedEpisodeNumber} from './episode-manifest.js';
@@ -1361,33 +1362,14 @@ document.addEventListener("keydown", (event) => {
     if (!$$("dialog").some((d) => d.open)) $("#search")?.focus();
     return;
   }
-  const v = $("#video");
-  if (
-    !(page==='watch' && !!$('#video')) ||
-    !v ||
-    event.ctrlKey ||
-    event.metaKey ||
-    event.altKey ||
-    /INPUT|TEXTAREA|SELECT|BUTTON/.test(event.target.tagName) ||
-    event.target === v
-  )
-    return;
-  const key = event.key.toLowerCase();
-  if ([" ", "arrowleft", "arrowright", "f", "m"].includes(key)) {
-    event.preventDefault();
-    if (!v.getAttribute("src")) return;
-    if (key === " ")
-      v.paused ? v.play().catch(() => toast(t("noAutoplay"))) : v.pause();
-    if (key === "arrowleft") v.currentTime = Math.max(0, v.currentTime - 10);
-    if (key === "arrowright" && Number.isFinite(v.duration))
-      v.currentTime = Math.min(v.duration, v.currentTime + 10);
-    if (key === "m") v.muted = !v.muted;
-    if (key === "f") {
-      if (document.fullscreenElement)
-        document.exitFullscreen?.().catch(() => {});
-      else $(".video-shell")?.requestFullscreen?.().catch(() => {});
-    }
-  }
+  if(page!=='watch'||document.querySelector('dialog[open]'))return;
+  const action=playerShortcut(event),v=$('#video');
+  if(!action||!v)return;
+  event.preventDefault();
+  const selector={fullscreen:'[data-video="fullscreen"]',mute:'[data-video="mute"]',cinema:'[data-action="cinema"]',play:'[data-video="play"]'}[action];
+  if(selector){$(selector)?.click();return;}
+  if(Number.isFinite(v.duration))v.currentTime=Math.min(v.duration,Math.max(0,v.currentTime+(action==='back'?-10:10)));
+
 });
 $$("dialog").forEach((d) =>
   d.addEventListener("click", (event) => {
@@ -1476,3 +1458,5 @@ document.addEventListener("error", event => {
 window.addEventListener('yoru:posters-ready',()=>{
  for(const img of document.querySelectorAll('img[data-poster]')){const a=byId(img.dataset.poster);if(a?.image&&img.getAttribute('src')!==a.image)img.src=a.image;}
 });
+
+window.addEventListener('yoru:source-ready',()=>{combinedCatalogue.clear();resolveRelease.clear();if(['home','catalog'].includes(page))loadCatalogue();});

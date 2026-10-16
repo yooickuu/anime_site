@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {playerShortcut} from '../src/player-shortcuts.js';
+const key=(code,k)=>({code,key:k,target:{closest:()=>null}});
+test('F/M/T work on both Latin and Russian keyboard layouts; PiP has no shortcut',()=>{for(const [code,k,action]of [['KeyF','а','fullscreen'],['KeyM','ь','mute'],['KeyT','е','cinema'],['KeyF','F','fullscreen']])assert.equal(playerShortcut(key(code,k)),action);assert.equal(playerShortcut(key('KeyP','p')),null);});
+test('shortcuts never interfere with typing, modifiers or key repeat',()=>{for(const prop of ['ctrlKey','metaKey','altKey','repeat','isComposing'])assert.equal(playerShortcut({...key('KeyF','f'),[prop]:true}),null);assert.equal(playerShortcut({...key('KeyT','t'),target:{isContentEditable:true}}),null);assert.equal(playerShortcut({...key('KeyM','m'),target:{closest:()=>({})}}),null);});

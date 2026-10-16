@@ -1,5 +1,5 @@
 import {requestCache} from './request-cache.js';
-import {animeGoReady,goIndex,goCatalogue,matchGo,normalizeGo,attachGoRelease,goEpisode} from './animego.js';
+import {animeGoReady,goReadyNow,goIndex,goCatalogue,matchGo,normalizeGo,attachGoRelease,goEpisode} from './animego.js';
 export {prepareGoVoices as prepareEpisodeAudio} from './animego.js';
 import {episodeManifest} from './episode-manifest.js';
 import {fetchCatalogue,fetchRelease} from './provider.js';
@@ -68,7 +68,7 @@ async function loadCombinedCatalogue(options){
     // A provider variant has one canonical card throughout the catalogue.
     return filtered?[normalizeVost(match)]:[];
   });
-  const goItems=await animeGoReady()?await goIndex().catch(()=>[]):[];
+  const goItems=goReadyNow()?await goIndex().catch(()=>[]):[];
   const linkedExtras=extra.map(a=>{const match=matchGo(a,goItems);return match?normalizeGo({...match,...(a.malId?{malId:a.malId}: {})}):a;});
   const items=mergeCatalogues([...libItems,...v.items,...g.items],linkedExtras,known).map(registerAnime);
   return {items,total:null,pages:Math.max(l.pages,v.pages,k?.pages||1,g.pages||1),totals:{...(results[0].status==='fulfilled'?{AniLiberty:l.total}:{}),...(results[1].status==='fulfilled'?{AnimeVost:v.total}:{}),...(k&&results[2]?.status==='fulfilled'?{Kitsu:k.total}:{}),...(g.total?{AnimeGO:g.total}:{})},partial:results.some(r=>r.status==='rejected')};
@@ -121,7 +121,7 @@ export async function discoveryIndex(){
  const [lib,av]=await Promise.all([sourceIndex(),vostIndex().catch(()=>[])]);
  const liberty=allLiberty.map(x=>({id:x.malId?'mal-'+x.malId:'lib-'+x.id,malId:x.malId,providerId:x.id,title:x.title,year:x.year,type:x.type}));
  const extra=av.filter(x=>!x.libertyId).map(x=>normalizeVost(x));
- const go=await animeGoReady()?await goIndex().catch(()=>[]):[];
+ const go=goReadyNow()?await goIndex().catch(()=>[]):[];
  return mergeCatalogues([...liberty,...extra,...go.filter(x=>x.hasKodik&&x.completeAudio&&!x.canonicalId).map(normalizeGo)],[]);
 }
 export async function findWatchRelease(id){

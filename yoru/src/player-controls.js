@@ -65,14 +65,6 @@ export function attachControls(root, video, t, onError) {
   for(const e of ['loadedmetadata','durationchange','timeupdate','play','pause','ended','volumechange','emptied'])video.addEventListener(e,update);
   for(const e of ['waiting','seeking','loadstart'])video.addEventListener(e,()=>{loading.hidden=false;});
   for(const e of ['canplay','playing','seeked','pause','error','ended'])video.addEventListener(e,()=>{loading.hidden=true;});
-  root.addEventListener('keydown',event=>{
-    if(/INPUT|BUTTON|SELECT/.test(event.target.tagName))return;
-    const key=event.key.toLowerCase();
-    if(![' ','arrowleft','arrowright','f','m'].includes(key))return;
-    event.preventDefault();event.stopPropagation();
-    if(key===' ')togglePlay();if(key==='f')fullscreen();if(key==='m')toggleMute();
-    if(Number.isFinite(video.duration)&&key.startsWith('arrow'))video.currentTime=Math.min(video.duration,Math.max(0,video.currentTime+(key==='arrowleft'?-10:10)));
-  });
   update();
   return ()=>idle.dispose();
 }
