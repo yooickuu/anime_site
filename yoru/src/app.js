@@ -1,7 +1,9 @@
+import {signInIdentifier} from './login.js';
 import {checkNickname,nicknameErrorKey,nicknameChecker} from './nicknames.js';
 import {savedEpisodeNumber} from './episode-manifest.js';
 import {createProfileDraft, createAvatarLoader} from './profile.js';
 import {watchView} from './watch-view.js';
+import {attachPlaybackAutomation} from './playback-automation.js';
 import {automaticSkipTimes} from './autoskip.js';
 import {discoveryChoice,watchRoute,audioChoices} from './discovery.js';
 import {initSelectMenus, enhanceSelects, closeSelectMenu} from './select-menu.js';
@@ -27,8 +29,6 @@ import {
   defaults,
   normalize,
   applyOperation,
-  skipTarget,
-  nextEpisodeAction,
   timeLabel,
   episodeNavigation,
   profileStats,
@@ -64,9 +64,9 @@ let onlineItems = [],
   ongoingOnly = false,
   playback = null,
   controlsCleanup = null,
+  automationCleanup = null,
   playerSeasons = [],
-  providerTiming = null,
-  endingSkipped = false;
+  providerTiming = null;
 const bookmark = icon("bookmark");
 const read = (key, fallback) => {
   try {
@@ -102,7 +102,6 @@ let operations = [],
   episode = 1,
   sourceKey = null,
   sourceGeneration = 0,
-  skipDone = false,
   lastProgress = 0,
   playerOpening = false,
   selectedAudio = '',
@@ -354,13 +353,6 @@ function preferencesHTML() {
 async function openDetails(id) {
   let a = byId(id);
   if (!a) return;
-  if (a.providerId || a.animeVostId || a.animeGoId || a.kitsuId || a.malId) {
-    try {
-      a = await resolveRelease(a);
-    } catch {
-      toast(t("providerError"));
-    }
-  }
   id = a.id;
   detailId = id;
   const e = state.entries[id] || {};
@@ -381,6 +373,16 @@ async function openDetails(id) {
         : `<button class="text-button" data-action="login">${t("authRequired")} ${icon("arrow")}</button>`
     }</div></div>`;
   if (!$("#details").open) $("#details").showModal();
+  // Paint existing information immediately; refresh metadata without replacing user's form.
+  void resolveRelease(a).then(updated=>{
+    if(!$('#details').open||detailId!==id)return;
+    if(!updated.catalogOnly&&!updated.blocked&&!$('#details [data-watch]')){
+      const button=document.createElement('button');button.className='button primary full-width';button.dataset.watch=updated.id;button.textContent=t('watch');$('#details .details-visual').append(button);
+      $('#details .availability-note')?.remove();
+    }
+    const story=$('#details .details-description');if(story&&descriptionFor(updated,lang))story.textContent=descriptionFor(updated,lang);
+  }).catch(()=>{});
+
 }
 function authDialog(mode = "login", method = "email") {
   authMode = mode;
@@ -395,7 +397,7 @@ function drawAuth() {
   $("#auth-dialog").className = "auth-dialog";
   $("#auth-dialog").innerHTML =
     closeButton("auth-dialog") +
-    `<span class="overline">yooickuu</span><h2>${t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "newPassword" : "login")}</h2>${disabled ? `<div class="setup-notice"><strong>${t("authNotConfigured")}</strong><p>${t("authSetupHint")}</p>${["localhost","127.0.0.1"].includes(location.hostname)?`<a class="text-button" href="setup.html" target="_blank" rel="noopener">${t("setupGuide")}</a>`:""}</div>` : ""}<div class="auth-tabs"><button class="chip ${authMethod === "email" ? "selected" : ""}" data-auth-method="email">${t("email")}</button><button class="chip ${authMethod === "phone" ? "selected" : ""}" data-auth-method="phone">${t("phone")}</button></div><form id="auth-form">${authMethod === "phone" ? `<label>${t("phone")}<input name="phone" type="tel" autocomplete="tel" placeholder="+7 700 123 45 67" value="${esc(phoneNumber)}" required ${authMode === "otp" ? "readonly" : ""}></label><p class="notice">${t("phoneHint")}</p>${!cfg.phoneAuth ? `<p class="form-error">${t("phoneDisabled")}</p>` : ""}${authMode === "otp" ? `<label>${t("code")}<input name="token" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" minlength="6" maxlength="10" required></label>` : ""}` : `${authMode === "register" ? `<label>${t("nickname")}<input name="name" autocomplete="nickname" maxlength="40" required></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p>` : ""}${authMode !== "newPassword" ? `<label>${t("email")}<input name="email" type="email" autocomplete="email" placeholder="you@icloud.com" required></label>` : ""}${authMode !== "reset" ? `<label>${t(authMode === "newPassword" ? "newPassword" : "password")}<span class="password-field"><input name="password" type="password" autocomplete="${authMode === "login" ? "current-password" : "new-password"}" minlength="${authMode === "login" ? "1" : "8"}" maxlength="128" required><button type="button" class="password-toggle icon-button" data-action="toggle-password" aria-label="${t("showPassword")}" aria-pressed="false">${icon("eye")}</button></span></label>${authMode !== "login" ? `<p class="notice">${t("passwordHint")}</p>` : ""}` : ""}`}<p class="form-error" id="auth-message" role="status"></p><button class="button primary full-width" ${disabled || (authMethod === "phone" && !cfg.phoneAuth) ? "disabled" : ""}>${authMethod === "phone" ? t(authMode === "otp" ? "verifyCode" : "sendCode") : t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "save" : "login")}</button></form>${authMethod === "email" && authMode !== "newPassword" ? `<div class="auth-links"><button class="text-button" data-auth-mode="${authMode === "register" ? "login" : "register"}">${t(authMode === "register" ? "login" : "register")}</button><button class="text-button" data-auth-mode="reset">${t("forgot")}</button></div>` : ""}<button class="button apple-button full-width" data-action="apple" ${disabled ? "disabled" : ""}>${t("apple")}</button>${!cfg.appleAuth ? `<p class="notice">${t("appleDisabled")}</p>` : ""}`;
+    `<span class="overline">yooickuu</span><h2>${t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "newPassword" : "login")}</h2>${disabled ? `<div class="setup-notice"><strong>${t("authNotConfigured")}</strong><p>${t("authSetupHint")}</p>${["localhost","127.0.0.1"].includes(location.hostname)?`<a class="text-button" href="setup.html" target="_blank" rel="noopener">${t("setupGuide")}</a>`:""}</div>` : ""}<div class="auth-tabs"><button class="chip ${authMethod === "email" ? "selected" : ""}" data-auth-method="email">${t("email")}</button><button class="chip ${authMethod === "phone" ? "selected" : ""}" data-auth-method="phone">${t("phone")}</button></div><form id="auth-form">${authMethod === "phone" ? `<label>${t("phone")}<input name="phone" type="tel" autocomplete="tel" placeholder="+7 700 123 45 67" value="${esc(phoneNumber)}" required ${authMode === "otp" ? "readonly" : ""}></label><p class="notice">${t("phoneHint")}</p>${!cfg.phoneAuth ? `<p class="form-error">${t("phoneDisabled")}</p>` : ""}${authMode === "otp" ? `<label>${t("code")}<input name="token" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" minlength="6" maxlength="10" required></label>` : ""}` : `${authMode === "register" ? `<label>${t("nickname")}<input name="name" autocomplete="nickname" maxlength="40" required></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p>` : ""}${authMode !== "newPassword" ? `<label>${t(authMode === "login" ? "loginIdentifier" : "email")}<input name="email" type="${authMode === "login" ? "text" : "email"}" autocomplete="${authMode === "login" ? "username" : "email"}" autocapitalize="none" spellcheck="false" required></label>` : ""}${authMode !== "reset" ? `<label>${t(authMode === "newPassword" ? "newPassword" : "password")}<span class="password-field"><input name="password" type="password" autocomplete="${authMode === "login" ? "current-password" : "new-password"}" minlength="${authMode === "login" ? "1" : "8"}" maxlength="128" required><button type="button" class="password-toggle icon-button" data-action="toggle-password" aria-label="${t("showPassword")}" aria-pressed="false">${icon("eye")}</button></span></label>${authMode !== "login" ? `<p class="notice">${t("passwordHint")}</p>` : ""}` : ""}`}<p class="form-error" id="auth-message" role="status"></p><button class="button primary full-width" ${disabled || (authMethod === "phone" && !cfg.phoneAuth) ? "disabled" : ""}>${authMethod === "phone" ? t(authMode === "otp" ? "verifyCode" : "sendCode") : t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "save" : "login")}</button></form>${authMethod === "email" && authMode !== "newPassword" ? `<div class="auth-links"><button class="text-button" data-auth-mode="${authMode === "register" ? "login" : "register"}">${t(authMode === "register" ? "login" : "register")}</button><button class="text-button" data-auth-mode="reset">${t("forgot")}</button></div>` : ""}<button class="button apple-button full-width" data-action="apple" ${disabled ? "disabled" : ""}>${t("apple")}</button>${!cfg.appleAuth ? `<p class="notice">${t("appleDisabled")}</p>` : ""}`;
 }
 function requireUser() {
   if (!user) {
@@ -471,10 +473,7 @@ async function submitAuth(form) {
       });
       if (!result.error) toast(t("passwordUpdated"));
     } else
-      result = await client.auth.signInWithPassword({
-        email: String(data.get("email")),
-        password: String(data.get("password")),
-      });
+      result = await signInIdentifier(client, String(data.get("email")), String(data.get("password")), window.YORU_CONFIG);
     if (result.error) throw result.error;
     $("#auth-dialog").close();
   } catch (error) {
@@ -783,15 +782,23 @@ async function updateSource(play = false, refresh = false) {
   const generation = ++sourceGeneration;
   sourceKey = null;
   recordReady = false;
-  skipDone = false;
-  endingSkipped = false;
   providerTiming = null;
   const video = $("#video");
   if (!video || !current) return;
   playback?.destroy();
-  let availableSources=[],attemptedURLs=new Set();
+  let availableSources=[],attemptedURLs=new Set(),nextPrepared=false;
   playback = createPlayback(video, status=>{
     if(generation!==sourceGeneration || page!=='watch' || !$('#video'))return;
+    if(status==='playing'&&!nextPrepared&&state.preferences.autoNext&&episode<current.episodes){
+      nextPrepared=true;
+      const upcoming={...current},nextIndex=episode+1,preferred=selectedAudio;
+      // Resolve only next-episode metadata, never download the next video in the background.
+      (async()=>{await prepareEpisodeAudio(upcoming,nextIndex);
+        const choices=audioChoices(upcoming,nextIndex);
+        const audio=choices.find(x=>x.id===preferred)?.id||choices.find(x=>x.id===state.preferences.audio)?.id||choices[0]?.id||'';
+        await videoEpisode(upcoming,nextIndex,false,audio);
+      })().catch(()=>{});
+    }
     const loading=$(".video-loading");
     if(loading)loading.hidden=!['loading','buffering'].includes(status);
     if(['error','unsupported'].includes(status)){
@@ -880,7 +887,7 @@ function recordProgress() {
   mutate({ type: "progress", key: sourceKey, value });
 }
 async function switchEpisode(n, play = false) {
-  if (!current || n < 1 || n > current.episodes) return;
+  if (!current || !Number.isInteger(n) || n < 1 || n > current.episodes || n === episode) return;
   recordProgress();
   episode = n;
   history.replaceState(null,'',`#watch/${current.id}/${episode}`);
@@ -905,38 +912,14 @@ function attachVideo() {
     if (!entry?.status && state.statuses.some((s) => s.id === "watching"))
       mutate({ type: "entry", id: current.id, patch: { status: "watching" } });
   });
-  video.addEventListener("timeupdate", () => {
-    if (!recordReady) return;
-    const target = skipTarget(
-      video.currentTime,
-      providerTiming?.opening,
-      state.preferences.autoSkip,
-      skipDone,
-      video.duration,
-    );
-    if (target !== null) {
-      skipDone = true;
-      video.currentTime = target;
-      toast(t("introSkipped"));
-    }
-    const endingTarget = skipTarget(
-      video.currentTime,
-      providerTiming?.ending,
-      state.preferences.autoSkip,
-      endingSkipped,
-      video.duration + 0.1,
-    );
-    if (endingTarget !== null) {
-      endingSkipped = true;
-      video.currentTime = Math.min(video.duration, endingTarget);
-    }
-    if (Date.now() - lastProgress > 5000) {
-      recordProgress();
-      lastProgress = Date.now();
-    }
-  });
-  video.addEventListener("pause", recordProgress);
-  video.addEventListener("ended", () => {
+  automationCleanup?.();
+  automationCleanup=attachPlaybackAutomation(video,{
+    context:()=>({ready:recordReady&&!!current&&page==='watch',token:sourceGeneration,
+      timing:providerTiming,preferences:state.preferences,episode,total:current?.episodes,
+      hasNext:!!current&&(hasRemoteSource(current.id,episode+1)||!!(current.providerId||current.animeVostId||current.animeGoId))}),
+    onSkip:kind=>{if(kind==='opening')toast(t('introSkipped'));},
+    onTick:()=>{if(Date.now()-lastProgress>5000){recordProgress();lastProgress=Date.now();}},
+    onEnded:next=>{
     recordProgress();
     renderEpisodes();
     if (
@@ -948,15 +931,10 @@ function attachVideo() {
       state.statuses.some((s) => s.id === "completed")
     )
       mutate({ type: "entry", id: current.id, patch: { status: "completed" } });
-    const next = nextEpisodeAction(
-      state.preferences,
-      episode,
-      current.episodes,
-      hasRemoteSource(current.id, episode + 1) ||
-        !!(current.providerId || current.animeVostId || current.animeGoId),
-    );
     if (next) switchEpisode(next.episode, next.play);
+    }
   });
+  video.addEventListener("pause", recordProgress);
   video.addEventListener("error", () => {
     if (video.getAttribute("src") && sourceKey) {
       $("#source-status").textContent = t("videoError");
@@ -965,7 +943,7 @@ function attachVideo() {
   });
 }
 function stopWatching(){
-  recordProgress();controlsCleanup?.();controlsCleanup=null;sourceKey=null;recordReady=false;++sourceGeneration;
+  recordProgress();controlsCleanup?.();controlsCleanup=null;automationCleanup?.();automationCleanup=null;sourceKey=null;recordReady=false;++sourceGeneration;
   playback?.destroy();playback=null;current=null;closeSelectMenu();
 }
 async function loadAutomaticSkips(){
@@ -1494,3 +1472,7 @@ document.addEventListener("error", event => {
   const a=byId(img.dataset.poster);
   if(a?.posterFallback && img.src!==a.posterFallback && !img.dataset.retried){img.dataset.retried="true";img.src=a.posterFallback;}
 },true);
+
+window.addEventListener('yoru:posters-ready',()=>{
+ for(const img of document.querySelectorAll('img[data-poster]')){const a=byId(img.dataset.poster);if(a?.image&&img.getAttribute('src')!==a.image)img.src=a.image;}
+});

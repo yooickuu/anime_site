@@ -1,3 +1,4 @@
+import {requestCache} from './request-cache.js';
 import {animeGoReady,goIndex,goCatalogue,matchGo,normalizeGo,attachGoRelease,goEpisode} from './animego.js';
 export {prepareGoVoices as prepareEpisodeAudio} from './animego.js';
 import {episodeManifest} from './episode-manifest.js';
@@ -43,7 +44,8 @@ export function discoveryOptions(options) {
    ongoing:view==='airingNow'||options.ongoing,
    type:view==='films'?'MOVIE':options.type};
 }
-export async function combinedCatalogue(options){
+export const combinedCatalogue=requestCache(loadCombinedCatalogue,{ttl:60000});
+async function loadCombinedCatalogue(options){
   options=discoveryOptions(options);
   if(options.scope!=='watchable' && ['popular','topRated','airingNow','films'].includes(options.view)){
     const result=await fetchKitsuCatalogue(options),known=await sourceIndex();
@@ -71,7 +73,8 @@ export async function combinedCatalogue(options){
   const items=mergeCatalogues([...libItems,...v.items,...g.items],linkedExtras,known).map(registerAnime);
   return {items,total:null,pages:Math.max(l.pages,v.pages,k?.pages||1,g.pages||1),totals:{...(results[0].status==='fulfilled'?{AniLiberty:l.total}:{}),...(results[1].status==='fulfilled'?{AnimeVost:v.total}:{}),...(k&&results[2]?.status==='fulfilled'?{Kitsu:k.total}:{}),...(g.total?{AnimeGO:g.total}:{})},partial:results.some(r=>r.status==='rejected')};
 }
-export async function resolveRelease(a){let base;try{base=await baseRelease(a);}catch(error){const recovered=await attachGoRelease(a).catch(()=>null);if(recovered?.episodeManifest?.some(e=>e.sources.go!==undefined))return recovered;throw error;}return attachGoRelease(base).catch(()=>base);}
+export const resolveRelease=requestCache(loadRelease,{ttl:60000,key:a=>[a.id,a.providerId,a.animeVostId,a.animeGoId].join(':')});
+async function loadRelease(a){let base;try{base=await baseRelease(a);}catch(error){const recovered=await attachGoRelease(a).catch(()=>null);if(recovered?.episodeManifest?.some(e=>e.sources.go!==undefined))return recovered;throw error;}return attachGoRelease(base).catch(()=>base);}
 async function baseRelease(a){
   if(a.providerId){
     registerAnime(a);
@@ -107,7 +110,7 @@ async function baseRelease(a){
 }
 
 export async function videoEpisode(a,index,refresh=false,audio=''){
- if(audio.startsWith('go-')&&a.animeGoId)return goEpisode(a,index,audio);
+ if(audio.startsWith('go-')&&a.animeGoId)return goEpisode(a,index,audio,refresh);
  const vost=audio==='vost'||(!audio&&(!a.providerId||a.videoProvider==='AnimeVost'));
  if(vost&&a.animeVostId)return vostEpisode(a,index,refresh,a.episodeManifest?.[index-1]?.sources.vost??a.episodeNumbers?.[index-1]??null);
  if(a.providerId)return providerEpisode(a.id,index,refresh,a.episodeManifest?.[index-1]?.sources.liberty??a.episodeNumbers?.[index-1]??null);

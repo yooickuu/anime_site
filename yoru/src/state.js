@@ -199,6 +199,7 @@ export function validSegments(v) {
 export function skipTarget(time, segment, enabled, alreadySkipped, duration) {
   if (
     !enabled ||
+    !Number.isFinite(time) || !Number.isFinite(duration) || duration <= 0 ||
     alreadySkipped ||
     !validSegments(segment) ||
     segment.end >= duration

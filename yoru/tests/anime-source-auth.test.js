@@ -32,7 +32,7 @@ test('snapshot resolver serves authenticated episodes and checks video without c
   throw Error('Unexpected upstream '+url);
  };
  vm.runInNewContext(result.outputFiles[0].text,{Request,Response,Headers,URL,URLSearchParams,AbortSignal,TextDecoder,Uint8Array,atob,fetch:fetcher,Deno:{env:{get:k=>k==='SUPABASE_URL'?'https://project.supabase.co':'public'},serve:fn=>handler=fn}});
- const health=await (await handler(new Request('https://project.supabase.co/functions/v1/anime-source'))).json();assert.equal(health.ready,true);assert.equal(health.version,4);
+ const health=await (await handler(new Request('https://project.supabase.co/functions/v1/anime-source'))).json();assert.equal(health.ready,true);assert.equal(health.version,5);
  const r=await handler(new Request('https://project.supabase.co/functions/v1/anime-source',{method:'POST',headers:{Authorization:'Bearer good'},body:JSON.stringify({action:'release',id:4013})}));
  assert.equal(r.status,200);const release=await r.json();assert.equal(release.episodes.length,1);assert.equal(release.voices[0].language,'ja');assert.equal(release.voices[0].url,undefined);
  assert.ok(calls.every(x=>!x.includes('animego.me')));

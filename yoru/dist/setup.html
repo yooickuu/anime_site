@@ -60,6 +60,15 @@
     </ol>
     <button data-copy-file="anime-source.ts">Скопировать подключение видео</button>
   </section>
+  <section id="nickname-login">
+    <h2>Вход по никнейму и паролю</h2>
+    <ol><li>Нажми «Скопировать SQL входа» → Supabase → SQL Editor → New query → вставить → Run.</li>
+    <li>Нажми «Скопировать функцию входа» → Edge Functions → Deploy a new function → Via Editor.</li>
+    <li>Имя функции: <code>login-nickname</code>. Замени весь код скопированным → Deploy function.</li>
+    <li>В настройках именно этой функции выключи <strong>Verify JWT with legacy secret</strong> и сохрани. Функция сама проверяет пароль; вход выполняется до получения сессии.</li>
+    <li>На сайте выйди из аккаунта и войди с никнеймом и своим паролем. Вход по почте остаётся доступным.</li></ol>
+    <div class="actions"><button data-copy-file="nickname-login.sql">Скопировать SQL входа</button><button data-copy-file="login-nickname.ts">Скопировать функцию входа</button></div>
+  </section>
   <section id="nicknames">
     <h2>Уникальные никнеймы</h2>
     <p>Нажми кнопку ниже, открой SQL Editor в Supabase, вставь в новый запрос и нажми Run. Функцию Edge Functions для этого создавать не нужно.</p>

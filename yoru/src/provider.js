@@ -1,4 +1,4 @@
-import { enrichPosters, cachedPoster } from "./posters.js";
+import { enrichPostersLater, cachedPoster } from "./posters.js";
 import { registerAnime, byId } from "./catalog.js";
 export const API = "https://api.anilibria.app/api/v1";
 const ORIGIN = "https://api.anilibria.app";
@@ -74,7 +74,7 @@ export async function fetchCatalogue({
   }
   const data = await request("/anime/catalog/releases?" + params);
   const items = (data.data || []).map(normalizeRelease);
-  await enrichPosters(items);
+  enrichPostersLater(items);
   return {
     items,
     total: data.meta?.pagination?.total || 0,
@@ -88,7 +88,7 @@ export async function fetchRelease(id, refresh = false) {
     "/anime/releases/" + encodeURIComponent(String(byId(id)?.providerId || id).replace("lib-", "")),
   );
   const model = normalizeRelease(raw);
-  await enrichPosters([model]);
+  enrichPostersLater([model]);
   const entry={raw,model,loadedAt:Date.now()};
   releases.set(model.id,entry);
   releases.set("lib-"+raw.id,entry);

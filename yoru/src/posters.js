@@ -25,3 +25,5 @@ export async function enrichPosters(items){
   for(const a of items)applyPoster(a,cachedPoster(a.malId));
   return items;
 }
+
+export function enrichPostersLater(items){void enrichPosters(items).then(()=>{if(globalThis.window)window.dispatchEvent(new Event('yoru:posters-ready'));});}

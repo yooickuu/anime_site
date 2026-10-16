@@ -27,17 +27,20 @@ export function createPlayback(video, onState = () => {}, {schedule=setTimeout,c
     emit('loading');
     startupTimer=schedule(()=>{if(own===generation && video.readyState<2)emit('error');},startupTimeout);
     listen('loadedmetadata', () => {
-      if(!autoplay){cancel(startupTimer);startupTimer=null;}
+      if(!autoplay)emit('ready');
       if (startAt > 0 && Number.isFinite(video.duration)) video.currentTime = Math.min(startAt, Math.max(0, video.duration - 0.1));
       video.playbackRate = speed;
-      if (autoplay) video.play().catch(() => emit('autoplayBlocked'));
+      if (autoplay) video.play().catch(error => {
+        if(error?.name==='AbortError')return;
+        emit(error?.name==='NotAllowedError'?'autoplayBlocked':'error');
+      });
     });
     listen('canplay', () => emit('ready'));
     listen('playing', () => emit('playing'));
     listen('waiting', () => emit('buffering'));
     listen('error', () => { if (video.getAttribute('src')) emit('error'); });
     if (stream && Hls.isSupported()) {
-      hls = new Hls({ maxBufferLength: 30, maxMaxBufferLength: 60 });
+      hls = new Hls({ startPosition: startAt > 0 ? startAt : -1, maxBufferLength: 30, maxMaxBufferLength: 60 });
       const transport = hls;
       hls.on(Hls.Events.ERROR, (_, data) => {
         if (!data.fatal || own !== generation) return;

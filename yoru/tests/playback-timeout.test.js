@@ -24,5 +24,11 @@ test('playable, replaced and destroyed video loads cannot time out later',()=>{
 test('paused metadata-only preload is not treated as a broken video',()=>{
  const h=harness();h.player.load({url:'https://example.test/paused.mp4',autoplay:false});
  h.video.readyState=1;h.video.dispatchEvent(new Event('loadedmetadata'));
- assert.equal(h.timers.size,0);assert.deepEqual(h.states,['loading']);
+ assert.equal(h.timers.size,0);assert.deepEqual(h.states,['loading','ready']);
+});
+test('autoplay policy rejection is distinct from real decode errors and old play promises',async()=>{
+ for(const [name,expected] of [['NotAllowedError','autoplayBlocked'],['NotSupportedError','error'],['AbortError',null]]){
+  const h=harness();h.video.play=()=>Promise.reject(Object.assign(Error(),{name}));h.player.load({url:'https://example.test/auto.mp4',autoplay:true});h.video.dispatchEvent(new Event('loadedmetadata'));await Promise.resolve();if(expected)assert.equal(h.states.at(-1),expected);else assert.deepEqual(h.states,['loading']);h.player.destroy();
+ }
+ const h=harness();let reject;h.video.play=()=>new Promise((_,r)=>reject=r);h.player.load({url:'https://example.test/first.mp4',autoplay:true});h.video.dispatchEvent(new Event('loadedmetadata'));h.player.load({url:'https://example.test/next.mp4'});reject(Object.assign(Error(),{name:'NotAllowedError'}));await Promise.resolve();assert.deepEqual(h.states,['loading','loading']);h.player.destroy();
 });

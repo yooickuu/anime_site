@@ -163,10 +163,10 @@ Deno.serve(async (req) => {
         healthCache = { at: Date.now(), ready: true, status: "ok" };
       } catch (e) {
         const m = e instanceof Error ? e.message : "unknown";
-        healthCache = { at: Date.now(), ready: false, status: /^[a-z_]+(?:_\d+)?$/.test(m) ? m : "source_unavailable" };
+        healthCache = { at: Date.now(), ready: false, status: /^[a-z_]+(?:_\d+)?$/.test(m) ? m : "source_unavailable", detail: m.replace(/https?:\/\/[^\s)]+/g, "[upstream]").slice(0, 180) };
       }
     }
-    return reply({ ready: healthCache.ready, version: 4, sourceStatus: healthCache.status });
+    return reply({ ready: healthCache.ready, version: 5, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
   }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   const authorization = req.headers.get("Authorization");

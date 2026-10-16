@@ -1,4 +1,6 @@
 const rows = {
+  loginIdentifier: ["Почта или никнейм", "Email or nickname", "メールアドレスまたはニックネーム"],
+  loginUnavailable: ["Вход по никнейму пока недоступен. Войди по почте.", "Nickname sign-in is unavailable. Use your email.", "ニックネームでログインできません。メールアドレスをご利用ください。"],
   home: ["Главная", "Home", "ホーム"],
   catalog: ["Каталог", "Catalogue", "作品一覧"],
   library: ["Мои списки", "My lists", "マイリスト"],

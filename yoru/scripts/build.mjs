@@ -1,6 +1,8 @@
 import {build} from 'esbuild';
 import {copyFile} from 'node:fs/promises';
 await copyFile('supabase/setup.sql', 'dist/setup.sql');
+await copyFile('supabase/nickname-login.sql','dist/nickname-login.sql');
+await copyFile('supabase/functions/login-nickname/index.ts','dist/login-nickname.ts');
 await copyFile('supabase/unique-nicknames.sql','dist/unique-nicknames.sql');
 await copyFile('supabase/account-deletion.sql', 'dist/account-deletion.sql');
 await copyFile('supabase/functions/delete-account/index.ts', 'dist/delete-account.ts');
