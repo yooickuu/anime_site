@@ -1,4 +1,10 @@
 const rows = {
+  profileBanner: ["Изменить баннер", "Change banner", "バナーを変更"],
+  cropBanner: ["Настрой баннер", "Adjust banner", "バナーを調整"],
+  removeBanner: ["Убрать баннер", "Remove banner", "バナーを削除"],
+  personalDetails: ["О тебе", "About you", "プロフィール編集"],
+  yourSpace: ["Твоё аниме-пространство", "Your anime space", "あなたのアニメ空間"],
+
   emailSent: ["Проверь почту", "Check your email", "メールをご確認ください"],
   switchAccount: ["Сменить аккаунт", "Switch account", "アカウントを切り替える"],
   addAccount: ["Добавить аккаунт", "Add account", "アカウントを追加"],

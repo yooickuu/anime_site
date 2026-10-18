@@ -18,7 +18,7 @@ export function normalizeKitsu(item,included=[]){
   const model={id,kitsuId:item.id,malId,title:name,alt:[...Object.values(a.titles||{}),...(a.abbreviatedTitles||[])].join(' '),
     type:a.subtype?.toUpperCase()||'TV',year:Number(a.startDate?.slice(0,4))||'',episodes:a.episodeCount||0,ongoing:a.status==='current',announced:a.status==='upcoming'||a.status==='tba',
     genres:refs('genres').map(g=>genres[g.attributes?.name]||g.attributes?.name).filter(Boolean),
-    description:a.synopsis||'',descriptionLanguage:'en',image:ownImage,posterFallback:a.posterImage?.large||ownImage,
+    banner:a.coverImage?.original||'',description:a.synopsis||'',descriptionLanguage:'en',image:ownImage,posterFallback:a.posterImage?.large||ownImage,
     translations:{en:[a.titles?.en||a.canonicalTitle||name,a.synopsis||''],ja:[a.titles?.ja_jp||name,a.synopsis||'']},
     audienceRating:Number(a.averageRating)>0?Number(a.averageRating)/10:null, audienceRatingSource:'Kitsu',
     provider:'Kitsu',officialPoster:!!ownImage,catalogOnly:true};

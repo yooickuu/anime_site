@@ -25,6 +25,7 @@ export const defaults = () => ({
     name: "",
     bio: "",
     avatar: "",
+    banner: "",
   },
 });
 export function normalize(value) {

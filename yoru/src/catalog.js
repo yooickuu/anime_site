@@ -1,3 +1,4 @@
+import {preferredPoster} from './image-quality.js';
 export const anime = [
   {
     id: "frieren",
@@ -186,4 +187,4 @@ export const titleFor = (a, lang) =>
   a?.translations?.[lang]?.[0] || a?.title || "";
 export const descriptionFor = (a, lang) =>
   a?.translations?.[lang]?.[1] || a?.description || "";
-export const cover = (a) => a.image || (a.providerId ? "" : `assets/${a.id}.jpg`);
+export const cover = (a) => preferredPoster(a) || (a.providerId ? "" : `assets/${a.id}.jpg`);
