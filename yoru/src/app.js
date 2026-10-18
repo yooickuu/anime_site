@@ -1,3 +1,4 @@
+import {accountVault} from './account-switcher.js';
 import {playerShortcut} from './player-shortcuts.js';
 import {signInIdentifier} from './login.js';
 import {checkNickname,nicknameErrorKey,nicknameChecker} from './nicknames.js';
@@ -107,7 +108,7 @@ let operations = [],
   playerOpening = false,
   selectedAudio = '',
   authResolved = !client,
-  heroTimer = null, heroIndex = 0, randomBusy = false, randomHistory = [];
+  heroTimer = null, heroIndex = 0, featuredItems = [], randomBusy = false, randomHistory = [];
 const t = (key) => dictionaries[lang][key] || key;
 const title = (a) => (a?.id === "sintel" ? t("demo") : titleFor(a, lang));
 const statusName = (s) => s.name || t(s.key || s.id);
@@ -189,12 +190,17 @@ function render(newWatch=false) {
   updateSync();
 }
 function homeHTML() {
-  return `<section class="quiet-hero"><div><span class="overline">${t("tagline")}</span><h1>${t("heroTitle")}</h1><p>${t("heroCopy")}</p><div class="hero-buttons"><button class="button primary" data-action="explore">${t("explore")} ${icon("arrow")}</button><button class="button soft" data-action="random">${icon("shuffle")} ${t("random")}</button></div></div><div class="hero-art" id="hero-art">${heroArtHTML()}</div></section><section class="section"><div class="section-head"><h2>${t("continue")}</h2>${user ? '<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button>' : ""}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
+ return `<section class="cinematic-hero" id="hero-art">${heroArtHTML()}</section><section class="section"><div class="section-head"><h2>${t('continue')}</h2>${user?'<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button>':''}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
 }
-function heroPool(){return anime.filter(a=>a.providerId);}
+function heroPool(){
+ if(featuredItems.length)return featuredItems;
+ const candidates=onlineItems.filter(a=>!a.blocked&&!a.catalogOnly&&a.image);
+ const recent=candidates.filter(a=>a.ongoing||Number(a.year)>=new Date().getFullYear()-1).sort((a,b)=>Number(b.ongoing)-Number(a.ongoing)||Number(b.year)-Number(a.year));
+ return recent.length?recent.slice(0,6):anime.filter(a=>a.providerId).slice(0,6);
+}
 function heroArtHTML(){
- const pool=heroPool(),front=pool[heroIndex%pool.length],left=pool[(heroIndex+pool.length-1)%pool.length],right=pool[(heroIndex+1)%pool.length];
- return `<div class="hero-stage"><img class="hero-side hero-side-left" src="${esc(cover(left))}" alt=""><img class="hero-side hero-side-right" src="${esc(cover(right))}" alt=""><button class="hero-featured" data-details="${front.id}" aria-label="${t('details')}: ${esc(title(front))}"><img src="${esc(cover(front))}" alt="${esc(title(front))}"></button></div><div class="hero-caption"><span>${esc(title(front))}</span><div class="hero-navigation"><button class="icon-button" data-action="hero-previous" aria-label="${t('previousPoster')}">${icon('previous')}</button><span class="hero-counter">${heroIndex%pool.length+1} / ${pool.length}</span><button class="icon-button" data-action="hero-next" aria-label="${t('nextPoster')}">${icon('next')}</button></div></div>`;
+ const pool=heroPool(),front=pool[heroIndex%pool.length];if(!front)return '';
+ return `<img class="hero-backdrop" src="${esc(front.banner||cover(front))}" alt="" fetchpriority="high"><div class="hero-shade"></div><div class="hero-content"><span class="hero-eyebrow"><i></i>${front.ongoing?t('airing'):t('spotlight')}</span><h1>${esc(title(front))}</h1><div class="hero-facts"><span>${front.year}</span><span>${esc(genreText(front.genres?.[0]))}</span>${audienceHTML(front)}</div><p>${esc(descriptionFor(front,lang))}</p><div class="hero-buttons"><button class="button primary" data-watch="${esc(front.id)}">${icon('play')} ${t('watch')}</button><button class="button glass-button" data-action="random">${icon('shuffle')} ${t('random')}</button><button class="icon-button glass-button" data-details="${esc(front.id)}" aria-label="${t('details')}">${icon('plus')}</button></div></div><div class="hero-bottom"><span>yooickuu / ${t('spotlight')}</span><div class="hero-navigation"><button class="icon-button glass-button" data-action="hero-previous" aria-label="${t('previousPoster')}">${icon('previous')}</button><span class="hero-counter">${heroIndex%pool.length+1} / ${pool.length}</span><button class="icon-button glass-button" data-action="hero-next" aria-label="${t('nextPoster')}">${icon('next')}</button></div></div>`;
 }
 async function rotateHero(direction=1){
  const node=$('#hero-art');if(!node||node.dataset.rotating)return;
@@ -209,7 +215,7 @@ async function rotateHero(direction=1){
  }catch{}finally{delete node.dataset.rotating;}
 }
 function startHero(){
- for(const a of heroPool()){const preload=new Image();preload.src=cover(a);}
+ const next=heroPool()[(heroIndex+1)%heroPool().length];if(next){const preload=new Image();preload.src=next.banner||cover(next);}
  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  heroTimer=setInterval(()=>{const node=$('#hero-art');if(node&&!document.hidden&&!node.matches(':hover,:focus-within')&&!$('dialog[open]'))rotateHero();},7000);
 }
@@ -330,12 +336,13 @@ function renderGrid() {
       : "";
 }
 const profileDraft = createProfileDraft();
+const accounts=accountVault(localStorage);
 function profileHTML() {
   if (!user) return guestHTML();
   if (!ready && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
   const p = state.preferences, stats = profileStats(state);
   const draft = {...p, name:p.name || user.user_metadata?.name || "", language:lang, theme, ...profileDraft.get(user.id)};
-  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><button class="button soft" data-action="logout">${t("logout")}</button></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-grid"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-fields"><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form><h3>${t("playerSettings")}</h3>${preferencesHTML()}${historyHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div></section>`;
+  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-grid"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-fields"><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form><h3>${t("playerSettings")}</h3>${preferencesHTML()}${historyHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div></section>`;
 }
 function historyHTML() {
   const history=Object.values(state.progress).filter(p=>p.id!=='sintel'&&byId(p.id)).sort((a,b)=>(b.updated||0)-(a.updated||0)).slice(0,8);
@@ -360,7 +367,7 @@ async function openDetails(id) {
   $("#details").className = "details-dialog";
   $("#details").innerHTML =
     `<div class="details-toolbar">${closeButton("details")}</div>` +
-    `<div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
+    `<img class="details-manga" src="${esc(a.banner||cover(a))}" alt="" aria-hidden="true"><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
       user && ready
         ? `<div class="detail-library"><label>${t("status")}<select id="detail-status"><option value="">${t("none")}</option>${state.statuses
             .filter((s) => s.id !== "favorites")
@@ -393,13 +400,34 @@ function authDialog(mode = "login", method = "email") {
   $("#auth-dialog").showModal();
 }
 function drawAuth() {
-  const cfg = window.YORU_CONFIG || {},
-    disabled = !configured;
-  $("#auth-dialog").className = "auth-dialog";
-  $("#auth-dialog").innerHTML =
-    closeButton("auth-dialog") +
-    `<span class="overline">yooickuu</span><h2>${t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "newPassword" : "login")}</h2>${disabled ? `<div class="setup-notice"><strong>${t("authNotConfigured")}</strong><p>${t("authSetupHint")}</p>${["localhost","127.0.0.1"].includes(location.hostname)?`<a class="text-button" href="setup.html" target="_blank" rel="noopener">${t("setupGuide")}</a>`:""}</div>` : ""}<div class="auth-tabs"><button class="chip ${authMethod === "email" ? "selected" : ""}" data-auth-method="email">${t("email")}</button><button class="chip ${authMethod === "phone" ? "selected" : ""}" data-auth-method="phone">${t("phone")}</button></div><form id="auth-form">${authMethod === "phone" ? `<label>${t("phone")}<input name="phone" type="tel" autocomplete="tel" placeholder="+7 700 123 45 67" value="${esc(phoneNumber)}" required ${authMode === "otp" ? "readonly" : ""}></label><p class="notice">${t("phoneHint")}</p>${!cfg.phoneAuth ? `<p class="form-error">${t("phoneDisabled")}</p>` : ""}${authMode === "otp" ? `<label>${t("code")}<input name="token" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" minlength="6" maxlength="10" required></label>` : ""}` : `${authMode === "register" ? `<label>${t("nickname")}<input name="name" autocomplete="nickname" maxlength="40" required></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p>` : ""}${authMode !== "newPassword" ? `<label>${t(authMode === "login" ? "loginIdentifier" : "email")}<input name="email" type="${authMode === "login" ? "text" : "email"}" autocomplete="${authMode === "login" ? "username" : "email"}" autocapitalize="none" spellcheck="false" required></label>` : ""}${authMode !== "reset" ? `<label>${t(authMode === "newPassword" ? "newPassword" : "password")}<span class="password-field"><input name="password" type="password" autocomplete="${authMode === "login" ? "current-password" : "new-password"}" minlength="${authMode === "login" ? "1" : "8"}" maxlength="128" required><button type="button" class="password-toggle icon-button" data-action="toggle-password" aria-label="${t("showPassword")}" aria-pressed="false">${icon("eye")}</button></span></label>${authMode !== "login" ? `<p class="notice">${t("passwordHint")}</p>` : ""}` : ""}`}<p class="form-error" id="auth-message" role="status"></p><button class="button primary full-width" ${disabled || (authMethod === "phone" && !cfg.phoneAuth) ? "disabled" : ""}>${authMethod === "phone" ? t(authMode === "otp" ? "verifyCode" : "sendCode") : t(authMode === "register" ? "register" : authMode === "reset" ? "resetPassword" : authMode === "newPassword" ? "save" : "login")}</button></form>${authMethod === "email" && authMode !== "newPassword" ? `<div class="auth-links"><button class="text-button" data-auth-mode="${authMode === "register" ? "login" : "register"}">${t(authMode === "register" ? "login" : "register")}</button><button class="text-button" data-auth-mode="reset">${t("forgot")}</button></div>` : ""}<button class="button apple-button full-width" data-action="apple" ${disabled ? "disabled" : ""}>${t("apple")}</button>${!cfg.appleAuth ? `<p class="notice">${t("appleDisabled")}</p>` : ""}`;
+  authMethod='email';
+  const registering=authMode==='register',reset=authMode==='reset',newPassword=authMode==='newPassword';
+  $('#auth-dialog').className='auth-dialog';
+  $('#auth-dialog').innerHTML=closeButton('auth-dialog')+`<span class="overline">yooickuu</span><h2>${t(registering?'register':reset?'resetPassword':newPassword?'newPassword':'login')}</h2><form id="auth-form">
+  ${registering?`<label>${t('nickname')}<input name="name" autocomplete="nickname" maxlength="40" required></label><p class="form-error" data-nickname-message role="status"></p>`:''}
+  ${!newPassword?`<label>${t(authMode==='login'?'loginIdentifier':'email')}<input name="email" type="${authMode==='login'?'text':'email'}" autocomplete="${authMode==='login'?'username':'email'}" autocapitalize="none" spellcheck="false" required></label>`:''}
+  ${!reset?`<label>${t('password')}<span class="password-field"><input name="password" type="password" autocomplete="${authMode==='login'?'current-password':'new-password'}" minlength="${authMode==='login'?1:8}" maxlength="128" required><button type="button" class="password-toggle icon-button" data-action="toggle-password" aria-label="${t('showPassword')}" aria-pressed="false">${icon('eye')}</button></span></label>`:''}
+  <p class="form-error" id="auth-message" role="status"></p><button class="button primary full-width" ${configured?'':'disabled'}>${t(registering?'register':reset?'resetPassword':newPassword?'save':'login')}</button></form>
+  ${!newPassword?`<div class="auth-links"><button class="text-button" data-auth-mode="${registering?'login':'register'}">${t(registering?'login':'register')}</button><button class="text-button" data-auth-mode="reset">${t('forgot')}</button></div>`:''}`;
 }
+function emailNotice(message){
+ $('#auth-dialog').innerHTML=`<div class="email-notice" role="status"><span class="notice-symbol">${icon('bookmark')}</span><h2>${t('emailSent')}</h2><p>${t(message)}</p><button class="button primary full-width" data-close="auth-dialog">${t('close')}</button></div>`;
+}
+function accountDialog(){
+ const rows=accounts.list();
+ $('#collection-dialog').className='small-dialog account-dialog';
+ $('#collection-dialog').innerHTML=closeButton('collection-dialog')+`<h2>${t('switchAccount')}</h2><div class="account-options">${rows.map(a=>`<button class="account-option" data-account="${esc(a.id)}" ${a.id===user?.id?'disabled':''}><span class="account-initial">${esc((a.name||a.email||'?').slice(0,1).toUpperCase())}</span><span><strong>${esc(a.name||a.email)}</strong><small>${esc(a.email||'')}</small></span>${a.id===user?.id?`<span>${t('currentAccount')}</span>`:''}</button>`).join('')}</div><button class="button primary full-width" data-action="add-account">${icon('plus')} ${t('addAccount')}</button>`;
+ $('#collection-dialog').showModal();
+}
+async function switchAccount(id){
+ if(id===user?.id)return;
+ recordProgress();await flush();
+ const session=accounts.session(id);if(!session)return;
+ const {error}=await client.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});
+ if(error){accounts.forget(id);$('#collection-dialog').close();authDialog();toast(t('accountExpired'));return;}
+ $('#collection-dialog').close();
+}
+
 function requireUser() {
   if (!user) {
     authDialog();
@@ -456,7 +484,7 @@ async function submitAuth(form) {
         try{await checkNickname(client,name);}catch(error){if(error.message==='nicknameTaken')throw error;}
       }
       if (!result.error && !result.data.session) {
-        $("#auth-message").textContent = t("checkEmail");
+        emailNotice("checkEmail");
         return;
       }
     } else if (authMode === "reset") {
@@ -465,7 +493,7 @@ async function submitAuth(form) {
         { redirectTo: redirect },
       );
       if (!result.error) {
-        $("#auth-message").textContent = t("resetEmail");
+        emailNotice("resetEmail");
         return;
       }
     } else if (authMode === "newPassword") {
@@ -621,7 +649,7 @@ async function loadProfile() {
       ? state.preferences.language
       : lang;
     theme = state.preferences.theme === "dark" ? "dark" : "light";
-    await avatarLoad();
+    void avatarLoad().catch(()=>{});
     if (generation !== authGeneration) return;
     render();
     flush();
@@ -634,6 +662,7 @@ async function loadProfile() {
   }
 }
 async function handleSession(session, event) {
+  try{accounts.remember(session);}catch{}
   const next = session?.user || null;
   authResolved=true;
   if (next?.id === user?.id) {
@@ -978,7 +1007,7 @@ async function uploadAvatar(file) {
     if(error)throw error;
     if (user?.id !== uid) return;
     mutate({ type: "preferences", patch: { avatar: path } });
-    await avatarLoad();
+    void avatarLoad().catch(()=>{});
     if(user?.id===uid)render();
   } catch { if(user?.id===uid)toast(t('requestError')); }
 }
@@ -1004,6 +1033,7 @@ async function submitAccountDeletion(form){
     }
     try{sessionStorage.removeItem('yooickuu.pending.'+uid);}catch{}
     operations=[];profileDraft.clear();avatarLoader.reset();
+    accounts.forget(uid);
     await client.auth.signOut({scope:'local'});
     await handleSession(null,'SIGNED_OUT');
     $('#collection-dialog').close();navigate('home');
@@ -1023,6 +1053,7 @@ document.addEventListener("click", async (event) => {
   const b = event.target.closest("button");
   if (!b) return;
   try {
+    if(b.dataset.account){b.disabled=true;try{await switchAccount(b.dataset.account);}finally{b.disabled=false;}return;}
     if (b.dataset.close) $("#" + b.dataset.close).close();
     if(b.dataset.discover){catalogueView=b.dataset.discover;catalogScope='all';query='';genre='all';typeFilter='all';ongoingOnly=false;navigate('catalog');}
     if (b.dataset.nav) navigate(b.dataset.nav);
@@ -1089,10 +1120,12 @@ document.addEventListener("click", async (event) => {
       case "register":
         authDialog("register");
         break;
+      case "switch-account": accountDialog();break;
+      case "add-account": $("#collection-dialog").close();authDialog();break;
       case "logout":
         recordProgress();
         await flush();
-        {const {error}=await client.auth.signOut();if(error)throw error;}
+        {const id=user?.id;const {error}=await client.auth.signOut({scope:"local"});if(error)throw error;if(id)accounts.forget(id);}
         break;
       case "apple":
         if (!window.YORU_CONFIG?.appleAuth) {
@@ -1437,6 +1470,7 @@ async function loadCatalogue(more = false, targetPage = 1) {
     catalogTotal = result.total;
     catalogPartial = result.partial;
     catalogPages = result.pages;
+    if(page==='home'&&$('#hero-art')&&!$('#hero-art').matches(':focus-within')){$('#hero-art').innerHTML=heroArtHTML();}
   } catch {
     if (generation !== catalogGeneration) return;
     catalogError = true;
@@ -1460,3 +1494,9 @@ window.addEventListener('yoru:posters-ready',()=>{
 });
 
 window.addEventListener('yoru:source-ready',()=>{combinedCatalogue.clear();resolveRelease.clear();if(['home','catalog'].includes(page))loadCatalogue();});
+
+// Featured metadata loads independently: it never holds up navigation or the catalogue.
+void fetchCatalogue({ongoing:true,sort:'picked'}).then(result=>{
+ featuredItems=result.items.filter(a=>a.ongoing&&!a.blocked&&!a.catalogOnly&&a.episodes>0).slice(0,6);
+ if(featuredItems.length&&page==='home'&&$('#hero-art')&&!$('#hero-art').matches(':focus-within'))$('#hero-art').innerHTML=heroArtHTML();
+}).catch(()=>{});

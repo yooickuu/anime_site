@@ -1,4 +1,10 @@
 const rows = {
+  emailSent: ["Проверь почту", "Check your email", "メールをご確認ください"],
+  switchAccount: ["Сменить аккаунт", "Switch account", "アカウントを切り替える"],
+  addAccount: ["Добавить аккаунт", "Add account", "アカウントを追加"],
+  currentAccount: ["Сейчас", "Current", "使用中"],
+  accountExpired: ["Войди в этот аккаунт ещё раз", "Sign in to this account again", "このアカウントに再ログインしてください"],
+  spotlight: ["В центре внимания", "In the spotlight", "注目の作品"],
   loginIdentifier: ["Почта или никнейм", "Email or nickname", "メールアドレスまたはニックネーム"],
   loginUnavailable: ["Вход по никнейму пока недоступен. Войди по почте.", "Nickname sign-in is unavailable. Use your email.", "ニックネームでログインできません。メールアドレスをご利用ください。"],
   home: ["Главная", "Home", "ホーム"],
