@@ -204,20 +204,40 @@ function heroArtHTML(){
  const pool=heroPool(),front=pool[heroIndex%pool.length];if(!front)return '';
  return `<img class="hero-backdrop" src="${esc(bannerFor(front))}" alt="" fetchpriority="high"><div class="hero-shade"></div><div class="hero-content"><span class="hero-eyebrow"><i></i>${front.ongoing?t('airing'):t('spotlight')}</span><h1>${esc(title(front))}</h1><div class="hero-facts"><span>${front.year}</span><span>${esc(genreText(front.genres?.[0]))}</span>${audienceHTML(front)}</div><p>${esc(descriptionFor(front,lang))}</p><div class="hero-buttons"><button class="button primary" data-watch="${esc(front.id)}">${icon('play')} ${t('watch')}</button><button class="button glass-button" data-action="random">${icon('shuffle')} ${t('random')}</button><button class="icon-button glass-button" data-details="${esc(front.id)}" aria-label="${t('details')}">${icon('plus')}</button></div></div><div class="hero-bottom" aria-hidden="true"><span class="hero-slide-count">${String(heroIndex%pool.length+1).padStart(2,'0')} <i>/</i> ${String(pool.length).padStart(2,'0')}</span><span class="hero-progress"><i></i></span></div>`;
 }
+const heroImages=new Map();
+function prepareHeroImage(url){
+ if(!heroImages.has(url)){
+  const img=new Image();img.decoding='async';img.src=url;
+  heroImages.set(url,img.decode().then(()=>img).catch(error=>{heroImages.delete(url);throw error;}));
+ }
+ return heroImages.get(url);
+}
+function preloadNextHero(){
+ const pool=heroPool(),next=pool[(heroIndex+1)%pool.length];
+ if(next)void prepareHeroImage(bannerFor(next)).catch(()=>{});
+}
 async function rotateHero(direction=1){
- const node=$('#hero-art');if(!node||node.dataset.rotating)return;
+ const node=$('#hero-art'),pool=heroPool();if(!node||node.dataset.rotating||pool.length<2)return;
  node.dataset.rotating='true';
- const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  try{
-  if(!reduced)await node.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(-5px)'}],{duration:220,easing:'ease-in',fill:'forwards'}).finished;
-  if(!node.isConnected)return;
-  heroIndex=(heroIndex+direction+heroPool().length)%heroPool().length;
-  node.innerHTML=heroArtHTML();node.getAnimations().forEach(a=>a.cancel());
-  if(!reduced)await node.animate([{opacity:0,transform:'translateY(7px)'},{opacity:1,transform:'translateY(0)'}],{duration:480,easing:'cubic-bezier(.2,.7,.2,1)'}).finished;
+  const next=pool[(heroIndex+direction+pool.length)%pool.length];
+  await prepareHeroImage(bannerFor(next));
+  if(!node.isConnected||document.hidden||node.matches(':focus-within')||$('dialog[open]'))return;
+  const currentPool=heroPool(),nextIndex=currentPool.findIndex(a=>a.id===next.id);
+  if(nextIndex<0)return;
+  const previous=node.querySelector('.hero-backdrop');
+  heroIndex=nextIndex;node.innerHTML=heroArtHTML();
+  if(previous&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+   // Keep the decoded outgoing image visible until the new artwork is ready.
+   previous.classList.add('hero-outgoing');node.append(previous);
+   try{await previous.animate([{opacity:1},{opacity:0}],{duration:700,easing:'ease-in-out'}).finished;}
+   finally{previous.remove();}
+  }
+  preloadNextHero();
  }catch{}finally{delete node.dataset.rotating;}
 }
 function startHero(){
- const next=heroPool()[(heroIndex+1)%heroPool().length];if(next){const preload=new Image();preload.src=bannerFor(next);}
+ preloadNextHero();
  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  heroTimer=setInterval(()=>{const node=$('#hero-art');if(node&&!document.hidden&&!node.matches(':focus-within')&&!$('dialog[open]'))rotateHero();},7000);
 }
@@ -344,7 +364,7 @@ function profileHTML() {
   if (!ready && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
   const p = state.preferences, stats = profileStats(state);
   const draft = {...p, name:p.name || user.user_metadata?.name || "", language:lang, theme, ...profileDraft.get(user.id)};
-  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="button glass-button" data-action="banner">${icon('plus')} ${t('profileBanner')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div><div class="profile-grid"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-fields"><h2>${t("personalDetails")}</h2><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div><div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${historyHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div></section>`;
+  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div><div class="profile-grid"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-fields"><h2>${t("personalDetails")}</h2><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div><div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${historyHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div></section>`;
 }
 function historyHTML() {
   const history=Object.values(state.progress).filter(p=>p.id!=='sintel'&&byId(p.id)).sort((a,b)=>(b.updated||0)-(a.updated||0)).slice(0,8);
