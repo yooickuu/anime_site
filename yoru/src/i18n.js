@@ -634,3 +634,6 @@ const releasePolish = {
  registrationCooldown:['После повторного удаления нужно подождать 3 дня перед новой регистрацией.','Please wait 3 days after repeated account deletion before registering again.','アカウントを繰り返し削除した場合、再登録まで3日間お待ちください。'],
 };
 for(const [key,values] of Object.entries(releasePolish))['ru','en','ja'].forEach((l,i)=>dictionaries[l][key]=values[i]);
+
+const octoberLayout={recommended:['Рекомендуем посмотреть','Recommended for you','おすすめのアニメ'],exploreCatalog:['Открыть каталог','Explore catalogue','カタログを見る'],genre:['Жанр','Genre','ジャンル'],allGenres:['Все жанры','All genres','すべてのジャンル']};
+for(const [key,values] of Object.entries(octoberLayout))['ru','en','ja'].forEach((l,i)=>dictionaries[l][key]=values[i]);

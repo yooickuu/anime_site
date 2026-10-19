@@ -11,19 +11,28 @@ export function createProfileDraft() {
   };
 }
 
-// A slower request for an old photo/account must not replace the current one.
-export function createAvatarLoader({identity, sign, display, schedule = setTimeout, cancel = clearTimeout}) {
-  let generation = 0, timer;
-  async function refresh() {
-    const own = ++generation, {uid, path} = identity();
-    cancel(timer);
-    if (!uid || !path) { display(''); return; }
-    let url = '';
-    try { url = await sign(path); } catch {}
-    const current = identity();
-    if (own !== generation || uid !== current.uid || path !== current.path) return;
-    display(url || '');
-    timer = schedule(refresh, url ? 50 * 60 * 1000 : 60 * 1000);
+// Cache signed URLs until renewal, without blanking a valid avatar on transient failures.
+export function createAvatarLoader({identity, sign, display, schedule = setTimeout, cancel = clearTimeout, now = Date.now}) {
+  let generation = 0, timer, cached = null, pending = null;
+  const keyOf=({uid,path})=>uid&&path?JSON.stringify([uid,path]):'';
+  async function refresh({force=false}={}) {
+    const who=identity(),key=keyOf(who);
+    if(!key){reset();return;}
+    if(!force&&cached?.key===key&&cached.expires>now())return;
+    if(pending?.key===key)return pending.promise;
+    const own=++generation;cancel(timer);
+    if(cached&&cached.key!==key){cached=null;display('');}
+    const promise=(async()=>{
+      let url='';try{url=await sign(who.path);}catch{}
+      if(own!==generation||key!==keyOf(identity()))return;
+      if(url){if(cached?.url!==url)display(url);cached={key,url,expires:now()+50*60*1000};}
+      // Keep the current photo if a renewal fails; never retain another user's image.
+      if(!url&&!cached)display('');
+      timer=schedule(()=>refresh({force:true}),url?50*60*1000:60*1000);
+    })();
+    pending={key,promise};
+    try{await promise;}finally{if(pending?.promise===promise)pending=null;}
   }
-  return {refresh, reset() { ++generation; cancel(timer); display(''); }};
+  function reset(){++generation;cancel(timer);cached=null;pending=null;display('');}
+  return {refresh,reset};
 }

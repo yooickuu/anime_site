@@ -1,5 +1,6 @@
 import {improvePoster} from './image-quality.js';
 import artwork from './artwork.json';
+import spotlight from './spotlight.json';
 import {accountVault} from './account-switcher.js';
 import {playerShortcut} from './player-shortcuts.js';
 import {signInIdentifier} from './login.js';
@@ -114,8 +115,9 @@ let operations = [],
 const t = (key) => dictionaries[lang][key] || key;
 const title = (a) => (a?.id === "sintel" ? t("demo") : titleFor(a, lang));
 const statusName = (s) => s.name || t(s.key || s.id);
+spotlight.forEach(registerAnime);
 const brand = () =>
-  `<a href="#home" class="brand"><img class="brand-mark brand-icon" src="assets/yooickuu-mark${theme==='dark'?'-dark':''}.svg?v=2" alt=""><span>yooickuu<span class="brand-dot">.</span></span></a>`;
+  `<a href="#home" class="brand"><img class="brand-mark brand-icon" src="assets/yooickuu-mark${theme==='dark'?'-dark':''}.svg?v=3" alt=""><span>yooickuu<span class="brand-dot">.</span></span></a>`;
 const closeButton = (id) =>
   `<button class="dialog-close icon-button" data-close="${id}" aria-label="${t("close")}">${icon("close")}</button>`;
 function toast(message) {
@@ -127,7 +129,7 @@ function toast(message) {
 function applyAppearance() {
   document.documentElement.lang = lang;
   document.body.classList.toggle("dark", theme === "dark");
-  const mark=`assets/yooickuu-mark${theme==='dark'?'-dark':''}.svg?v=2`;
+  const mark=`assets/yooickuu-mark${theme==='dark'?'-dark':''}.svg?v=3`;
   document.querySelector('link[rel="icon"]')?.setAttribute('href',mark);
   document.querySelector('link[rel="apple-touch-icon"]')?.setAttribute('href',`assets/yooickuu-touch${theme==='dark'?'-dark':''}.png?v=2`);
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='dark'?'#191522':'#f8f6fc');
@@ -185,7 +187,7 @@ function render(newWatch=false) {
       )
       .join(
         "",
-      )}</select><button class="icon-button" data-action="theme" aria-label="${t("theme")}">${icon(theme === "dark" ? "sun" : "moon")}</button>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='watch' ? (current ? playerHTML() : (authResolved ? guestHTML() : `<p class="watch-loading">${t('loading')}</p>`)) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
+      )}</select><button class="icon-button" data-action="theme" aria-label="${t("theme")}">${icon(theme === "dark" ? "sun" : "moon")}</button>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='watch' ? (current ? playerHTML() : (authResolved ? guestHTML() : `<p class="watch-loading">${t('loading')}</p>`)) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
   if(preservedWatch && $('#watch-page'))$('#watch-page').replaceWith(preservedWatch);
   if(page==='home')startHero();
   if (page !== 'watch' && page !== "profile" && !(page === "library" && !user)) renderGrid();
@@ -195,14 +197,10 @@ function homeHTML() {
  return `<section class="cinematic-hero" id="hero-art">${heroArtHTML()}</section><section class="section"><div class="section-head"><h2>${t('continue')}</h2>${user?'<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button>':''}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
 }
 function bannerFor(a){return artwork[a?.malId]?.banner||a?.banner||'';}
-function heroPool(){
- const candidates=[...featuredItems,...onlineItems,...anime].filter(a=>!a.blocked&&!a.catalogOnly&&artwork[a.malId]?.banner);
- const unique=[...new Map(candidates.map(a=>[a.malId||a.id,a])).values()];
- return unique.sort((a,b)=>Number(b.ongoing)-Number(a.ongoing)||Number(b.year)-Number(a.year)).slice(0,24);
-}
+function heroPool(){return spotlight.map(a=>({...a,...byId(a.id),image:a.image,banner:a.banner}));}
 function heroArtHTML(){
  const pool=heroPool(),front=pool[heroIndex%pool.length];if(!front)return '';
- return `<img class="hero-backdrop" src="${esc(bannerFor(front))}" alt="" fetchpriority="high"><div class="hero-shade"></div><div class="hero-content"><span class="hero-eyebrow"><i></i>${front.ongoing?t('airing'):t('spotlight')}</span><h1>${esc(title(front))}</h1><div class="hero-facts"><span>${front.year}</span><span>${esc(genreText(front.genres?.[0]))}</span>${audienceHTML(front)}</div><p>${esc(descriptionFor(front,lang))}</p><div class="hero-buttons"><button class="button primary" data-watch="${esc(front.id)}">${icon('play')} ${t('watch')}</button><button class="button glass-button" data-action="random">${icon('shuffle')} ${t('random')}</button><button class="icon-button glass-button" data-details="${esc(front.id)}" aria-label="${t('details')}">${icon('plus')}</button></div></div><div class="hero-bottom" aria-hidden="true"><span class="hero-slide-count">${String(heroIndex%pool.length+1).padStart(2,'0')} <i>/</i> ${String(pool.length).padStart(2,'0')}</span><span class="hero-progress"><i></i></span></div>`;
+ return `<picture class="hero-picture"><source media="(max-width:600px)" srcset="${esc(front.image)}"><img class="hero-backdrop" src="${esc(bannerFor(front))}" alt="" fetchpriority="high" decoding="async" width="1600" height="500"></picture><div class="hero-shade"></div><div class="hero-content"><span class="hero-eyebrow"><i></i>${front.ongoing?t('airing'):t('spotlight')}</span><h1>${esc(title(front))}</h1><div class="hero-facts"><span>${front.year}</span><span>${esc(genreText(front.genres?.[0]))}</span>${audienceHTML(front)}</div><p>${esc(descriptionFor(front,lang))}</p><div class="hero-buttons"><button class="button primary" data-watch="${esc(front.id)}">${icon('play')} ${t('watch')}</button><button class="button glass-button" data-action="random">${icon('shuffle')} ${t('random')}</button><button class="icon-button glass-button" data-details="${esc(front.id)}" aria-label="${t('details')}">${icon('plus')}</button></div></div>`;
 }
 const heroImages=new Map();
 function prepareHeroImage(url){
@@ -214,22 +212,22 @@ function prepareHeroImage(url){
 }
 function preloadNextHero(){
  const pool=heroPool(),next=pool[(heroIndex+1)%pool.length];
- if(next)void prepareHeroImage(bannerFor(next)).catch(()=>{});
+ if(next)void prepareHeroImage(matchMedia('(max-width:600px)').matches?next.image:bannerFor(next)).catch(()=>{});
 }
 async function rotateHero(direction=1){
  const node=$('#hero-art'),pool=heroPool();if(!node||node.dataset.rotating||pool.length<2)return;
  node.dataset.rotating='true';
  try{
   const next=pool[(heroIndex+direction+pool.length)%pool.length];
-  await prepareHeroImage(bannerFor(next));
+  await prepareHeroImage(matchMedia('(max-width:600px)').matches?next.image:bannerFor(next));
   if(!node.isConnected||document.hidden||node.matches(':focus-within')||$('dialog[open]'))return;
   const currentPool=heroPool(),nextIndex=currentPool.findIndex(a=>a.id===next.id);
   if(nextIndex<0)return;
-  const previous=node.querySelector('.hero-backdrop');
+  const previous=node.querySelector('.hero-picture');
   heroIndex=nextIndex;node.innerHTML=heroArtHTML();
   if(previous&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
    // Keep the decoded outgoing image visible until the new artwork is ready.
-   previous.classList.add('hero-outgoing');node.append(previous);
+   previous.classList.add('hero-outgoing');node.prepend(previous);previous.style.zIndex='1';
    try{await previous.animate([{opacity:1},{opacity:0}],{duration:700,easing:'ease-in-out'}).finished;}
    finally{previous.remove();}
   }
@@ -262,6 +260,9 @@ function continueHTML() {
 function guestHTML() {
   return `<section class="guest-panel"><span class="guest-symbol">${icon("bookmark")}</span><h1>${t("libraryGuest")}</h1><p>${t("guestCopy")}</p><button class="button primary" data-action="login">${t("login")}</button><button class="button soft" data-action="register">${t("register")}</button></section>`;
 }
+function recommendationsShell(){
+ return `<section class="section recommendations"><div class="section-head"><h2>${t('recommended')}</h2><button class="text-button" data-nav="catalog">${t('exploreCatalog')} ${icon('arrow')}</button></div><div class="anime-grid" id="anime-grid"></div><div id="catalog-status" class="catalog-status" aria-live="polite"></div><div id="results-caption" hidden></div><div id="empty" class="empty" hidden>${t('empty')}</div></section>`;
+}
 function catalogShell() {
   const collection = state.collections.find((c) => c.id === list),
     status = state.statuses.find((s) => s.id === list);
@@ -269,7 +270,7 @@ function catalogShell() {
     page === "library"
       ? collection?.name || (status ? statusName(status) : t("library"))
       : t("catalog");
-  return `${page==='catalog'?discoveryHTML():''}<div class="library-layout ${page === "library" ? "with-sidebar" : ""}">${page === "library" ? `<aside class="library-sidebar"><h3>${t("library")}</h3><button class="list-nav ${list === "all" ? "active" : ""}" data-list="all">${t("allStories")} <span>${savedCount()}</span></button>${state.statuses.map((s) => `<button class="list-nav ${list === s.id ? "active" : ""}" data-list="${esc(s.id)}">${esc(statusName(s))}<span>${Object.values(state.entries).filter((e) => (s.id === "favorites" ? e.favorite : (e.status === s.id || e.legacyLists?.includes(s.id)))).length}</span></button>`).join("")}<button class="text-button" data-action="manage-statuses">${icon("settings")} ${t("manageStatuses")}</button><button class="text-button" data-action="create-status">${icon("plus")} ${t("createCollection")}</button></aside>` : ""}<section class="section catalog-section" id="catalog"><div class="section-head"><div><h2>${esc(heading)}</h2></div>${collection ? `<div><button class="text-button" data-edit-collection="${esc(collection.id)}">${t("rename")}</button><button class="text-button danger" data-delete-collection="${esc(collection.id)}">${t("remove")}</button></div>` : `<label class="sort-label">${t("order")} <select id="sort" aria-label="${t("order")}">${(page === "library" ? ["picked", "newest", "alphabetical"] : ["picked", "hiddenGems", "latest", "newest", "oldest"]).map((v) => `<option value="${v}" ${sort === v ? "selected" : ""}>${t(v)}</option>`).join("")}</select></label>`}</div>${list === "ongoing" ? `<p class="notice">${t("ongoingHint")}</p>` : ""}<label class="catalog-search"><input id="catalog-search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"></label><div class="catalog-options">${page !== "library" ? `<select id="catalog-view" aria-label="${t('discover')}">${['all','popular','topRated','airingNow','films','hiddenGems'].map(v=>`<option value="${v}" ${catalogueView===v?'selected':''}>${t(v==='all'?'allAnime':v)}</option>`).join('')}</select><label class="available-filter"><input type="checkbox" id="catalog-available" ${catalogScope==='watchable'?'checked':''}>${t('availableOnly')}</label>` : ""}<select id="type-filter" aria-label="${t("allTypes")}">${[
+  return `${page==='catalog'?discoveryHTML():''}<div class="library-layout ${page === "library" ? "with-sidebar" : ""}">${page === "library" ? `<aside class="library-sidebar"><h3>${t("library")}</h3><button class="list-nav ${list === "all" ? "active" : ""}" data-list="all">${t("allStories")} <span>${savedCount()}</span></button>${state.statuses.map((s) => `<button class="list-nav ${list === s.id ? "active" : ""}" data-list="${esc(s.id)}">${esc(statusName(s))}<span>${Object.values(state.entries).filter((e) => (s.id === "favorites" ? e.favorite : (e.status === s.id || e.legacyLists?.includes(s.id)))).length}</span></button>`).join("")}<button class="text-button" data-action="manage-statuses">${icon("settings")} ${t("manageStatuses")}</button><button class="text-button" data-action="create-status">${icon("plus")} ${t("createCollection")}</button></aside>` : ""}<section class="section catalog-section" id="catalog"><div class="section-head"><div><h2>${esc(heading)}</h2></div>${collection ? `<div><button class="text-button" data-edit-collection="${esc(collection.id)}">${t("rename")}</button><button class="text-button danger" data-delete-collection="${esc(collection.id)}">${t("remove")}</button></div>` : `<label class="sort-label">${t("order")} <select id="sort" aria-label="${t("order")}">${(page === "library" ? ["picked", "newest", "alphabetical"] : ["picked", "hiddenGems", "latest", "newest", "oldest"]).map((v) => `<option value="${v}" ${sort === v ? "selected" : ""}>${t(v)}</option>`).join("")}</select></label>`}</div>${list === "ongoing" ? `<p class="notice">${t("ongoingHint")}</p>` : ""}<label class="catalog-search"><input id="catalog-search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"></label><div class="catalog-options">${page !== "library" ? `<label class="available-filter"><input type="checkbox" id="catalog-available" ${catalogScope==='watchable'?'checked':''}>${t('availableOnly')}</label>` : ""}<select id="type-filter" aria-label="${t("allTypes")}">${[
     ["all", "allTypes"],
     ["series", "series"],
     ["MOVIE", "movies"],
@@ -283,16 +284,7 @@ function catalogShell() {
     )
     .join(
       "",
-    )}</select><label><input type="checkbox" id="ongoing-only" ${ongoingOnly ? "checked" : ""}> ${t("ongoingOnly")}</label></div><div class="filters" role="group" aria-label="${t("catalog")}"><button class="chip ${genre === "all" ? "selected" : ""}" data-genre="all" aria-pressed="${genre === "all"}">${t("all")}</button>${Object.entries(
-    genreLabels,
-  )
-    .map(
-      ([v, n]) =>
-        `<button class="chip ${genre === v ? "selected" : ""}" data-genre="${v}" aria-pressed="${genre === v}">${n[langIndex(lang)]}</button>`,
-    )
-    .join(
-      "",
-    )}</div><div id="results-caption" class="results-caption" aria-live="polite"></div><div class="anime-grid" id="anime-grid"></div><div id="catalog-status" class="catalog-status" aria-live="polite"></div><div class="empty" id="empty" hidden><span>${icon("search")}</span><h3>${t("empty")}</h3><p>${t("emptyHint")}</p><button class="button soft" data-action="reset">${t("reset")}</button></div></section></div>`;
+    )}</select><label><input type="checkbox" id="ongoing-only" ${ongoingOnly ? "checked" : ""}> ${t("ongoingOnly")}</label></div><label class="genre-filter">${t('genre')}<select id="genre-filter"><option value="all">${t('allGenres')}</option>${Object.entries(genreLabels).map(([v,n])=>`<option value="${esc(v)}" ${genre===v?'selected':''}>${n[langIndex(lang)]}</option>`).join('')}</select></label><div id="results-caption" class="results-caption" aria-live="polite"></div><div class="anime-grid" id="anime-grid"></div><div id="catalog-status" class="catalog-status" aria-live="polite"></div><div class="empty" id="empty" hidden><span>${icon("search")}</span><h3>${t("empty")}</h3><p>${t("emptyHint")}</p><button class="button soft" data-action="reset">${t("reset")}</button></div></section></div>`;
 }
 function genreText(g) {
   return genreLabels[g]?.[langIndex(lang)] || g || "";
@@ -332,9 +324,10 @@ function renderGrid() {
       ))
     );
   });
-  if (sort === "newest") items.sort((a, b) => b.year - a.year);
-  if (sort === "alphabetical")
+  if (page!=="home" && sort === "newest") items.sort((a, b) => b.year - a.year);
+  if (page!=="home" && sort === "alphabetical")
     items.sort((a, b) => title(a).localeCompare(title(b), lang));
+  if(page==='home')items=items.slice(0,24);
   grid.innerHTML = items
     .map((a) => {
       const e = state.entries[a.id];
@@ -345,7 +338,7 @@ function renderGrid() {
   const status = $("#catalog-status");
   if (status)
     status.innerHTML =
-      page === "library"
+      ["library","home"].includes(page)
         ? ""
         : catalogBusy
           ? `<p>${t("loading")}</p>`
@@ -364,7 +357,7 @@ function profileHTML() {
   if (!ready && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
   const p = state.preferences, stats = profileStats(state);
   const draft = {...p, name:p.name || user.user_metadata?.name || "", language:lang, theme, ...profileDraft.get(user.id)};
-  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div><div class="profile-grid"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-fields"><h2>${t("personalDetails")}</h2><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div><div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${historyHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div></section>`;
+  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div><div class="profile-grid"><div class="profile-sidebar"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div><div class="profile-main"><div class="profile-fields"><h2>${t("personalDetails")}</h2><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div>${historyHTML()}</div></div></section>`;
 }
 function historyHTML() {
   const history=Object.values(state.progress).filter(p=>p.id!=='sintel'&&byId(p.id)).sort((a,b)=>(b.updated||0)-(a.updated||0)).slice(0,8);
@@ -389,7 +382,7 @@ async function openDetails(id) {
   $("#details").className = "details-dialog";
   $("#details").innerHTML =
     `<div class="details-toolbar">${closeButton("details")}</div>` +
-    `<img class="details-manga" src="${esc(bannerFor(a)||cover(a))}" alt="" aria-hidden="true"><div class="details-art-shade"></div><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
+    `<img class="details-manga ${bannerFor(a)?'':'portrait-art'}" src="${esc(cover(a))}" alt="" aria-hidden="true"><div class="details-art-shade"></div><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
       user && ready
         ? `<div class="detail-library"><label>${t("status")}<select id="detail-status"><option value="">${t("none")}</option>${state.statuses
             .filter((s) => s.id !== "favorites")
@@ -634,6 +627,7 @@ const avatarLoader = createAvatarLoader({
   display: url => {
     avatarUrl = url;
     for(const node of $$('.avatar, .profile-avatar')) {
+      if(url&&node.querySelector('img')?.getAttribute('src')===url)continue;
       node.innerHTML = url ? `<img src="${esc(url)}" alt="">` : esc((state.preferences.name || user?.email || 'u').slice(0,1).toUpperCase());
     }
   },
@@ -1300,15 +1294,18 @@ document.addEventListener("click", async (event) => {
 document.addEventListener("input", (event) => {
   if (["search", "catalog-search"].includes(event.target.id)) {
     query = event.target.value;
-    if (page === "profile" || page === "library" || page === "watch") {
+    if(event.isComposing)return;
+    const caret=[event.target.selectionStart,event.target.selectionEnd];
+    if (event.target.id === "search" && page !== "catalog") {
       if(current)stopWatching();
       page = "catalog";
       history.pushState(null,'','#catalog');
       render();
       const input = $("#search");
       input.focus();
+      input.setSelectionRange(caret[0]??query.length,caret[1]??query.length);
     }
-    for(const input of $$("#search,#catalog-search"))if(input!==event.target)input.value=query;
+    for(const input of $$("#search,#catalog-search"))if(input!==event.target && input.value!==query)input.value=query;
     renderGrid();
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => loadCatalogue(), 350);
@@ -1316,6 +1313,7 @@ document.addEventListener("input", (event) => {
 });
 document.addEventListener("change", (event) => {
   const input = event.target;
+  if(input.id==='genre-filter'){genre=input.value;if(page==='library')renderGrid();else loadCatalogue();}
   if(input.id==='catalog-view'){catalogueView=input.value;loadCatalogue();}
   if(input.id==='catalog-available'){catalogScope=input.checked?'watchable':'all';loadCatalogue();}
   if (input.id === "language") {
@@ -1500,7 +1498,7 @@ async function loadCatalogue(more = false, targetPage = 1) {
   }
   renderGrid();
   try {
-    const result = await combinedCatalogue({
+    const result = await combinedCatalogue(page==='home'?{scope:'watchable',view:'popular',sort:'picked',query:'',genre:'all',type:'all',page:1}:{
       scope: catalogScope,
       view: catalogueView,
       query,
@@ -1516,7 +1514,7 @@ async function loadCatalogue(more = false, targetPage = 1) {
     catalogTotal = result.total;
     catalogPartial = result.partial;
     catalogPages = result.pages;
-    if(page==='home'&&$('#hero-art')&&!$('#hero-art').matches(':focus-within')){$('#hero-art').innerHTML=heroArtHTML();}
+
   } catch {
     if (generation !== catalogGeneration) return;
     catalogError = true;
@@ -1540,12 +1538,6 @@ window.addEventListener('yoru:posters-ready',()=>{
 });
 
 window.addEventListener('yoru:source-ready',()=>{combinedCatalogue.clear();resolveRelease.clear();if(['home','catalog'].includes(page))loadCatalogue();});
-
-// Featured metadata loads independently: it never holds up navigation or the catalogue.
-void fetchCatalogue({ongoing:true,sort:'picked'}).then(result=>{
- featuredItems=result.items.filter(a=>a.ongoing&&!a.blocked&&!a.catalogOnly&&a.episodes>0).slice(0,24);
- if(featuredItems.length&&page==='home'&&$('#hero-art')&&!$('#hero-art').matches(':focus-within'))$('#hero-art').innerHTML=heroArtHTML();
-}).catch(()=>{});
 
 window.addEventListener('scroll',()=>document.querySelector('.header')?.classList.toggle('scrolled',window.scrollY>40),{passive:true});
 

@@ -42,15 +42,75 @@
     "source": "https://media.kitsu.app/anime/46474/cover_image/883c308356a4db76a9c0af900ada96ed.jpg"
   },
   "61323": {
-    "banner": "assets/backdrops/61323.webp",
-    "width": 1920,
-    "height": 640,
+    "banner": "assets/spotlight/61323.webp",
+    "width": 1600,
+    "height": 500,
     "source": "https://media.kitsu.app/anime/49752/cover_image/88c5559ac51a771e5b1ef558fee1296d.jpg"
   },
   "61469": {
-    "banner": "assets/backdrops/61469.webp",
-    "width": 1920,
-    "height": 652,
+    "banner": "assets/spotlight/61469.webp",
+    "width": 1600,
+    "height": 500,
     "source": "https://media.kitsu.app/anime/49847/cover_image/87f7240542a0cbb6204bb79e973950c5.jpg"
+  },
+  "57658": {
+    "banner": "assets/spotlight/57658.webp",
+    "width": 1600,
+    "height": 500,
+    "source": "https://media.kitsu.app/anime/48363/cover_image/8698500ebb25794e97e7602eb4876ce5.jpg"
+  },
+  "59978": {
+    "banner": "assets/spotlight/59978.webp",
+    "width": 1600,
+    "height": 500,
+    "source": "https://media.kitsu.app/anime/49240/cover_image/b3d01e59bb588122c6c8691880aa3b1b.jpg"
+  },
+  "62001": {
+    "banner": "assets/spotlight/62001.webp",
+    "width": 1600,
+    "height": 500,
+    "source": "https://media.kitsu.app/anime/50023/cover_image/5fafec7e883e26e6f6f5aa3909811b51.png"
+  },
+  "62076": {
+    "banner": "assets/spotlight/62076.webp",
+    "width": 1600,
+    "height": 500,
+    "source": "https://media.kitsu.app/anime/50040/cover_image/829af5c6aab188c4c23ea7378e816b9b.jpg"
+  },
+  "60371": {
+    "banner": "assets/spotlight/60371.webp",
+    "width": 1600,
+    "height": 500,
+    "source": "https://media.kitsu.app/anime/49372/cover_image/c8343a83a47f34939470fd08518a39f9.jpg"
+  },
+  "59983": {
+    "banner": "assets/spotlight/59983.webp",
+    "width": 1600,
+    "height": 500,
+    "source": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/182300-d1znfWKzn1bT.jpg"
+  },
+  "59708": {
+    "banner": "assets/spotlight/59708.webp",
+    "width": 1600,
+    "height": 500,
+    "source": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/180745-Iicz1F6Kuj4e.jpg"
+  },
+  "56734": {
+    "banner": "assets/spotlight/56734.webp",
+    "width": 1600,
+    "height": 500,
+    "source": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/169580-RUdWWw0j74HH.jpg"
+  },
+  "58567": {
+    "banner": "assets/spotlight/58567.webp",
+    "width": 1600,
+    "height": 500,
+    "source": "https://media.kitsu.app/anime/48671/cover_image/79ec6fc03c7515c4a15d78f107b33253.jpg"
+  },
+  "59192": {
+    "banner": "assets/spotlight/59192.webp",
+    "width": 1600,
+    "height": 500,
+    "source": "https://media.kitsu.app/anime/49001/cover_image/60097f6669b09f38479808dbf415d2a8.jpg"
   }
 }
