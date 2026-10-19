@@ -3,55 +3,64 @@
     "banner": "assets/backdrops/13759.webp",
     "width": 1920,
     "height": 1080,
-    "source": "https://media.kitsu.app/anime/cover_images/7023/original.jpg"
+    "source": "https://media.kitsu.app/anime/cover_images/7023/original.jpg",
+    "detailsBanner": "assets/backdrops/13759.webp"
   },
   "32281": {
     "banner": "assets/backdrops/32281.webp",
     "width": 1500,
     "height": 844,
-    "source": "https://media.kitsu.app/anime/cover_images/11614/original.jpg"
+    "source": "https://media.kitsu.app/anime/cover_images/11614/original.jpg",
+    "detailsBanner": "assets/backdrops/32281.webp"
   },
   "33502": {
     "banner": "assets/backdrops/33502.webp",
     "width": 1920,
     "height": 1080,
-    "source": "https://media.kitsu.app/anime/cover_images/12769/original.jpg"
+    "source": "https://media.kitsu.app/anime/cover_images/12769/original.jpg",
+    "detailsBanner": "assets/backdrops/33502.webp"
   },
   "38000": {
     "banner": "assets/backdrops/38000.webp",
     "width": 2048,
     "height": 499,
-    "source": "https://media.kitsu.app/anime/41370/cover_image/7958f9c01b57c980636386d124553791.jpg"
+    "source": "https://media.kitsu.app/anime/41370/cover_image/7958f9c01b57c980636386d124553791.jpg",
+    "detailsBanner": "assets/backdrops/38000.webp"
   },
   "40748": {
     "banner": "assets/backdrops/40748.webp",
     "width": 1981,
     "height": 544,
-    "source": "https://media.kitsu.app/anime/cover_images/42765/original.jpeg"
+    "source": "https://media.kitsu.app/anime/cover_images/42765/original.jpeg",
+    "detailsBanner": "assets/backdrops/40748.webp"
   },
   "47917": {
     "banner": "assets/backdrops/47917.webp",
     "width": 1729,
     "height": 465,
-    "source": "https://media.kitsu.app/anime/44196/cover_image/3fd6e33b28f7eb12fb0a26bf1ac9eac0.png"
+    "source": "https://media.kitsu.app/anime/44196/cover_image/3fd6e33b28f7eb12fb0a26bf1ac9eac0.png",
+    "detailsBanner": "assets/backdrops/47917.webp"
   },
   "52991": {
     "banner": "assets/backdrops/52991.webp",
     "width": 2560,
     "height": 820,
-    "source": "https://media.kitsu.app/anime/46474/cover_image/883c308356a4db76a9c0af900ada96ed.jpg"
+    "source": "https://media.kitsu.app/anime/46474/cover_image/883c308356a4db76a9c0af900ada96ed.jpg",
+    "detailsBanner": "assets/backdrops/52991.webp"
   },
   "61323": {
     "banner": "assets/spotlight/61323.webp",
     "width": 1600,
     "height": 500,
-    "source": "https://media.kitsu.app/anime/49752/cover_image/88c5559ac51a771e5b1ef558fee1296d.jpg"
+    "source": "https://media.kitsu.app/anime/49752/cover_image/88c5559ac51a771e5b1ef558fee1296d.jpg",
+    "detailsBanner": "assets/backdrops/61323.webp"
   },
   "61469": {
     "banner": "assets/spotlight/61469.webp",
     "width": 1600,
     "height": 500,
-    "source": "https://media.kitsu.app/anime/49847/cover_image/87f7240542a0cbb6204bb79e973950c5.jpg"
+    "source": "https://media.kitsu.app/anime/49847/cover_image/87f7240542a0cbb6204bb79e973950c5.jpg",
+    "detailsBanner": "assets/backdrops/61469.webp"
   },
   "57658": {
     "banner": "assets/spotlight/57658.webp",

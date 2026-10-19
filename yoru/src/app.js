@@ -1,3 +1,5 @@
+import {styles,normalizeStyle,styleColors} from './appearance.js';
+import {eveningPlan} from './evening-plan.js';
 import {improvePoster} from './image-quality.js';
 import artwork from './artwork.json';
 import spotlight from './spotlight.json';
@@ -82,7 +84,9 @@ const read = (key, fallback) => {
 };
 let lang = read("yooickuu.language", "ru");
 if (!dictionaries[lang]) lang = "ru";
-let theme = read("yooickuu.theme", "light"),
+let appearance = normalizeStyle(read("yooickuu.appearance", "graphite"));
+let eveningMinutes = 30;
+let theme = "dark",
   state = defaults(),
   user = null,
   ready = false,
@@ -128,15 +132,16 @@ function toast(message) {
 }
 function applyAppearance() {
   document.documentElement.lang = lang;
-  document.body.classList.toggle("dark", theme === "dark");
+  document.body.classList.add("dark");
+  document.body.dataset.style = appearance;
   const mark=`assets/yooickuu-mark${theme==='dark'?'-dark':''}.svg?v=3`;
   document.querySelector('link[rel="icon"]')?.setAttribute('href',mark);
-  document.querySelector('link[rel="apple-touch-icon"]')?.setAttribute('href',`assets/yooickuu-touch${theme==='dark'?'-dark':''}.png?v=2`);
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='dark'?'#191522':'#f8f6fc');
+  document.querySelector('link[rel="apple-touch-icon"]')?.setAttribute('href',`assets/yooickuu-touch.png?v=3`);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content',styleColors[appearance]);
   document.title = "yooickuu — " + ({ru:"аниме, фильмы и личные списки",en:"anime, films and personal lists",ja:"アニメ・映画・マイリスト"}[lang]);
   try {
     localStorage.setItem("yooickuu.language", JSON.stringify(lang));
-    localStorage.setItem("yooickuu.theme", JSON.stringify(theme));
+    localStorage.setItem("yooickuu.appearance", JSON.stringify(appearance));
   } catch {}
 }
 function navigate(next, selected = "all") {
@@ -187,7 +192,7 @@ function render(newWatch=false) {
       )
       .join(
         "",
-      )}</select><button class="icon-button" data-action="theme" aria-label="${t("theme")}">${icon(theme === "dark" ? "sun" : "moon")}</button>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='watch' ? (current ? playerHTML() : (authResolved ? guestHTML() : `<p class="watch-loading">${t('loading')}</p>`)) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
+      )}</select>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='watch' ? (current ? playerHTML() : (authResolved ? guestHTML() : `<p class="watch-loading">${t('loading')}</p>`)) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
   if(preservedWatch && $('#watch-page'))$('#watch-page').replaceWith(preservedWatch);
   if(page==='home')startHero();
   if (page !== 'watch' && page !== "profile" && !(page === "library" && !user)) renderGrid();
@@ -357,7 +362,14 @@ function profileHTML() {
   if (!ready && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
   const p = state.preferences, stats = profileStats(state);
   const draft = {...p, name:p.name || user.user_metadata?.name || "", language:lang, theme, ...profileDraft.get(user.id)};
-  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div><div class="profile-grid"><div class="profile-sidebar"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div><div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div><div class="profile-main"><div class="profile-fields"><h2>${t("personalDetails")}</h2><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div>${historyHTML()}</div></div></section>`;
+  return `<section class="profile-page"><div class="section-head"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div><div class="profile-grid"><div class="profile-sidebar"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yooickuu")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div>${appearanceHTML()}<div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div><div class="profile-main"><div class="profile-fields"><h2>${t("personalDetails")}</h2><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div>${historyHTML()}${eveningHTML()}</div></div></section>`;
+}
+function appearanceHTML() {
+ return `<section class="profile-appearance glass-panel"><div class="panel-heading"><span class="overline">${t('yourAtmosphere')}</span><h2>${t('siteStyle')}</h2></div><div class="style-options" role="group" aria-label="${t('siteStyle')}">${styles.map(id=>`<button class="style-option" data-style-choice="${id}" aria-pressed="${appearance===id}"><span class="style-swatch" data-style="${id}" aria-hidden="true"><i></i><i></i><i></i></span><span>${t('style_'+id)}</span><span class="style-selected" aria-hidden="true">${icon('check')}</span></button>`).join('')}</div></section>`;
+}
+function eveningHTML() {
+ const choices=eveningPlan(state,byId,eveningMinutes);
+ return `<section class="profile-evening glass-panel" id="evening-plan"><div class="panel-heading"><span class="overline">${t('aLittleTime')}</span><h2>${t('eveningPlan')}</h2></div><p class="panel-description">${t('eveningHint')}</p><div class="time-options" role="group" aria-label="${t('availableTime')}">${[15,30,60,90].map(n=>`<button class="chip" data-plan-minutes="${n}" aria-pressed="${n===eveningMinutes}">${n} ${t('minutesShort')}</button>`).join('')}</div><div class="evening-results" aria-live="polite">${choices.length?choices.map(plan=>{const a=byId(plan.id)||state.entries[plan.id]?.anime||Object.values(state.progress).find(p=>p.id===plan.id)?.anime;return `<button class="evening-option" data-watch="${esc(plan.id)}" data-episode="${plan.start}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t('episode')} ${plan.ordinal}${plan.count>1?' · '+plan.count+' '+t('episodes'):''}</small><small>${plan.estimated?'≈ ':''}${plan.minutes} ${t('minutesShort')}${plan.resume?' · '+t('continue'):''}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('eveningEmpty')}</p>`}</div>${choices.some(c=>c.estimated)?`<p class="plan-estimate">${t('eveningEstimate')}</p>`:''}</section>`;
 }
 function historyHTML() {
   const history=Object.values(state.progress).filter(p=>p.id!=='sintel'&&byId(p.id)).sort((a,b)=>(b.updated||0)-(a.updated||0)).slice(0,8);
@@ -382,7 +394,7 @@ async function openDetails(id) {
   $("#details").className = "details-dialog";
   $("#details").innerHTML =
     `<div class="details-toolbar">${closeButton("details")}</div>` +
-    `<img class="details-manga ${bannerFor(a)?'':'portrait-art'}" src="${esc(cover(a))}" alt="" aria-hidden="true"><div class="details-art-shade"></div><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
+    `<div class="details-artwork ${bannerFor(a)?'':'portrait-art'}" aria-hidden="true"><img class="details-manga" data-details-art="${esc(a.id)}" src="${esc(artwork[a.malId]?.detailsBanner||bannerFor(a)||cover(a))}" alt=""><div class="details-art-shade"></div></div><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
       user && ready
         ? `<div class="detail-library"><label>${t("status")}<select id="detail-status"><option value="">${t("none")}</option>${state.statuses
             .filter((s) => s.id !== "favorites")
@@ -670,7 +682,7 @@ async function loadProfile() {
     lang = dictionaries[state.preferences.language]
       ? state.preferences.language
       : lang;
-    theme = state.preferences.theme === "dark" ? "dark" : "light";
+    appearance = normalizeStyle(state.preferences.appearance);
     void avatarLoad().catch(()=>{});
     if (generation !== authGeneration) return;
     render();
@@ -1090,6 +1102,14 @@ document.addEventListener("click", async (event) => {
   const b = event.target.closest("button");
   if (!b) return;
   try {
+    if(b.dataset.styleChoice){
+      const next=normalizeStyle(b.dataset.styleChoice);
+      if(!mutate({type:'preferences',patch:{appearance:next,theme:'dark'}}))return;
+      appearance=next;applyAppearance();
+      $$('[data-style-choice]').forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.styleChoice===next)));
+      return;
+    }
+    if(b.dataset.planMinutes){eveningMinutes=Number(b.dataset.planMinutes);$('#evening-plan').outerHTML=eveningHTML();$('#evening-plan [data-plan-minutes="'+eveningMinutes+'"]').focus({preventScroll:true});return;}
     if(b.dataset.account){b.disabled=true;try{await switchAccount(b.dataset.account);}finally{b.disabled=false;}return;}
     if (b.dataset.close) $("#" + b.dataset.close).close();
     if(b.dataset.discover){catalogueView=b.dataset.discover;catalogScope='all';query='';genre='all';typeFilter='all';ongoingOnly=false;navigate('catalog');}
@@ -1146,11 +1166,6 @@ document.addEventListener("click", async (event) => {
       collectionDialog("delete-status", b.dataset.deleteStatus);
     }
     switch (b.dataset.action) {
-      case "theme":
-        theme = theme === "light" ? "dark" : "light";
-        if (user && ready) mutate({ type: "preferences", patch: { theme } });
-        render();
-        break;
       case "login":
         authDialog();
         break;
@@ -1413,7 +1428,8 @@ document.addEventListener("submit", async (event) => {
       name: String(data.get("name")).trim(),
       bio: String(data.get("bio")).trim(),
       language: lang,
-      theme,
+      theme: "dark",
+      appearance,
     };
     if (!patch.name) {toast(t('invalidName')); return;}
     const uid=user?.id, button=form.querySelector('button:not([type="button"])');
@@ -1528,7 +1544,13 @@ async function loadCatalogue(more = false, targetPage = 1) {
 
 document.addEventListener("error", event => {
   const img=event.target;
-  if(img.tagName!=="IMG" || !img.dataset.poster)return;
+  if(img.tagName!=="IMG")return;
+  if(img.dataset.detailsArt){
+    const a=byId(img.dataset.detailsArt);
+    if(a&&!img.dataset.artFallback){img.dataset.artFallback='true';img.dataset.poster=a.id;img.src=cover(a);img.closest('.details-artwork')?.classList.add('portrait-art');}
+    return;
+  }
+  if(!img.dataset.poster)return;
   const a=byId(img.dataset.poster);
   if(a?.posterFallback && img.src!==a.posterFallback && !img.dataset.retried){img.dataset.retried="true";img.src=a.posterFallback;}
 },true);
@@ -1541,4 +1563,4 @@ window.addEventListener('yoru:source-ready',()=>{combinedCatalogue.clear();resol
 
 window.addEventListener('scroll',()=>document.querySelector('.header')?.classList.toggle('scrolled',window.scrollY>40),{passive:true});
 
-document.addEventListener('load',event=>{const img=event.target;if(img instanceof HTMLImageElement && img.dataset.poster)void improvePoster(img,byId(img.dataset.poster));},true);
+document.addEventListener('load',event=>{const img=event.target;if(!(img instanceof HTMLImageElement))return;if(img.dataset.detailsArt&&img.naturalWidth<img.naturalHeight){img.closest('.details-artwork')?.classList.add('portrait-art');void improvePoster(img,byId(img.dataset.detailsArt));}else if(img.dataset.poster)void improvePoster(img,byId(img.dataset.poster));},true);
