@@ -54,9 +54,9 @@
     <p>Функция получает ссылки на видео для плеера yooickuu. Сами видео в Supabase не загружаются.</p>
     <ol>
       <li>Нажми «Скопировать подключение видео».</li>
-      <li>В Supabase открой Edge Functions → Deploy a new function → Via Editor. Имя: <code>anime-source</code>.</li>
-      <li>Замени содержимое index.ts скопированным кодом и нажми Deploy function.</li>
-      <li>Выключи Verify JWT with legacy secret и сохрани. Вход пользователя проверяет сама функция.</li>
+      <li>В Supabase открой Edge Functions → <code>anime-source</code> → Code. Если функции ещё нет: Deploy a new function → Via Editor → имя <code>anime-source</code>.</li>
+      <li>Замени весь код index.ts скопированным кодом и нажми Deploy updates (для новой функции — Deploy function).</li>
+      <li>Выключи Verify JWT with legacy secret и сохрани. Эта функция разрешает гостевой просмотр; личные данные аккаунтов остаются закрыты.</li>
     </ol>
     <button data-copy-file="anime-source.ts">Скопировать подключение видео</button>
   </section>

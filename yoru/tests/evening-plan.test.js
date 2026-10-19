@@ -26,3 +26,24 @@ test('plan never includes episodes beyond the available manifest',()=>{
  const [p]=eveningPlan(state,()=>({...title,episodes:24,episodeNumbers:[1,2]}),90);assert.equal(p.count,1);
  state.progress.a.completed=true;assert.deepEqual(eveningPlan(state,()=>({...title,episodes:24,episodeNumbers:[1,2]}),90),[]);
 });
+test('plan respects playback speed, per-episode duration and spare time',()=>{
+ const state={preferences:{speed:2},entries:{a:{status:'planned'}}};
+ const [p]=eveningPlan(state,()=>({...title,episodes:2,episodeManifest:[{duration:1200},{duration:1800}]}),30);
+ assert.equal(p.count,2);assert.equal(p.minutes,25);assert.equal(p.spareMinutes,5);assert.equal(p.estimated,false);
+});
+test('plan modes separate new choices from continuations',()=>{
+ const state={entries:{a:{status:'planned'},b:{status:'watching'}}};
+ const lookup=id=>({...title,id});
+ assert.deepEqual(eveningPlan(state,lookup,30,'new').map(p=>p.id),['a']);
+ assert.deepEqual(eveningPlan(state,lookup,30,'continue').map(p=>p.id),['b']);
+});
+test('replaying a completed episode does not move continuation backwards',()=>{
+ const state={progress:{old:{id:'a',episode:6,completed:true,updated:1},replay:{id:'a',episode:1,completed:true,updated:2}}};
+ assert.equal(eveningPlan(state,()=>title,30)[0].start,7);
+});
+test('ongoing plan does not invent unreleased episodes from an announced total',()=>{
+ const state={entries:{a:{status:'planned'}}};
+ assert.deepEqual(eveningPlan(state,()=>({...title,ongoing:true}),60),[]);
+ const [p]=eveningPlan(state,()=>({...title,ongoing:true,episodeNumbers:[1]}),60);
+ assert.equal(p.count,1);
+});

@@ -166,31 +166,30 @@ Deno.serve(async (req) => {
         healthCache = { at: Date.now(), ready: false, status: /^[a-z_]+(?:_\d+)?$/.test(m) ? m : "source_unavailable", detail: m.replace(/https?:\/\/[^\s)]+/g, "[upstream]").slice(0, 180) };
       }
     }
-    return reply({ ready: healthCache.ready, version: 5, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
+    return reply({ ready: healthCache.ready, version: 6, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
   }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
-  const authorization = req.headers.get("Authorization");
-  if (!authorization?.startsWith("Bearer ")) return reply({ error: "unauthorized" }, 401);
   try {
-    const auth = await fetch(Deno.env.get("SUPABASE_URL") + "/auth/v1/user", { headers: { Authorization: authorization, apikey: Deno.env.get("SUPABASE_ANON_KEY") || "" }, signal: AbortSignal.timeout(1e4) });
-    if (!auth.ok) {
-      await auth.body?.cancel();
-      return reply({ error: "unauthorized" }, 401);
-    }
-    const user = await auth.json();
-    if (!user.id) return reply({ error: "unauthorized" }, 401);
+    const key = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
     const now = Date.now();
-    let limit = limits.get(user.id);
+    let limit = limits.get(key);
     if (!limit || now - limit.at > 6e4) limit = { at: now, count: 0 };
     limit.count++;
-    limits.set(user.id, limit);
+    limits.set(key, limit);
     if (limits.size > 1e3) {
       for (const [id2, l] of limits) if (now - l.at > 6e4) limits.delete(id2);
     }
     if (limit.count > 60) return reply({ error: "too_many_requests" }, 429);
     const raw = await req.text();
     if (raw.length > 512) return reply({ error: "invalid_request" }, 400);
-    const body = JSON.parse(raw), id = Number(body.id), ordinal = Number(body.ordinal);
+    let body;
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      return reply({ error: "invalid_request" }, 400);
+    }
+    if (!body || typeof body !== "object") return reply({ error: "invalid_request" }, 400);
+    const id = Number(body.id), ordinal = Number(body.ordinal);
     if (!positiveID(id)) return reply({ error: "invalid_id" }, 400);
     if (body.action === "release") return reply(await snapshotRelease(id));
     if (!Number.isFinite(ordinal) || ordinal < 0 || ordinal > 1e4) return reply({ error: "invalid_episode" }, 400);

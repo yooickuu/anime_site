@@ -8,18 +8,20 @@ Deno.serve(async req=>{
  const reply=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers});
  if(origin&&!origins.has(origin))return reply({error:'origin_not_allowed'},403);
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'GET, POST, OPTIONS'}});
- if(req.method==='GET'){if(!healthCache||Date.now()-healthCache.at>60000){try{await snapshotHealth();healthCache={at:Date.now(),ready:true,status:'ok'};}catch(e){const m=e instanceof Error?e.message:'unknown';healthCache={at:Date.now(),ready:false,status:/^[a-z_]+(?:_\d+)?$/.test(m)?m:'source_unavailable',detail:m.replace(/https?:\/\/[^\s)]+/g,'[upstream]').slice(0,180)};}}return reply({ready:healthCache.ready,version:5,sourceStatus:healthCache.status,...(healthCache.detail?{detail:healthCache.detail}:{})});}
+ if(req.method==='GET'){if(!healthCache||Date.now()-healthCache.at>60000){try{await snapshotHealth();healthCache={at:Date.now(),ready:true,status:'ok'};}catch(e){const m=e instanceof Error?e.message:'unknown';healthCache={at:Date.now(),ready:false,status:/^[a-z_]+(?:_\d+)?$/.test(m)?m:'source_unavailable',detail:m.replace(/https?:\/\/[^\s)]+/g,'[upstream]').slice(0,180)};}}return reply({ready:healthCache.ready,version:6,guestPlayback:true,sourceStatus:healthCache.status,...(healthCache.detail?{detail:healthCache.detail}:{})});}
  if(req.method!=='POST')return reply({error:'method_not_allowed'},405);
- const authorization=req.headers.get('Authorization');
- if(!authorization?.startsWith('Bearer '))return reply({error:'unauthorized'},401);
+ // Public read-only catalogue/video endpoint. Account data stays behind Auth/RLS.
  try{
-  const auth=await fetch(Deno.env.get('SUPABASE_URL')+'/auth/v1/user',{headers:{Authorization:authorization,apikey:Deno.env.get('SUPABASE_ANON_KEY')||''},signal:AbortSignal.timeout(10000)});
-  if(!auth.ok){await auth.body?.cancel();return reply({error:'unauthorized'},401);}
-  const user=await auth.json();if(!user.id)return reply({error:'unauthorized'},401);
-  const now=Date.now();let limit=limits.get(user.id);if(!limit||now-limit.at>60000)limit={at:now,count:0};limit.count++;limits.set(user.id,limit);if(limits.size>1000)for(const [id,l]of limits)if(now-l.at>60000)limits.delete(id);
+  const key=req.headers.get('x-forwarded-for')?.split(',')[0].trim()||'unknown';
+  const now=Date.now();let limit=limits.get(key);
+  if(!limit||now-limit.at>60000)limit={at:now,count:0};
+  limit.count++;limits.set(key,limit);
+  if(limits.size>1000)for(const [id,l]of limits)if(now-l.at>60000)limits.delete(id);
   if(limit.count>60)return reply({error:'too_many_requests'},429);
   const raw=await req.text();if(raw.length>512)return reply({error:'invalid_request'},400);
-  const body=JSON.parse(raw),id=Number(body.id),ordinal=Number(body.ordinal);
+  let body;try{body=JSON.parse(raw);}catch{return reply({error:'invalid_request'},400);}
+  if(!body||typeof body!=='object')return reply({error:'invalid_request'},400);
+  const id=Number(body.id),ordinal=Number(body.ordinal);
   if(!positiveID(id))return reply({error:'invalid_id'},400);
   if(body.action==='release')return reply(await goRelease(id));
   if(!Number.isFinite(ordinal)||ordinal<0||ordinal>10000)return reply({error:'invalid_episode'},400);

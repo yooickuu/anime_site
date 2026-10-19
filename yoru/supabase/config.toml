@@ -3,5 +3,5 @@
 verify_jwt = false
 
 [functions.anime-source]
-# Auth is verified with /auth/v1/user inside the function; no service-role operations.
+# Public read-only playback endpoint; account data stays protected by Auth/RLS.
 verify_jwt = false

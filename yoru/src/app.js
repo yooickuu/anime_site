@@ -1,3 +1,4 @@
+import {applyGuestPlaybackOperation} from './guest-playback.js';
 import {styles,normalizeStyle,styleColors} from './appearance.js';
 import {eveningPlan} from './evening-plan.js';
 import {improvePoster} from './image-quality.js';
@@ -85,7 +86,7 @@ const read = (key, fallback) => {
 let lang = read("yooickuu.language", "ru");
 if (!dictionaries[lang]) lang = "ru";
 let appearance = normalizeStyle(read("yooickuu.appearance", "graphite"));
-let eveningMinutes = 30;
+let eveningMinutes = 30, eveningMode = "all";
 let theme = "dark",
   state = defaults(),
   user = null,
@@ -164,7 +165,7 @@ async function fromHash() {
     page='watch';
     if(current?.id===route.id && $('#video')){if(episode!==route.episode)await switchEpisode(route.episode,false);return;}
     render();
-    if(authResolved && user && ready)await openPlayer(route.id,route.episode,false);
+    if(authResolved && (!user || ready))await openPlayer(route.id,route.episode,false);
     return;
   }
   if(current)stopWatching();
@@ -192,7 +193,7 @@ function render(newWatch=false) {
       )
       .join(
         "",
-      )}</select>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='watch' ? (current ? playerHTML() : (authResolved ? guestHTML() : `<p class="watch-loading">${t('loading')}</p>`)) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
+      )}</select>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='watch' ? (current ? playerHTML() : `<p class="watch-loading">${t('loading')}</p>`) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
   if(preservedWatch && $('#watch-page'))$('#watch-page').replaceWith(preservedWatch);
   if(page==='home')startHero();
   if (page !== 'watch' && page !== "profile" && !(page === "library" && !user)) renderGrid();
@@ -368,8 +369,8 @@ function appearanceHTML() {
  return `<section class="profile-appearance glass-panel"><div class="panel-heading"><span class="overline">${t('yourAtmosphere')}</span><h2>${t('siteStyle')}</h2></div><div class="style-options" role="group" aria-label="${t('siteStyle')}">${styles.map(id=>`<button class="style-option" data-style-choice="${id}" aria-pressed="${appearance===id}"><span class="style-swatch" data-style="${id}" aria-hidden="true"><i></i><i></i><i></i></span><span>${t('style_'+id)}</span><span class="style-selected" aria-hidden="true">${icon('check')}</span></button>`).join('')}</div></section>`;
 }
 function eveningHTML() {
- const choices=eveningPlan(state,byId,eveningMinutes);
- return `<section class="profile-evening glass-panel" id="evening-plan"><div class="panel-heading"><span class="overline">${t('aLittleTime')}</span><h2>${t('eveningPlan')}</h2></div><p class="panel-description">${t('eveningHint')}</p><div class="time-options" role="group" aria-label="${t('availableTime')}">${[15,30,60,90].map(n=>`<button class="chip" data-plan-minutes="${n}" aria-pressed="${n===eveningMinutes}">${n} ${t('minutesShort')}</button>`).join('')}</div><div class="evening-results" aria-live="polite">${choices.length?choices.map(plan=>{const a=byId(plan.id)||state.entries[plan.id]?.anime||Object.values(state.progress).find(p=>p.id===plan.id)?.anime;return `<button class="evening-option" data-watch="${esc(plan.id)}" data-episode="${plan.start}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t('episode')} ${plan.ordinal}${plan.count>1?' · '+plan.count+' '+t('episodes'):''}</small><small>${plan.estimated?'≈ ':''}${plan.minutes} ${t('minutesShort')}${plan.resume?' · '+t('continue'):''}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('eveningEmpty')}</p>`}</div>${choices.some(c=>c.estimated)?`<p class="plan-estimate">${t('eveningEstimate')}</p>`:''}</section>`;
+ const choices=eveningPlan(state,byId,eveningMinutes,eveningMode);
+ return `<section class="profile-evening glass-panel" id="evening-plan"><div class="panel-heading"><span class="overline">${t('aLittleTime')}</span><h2>${t('eveningPlan')}</h2></div><p class="panel-description">${t('eveningHint')}</p><div class="plan-modes" role="group" aria-label="${t('planMode')}">${['all','continue','new'].map(id=>`<button class="chip" data-plan-mode="${id}" aria-pressed="${eveningMode===id}">${t('plan_'+id)}</button>`).join('')}</div><div class="time-options" role="group" aria-label="${t('availableTime')}">${[15,30,60,90,120].map(n=>`<button class="chip" data-plan-minutes="${n}" aria-pressed="${n===eveningMinutes}">${n} ${t('minutesShort')}</button>`).join('')}</div><div class="evening-results" aria-live="polite">${choices.length?choices.map(plan=>{const a=byId(plan.id)||state.entries[plan.id]?.anime||Object.values(state.progress).find(p=>p.id===plan.id)?.anime;return `<button class="evening-option" data-watch="${esc(plan.id)}" data-episode="${plan.start}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t(plan.count>1?'episodes':'episode')} ${plan.ordinal}${plan.count>1?'–'+plan.lastOrdinal:''}</small><small>${plan.estimated?'≈ ':''}${plan.minutes} ${t('minutesShort')}${plan.speed!==1?' · '+plan.speed+'×':''}</small><small class="plan-spare">${t('planSpare')} ${plan.spareMinutes} ${t('minutesShort')}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('eveningEmpty')}</p>`}</div>${choices.some(c=>c.estimated)?`<p class="plan-estimate">${t('eveningEstimate')}</p>`:''}</section>`;
 }
 function historyHTML() {
   const history=Object.values(state.progress).filter(p=>p.id!=='sintel'&&byId(p.id)).sort((a,b)=>(b.updated||0)-(a.updated||0)).slice(0,8);
@@ -394,7 +395,7 @@ async function openDetails(id) {
   $("#details").className = "details-dialog";
   $("#details").innerHTML =
     `<div class="details-toolbar">${closeButton("details")}</div>` +
-    `<div class="details-artwork ${bannerFor(a)?'':'portrait-art'}" aria-hidden="true"><img class="details-manga" data-details-art="${esc(a.id)}" src="${esc(artwork[a.malId]?.detailsBanner||bannerFor(a)||cover(a))}" alt=""><div class="details-art-shade"></div></div><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
+    `<div class="details-artwork ${bannerFor(a)?'':'portrait-art'}" aria-hidden="true"><img class="details-art-fill" src="${esc(artwork[a.malId]?.detailsBanner||bannerFor(a)||cover(a))}" alt="" data-art-fill="${esc(a.id)}"><img class="details-manga" data-details-art="${esc(a.id)}" src="${esc(artwork[a.malId]?.detailsBanner||bannerFor(a)||cover(a))}" alt=""><div class="details-art-shade"></div></div><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
       user && ready
         ? `<div class="detail-library"><label>${t("status")}<select id="detail-status"><option value="">${t("none")}</option>${state.statuses
             .filter((s) => s.id !== "favorites")
@@ -575,6 +576,7 @@ function accountAnimeSnapshot(a) {
   return {...snapshot,translations:Object.fromEntries(Object.entries(a.translations||{}).map(([language,value])=>[language,[value[0],'']]))};
 }
 function mutate(op) {
+  if(!user){const next=applyGuestPlaybackOperation(state,op);if(next){state=next;return true;}}
   if (!requireUser()) return false;
   if (
     op.type === "collectionItem" &&
@@ -718,7 +720,8 @@ async function handleSession(session, event) {
   syncFailure = false;
   ++authGeneration;
   render();
-  if (user) {await loadProfile();if(page==='watch')await fromHash();}
+  if (user) await loadProfile();
+  if(page==='watch')await fromHash();
   if (event === "PASSWORD_RECOVERY") authDialog("newPassword");
 }
 function collectionDialog(mode, id) {
@@ -772,9 +775,9 @@ function playerHTML() {
   return watchView({a:current,t,title,cover,speed:state.preferences.speed,preferencesHTML:preferencesHTML(),related});
 }
 async function openPlayer(id, requested, pushRoute=true) {
-  if (!requireUser() || playerOpening) return;
+  if (playerOpening || (user && !ready)) return;
   playerOpening = true;
-  const openingHash=location.hash;
+  const openingHash=location.hash, openingAccount=authGeneration;
   let a;
   try{a=await findWatchRelease(id);}catch{toast(t("providerError"));}
   if(!a){playerOpening=false;return;}
@@ -794,7 +797,7 @@ async function openPlayer(id, requested, pushRoute=true) {
     }
   }
   if ((a.providerId || a.animeVostId || a.animeGoId) && !a.episodes) {toast(t("noReleasedEpisodes"));playerOpening=false;return;}
-  if (!user || !ready || location.hash!==openingHash) {playerOpening=false;return;}
+  if ((user && !ready) || openingAccount!==authGeneration || location.hash!==openingHash) {playerOpening=false;return;}
   try {
     recordProgress();
     $$("dialog[open]").forEach((d) => d.close());
@@ -907,7 +910,7 @@ async function updateSource(play = false, refresh = false) {
         enhanceSelects($("#watch-page"));
       }
     }else url=await mediaSource(current.id,episode);
-    if(generation!==sourceGeneration || !user)return;
+    if(generation!==sourceGeneration)return;
     if(!url)throw Error('noSource');
     const saved=state.progress[sourceKey];
     attemptedURLs.add(url);
@@ -922,8 +925,7 @@ async function updateSource(play = false, refresh = false) {
 function recordProgress() {
   const video = $("#video");
   if (
-    !user ||
-    !ready ||
+    (user && !ready) ||
     !current ||
     !sourceKey ||
     !recordReady ||
@@ -971,7 +973,7 @@ function attachVideo() {
     loadAutomaticSkips();
   });
   video.addEventListener("play", () => {
-    if (!current || current.id === "sintel") return;
+    if (!user || !ready || !current || current.id === "sintel") return;
     const entry = state.entries[current.id];
     if (!entry?.status && state.statuses.some((s) => s.id === "watching"))
       mutate({ type: "entry", id: current.id, patch: { status: "watching" } });
@@ -987,7 +989,7 @@ function attachVideo() {
     recordProgress();
     renderEpisodes();
     if (
-      current && current.id !== "sintel" && !current.ongoing &&
+      user && ready && current && current.id !== "sintel" && !current.ongoing &&
       Array.from(
         { length: current.episodes },
         (_, i) => state.progress[`${current.id}:${i + 1}`]?.completed,
@@ -1109,6 +1111,7 @@ document.addEventListener("click", async (event) => {
       $$('[data-style-choice]').forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.styleChoice===next)));
       return;
     }
+    if(b.dataset.planMode){eveningMode=['all','continue','new'].includes(b.dataset.planMode)?b.dataset.planMode:'all';$('#evening-plan').outerHTML=eveningHTML();$('#evening-plan [data-plan-mode="'+eveningMode+'"]').focus({preventScroll:true});return;}
     if(b.dataset.planMinutes){eveningMinutes=Number(b.dataset.planMinutes);$('#evening-plan').outerHTML=eveningHTML();$('#evening-plan [data-plan-minutes="'+eveningMinutes+'"]').focus({preventScroll:true});return;}
     if(b.dataset.account){b.disabled=true;try{await switchAccount(b.dataset.account);}finally{b.disabled=false;}return;}
     if (b.dataset.close) $("#" + b.dataset.close).close();
@@ -1545,6 +1548,7 @@ async function loadCatalogue(more = false, targetPage = 1) {
 document.addEventListener("error", event => {
   const img=event.target;
   if(img.tagName!=="IMG")return;
+  if(img.dataset.artFill){img.hidden=true;return;}
   if(img.dataset.detailsArt){
     const a=byId(img.dataset.detailsArt);
     if(a&&!img.dataset.artFallback){img.dataset.artFallback='true';img.dataset.poster=a.id;img.src=cover(a);img.closest('.details-artwork')?.classList.add('portrait-art');}
@@ -1563,4 +1567,4 @@ window.addEventListener('yoru:source-ready',()=>{combinedCatalogue.clear();resol
 
 window.addEventListener('scroll',()=>document.querySelector('.header')?.classList.toggle('scrolled',window.scrollY>40),{passive:true});
 
-document.addEventListener('load',event=>{const img=event.target;if(!(img instanceof HTMLImageElement))return;if(img.dataset.detailsArt&&img.naturalWidth<img.naturalHeight){img.closest('.details-artwork')?.classList.add('portrait-art');void improvePoster(img,byId(img.dataset.detailsArt));}else if(img.dataset.poster)void improvePoster(img,byId(img.dataset.poster));},true);
+document.addEventListener('load',event=>{const img=event.target;if(!(img instanceof HTMLImageElement))return;if(img.dataset.detailsArt){const fill=img.closest('.details-artwork')?.querySelector('.details-art-fill');if(fill){fill.hidden=false;if(fill.getAttribute('src')!==img.getAttribute('src'))fill.src=img.getAttribute('src');}}if(img.dataset.detailsArt&&img.naturalWidth<img.naturalHeight){img.closest('.details-artwork')?.classList.add('portrait-art');void improvePoster(img,byId(img.dataset.detailsArt));}else if(img.dataset.poster)void improvePoster(img,byId(img.dataset.poster));},true);
