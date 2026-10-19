@@ -30,7 +30,11 @@
       ]
     },
     "audienceRating": 8.6,
-    "popularity": 267320
+    "popularity": 267320,
+    "hero": "assets/spotlight/57658-hero.webp",
+    "heroWidth": 2000,
+    "heroHeight": 602,
+    "heroMobile": "assets/spotlight/57658-mobile.webp"
   },
   {
     "id": "mal-59978",
@@ -63,7 +67,11 @@
       ]
     },
     "audienceRating": 8.8,
-    "popularity": 231897
+    "popularity": 231897,
+    "hero": "assets/spotlight/59978-hero.webp",
+    "heroWidth": 2560,
+    "heroHeight": 916,
+    "heroMobile": "assets/spotlight/59978-mobile.webp"
   },
   {
     "id": "mal-62001",
@@ -96,7 +104,11 @@
       ]
     },
     "audienceRating": 7.9,
-    "popularity": 142818
+    "popularity": 142818,
+    "hero": "assets/spotlight/62001-hero.webp",
+    "heroWidth": 1920,
+    "heroHeight": 762,
+    "heroMobile": "assets/spotlight/62001-mobile.webp"
   },
   {
     "id": "mal-62076",
@@ -127,7 +139,11 @@
       ]
     },
     "audienceRating": 8.3,
-    "popularity": 133304
+    "popularity": 133304,
+    "hero": "assets/spotlight/62076-hero.webp",
+    "heroWidth": 1488,
+    "heroHeight": 2104,
+    "heroMobile": "assets/spotlight/62076-mobile.webp"
   },
   {
     "id": "mal-60371",
@@ -160,7 +176,11 @@
       ]
     },
     "audienceRating": 8.4,
-    "popularity": 130483
+    "popularity": 130483,
+    "hero": "assets/spotlight/60371-hero.webp",
+    "heroWidth": 2048,
+    "heroHeight": 712,
+    "heroMobile": "assets/spotlight/60371-mobile.webp"
   },
   {
     "id": "mal-59983",
@@ -193,7 +213,11 @@
       ]
     },
     "audienceRating": 8.3,
-    "popularity": 122673
+    "popularity": 122673,
+    "hero": "assets/spotlight/59983-hero.webp",
+    "heroWidth": 1742,
+    "heroHeight": 2560,
+    "heroMobile": "assets/spotlight/59983-mobile.webp"
   },
   {
     "id": "mal-59708",
@@ -226,7 +250,11 @@
       ]
     },
     "audienceRating": 8.0,
-    "popularity": 121513
+    "popularity": 121513,
+    "hero": "assets/spotlight/59708-hero.webp",
+    "heroWidth": 1760,
+    "heroHeight": 2490,
+    "heroMobile": "assets/spotlight/59708-mobile.webp"
   },
   {
     "id": "mal-56734",
@@ -258,7 +286,11 @@
       ]
     },
     "audienceRating": 7.9,
-    "popularity": 104426
+    "popularity": 104426,
+    "hero": "assets/spotlight/56734-hero.webp",
+    "heroWidth": 1448,
+    "heroHeight": 2047,
+    "heroMobile": "assets/spotlight/56734-mobile.webp"
   },
   {
     "id": "mal-61323",
@@ -291,7 +323,11 @@
       ]
     },
     "audienceRating": 8.1,
-    "popularity": 47883
+    "popularity": 47883,
+    "hero": "assets/spotlight/61323-hero.webp",
+    "heroWidth": 1920,
+    "heroHeight": 640,
+    "heroMobile": "assets/spotlight/61323-mobile.webp"
   },
   {
     "id": "mal-61469",
@@ -325,6 +361,10 @@
       ]
     },
     "audienceRating": 8.6,
-    "popularity": 43866
+    "popularity": 43866,
+    "hero": "assets/spotlight/61469-hero.webp",
+    "heroWidth": 1920,
+    "heroHeight": 652,
+    "heroMobile": "assets/spotlight/61469-mobile.webp"
   }
 ]

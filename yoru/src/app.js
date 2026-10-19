@@ -1,3 +1,4 @@
+import {revealSurfaces} from './motion.js';
 import {applyGuestPlaybackOperation} from './guest-playback.js';
 import {styles,normalizeStyle,styleColors} from './appearance.js';
 import {eveningPlan} from './evening-plan.js';
@@ -198,15 +199,17 @@ function render(newWatch=false) {
   if(page==='home')startHero();
   if (page !== 'watch' && page !== "profile" && !(page === "library" && !user)) renderGrid();
   updateSync();
+  revealSurfaces(document.querySelector('main'));
 }
 function homeHTML() {
  return `<section class="cinematic-hero" id="hero-art">${heroArtHTML()}</section><section class="section"><div class="section-head"><h2>${t('continue')}</h2>${user?'<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button>':''}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
 }
 function bannerFor(a){return artwork[a?.malId]?.banner||a?.banner||'';}
 function heroPool(){return spotlight.map(a=>({...a,...byId(a.id),image:a.image,banner:a.banner}));}
+function heroImage(a){return matchMedia('(max-width:600px)').matches?(a.heroMobile||a.image):(a.hero||bannerFor(a));}
 function heroArtHTML(){
  const pool=heroPool(),front=pool[heroIndex%pool.length];if(!front)return '';
- return `<picture class="hero-picture"><source media="(max-width:600px)" srcset="${esc(front.image)}"><img class="hero-backdrop" src="${esc(bannerFor(front))}" alt="" fetchpriority="high" decoding="async" width="1600" height="500"></picture><div class="hero-shade"></div><div class="hero-content"><span class="hero-eyebrow"><i></i>${front.ongoing?t('airing'):t('spotlight')}</span><h1>${esc(title(front))}</h1><div class="hero-facts"><span>${front.year}</span><span>${esc(genreText(front.genres?.[0]))}</span>${audienceHTML(front)}</div><p>${esc(descriptionFor(front,lang))}</p><div class="hero-buttons"><button class="button primary" data-watch="${esc(front.id)}">${icon('play')} ${t('watch')}</button><button class="button glass-button" data-action="random">${icon('shuffle')} ${t('random')}</button><button class="icon-button glass-button" data-details="${esc(front.id)}" aria-label="${t('details')}">${icon('plus')}</button></div></div>`;
+ return `<picture class="hero-picture ${front.heroHeight>front.heroWidth?'hero-portrait':'hero-wide'}"><source media="(max-width:600px)" srcset="${esc(front.heroMobile||front.image)}"><img class="hero-backdrop" src="${esc(front.hero||bannerFor(front))}" alt="" fetchpriority="high" decoding="async" width="${front.heroWidth||1600}" height="${front.heroHeight||500}"></picture><div class="hero-shade"></div><div class="hero-content"><span class="hero-eyebrow"><i></i>${front.ongoing?t('airing'):t('spotlight')}</span><h1>${esc(title(front))}</h1><div class="hero-facts"><span>${front.year}</span><span>${esc(genreText(front.genres?.[0]))}</span>${audienceHTML(front)}</div><p>${esc(descriptionFor(front,lang))}</p><div class="hero-buttons"><button class="button primary" data-watch="${esc(front.id)}">${icon('play')} ${t('watch')}</button><button class="button glass-button" data-action="random">${icon('shuffle')} ${t('random')}</button><button class="icon-button glass-button" data-details="${esc(front.id)}" aria-label="${t('details')}">${icon('plus')}</button></div></div>`;
 }
 const heroImages=new Map();
 function prepareHeroImage(url){
@@ -218,14 +221,14 @@ function prepareHeroImage(url){
 }
 function preloadNextHero(){
  const pool=heroPool(),next=pool[(heroIndex+1)%pool.length];
- if(next)void prepareHeroImage(matchMedia('(max-width:600px)').matches?next.image:bannerFor(next)).catch(()=>{});
+ if(next)void prepareHeroImage(heroImage(next)).catch(()=>{});
 }
 async function rotateHero(direction=1){
  const node=$('#hero-art'),pool=heroPool();if(!node||node.dataset.rotating||pool.length<2)return;
  node.dataset.rotating='true';
  try{
   const next=pool[(heroIndex+direction+pool.length)%pool.length];
-  await prepareHeroImage(matchMedia('(max-width:600px)').matches?next.image:bannerFor(next));
+  await prepareHeroImage(heroImage(next));
   if(!node.isConnected||document.hidden||node.matches(':focus-within')||$('dialog[open]'))return;
   const currentPool=heroPool(),nextIndex=currentPool.findIndex(a=>a.id===next.id);
   if(nextIndex<0)return;
@@ -234,7 +237,7 @@ async function rotateHero(direction=1){
   if(previous&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
    // Keep the decoded outgoing image visible until the new artwork is ready.
    previous.classList.add('hero-outgoing');node.prepend(previous);previous.style.zIndex='1';
-   try{await previous.animate([{opacity:1},{opacity:0}],{duration:700,easing:'ease-in-out'}).finished;}
+   try{await previous.animate([{opacity:1},{opacity:0}],{duration:1100,easing:'cubic-bezier(.22,.61,.36,1)'}).finished;}
    finally{previous.remove();}
   }
   preloadNextHero();
@@ -340,6 +343,7 @@ function renderGrid() {
       return `<article class="anime-card"><button class="poster-button" data-details="${a.id}" aria-label="${t("details")}: ${esc(title(a))}"><img src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}" loading="lazy">${a.ongoing ? `<span class="ongoing-badge" title="${t("ongoingTooltip")}" aria-label="${t("ongoingTooltip")}"><i></i>${t("airing")}</span>` : ""}${a.catalogOnly ? `<span class="catalog-only-badge">${t("catalogOnly")}</span>` : ""}<span class="poster-play">${icon("play")}</span><span class="poster-label">${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span></button><button class="save-button ${e ? "saved" : ""}" data-details="${a.id}" aria-label="${t("status")}: ${esc(title(a))}">${bookmark}</button><button class="anime-title" data-details="${a.id}">${esc(title(a))}</button>${audienceHTML(a)}<p class="anime-meta">${a.year} · ${esc(genreText(a.genres[0]))}${e?.rating ? " · " + e.rating + "/10" : ""}</p></article>`;
     })
     .join("");
+  revealSurfaces(grid);
   $("#empty").hidden = items.length > 0 || catalogBusy;
   const status = $("#catalog-status");
   if (status)

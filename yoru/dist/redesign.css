@@ -273,3 +273,26 @@ body.dark[data-style] :is(.button.soft,.icon-button,.select-trigger,.glass-butto
 body.dark[data-style] .details-artwork .details-manga{z-index:1;mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
 body.dark[data-style] .details-artwork .details-art-shade{z-index:2}
 .details-art-fill[hidden]{display:none}.plan-modes{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}.plan-modes .chip{font-size:11px;min-height:36px;padding:9px 12px}.plan-spare{color:var(--accent)!important}.evening-option img{align-self:start}.evening-option{padding:12px 10px}.evening-option strong{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.style-options{gap:14px 12px}
+
+/* Fade to the actual page scene, not a differently coloured opaque rectangle. */
+body.dark[data-style]:has(.home-container) .cinematic-hero{background:transparent;box-shadow:none}
+.hero-picture{mask-image:linear-gradient(to bottom,#000 0%,#000 35%,#000f 43%,#000e 51%,#000c 60%,#0008 71%,#0004 82%,#0001 93%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 35%,#000f 43%,#000e 51%,#000c 60%,#0008 71%,#0004 82%,#0001 93%,transparent 100%)}
+.hero-picture .hero-backdrop{width:100%;height:100%;object-fit:contain;object-position:right top;transform:none;filter:none;animation:none}
+.hero-picture.hero-portrait{left:32%;width:68%}.hero-picture.hero-portrait .hero-backdrop{object-position:center top}
+body.dark[data-style] .hero-shade{background:linear-gradient(90deg,rgba(var(--surface-rgb),.92),rgba(var(--surface-rgb),.72) 26%,rgba(var(--surface-rgb),.18) 56%,transparent 80%);mask-image:linear-gradient(#000 0%,#000 40%,#000d 55%,#0007 75%,#0002 90%,transparent 100%);-webkit-mask-image:linear-gradient(#000 0%,#000 40%,#000d 55%,#0007 75%,#0002 90%,transparent 100%)}
+@media(max-width:600px){.hero-picture,.hero-picture.hero-portrait{left:0;width:100%;height:100%}.hero-picture .hero-backdrop{object-fit:contain;object-position:center top}body.dark[data-style] .hero-shade{background:linear-gradient(0deg,transparent,rgba(var(--surface-rgb),.9) 28%,rgba(var(--surface-rgb),.72) 45%,rgba(var(--surface-rgb),.12) 72%,transparent);mask-image:linear-gradient(#000 0%,#000 65%,#000a 80%,transparent 100%);-webkit-mask-image:linear-gradient(#000 0%,#000 65%,#000a 80%,transparent 100%)}}
+/* Motion follows interaction: arrivals, glass highlights, tactile controls and menus. */
+@keyframes surface-reveal{from{opacity:0;transform:translate3d(0,16px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes dialog-reveal{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes hero-copy-reveal{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:no-preference){
+ .anime-card{animation:none}.motion-enter{animation:surface-reveal .65s cubic-bezier(.16,1,.3,1) var(--reveal-delay,0ms) both!important}
+ dialog[open]{animation:dialog-reveal .38s cubic-bezier(.16,1,.3,1)}dialog[open]::backdrop{animation:hero-copy-reveal .28s ease-out}
+ .hero-content>:is(.hero-eyebrow,h1,.hero-facts,p,.hero-buttons){animation:hero-copy-reveal .7s cubic-bezier(.16,1,.3,1) both}.hero-content h1{animation-delay:45ms}.hero-content .hero-facts{animation-delay:85ms}.hero-content p{animation-delay:120ms}.hero-content .hero-buttons{animation-delay:160ms}
+ :is(.button,.icon-button,.chip,.filter-chip,.select-trigger,.style-option,.history-item,.evening-option,.list-nav){transition:transform .28s cubic-bezier(.16,1,.3,1),background-color .28s ease,box-shadow .28s ease,color .25s ease,opacity .25s ease}
+ :is(.button,.icon-button,.chip,.filter-chip,.style-option):active:not(:disabled){transform:scale(.96)}
+ .toggle-track,.toggle-track::after{transition:transform .32s cubic-bezier(.16,1,.3,1),background-color .25s ease}
+ .poster-button img{transition:transform .65s cubic-bezier(.16,1,.3,1),filter .4s ease}.poster-play{transition:opacity .35s ease,transform .4s cubic-bezier(.16,1,.3,1)}
+ .site-select-menu{animation:dialog-reveal .25s cubic-bezier(.16,1,.3,1);transform-origin:top center}
+ @media(hover:hover) and (pointer:fine){.button:hover:not(:disabled),.style-option:hover{transform:translateY(-2px)}.history-item:hover,.evening-option:hover{transform:translateX(3px)}.poster-button:hover img{transform:scale(1.025)}.button.primary:hover{box-shadow:0 8px 28px rgba(var(--accent-rgb),.28)}.glass-button:hover,.icon-button:hover{box-shadow:inset 0 1px 0 #ffffff24,0 6px 22px #0002}}
+}
