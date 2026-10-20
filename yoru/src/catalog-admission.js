@@ -1,12 +1,13 @@
 export const admissionPolicy = Object.freeze({version:1,batchSize:250,qualities:[360,480,720,1080],audio:{ru:2,en:1,ja:1},subtitles:['ru','en','ja']});
-const normalized = s => String(s||'').normalize('NFKC').trim().toLocaleLowerCase().replace(/\s+/g,' ');
-const fresh = (proof,now) => proof?.passed===true && Number.isFinite(Date.parse(proof.checkedAt)) && Date.parse(proof.checkedAt)<=now && now-Date.parse(proof.checkedAt)<=86400000;
+export const normalized = s => String(s||'').normalize('NFKC').trim().toLocaleLowerCase().replace(/\s+/g,' ');
+export const fresh = (proof,now) => proof?.passed===true && Number.isFinite(Date.parse(proof.checkedAt)) && Date.parse(proof.checkedAt)<=now && now-Date.parse(proof.checkedAt)<=86400000;
 export function identityKeys(a){
  return ['mal','anilist'].flatMap(k=>Number.isSafeInteger(a.ids?.[k])&&a.ids[k]>0?[`${k}:${a.ids[k]}`]:[]);
 }
 // Only local verifier output belongs in evidence. Provider claims are not proof.
 export function auditAdmission(a,{now=Date.now(),playerSubtitlesReady=false}={}){
  const issues=[];const fail=(code,path)=>issues.push({code,path});
+ for(const issue of a.assemblyIssues||[])fail(issue.code,issue.path);
  if(!identityKeys(a).length)fail('canonical_identity_missing','ids');
  if(!fresh(a.evidence?.identity,now))fail('identity_unverified','evidence.identity');
  if(!playerSubtitlesReady)fail('player_subtitles_not_ready','player');
@@ -31,20 +32,7 @@ export function auditAdmission(a,{now=Date.now(),playerSubtitlesReady=false}={})
   if(!audio.some(t=>t.language==='ja'&&t.original===true))fail('japanese_original_unverified',path);
   const ids=audio.map(t=>t.id);if(ids.some(id=>!id)||new Set(ids).size!==ids.length)fail('duplicate_audio_id',path);
   for(const track of audio){
-   const p=`${path}.audio.${track.id}`;
-   if(!fresh(track.languageReview,now))fail('audio_language_unverified',p);
-   for(const quality of admissionPolicy.qualities){
-    const s=track.sources?.find(x=>x.quality===quality);
-    if(!s?.url||s.height!==quality||!fresh(s.probe,now)||s.probe?.decoded!==true||s.probe?.browserPlayable!==true)fail('quality_unverified',`${p}.${quality}`);
-   }
-   for(const language of admissionPolicy.subtitles){
-    const sub=track.subtitles?.find(s=>s.language===language);
-    if(!sub?.url||sub.format!=='vtt'||!fresh(sub.review,now)||sub.review?.synchronized!==true)fail('subtitle_unverified',`${p}.subtitles.${language}`);
-   }
-   for(const kind of ['opening','ending']){
-    const mark=track[kind];
-    if(!fresh(mark?.review,now)||!(mark?.absent===true||(Number.isFinite(mark?.start)&&Number.isFinite(mark?.end)&&mark.start>=0&&mark.end>mark.start&&mark.end<=track.duration)))fail('skip_timing_unverified',`${p}.${kind}`);
-   }
+   issues.push(...auditAudioTrack(track,{now,path:`${path}.audio.${track.id}`}));
   }
  }
  return {id:a.id,passed:issues.length===0,issues};
@@ -58,4 +46,23 @@ export function auditBatch(candidates,{existing=[],...options}={}){
   for(const k of identityKeys(a))if(!seen.has(k))seen.set(k,a.id);
   result.passed=result.issues.length===0;return result;
  });
+}
+
+export function auditAudioTrack(track,{now=Date.now(),path="audio"}={}){
+ const issues=[],fail=(code,path)=>issues.push({code,path});
+   const p=path;
+   if(!fresh(track.languageReview,now))fail('audio_language_unverified',p);
+   for(const quality of admissionPolicy.qualities){
+    const s=track.sources?.find(x=>x.quality===quality);
+    if(!s?.url||s.height!==quality||!fresh(s.probe,now)||s.probe?.decoded!==true||s.probe?.browserPlayable!==true)fail('quality_unverified',`${p}.${quality}`);
+   }
+   for(const language of admissionPolicy.subtitles){
+    const sub=track.subtitles?.find(s=>s.language===language);
+    if(!sub?.url||sub.format!=='vtt'||!fresh(sub.review,now)||sub.review?.synchronized!==true)fail('subtitle_unverified',`${p}.subtitles.${language}`);
+   }
+   for(const kind of ['opening','ending']){
+    const mark=track[kind];
+    if(!fresh(mark?.review,now)||!(mark?.absent===true||(Number.isFinite(mark?.start)&&Number.isFinite(mark?.end)&&mark.start>=0&&mark.end>mark.start&&mark.end<=track.duration)))fail('skip_timing_unverified',`${p}.${kind}`);
+   }
+ return issues;
 }
