@@ -1,0 +1,50 @@
+{
+  "graphite": {
+    "image": "assets/scenes/graphite.webp",
+    "width": 1920,
+    "height": 1038,
+    "source": "https://www.ghibli.jp/gallery/marnie005.jpg"
+  },
+  "iris": {
+    "image": "assets/scenes/iris.webp",
+    "width": 1920,
+    "height": 1038,
+    "source": "https://www.ghibli.jp/gallery/marnie009.jpg"
+  },
+  "lagoon": {
+    "image": "assets/scenes/lagoon.webp",
+    "width": 1920,
+    "height": 1038,
+    "source": "https://www.ghibli.jp/gallery/chihiro043.jpg"
+  },
+  "ember": {
+    "image": "assets/scenes/ember.webp",
+    "width": 1920,
+    "height": 1038,
+    "source": "https://www.ghibli.jp/gallery/marnie021.jpg"
+  },
+  "midnight": {
+    "image": "assets/scenes/midnight.webp",
+    "width": 1920,
+    "height": 1038,
+    "source": "https://www.ghibli.jp/gallery/mononoke024.jpg"
+  },
+  "forest": {
+    "image": "assets/scenes/forest.webp",
+    "width": 1920,
+    "height": 1038,
+    "source": "https://www.ghibli.jp/gallery/marnie037.jpg"
+  },
+  "wine": {
+    "image": "assets/scenes/wine.webp",
+    "width": 1920,
+    "height": 1038,
+    "source": "https://www.ghibli.jp/gallery/chihiro008.jpg"
+  },
+  "slate": {
+    "image": "assets/scenes/slate.webp",
+    "width": 1920,
+    "height": 1038,
+    "source": "https://www.ghibli.jp/gallery/marnie010.jpg"
+  }
+}

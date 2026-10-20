@@ -1,4 +1,6 @@
 const rows = {
+  bannerFit: ["Целиком", "Full image", "全体を表示"],
+  bannerCrop: ["Обрезать", "Crop", "切り抜く"],
   style_forest: ["Хвойный лес", "Forest", "深い森"],
   style_wine: ["Бордо", "Bordeaux", "ボルドー"],
   style_slate: ["Серебряный туман", "Silver mist", "銀の霧"],

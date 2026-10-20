@@ -260,3 +260,16 @@
 - npm check/build,118tests прошли; CSS parse0warnings. После маленькой очистки observer снова build. Cachebuster20261019-motion4.
 - CUA СНОВА РАБОТАЕТ (Safari native). Создана отдельная QAвкладка127.0.0.1:4173/?v=motion4, но сервер4173 остановлен, поэтому SafariCan’tConnect. Нужно запустить npm run dev, затем проверить desktop/mobile, все8палитр и новые портретные hero. Полной визуальной проверки ещё нет. Ничего из личных аккаунтов не трогали. Ввод адреса через paste, typeText терял латинские символы на текущей раскладке.
 - Пользователь торопит из-за2%лимита, просит без тяжёлых проверок. Изменения отправитьGitHub; публикацию через конечный /anime_site/yoru/dist/ или актуальныйroot проверить при продолжении. Источники видео/аккаунты не менялись.
+
+## 20 October 2026 — image backgrounds, full-width banner and hero
+
+User asked to finish the latest two visual tasks, then stop and wait.
+- Added 8 locally hosted 1920×1038 anime scene backgrounds in assets/scenes; exact original source URLs in src/scene-artwork.json. Image-generation tool was unavailable; no paid generation used.
+- New dist/scenes.css owns hero, profile cover and monochrome detail art styling. Removed conflicting historical component rules from style.css/redesign.css. Shared scene appears behind all views.
+- Hero: all 10 use horizontal approx 16:9 originals, 1200–1920px wide, encoded WebP95 without upscaling; sources in spotlight.json. Replaced portrait and very narrow images with episode/promotional stills. Uniform full-frame object-fit:cover, no distortion, some edge cropping remains on narrow screens. Extended image to lower hero boundary and transparency mask fades to the actual scene. Removed opacity-zero entrance for hero text (background Safari could freeze its animation).
+- Profile banner: viewport-wide, full-width natural landscape image; soft matching background fills remaining edges. Portrait uploads retain a contained view. Bottom alpha fade. Upload now defaults to full image, optional crop, preserves aspect ratio and compresses for 2MB limit.
+- Header blur reduced to 3px; shared button/icon/select dimensions aligned; player buttons remain compact.
+- Validation: build/check and 119 tests pass, including new full-banner geometry test. All ten source images inspected as contact sheet /tmp/hero-final-all.jpg.
+- Final live UI verification incomplete: Safari capture failed with ScreenCaptureKit -3811; then noWindowsAvailable. Do NOT claim full desktop/mobile/all-theme visual QA. User screenshots confirmed earlier scene/background integration but are before latest image replacement.
+- No account writes or video-source changes. QA fixture removed. Temporary profile fixture generator remains /tmp/yooickuu-profile-preview.mjs if needed.
+- Further work only after user's next instruction. Check publication separately; previous Pages URL often serves /anime_site/yoru/dist/ instead of workflow root.
