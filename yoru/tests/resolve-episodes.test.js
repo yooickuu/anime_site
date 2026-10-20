@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {resolveRelease,videoEpisode} from '../src/sources.js';
+import {resolveRelease,videoEpisode} from '../src/legacy-sources.js';
 import {registerAnime} from '../src/catalog.js';
 import {audioChoices} from '../src/discovery.js';
 test('resolving a linked release merges playlists and retrieves the selected ordinal',async()=>{

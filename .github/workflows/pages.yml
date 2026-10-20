@@ -1,10 +1,8 @@
-name: Deploy yooickuu to GitHub Pages
+name: Deploy yomiku to GitHub Pages
 on:
   push:
     branches: [main]
   workflow_dispatch:
-  schedule:
-    - cron: "35 4 * * *"
 permissions:
   contents: read
   pages: write
@@ -27,38 +25,6 @@ jobs:
           cache-dependency-path: yoru/package-lock.json
       - run: npm ci
       - run: npm test
-      - name: Refresh catalogue ID index
-        run: node scripts/audit-catalog.mjs
-        continue-on-error: true
-      - name: Refresh additional video catalogue
-        run: npm run update:animevost
-        continue-on-error: true
-      - name: Restore additional source progress
-        uses: actions/cache/restore@v4
-        with:
-          path: yoru/checks/animego-cache
-          key: animego-v3-${{ github.run_id }}
-          restore-keys: animego-v3-
-      - run: node scripts/source-cache.mjs restore
-      - name: Refresh multi-audio source in bounded batches
-        if: github.event_name != 'push'
-        run: node scripts/update-animego.mjs
-        env:
-          SCAN_LIMIT: '300'
-        continue-on-error: true
-      - name: Refresh complete episode and audio catalogues
-        if: github.event_name != 'push'
-        run: node scripts/snapshot-animego.mjs
-        env:
-          SNAPSHOT_LIMIT: '60'
-          SNAPSHOT_REQUEST_LIMIT: '240'
-        continue-on-error: true
-      - run: node scripts/source-cache.mjs save
-      - name: Preserve additional source progress
-        uses: actions/cache/save@v4
-        with:
-          path: yoru/checks/animego-cache
-          key: animego-v3-${{ github.run_id }}
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

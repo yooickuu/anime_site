@@ -6,7 +6,7 @@ import {styles,normalizeStyle,styleColors} from './appearance.js';
 import {eveningPlan} from './evening-plan.js';
 import {improvePoster} from './image-quality.js';
 import artwork from './artwork.json';
-import spotlight from './spotlight.json';
+
 import {accountVault} from './account-switcher.js';
 import {playerShortcut} from './player-shortcuts.js';
 import {signInIdentifier} from './login.js';
@@ -21,10 +21,10 @@ import {initSelectMenus, enhanceSelects, closeSelectMenu} from './select-menu.js
 import {createPlayback} from './playback.js';
 import {cropAvatar,cropBanner} from './avatar-crop.js';
 import {authErrorKey} from "./public-config.js";
-import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio} from "./sources.js";
+import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons} from "./sources.js";
 import {icon} from "./icons.js";
 import {controlsHTML, attachControls} from "./player-controls.js";
-import { fetchCatalogue, fetchRelease, providerEpisode, chooseQuality, releaseSeasons } from "./provider.js";
+import { chooseQuality } from "./provider.js";
 import {
   anime,
   demo,
@@ -123,7 +123,7 @@ let operations = [],
 const t = (key) => dictionaries[lang][key] || key;
 const title = (a) => (a?.id === "sintel" ? t("demo") : titleFor(a, lang));
 const statusName = (s) => s.name || t(s.key || s.id);
-spotlight.forEach(registerAnime);
+publishedItems.forEach(registerAnime);
 const brand = () =>
   `<a href="#home" class="brand" aria-label="yomiku · ${t('home')}"><img class="brand-symbol" src="assets/yomiku-mark.svg?v=2" alt="" width="44" height="44"><span class="brand-wordmark"><span class="brand-kana" aria-hidden="true">ヨミク</span><span class="brand-name">yomiku</span></span></a>`;
 const closeButton = (id) =>
@@ -211,10 +211,10 @@ function homeHTML() {
  return `<section class="cinematic-hero" id="hero-art">${heroArtHTML()}</section><section class="section"><div class="section-head"><h2>${t('continue')}</h2>${user?'<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button>':''}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
 }
 function bannerFor(a){return artwork[a?.malId]?.banner||a?.banner||'';}
-function heroPool(){return spotlight.map(a=>({...a,...byId(a.id),image:a.image,banner:a.banner,hero:a.hero,heroMobile:a.heroMobile,heroWidth:a.heroWidth,heroHeight:a.heroHeight}));}
+function heroPool(){return publishedItems.slice(0,10); }
 function heroImage(a){return matchMedia('(max-width:600px)').matches?(a.heroMobile||a.image):(a.hero||bannerFor(a));}
 function heroArtHTML(){
- const pool=heroPool(),front=pool[heroIndex%pool.length];if(!front)return '';
+ const pool=heroPool(),front=pool[heroIndex%pool.length];if(!front)return `<div class="hero-content"><span class="hero-eyebrow">yomiku</span><h1>${t('catalogRebuilding')}</h1><p>${t('catalogRebuildingHint')}</p><button class="button glass-button" data-nav="library">${t('library')}</button></div>`;
  return `<picture class="hero-picture ${front.heroHeight>front.heroWidth?'hero-portrait':'hero-wide'}"><source media="(max-width:600px)" srcset="${esc(front.heroMobile||front.image)}"><img class="hero-backdrop" src="${esc(front.hero||bannerFor(front))}" alt="" fetchpriority="high" decoding="async" width="${front.heroWidth||1600}" height="${front.heroHeight||500}"></picture><div class="hero-shade"></div><div class="hero-content"><span class="hero-eyebrow"><i></i>${front.ongoing?t('airing'):t('spotlight')}</span><h1>${esc(title(front))}</h1><div class="hero-facts"><span>${front.year}</span><span>${esc(genreText(front.genres?.[0]))}</span>${audienceHTML(front)}</div><p>${esc(descriptionFor(front,lang))}</p><div class="hero-buttons"><button class="button primary" data-watch="${esc(front.id)}">${icon('play')} ${t('watch')}</button><button class="button glass-button" data-action="random">${icon('shuffle')} ${t('random')}</button><button class="icon-button glass-button" data-details="${esc(front.id)}" aria-label="${t('details')}">${icon('plus')}</button></div></div>`;
 }
 const heroImages=new Map();
@@ -258,7 +258,7 @@ function startHero(){
 function continueHTML() {
   const map = new Map();
   Object.values(state.progress)
-    .filter((p) => p && byId(p.id) && p.time > 0)
+    .filter((p) => p && isPublished(p.id) && byId(p.id) && p.time > 0)
     .sort((a, b) => b.updated - a.updated)
     .forEach((p) => {
       if (!map.has(p.id)) map.set(p.id, p);
@@ -271,7 +271,7 @@ function continueHTML() {
           return `<button class="continue-card" data-watch="${a.id}" data-episode="${p.episode}"><img class="continue-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt=""><div class="continue-info"><h3>${esc(title(a))}</h3><p>${t("episode")} ${esc(savedEpisodeNumber(p))} · ${p.completed ? t("viewed") : timeLabel(p.time) + " / " + timeLabel(p.duration)}</p><div class="progress-track"><span style="width:${Math.min(100, Math.max(0, (p.time / p.duration) * 100))}%"></span></div></div><span class="resume-play">${icon("play")}</span></button>`;
         })
         .join("")
-    : `<div class="welcome-card"><div class="welcome-icon">${icon("play")}</div><div><h3>${t("continueEmpty")}</h3><p>${t("continueHint")}</p><button class="text-button" data-watch="sintel">${t("tryPlayer")} ${icon("arrow")}</button></div></div><div class="welcome-card tip"><div class="welcome-icon">${icon("bookmark")}</div><div><h3>${t("libraryGuest")}</h3><p>${t("privateLists")}</p><button class="text-button" data-nav="library">${t("library")} ${icon("arrow")}</button></div></div>`;
+    : `<div class="welcome-card"><div class="welcome-icon">${icon("play")}</div><div><h3>${t("continueEmpty")}</h3><p>${t("continueHint")}</p></div></div><div class="welcome-card tip"><div class="welcome-icon">${icon("bookmark")}</div><div><h3>${t("libraryGuest")}</h3><p>${t("privateLists")}</p><button class="text-button" data-nav="library">${t("library")} ${icon("arrow")}</button></div></div>`;
 }
 function guestHTML() {
   return `<section class="guest-panel"><span class="guest-symbol">${icon("bookmark")}</span><h1>${t("libraryGuest")}</h1><p>${t("guestCopy")}</p><button class="button primary" data-action="login">${t("login")}</button><button class="button soft" data-action="register">${t("register")}</button></section>`;
@@ -317,9 +317,7 @@ function renderGrid() {
         ]
       : onlineItems.length
         ? onlineItems
-        : catalogError
-          ? anime
-          : []
+        : []
   ).filter((a) => {
     const e = state.entries[a.id],
       c = state.collections.find((c) => c.id === list);
@@ -380,7 +378,7 @@ function appearanceHTML() {
  return `<section class="profile-appearance glass-panel"><div class="panel-heading"><span class="overline">${t('yourAtmosphere')}</span><h2>${t('siteStyle')}</h2></div><div class="style-options" role="group" aria-label="${t('siteStyle')}">${styles.map(id=>`<button class="style-option" data-style-choice="${id}" aria-pressed="${appearance===id}"><span class="style-swatch" data-style="${id}" aria-hidden="true"><i></i><i></i><i></i></span><span>${t('style_'+id)}</span><span class="style-selected" aria-hidden="true">${icon('check')}</span></button>`).join('')}</div></section>`;
 }
 function eveningHTML() {
- const choices=eveningPlan(state,byId,eveningMinutes,eveningMode);
+ const choices=eveningPlan(state,byId,eveningMinutes,eveningMode).filter(p=>isPublished(p.id));
  return `<section class="profile-evening glass-panel" id="evening-plan"><div class="panel-heading"><span class="overline">${t('aLittleTime')}</span><h2>${t('eveningPlan')}</h2></div><p class="panel-description">${t('eveningHint')}</p><div class="plan-modes" role="group" aria-label="${t('planMode')}">${['all','continue','new'].map(id=>`<button class="chip" data-plan-mode="${id}" aria-pressed="${eveningMode===id}">${t('plan_'+id)}</button>`).join('')}</div><div class="time-options" role="group" aria-label="${t('availableTime')}">${[15,30,60,90,120].map(n=>`<button class="chip" data-plan-minutes="${n}" aria-pressed="${n===eveningMinutes}">${n} ${t('minutesShort')}</button>`).join('')}</div><div class="evening-results" aria-live="polite">${choices.length?choices.map(plan=>{const a=byId(plan.id)||state.entries[plan.id]?.anime||Object.values(state.progress).find(p=>p.id===plan.id)?.anime;return `<button class="evening-option" data-watch="${esc(plan.id)}" data-episode="${plan.start}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t(plan.count>1?'episodes':'episode')} ${plan.ordinal}${plan.count>1?'–'+plan.lastOrdinal:''}</small><small>${plan.estimated?'≈ ':''}${plan.minutes} ${t('minutesShort')}${plan.speed!==1?' · '+plan.speed+'×':''}</small><small class="plan-spare">${t('planSpare')} ${plan.spareMinutes} ${t('minutesShort')}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('eveningEmpty')}</p>`}</div>${choices.some(c=>c.estimated)?`<p class="plan-estimate">${t('eveningEstimate')}</p>`:''}</section>`;
 }
 function historyHTML() {
@@ -400,6 +398,7 @@ function preferencesHTML() {
 async function openDetails(id) {
   let a = byId(id);
   if (!a) return;
+  a={...a,catalogOnly:!isPublished(a.id)};
   id = a.id;
   detailId = id;
   const e = state.entries[id] || {};
@@ -800,7 +799,7 @@ async function openPlayer(id, requested, pushRoute=true) {
   const openingHash=location.hash, openingAccount=authGeneration;
   let a;
   try{a=await findWatchRelease(id);}catch{toast(t("providerError"));}
-  if(!a){playerOpening=false;return;}
+  if(!a){playerOpening=false;toast(t('releaseAwaitingReview'));if(page==='watch'&&!current)navigate('catalog');return;}
   if (a.providerId || a.animeVostId || a.animeGoId || a.kitsuId || a.malId) {
     try {
       a = await resolveRelease(a);
@@ -923,7 +922,7 @@ async function updateSource(play = false, refresh = false, position) {
   let url=null,stream=false;
   try {
     if(current.animeGoId){const loadingAnime=current;await prepareEpisodeAudio(loadingAnime,episode).catch(()=>{loadingAnime.currentGoVoices=[];loadingAnime.goVoiceOrdinal=null;});if(generation!==sourceGeneration)return;selectedAudio=preferredAudio(audioChoices(current,episode),state.preferences,current.id);renderEpisodes();}
-    if(current.id==='sintel')url='assets/sintel-trailer.mp4';
+    if(!isPublished(current.id))throw Error('noSource');
     else if(current.providerId || current.animeVostId || current.animeGoId){
       const info=await videoEpisode(current,episode,refresh,selectedAudio);
       if(generation!==sourceGeneration)return;
@@ -1100,7 +1099,7 @@ function showAbout() {
   $("#about-dialog").className = "about-dialog";
   $("#about-dialog").innerHTML =
     closeButton("about-dialog") +
-    `<span class="overline">yomiku</span><h2>${t("about")}</h2><p>${t("aboutCopy")}</p><p>${t("sources")}<br><a href="https://animevost.org" target="_blank" rel="noopener noreferrer">AnimeVost</a> · <a href="https://kitsu.app" target="_blank" rel="noopener noreferrer">Kitsu</a> · <a href="https://aniliberty.top" target="_blank" rel="noopener noreferrer">AniLiberty</a>.</p><button class="button primary" data-close="about-dialog">${t("close")}</button>`;
+    `<span class="overline">yomiku</span><h2>${t("about")}</h2><p>${t("aboutCopy")}</p><p>${t("sources")}<br>${t("catalogRebuilding")}</p><button class="button primary" data-close="about-dialog">${t("close")}</button>`;
   $("#about-dialog").showModal();
 }
 document.addEventListener("click", async (event) => {

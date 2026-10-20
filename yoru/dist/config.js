@@ -7,5 +7,5 @@ window.YORU_CONFIG = {
   "phoneAuth": false,
   "appleAuth": false,
   "accountDeletion": true,
-  "animeGo": true
+  "animeGo": false
 };

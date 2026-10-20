@@ -661,3 +661,10 @@ for(const [key,values] of Object.entries(releasePolish))['ru','en','ja'].forEach
 
 const octoberLayout={recommended:['Рекомендуем посмотреть','Recommended for you','おすすめのアニメ'],exploreCatalog:['Открыть каталог','Explore catalogue','カタログを見る'],genre:['Жанр','Genre','ジャンル'],allGenres:['Все жанры','All genres','すべてのジャンル']};
 for(const [key,values] of Object.entries(octoberLayout))['ru','en','ja'].forEach((l,i)=>dictionaries[l][key]=values[i]);
+
+const catalogueResetCopy={
+ catalogRebuilding:['Новые истории — скоро','New stories are coming','新しい物語を準備中'],
+ catalogRebuildingHint:['Собираем новую коллекцию. Твои списки и история остаются с тобой.','A new collection is on its way. Your lists and history are safe.','新しいコレクションを準備しています。リストと視聴履歴はそのまま残ります。'],
+ releaseAwaitingReview:['Этот тайтл ещё не добавлен в новую коллекцию.','This title has not joined the new collection yet.','この作品はまだ新しいコレクションに追加されていません。']
+};
+for(const [key,values] of Object.entries(catalogueResetCopy))['ru','en','ja'].forEach((lang,i)=>dictionaries[lang][key]=values[i]);

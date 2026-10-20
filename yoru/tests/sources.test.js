@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mergeCatalogues,combinedCatalogue} from '../src/sources.js';
+import {mergeCatalogues,combinedCatalogue} from '../src/legacy-sources.js';
 import {normalizeKitsu,fetchKitsuCatalogue} from '../src/kitsu.js';
 import {normalizeRelease,providerEpisode} from '../src/provider.js';
 import {enrichPosters} from '../src/posters.js';
@@ -93,7 +93,7 @@ test('audience ratings come from actual Kitsu scores and remain absent when unsc
  assert.equal(normalizeKitsu({id:'no-rating',attributes:{canonicalTitle:'B'}}).audienceRating,null);
 });
 test('discovery modes send actual popularity, rating, airing and film filters',async()=>{
- const {discoveryOptions}=await import('../src/sources.js');
+ const {discoveryOptions}=await import('../src/legacy-sources.js');
  assert.equal(discoveryOptions({view:'popular',sort:'latest'}).sort,'popular');
  assert.equal(discoveryOptions({view:'topRated'}).sort,'topRated');
  assert.equal(discoveryOptions({view:'airingNow'}).ongoing,true);

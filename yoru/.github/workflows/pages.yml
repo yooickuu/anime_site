@@ -1,10 +1,8 @@
-name: Deploy yooickuu to GitHub Pages
+name: Deploy yomiku to GitHub Pages
 on:
   push:
     branches: [main]
   workflow_dispatch:
-  schedule:
-    - cron: "35 4 * * *"
 permissions:
   contents: read
   pages: write
@@ -23,12 +21,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - name: Refresh catalogue ID index
-        run: node scripts/audit-catalog.mjs
-        continue-on-error: true
-      - name: Refresh additional video catalogue
-        run: npm run update:animevost
-        continue-on-error: true
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
