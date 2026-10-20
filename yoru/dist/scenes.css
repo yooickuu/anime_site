@@ -128,3 +128,26 @@ footer .brand .brand-symbol{width:36px;height:36px}footer .brand .brand-name{fon
  .profile-email{overflow-wrap:anywhere}
 }
 @media(max-width:360px){.header>.brand .brand-symbol{width:30px;height:30px}.header>.brand .brand-name{font-size:22px}.header-tools{gap:4px}}
+
+/* Equal side columns keep the signature at the actual centre of the header. */
+.header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:18px;height:84px;min-height:84px}
+.header>nav{grid-column:1;grid-row:1;justify-self:start;order:initial;min-width:0}
+.header>.brand{grid-column:2;grid-row:1;justify-self:center;margin:0;gap:9px}
+.header>.brand .brand-symbol{width:58px;height:58px}
+.header>.brand .brand-name{font-size:35px;letter-spacing:-1.8px}
+.header>.brand .brand-kana{font-size:9px;letter-spacing:4px}
+.header>.header-tools{grid-column:3;grid-row:1;justify-self:end;margin:0;min-width:0;max-width:100%}
+.header-tools .search,.header-tools .search:focus-within{min-width:60px;max-width:205px;flex-shrink:1}
+@media(min-width:801px) and (max-width:1100px){.header{gap:12px}.header>.brand .brand-symbol{width:50px;height:50px}.header>.brand .brand-name{font-size:31px}.header .nav-link{padding:10px 8px}}
+@media(max-width:800px){
+ .header{grid-template-columns:minmax(0,1fr) auto;height:auto;min-height:0;gap:8px;padding-top:8px;padding-bottom:10px}
+ .header>.brand{grid-column:1/-1;grid-row:1;justify-self:center;gap:6px;min-height:50px}
+ .header>.brand .brand-symbol{width:48px;height:48px}
+ .header>.brand .brand-name{font-size:30px}
+ .header>.brand .brand-kana{font-size:8px;letter-spacing:3px}
+ .header>nav{grid-column:1;grid-row:2;justify-self:start;width:100%;justify-content:flex-start;gap:2px}
+ .header>.header-tools{grid-column:2;grid-row:2}
+ .header .nav-link{padding:8px 6px;min-width:0;flex:1;white-space:nowrap}
+ .header-tools .search{display:none}
+}
+@media(max-width:380px){.header{column-gap:5px}.header .nav-link{font-size:10px;padding:8px 4px;gap:3px}.header #list-count{font-size:8px;padding:2px 3px}}

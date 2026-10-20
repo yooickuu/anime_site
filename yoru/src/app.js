@@ -125,7 +125,7 @@ const title = (a) => (a?.id === "sintel" ? t("demo") : titleFor(a, lang));
 const statusName = (s) => s.name || t(s.key || s.id);
 spotlight.forEach(registerAnime);
 const brand = () =>
-  `<a href="#home" class="brand" aria-label="yomiku · ${t('home')}"><img class="brand-symbol" src="assets/yomiku-mark.svg" alt="" width="44" height="44"><span class="brand-wordmark"><span class="brand-kana" aria-hidden="true">ヨミク</span><span class="brand-name">yomiku</span></span></a>`;
+  `<a href="#home" class="brand" aria-label="yomiku · ${t('home')}"><img class="brand-symbol" src="assets/yomiku-mark.svg?v=2" alt="" width="44" height="44"><span class="brand-wordmark"><span class="brand-kana" aria-hidden="true">ヨミク</span><span class="brand-name">yomiku</span></span></a>`;
 const closeButton = (id) =>
   `<button class="dialog-close icon-button" data-close="${id}" aria-label="${t("close")}">${icon("close")}</button>`;
 function toast(message) {
@@ -138,9 +138,9 @@ function applyAppearance() {
   document.documentElement.lang = lang;
   document.body.classList.add("dark");
   document.body.dataset.style = appearance;
-  const mark='assets/yomiku-mark.svg';
+  const mark='assets/yomiku-mark.svg?v=2';
   document.querySelector('link[rel="icon"]')?.setAttribute('href',mark);
-  document.querySelector('link[rel="apple-touch-icon"]')?.setAttribute('href',`assets/yomiku-touch.png`);
+  document.querySelector('link[rel="apple-touch-icon"]')?.setAttribute('href',`assets/yomiku-touch.png?v=2`);
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content',styleColors[appearance]);
   document.title = "yomiku — " + ({ru:"аниме, фильмы и личные списки",en:"anime, films and personal lists",ja:"アニメ・映画・マイリスト"}[lang]);
   try {

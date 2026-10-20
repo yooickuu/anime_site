@@ -299,3 +299,7 @@ User asked to finish the latest two visual tasks, then stop and wait.
 - New transparent origami bird/comet SVG, fresh 180px home-screen icon. Open wordmark with small Japanese kana, no square badge; remains left in header, responsive sizing and subtle hover, respects reduced motion.
 - Narrow-header search no longer grows into adjacent navigation; mobile section headers/pagination wrap; profile email wraps rather than overflowing. Existing player control sizes unchanged.
 - Build/check, manifest/SVG validation pass. Icon raster inspected. No broad functional tests or full browser visual audit: user requested short checks and was actively using Safari; isolated in-app browser unavailable.
+
+## 20 October — centred yomiku signature
+- Detailed origami folds, secondary sparkle and thin orbit; regenerated touch icon. Header now equal left/right grid columns: nav left, larger brand truly centred, tools right. Tablet/phone uses centred brand above a compact navigation/tools row to avoid collisions.
+- Build/check and SVG/manifest parse validated; no long suite, per explicit quota request. CSS layout reviewed, not claiming full-device visual QA.
