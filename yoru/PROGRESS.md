@@ -280,3 +280,8 @@ User asked to finish the latest two visual tasks, then stop and wait.
 - Profile header/buttons now overlay the same full-width banner stage; fixed440px desktop/380px tablet/330px phone regardless of uploaded image dimensions. Foreground uses contain to preserve geometry, soft matching image fills edges. Removed natural-height and portrait-height variants. Existing stored images are unchanged.
 - Build/check + 7 focused tests pass (ten-slide cycle/wrap, failed image, stalleddecode, stalledanimation, bannergeometry). User requested no heavy checks; no full visual QA repeated.
 - User requested stop after these fixes; wait for next instruction.
+
+## 20 October — edge fill and compact control alignment
+- Profile foreground switched contain→cover: fills fixed banner edge-to-edge without distortion (outer portions may crop). Height/header/fade unchanged; original upload preserved. Verified full-width profile in Safari on generated demo fixture; removed fixture afterwards.
+- Unified player icon/select heights40px,36px on narrow phones; matched mobile grid cells to buttons (previous32px cells with36–40px children caused overflow). Aligned pickers, episode buttons, form actions, pagination, filter chips and mobile header controls.
+- Build/check pass; scenes.css parses without errors. No broad/heavy suite, per user's request. Other pages' controls inspected in CSS, not claimed fully visually tested.

@@ -40,7 +40,7 @@ main:has(>.profile-page){margin-top:0}
 .profile-banner-heading .profile-account-actions{margin:0}
 body.dark[data-style] .profile-banner-heading button{background:linear-gradient(135deg,#ffffff1b,transparent),rgba(var(--surface-rgb),.65);color:#fff;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-radius:12px;min-height:44px;padding:12px 18px}
 .profile-cover{position:absolute;inset:0 auto 0 50%;height:100%;min-height:0;width:100vw;max-width:none;margin:0 0 0 -50vw;overflow:hidden;isolation:isolate;mask-image:linear-gradient(#000 48%,#000e 65%,#0006 84%,transparent);-webkit-mask-image:linear-gradient(#000 48%,#000e 65%,#0006 84%,transparent)}
-.profile-cover>img{display:block;position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;object-position:center;animation:none}
+.profile-cover>img{display:block;position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;object-position:center;animation:none}
 .profile-cover>img[hidden]{display:none}
 .profile-cover-fade{position:absolute;inset:0;background:linear-gradient(#0007,transparent 38%);pointer-events:none}
 .profile-cover-actions{position:absolute;right:max(18px,calc((100vw - 1080px)/2));top:100px;display:flex;gap:8px;opacity:.7;transition:opacity .2s;z-index:2}.profile-cover-actions:hover,.profile-cover-actions:focus-within{opacity:1}
@@ -59,7 +59,13 @@ body.dark[data-style] .details-dialog{background:linear-gradient(rgba(var(--surf
 body.dark[data-style] .details-copy{background:linear-gradient(135deg,#ffffff09,transparent),rgba(var(--surface-rgb),.69)!important;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
 .details-dialog .details-toolbar{margin-top:0;min-height:56px}.details-dialog .details-toolbar .icon-button{width:40px;height:40px;min-width:40px}
 body.dark[data-style] .video-controls{background:linear-gradient(135deg,#ffffff0e,transparent),rgba(var(--surface-rgb),.9)}
-.video-controls .icon-button{width:36px;min-width:36px;height:36px}.video-controls .select-trigger{min-height:36px}
+.video-controls{--player-control-size:40px;align-items:center}
+.video-controls .icon-button{width:var(--player-control-size);min-width:var(--player-control-size);height:var(--player-control-size);min-height:var(--player-control-size);padding:0;border-radius:9px}
+.video-controls .select-trigger{height:var(--player-control-size);min-height:var(--player-control-size);padding:0 9px;border-radius:9px;line-height:1}
+.video-controls .video-option,.video-controls .site-select{display:flex;align-items:center;min-width:0}
+.video-controls .ui-icon{width:20px;height:20px;display:block;flex:none}
+.video-controls .select-trigger .ui-icon{width:14px;height:14px}
+.video-controls .select-trigger>span{line-height:1.25}
 @media(min-width:1700px){.cinematic-hero{height:760px}}
 @media(max-width:800px){.cinematic-hero{height:650px;min-height:0;margin-left:-4.35%;margin-right:-4.35%}.hero-content{width:80%;padding-bottom:70px}.hero-content h1{font-size:36px}.hero-backdrop{object-position:65% center}.profile-grid{margin-top:-90px}}
 @media(max-width:600px){.cinematic-hero{height:auto;min-height:480px;align-items:flex-end;margin-top:0}.hero-picture{height:auto;aspect-ratio:2.5;mask-image:linear-gradient(#000 50%,#000a 70%,transparent);-webkit-mask-image:linear-gradient(#000 50%,#000a 70%,transparent)}.hero-backdrop{object-fit:contain;object-position:top center}.hero-shade{height:auto;aspect-ratio:2.5;background:linear-gradient(transparent,#080a1044);mask-image:linear-gradient(#000 50%,transparent);-webkit-mask-image:linear-gradient(#000 50%,transparent)}.hero-content{width:100%;margin:0;padding:145px 6% 38px}.hero-content h1{font-size:29px;max-width:90%;margin-bottom:14px}.hero-content>p{-webkit-line-clamp:2;font-size:12px;margin-bottom:20px}.hero-eyebrow{margin-bottom:12px;font-size:10px}.hero-buttons{gap:8px}.hero-buttons .button{padding:12px 14px;font-size:12px}.hero-facts{margin-bottom:12px}.profile-grid{margin-top:-70px}.profile-cover-actions{top:118px;right:14px}.profile-cover-actions .icon-button{width:36px;min-width:36px;height:36px}.profile-card{padding:20px!important}.details-artwork{height:520px}.details-dialog .details-layout{margin-top:190px}.details-manga{height:auto;max-height:100%;min-height:0}.details-dialog .details-toolbar{min-height:54px}.header-tools .icon-button{width:36px;min-width:36px;height:36px}}
@@ -76,3 +82,26 @@ body.dark[data-style] .header.scrolled{background:rgba(var(--surface-rgb),.65)!i
 
 @media(max-width:800px){.profile-banner-stage{height:380px}.profile-grid{margin-top:-50px}}
 @media(max-width:600px){.profile-banner-stage{height:330px}.profile-banner-heading{top:22px;display:flex;align-items:flex-start;flex-wrap:wrap;gap:12px}.profile-banner-heading h1{font-size:28px}.profile-banner-heading .profile-account-actions{gap:8px}.profile-banner-heading .profile-account-actions button{font-size:11px;min-height:38px;padding:10px 12px}.profile-grid{margin-top:-40px}}
+
+/* Matching dimensions within each control group, including the narrow phone row. */
+.watch-page .player-pickers .select-trigger{height:44px;min-height:44px;padding:0 12px}
+.watch-page .episode-nav{align-items:stretch}
+.watch-page .episode-nav .button{min-height:44px;padding:10px 14px;line-height:1.3}
+.form-actions{display:flex;align-items:stretch;flex-wrap:wrap;gap:10px}
+.form-actions .button,.catalog-pagination .button{min-height:44px;line-height:1.25}
+.catalog-pagination input[type=number]{height:44px;min-height:44px}
+:is(.filter-row,.time-options,.plan-modes) :is(.chip,.filter-chip){min-height:38px;display:inline-flex;align-items:center;justify-content:center;line-height:1.25}
+.header-tools .avatar{aspect-ratio:1;object-fit:cover;flex-shrink:0;overflow:hidden}
+@media(max-width:600px){
+ .video-controls{grid-template-columns:40px 40px minmax(50px,1fr) minmax(60px,1fr) 40px 40px 40px;gap:3px;padding:5px;align-items:center}
+ .video-controls .select-trigger{padding:0 6px}
+ .video-controls .video-option>.site-select{width:100%;max-width:none}
+ .video-controls .select-trigger{width:100%;gap:3px}
+ .header-tools .icon-button{min-height:36px;height:36px;width:36px;min-width:36px;padding:0}
+ .header-tools .select-trigger,.header-tools .login-button{height:36px;min-height:36px}
+ .header-tools .avatar{height:36px;width:36px;min-width:36px;flex-basis:36px}
+}
+@media(max-width:380px){
+ .video-controls{--player-control-size:36px;grid-template-columns:36px 36px minmax(44px,1fr) minmax(54px,1fr) 36px 36px 36px;gap:2px;padding:4px}
+ .video-controls .select-trigger{font-size:10px;padding:0 4px}
+}
