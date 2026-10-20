@@ -303,3 +303,5 @@ User asked to finish the latest two visual tasks, then stop and wait.
 ## 20 October — centred yomiku signature
 - Detailed origami folds, secondary sparkle and thin orbit; regenerated touch icon. Header now equal left/right grid columns: nav left, larger brand truly centred, tools right. Tablet/phone uses centred brand above a compact navigation/tools row to avoid collisions.
 - Build/check and SVG/manifest parse validated; no long suite, per explicit quota request. CSS layout reviewed, not claiming full-device visual QA.
+
+- Final quick request: header94px desktop, proportionally larger logo/navigation/search/buttons/avatar; constrained tablet sizes and modest phone increase. CSS only; cache version yomiku3.

@@ -151,3 +151,29 @@ footer .brand .brand-symbol{width:36px;height:36px}footer .brand .brand-name{fon
  .header-tools .search{display:none}
 }
 @media(max-width:380px){.header{column-gap:5px}.header .nav-link{font-size:10px;padding:8px 4px;gap:3px}.header #list-count{font-size:8px;padding:2px 3px}}
+/* Slightly roomier header, with proportional controls and a compact phone layout. */
+@media(min-width:801px){
+ .header{height:94px;min-height:94px}
+ .header>.brand .brand-symbol{width:64px;height:64px}
+ .header>.brand .brand-name{font-size:38px}
+ .header>.brand .brand-kana{font-size:10px}
+ .header .nav-link{height:46px;font-size:13px;padding:11px 14px}
+ .header-tools .search{height:44px}
+ .header-tools .search input{font-size:13px}
+ .header-tools .select-trigger,.header-tools .login-button{height:44px;min-height:44px;font-size:13px}
+ .header-tools .avatar{width:44px;height:44px;min-width:44px;flex-basis:44px}
+}
+@media(min-width:801px) and (max-width:1100px){
+ .header>.brand .brand-symbol{width:55px;height:55px}
+ .header>.brand .brand-name{font-size:34px}
+ .header .nav-link{font-size:12px;padding:10px 8px}
+ .header-tools .select-trigger,.header-tools .login-button{font-size:12px;padding-left:9px;padding-right:9px}
+}
+@media(max-width:800px){
+ .header{padding-top:10px;padding-bottom:12px;row-gap:10px}
+ .header>.brand .brand-symbol{width:52px;height:52px}
+ .header>.brand .brand-name{font-size:32px}
+ .header .nav-link{height:39px}
+ .header-tools .select-trigger,.header-tools .login-button{height:39px;min-height:39px}
+ .header-tools .avatar{width:39px;height:39px;min-width:39px;flex-basis:39px}
+}
