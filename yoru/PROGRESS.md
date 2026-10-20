@@ -273,3 +273,10 @@ User asked to finish the latest two visual tasks, then stop and wait.
 - Final live UI verification incomplete: Safari capture failed with ScreenCaptureKit -3811; then noWindowsAvailable. Do NOT claim full desktop/mobile/all-theme visual QA. User screenshots confirmed earlier scene/background integration but are before latest image replacement.
 - No account writes or video-source changes. QA fixture removed. Temporary profile fixture generator remains /tmp/yooickuu-profile-preview.mjs if needed.
 - Further work only after user's next instruction. Check publication separately; previous Pages URL often serves /anime_site/yoru/dist/ instead of workflow root.
+
+## 20 October — carousel stall and consistent profile banner
+- User reports hero stops after JJK→Frieren; all ten published images returned HTTP 200 at current Pages root `/anime_site/assets/…` (legacy `/yoru/dist/` is now404).
+- Decoupled rotation lock from Web Animations `.finished`, with timed outgoing-layer removal for suspended Safari animations. Bounded image decode to4500ms, skip failed candidates; explicit spotlight artwork wins over catalogue merge. Keyboard focus still pauses, lingering pointer focus no longer pauses.
+- Profile header/buttons now overlay the same full-width banner stage; fixed440px desktop/380px tablet/330px phone regardless of uploaded image dimensions. Foreground uses contain to preserve geometry, soft matching image fills edges. Removed natural-height and portrait-height variants. Existing stored images are unchanged.
+- Build/check + 7 focused tests pass (ten-slide cycle/wrap, failed image, stalleddecode, stalledanimation, bannergeometry). User requested no heavy checks; no full visual QA repeated.
+- User requested stop after these fixes; wait for next instruction.
