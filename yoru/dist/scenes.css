@@ -105,3 +105,26 @@ body.dark[data-style] .header.scrolled{background:rgba(var(--surface-rgb),.65)!i
  .video-controls{--player-control-size:36px;grid-template-columns:36px 36px minmax(44px,1fr) minmax(54px,1fr) 36px 36px 36px;gap:2px;padding:4px}
  .video-controls .select-trigger{font-size:10px;padding:0 4px}
 }
+
+/* yomiku: an open paper-comet signature, without a badge or square container. */
+.brand{gap:7px;flex-shrink:0;text-decoration:none}
+.brand .brand-symbol{display:block;flex:none;width:44px;height:44px;object-fit:contain;background:none;border:0;border-radius:0;box-shadow:none;transform:none;filter:drop-shadow(0 3px 9px #b79ce928)}
+.brand .brand-wordmark,.header>.brand .brand-wordmark{display:grid;position:relative;gap:2px;align-content:center;padding:3px 0 4px}
+.brand .brand-name,.header>.brand .brand-name{display:block;font-size:29px;line-height:1;letter-spacing:-1.6px;font-weight:850;font-style:italic;padding-right:3px}
+.brand .brand-kana{display:block;font-size:8px;line-height:1;letter-spacing:3.4px;font-weight:600;color:var(--accent);padding-left:3px;opacity:.9}
+.header>.brand{gap:7px;min-height:48px}
+.brand:focus-visible{outline:2px solid var(--accent);outline-offset:5px;border-radius:6px}
+footer .brand .brand-symbol{width:36px;height:36px}footer .brand .brand-name{font-size:25px}
+@media(prefers-reduced-motion:no-preference){.brand-symbol{transition:transform .28s ease,filter .28s ease}.brand:hover .brand-symbol{transform:translate(2px,-2px) rotate(-5deg);filter:drop-shadow(0 4px 12px #b79ce94d)}}
+@media(min-width:801px) and (max-width:1050px){.header{gap:14px}.header-tools{min-width:0}.header-tools .search,.header-tools .search:focus-within{width:clamp(100px,13vw,150px);flex-shrink:1}.header nav{gap:2px}}
+@media(max-width:600px){
+ .header>.brand{min-height:38px;gap:4px}
+ .header>.brand .brand-symbol{width:35px;height:35px}
+ .header>.brand .brand-name{font-size:25px;letter-spacing:-1.35px}
+ .header>.brand .brand-kana{font-size:7px;letter-spacing:2.5px}
+ .section-head{flex-wrap:wrap;row-gap:12px}
+ .catalog-pagination{flex-wrap:wrap;justify-content:center;row-gap:8px}
+ .profile-fields,.profile-history,.profile-preferences,.player-settings{min-width:0}
+ .profile-email{overflow-wrap:anywhere}
+}
+@media(max-width:360px){.header>.brand .brand-symbol{width:30px;height:30px}.header>.brand .brand-name{font-size:22px}.header-tools{gap:4px}}

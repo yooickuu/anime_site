@@ -490,7 +490,7 @@ for (const [key, values] of Object.entries(extra))
   ["ru", "en", "ja"].forEach((l, i) => (dictionaries[l][key] = values[i]));
 for (const dictionary of Object.values(dictionaries))
   for (const key of Object.keys(dictionary))
-    dictionary[key] = dictionary[key].replaceAll("Yoru", "yooickuu");
+    dictionary[key] = dictionary[key].replaceAll("Yoru", "yomiku");
 const online = {
   onlineCatalog: [
     "Онлайн-каталог · AniLiberty",

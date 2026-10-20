@@ -293,3 +293,9 @@ User asked to finish the latest two visual tasks, then stop and wait.
 - Reuse player/video through source switches; suspend listeners/transport without clearing native src or pausing. Normal watch-page rerenders leave its DOM mounted. Removed duplicate metadata resume and early raw-video error toast.
 - 23 targeted tests pass; native Safari QA with actual createPlayback+automation and local sample video confirmed episode 1 -> 2, fullscreen true, playing true, volume .2 and speed 1.25. QA fixture/tab removed. No real account changed. This does not certify every external source or iPhone native fullscreen.
 - Auto-skip requires valid source/AniSkip timestamps; disabled/missing marks, post-credit scenes, all next/autoplay combinations, last episode and repeated ended events covered. Source failures from prior catalogue work remain separate.
+
+## 20 October — yomiku brand
+- Renamed visible UI, localized copy replacement, page/social metadata, manifest, setup labels and export filename to yomiku. Kept existing GitHub URL, Supabase configuration and storage keys to preserve accounts/preferences/history.
+- New transparent origami bird/comet SVG, fresh 180px home-screen icon. Open wordmark with small Japanese kana, no square badge; remains left in header, responsive sizing and subtle hover, respects reduced motion.
+- Narrow-header search no longer grows into adjacent navigation; mobile section headers/pagination wrap; profile email wraps rather than overflowing. Existing player control sizes unchanged.
+- Build/check, manifest/SVG validation pass. Icon raster inspected. No broad functional tests or full browser visual audit: user requested short checks and was actively using Safari; isolated in-app browser unavailable.

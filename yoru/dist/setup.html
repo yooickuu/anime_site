@@ -4,15 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>Подключение аккаунтов · yooickuu</title>
-  <link rel="icon" href="assets/yooickuu-icon.png">
+  <title>Подключение аккаунтов · yomiku</title>
+  <link rel="icon" href="assets/yomiku-mark.svg">
   <style>
     :root{color-scheme:light dark;font-family:system-ui,sans-serif;line-height:1.6;background:#10111a;color:#eeeef6}
     *{box-sizing:border-box}body{margin:0}main{max-width:760px;margin:auto;padding:28px 20px 64px}h1{line-height:1.2;font-size:clamp(28px,6vw,40px)}h2{font-size:21px}a{color:#c9b4ff}section{background:#1b1c29;border:1px solid #343449;border-radius:20px;padding:24px;margin:20px 0}button,.button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border:0;border-radius:12px;padding:11px 18px;background:#c9b4ff;color:#19102c;font:inherit;font-weight:600;text-decoration:none;cursor:pointer;max-width:100%}button:disabled{opacity:.5;cursor:wait}button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid #e4d8ff;outline-offset:3px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}textarea{display:block;width:100%;min-height:140px;padding:12px;background:#10111a;color:#eeeef6;border:1px solid #555269;border-radius:12px;font:13px/1.5 monospace;resize:vertical}code{overflow-wrap:anywhere;color:#dbcdff}li+li{margin-top:9px}.muted{color:#b7b6c9}#status{white-space:pre-line;overflow-wrap:anywhere;min-height:2em}summary{cursor:pointer;padding:10px 0}@media(prefers-color-scheme:light){:root{background:#f5f3fb;color:#262234}section{background:#fff;border-color:#ddd5ed}a{color:#6541ad}.muted{color:#625c70}textarea{background:#faf9fd;color:#262234}code{color:#6541ad}}
   </style>
 </head>
 <body><main>
-  <a href="./">← Вернуться в yooickuu</a>
+  <a href="./">← Вернуться в yomiku</a>
   <h1>Подключаем аккаунты</h1>
   <p>Эту настройку один раз выполняет владелец сайта. Оплачивать тариф для этих шагов не нужно.</p>
   <section>
@@ -51,7 +51,7 @@
   </section>
   <section id="anime-source">
     <h2>Новые озвучки и серии</h2>
-    <p>Функция получает ссылки на видео для плеера yooickuu. Сами видео в Supabase не загружаются.</p>
+    <p>Функция получает ссылки на видео для плеера yomiku. Сами видео в Supabase не загружаются.</p>
     <ol>
       <li>Нажми «Скопировать подключение видео».</li>
       <li>В Supabase открой Edge Functions → <code>anime-source</code> → Code. Если функции ещё нет: Deploy a new function → Via Editor → имя <code>anime-source</code>.</li>
@@ -79,7 +79,7 @@
     <h2>3. Проверь подключение</h2>
     <button id="check">Проверить подключение</button>
     <p id="status" role="status" aria-live="polite"></p>
-    <p>Для первой регистрации используй ту же почту, что и для аккаунта Supabase. Открой yooickuu, нажми <strong>Войти → Регистрация</strong>, заполни поля и подтверди адрес по письму.</p>
+    <p>Для первой регистрации используй ту же почту, что и для аккаунта Supabase. Открой yomiku, нажми <strong>Войти → Регистрация</strong>, заполни поля и подтверди адрес по письму.</p>
     <p class="muted">Встроенная почта Supabase отправляет письма только участникам проекта и ограничена двумя письмами в час. Для регистрации друзей потребуется отдельный почтовый сервис (SMTP). Телефон и Apple подключаются отдельно. Эти проверки не заменяют проверку сохранения после настоящего входа.</p>
   </section>
   <p class="muted">В сайт записываются только Project URL и публичный Publishable key. Secret key, service_role, пароль базы и SMTP-пароль в файлы сайта не добавляй.</p>
