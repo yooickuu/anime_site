@@ -3,24 +3,32 @@ import Hls from 'hls.js';
 // One transport for the application and the browser playback checks.
 export function createPlayback(video, onState = () => {}, {schedule=setTimeout,cancel=clearTimeout,startupTimeout=20000} = {}) {
   let hls = null, generation = 0, events = null, startupTimer;
-  function stop() {
+  function suspend() {
     generation++;
     cancel(startupTimer);startupTimer=null;
     events?.abort();
     events = null;
+    hls?.stopLoad();
+  }
+  function stop() {
+    suspend();
     hls?.destroy();
     hls = null;
     video.pause();
     video.removeAttribute('src');
     video.load();
   }
-  function load({ url, stream = false, autoplay = false, startAt = 0, speed = 1 }) {
-    stop();
+  function load({ url, stream = false, autoplay = false, startAt = 0, speed = 1, onState: notify = onState, onMetadata = () => {} }) {
+    // Keep the video and its fullscreen container mounted. In particular, native
+    // Safari playback must not pass through an empty src between episodes.
+    suspend();
+    hls?.destroy();
+    hls = null;
     const own = generation;
     events = new AbortController();
     const emit = state => { if (own !== generation)return;
       if(['ready','playing','error','unsupported','autoplayBlocked'].includes(state)){cancel(startupTimer);startupTimer=null;}
-      onState(state);
+      notify(state);
     };
     const listen = (name, fn) => video.addEventListener(name, fn, { signal: events.signal });
     let mediaRetries = 0, networkRetries = 0;
@@ -30,6 +38,7 @@ export function createPlayback(video, onState = () => {}, {schedule=setTimeout,c
       if(!autoplay)emit('ready');
       if (startAt > 0 && Number.isFinite(video.duration)) video.currentTime = Math.min(startAt, Math.max(0, video.duration - 0.1));
       video.playbackRate = speed;
+      onMetadata();
       if (autoplay) video.play().catch(error => {
         if(error?.name==='AbortError')return;
         emit(error?.name==='NotAllowedError'?'autoplayBlocked':'error');
@@ -57,5 +66,5 @@ export function createPlayback(video, onState = () => {}, {schedule=setTimeout,c
       video.load();
     } else emit('unsupported');
   }
-  return { load, destroy: stop };
+  return { load, suspend, destroy: stop };
 }

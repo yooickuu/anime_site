@@ -4,7 +4,12 @@ import {timeLabel} from './state.js';
 export function controlsHTML(t, {speed = 1} = {}) {
   return `<div class="video-controls" role="group" aria-label="${t('videoControls')}"><input class="video-seek" type="range" min="0" max="100" value="0" step="0.1" aria-label="${t('seek')}" disabled><button class="icon-button" data-video="play" aria-label="${t('play')}" title="${t('play')}">${icon('play')}</button><span class="video-time" data-video-time>0:00 / 0:00</span><button class="icon-button" data-video="mute" aria-label="${t('mute')}" title="${t('mute')}">${icon('volume')}</button><input class="video-volume" type="range" min="0" max="1" value="1" step="0.05" aria-label="${t('volume')}"><span class="video-option"><select id="speed" aria-label="${t('speed')}">${[0.5,0.75,1,1.25,1.5,1.75,2].map(v=>`<option value="${v}" ${Number(speed)===v?'selected':''}>${v}×</option>`).join('')}</select></span><span class="video-option" id="quality-control" hidden><select id="quality" aria-label="${t('quality')}"></select></span><button class="icon-button" data-action="cinema" aria-label="${t('cinema')}" title="${t('cinema')}" aria-pressed="false">${icon('screen')}</button><button class="icon-button" data-video="pip" aria-label="${t('pip')}" title="${t('pip')}">${icon('pip')}</button><button class="icon-button" data-video="fullscreen" aria-label="${t('fullscreen')}" title="${t('fullscreen')}">${icon('fullscreen')}</button></div><span class="video-loading" role="status" hidden>${t('loading')}</span>`;
 }
-export function attachControls(root, video, t, onError) {
+export function attachControls(root, video, t, onError, {sound, onSoundChange = () => {}} = {}) {
+  if(sound){video.volume=sound.volume;video.muted=sound.muted;}
+  let soundTimer;
+  const saveSound=()=>{clearTimeout(soundTimer);soundTimer=null;onSoundChange();};
+  const soundChanged=()=>{clearTimeout(soundTimer);soundTimer=setTimeout(saveSound,250);};
+  video.addEventListener('volumechange',soundChanged);
   const play=root.querySelector('[data-video="play"]'),mute=root.querySelector('[data-video="mute"]');
   const seek=root.querySelector('.video-seek'),volume=root.querySelector('.video-volume'),time=root.querySelector('[data-video-time]');
   const pip=root.querySelector('[data-video="pip"]'),full=root.querySelector('[data-video="fullscreen"]');
@@ -66,5 +71,5 @@ export function attachControls(root, video, t, onError) {
   for(const e of ['waiting','seeking','loadstart'])video.addEventListener(e,()=>{loading.hidden=false;});
   for(const e of ['canplay','playing','seeked','pause','error','ended'])video.addEventListener(e,()=>{loading.hidden=true;});
   update();
-  return ()=>idle.dispose();
+  return ()=>{if(soundTimer)saveSound();video.removeEventListener('volumechange',soundChanged);idle.dispose();};
 }

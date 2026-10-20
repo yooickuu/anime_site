@@ -32,3 +32,17 @@ test('autoplay policy rejection is distinct from real decode errors and old play
  }
  const h=harness();let reject;h.video.play=()=>new Promise((_,r)=>reject=r);h.player.load({url:'https://example.test/first.mp4',autoplay:true});h.video.dispatchEvent(new Event('loadedmetadata'));h.player.load({url:'https://example.test/next.mp4'});reject(Object.assign(Error(),{name:'NotAllowedError'}));await Promise.resolve();assert.deepEqual(h.states,['loading','loading']);h.player.destroy();
 });
+test('episode/quality replacement keeps native video attached without an empty source or forced pause',()=>{
+ const h=harness(),actions=[];
+ h.video.pause=()=>actions.push('pause');
+ h.video.removeAttribute=()=>actions.push('empty-src');
+ h.player.load({url:'https://example.test/episode1.mp4'});
+ h.player.suspend();
+ h.player.load({url:'https://example.test/episode2.mp4',startAt:65.25,speed:1.5});
+ h.video.dispatchEvent(new Event('loadedmetadata'));
+ assert.deepEqual(actions,[]);
+ assert.equal(h.video.currentTime,65.25);
+ assert.equal(h.video.playbackRate,1.5);
+ h.player.destroy();
+ assert.deepEqual(actions,['pause','empty-src']);
+});

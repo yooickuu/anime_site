@@ -4,15 +4,17 @@ import {defaults} from '../src/state.js';
 import {applyGuestPlaybackOperation as apply} from '../src/guest-playback.js';
 test('guests can adjust all playback settings without account operations',()=>{
  const original=defaults();
- const next=apply(original,{type:'preferences',patch:{speed:1.5,quality:720,audio:'go-1',autoSkip:true,autoNext:false,autoPlay:true}});
+ const next=apply(original,{type:'preferences',patch:{speed:1.5,quality:720,audio:'go-1',audioByAnime:{a:'go-1'},volume:.35,muted:true,autoSkip:true,autoNext:false,autoPlay:true}});
  assert.equal(next.preferences.speed,1.5);assert.equal(next.preferences.quality,720);
  assert.equal(next.preferences.autoSkip,true);assert.equal(next.preferences.autoNext,false);
+ assert.equal(next.preferences.volume,.35);assert.equal(next.preferences.muted,true);
  assert.equal(original.preferences.speed,1);
 });
-test('guest playback remembers a position in memory, with a clean state after reset',()=>{
- const next=apply(defaults(),{type:'progress',key:'a:1',value:{id:'a',episode:1,time:120,duration:1440}});
- assert.equal(next.progress['a:1'].time,120);
- assert.deepEqual(defaults().progress,{});
+test('guests cannot create viewing history, even within the current visit',()=>{
+ const original=defaults();
+ assert.equal(apply(original,{type:'progress',key:'a:1',value:{id:'a',episode:1,time:120,duration:1440}}),null);
+ assert.equal(apply(original,{type:'rebaseEpisodes',id:'a',numbers:[1,2]}),null);
+ assert.deepEqual(original.progress,{});
 });
 test('guest playback cannot mutate account details, lists, ratings or profile assets',()=>{
  for(const op of [{type:'entry',id:'a',patch:{rating:9}},{type:'createStatus',name:'test'},

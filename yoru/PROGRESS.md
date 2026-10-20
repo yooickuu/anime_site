@@ -285,3 +285,11 @@ User asked to finish the latest two visual tasks, then stop and wait.
 - Profile foreground switched contain→cover: fills fixed banner edge-to-edge without distortion (outer portions may crop). Height/header/fade unchanged; original upload preserved. Verified full-width profile in Safari on generated demo fixture; removed fixture afterwards.
 - Unified player icon/select heights40px,36px on narrow phones; matched mobile grid cells to buttons (previous32px cells with36–40px children caused overflow). Aligned pickers, episode buttons, form actions, pagination, filter chips and mobile header controls.
 - Build/check pass; scenes.css parses without errors. No broad/heavy suite, per user's request. Other pages' controls inspected in CSS, not claimed fully visually tested.
+
+## 20 October — explicit lists, saved player settings and continuous playback
+- Removed automatic Watching/Completed list writes on play/end. Existing saved lists unchanged. Guests retain only player preferences locally; no guest progress/history, no account list/rating writes. Comments explicitly deferred by user; subtitles also deferred.
+- Save volume/mute, speed, quality and per-title audio preference. Restore selected AnimeGO audio after async voice discovery. Same-episode quality/audio replacement preserves transient time for guests too.
+- Registered-user progress still syncs to Supabase. Pending operations now persist in account-specific localStorage (migrates sessionStorage draft), allowing close/reopen before a network save finishes. Deleted account clears both pending stores.
+- Reuse player/video through source switches; suspend listeners/transport without clearing native src or pausing. Normal watch-page rerenders leave its DOM mounted. Removed duplicate metadata resume and early raw-video error toast.
+- 23 targeted tests pass; native Safari QA with actual createPlayback+automation and local sample video confirmed episode 1 -> 2, fullscreen true, playing true, volume .2 and speed 1.25. QA fixture/tab removed. No real account changed. This does not certify every external source or iPhone native fullscreen.
+- Auto-skip requires valid source/AniSkip timestamps; disabled/missing marks, post-credit scenes, all next/autoplay combinations, last episode and repeated ended events covered. Source failures from prior catalogue work remain separate.
