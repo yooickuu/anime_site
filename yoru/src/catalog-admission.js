@@ -30,7 +30,7 @@ export const mediaURL = value => {
 };
 
 export function identityKeys(a) {
-  return ['mal', 'anilist', 'shikimori', 'kodik'].flatMap(k => {
+  return ['mal', 'anilist', 'shikimori', 'kodik', 'anilibria'].flatMap(k => {
     const val = a.ids?.[k];
     if (Number.isSafeInteger(val) && val > 0) return [`${k}:${val}`];
     if (typeof val === 'string' && val.trim()) return [`${k}:${val.trim()}`];
@@ -49,7 +49,7 @@ export function auditAdmission(a, { now = Date.now(), playerSubtitlesReady = tru
 
   const expected = a.releasedEpisodes || (a.episodes || []).map(e => e.number);
   const actual = (a.episodes || []).map(e => e.number);
-  if (!Array.isArray(expected) || !expected.length || !expected.every(n => Number.isFinite(n) && n > 0) || new Set(expected).size !== expected.length) {
+  if (!Array.isArray(expected) || !expected.length || !expected.every(n => Number.isFinite(n) && (strict ? n > 0 : n >= 0)) || new Set(expected).size !== expected.length) {
     fail('release_manifest_missing', 'releasedEpisodes');
   }
   if (strict && !fresh(a.evidence?.releaseManifest, now, maxAge)) fail('release_manifest_unverified', 'evidence.releaseManifest');

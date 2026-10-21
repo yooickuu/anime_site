@@ -5,10 +5,17 @@
  * fetches high-resolution banners/posters, and publishes to src/published-catalog.json.
  */
 
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { goRelease, goVoices, kodikVideo } from '../server/animego.js';
+import { readFile, writeFile, rename } from 'node:fs/promises';
+import { createApprovedCatalogue } from '../src/approved-catalog.js';
+import {normalizeSeedCatalog} from './normalize-seed-catalog.mjs';
+import { seedPages, remember, isKnown } from './seed-progress.mjs';
 
 const CATALOG_PATH = 'src/published-catalog.json';
+const PROGRESS_PATH = 'src/seed-progress.json';
+async function saveJSON(path, data) {
+  await writeFile(path + '.tmp', JSON.stringify(data, null, 2));
+  await rename(path + '.tmp', path);
+}
 const ANILIBRIA_BASE = 'https://anilibria.top/api/v1/anime/';
 const USER_AGENT = 'YoruAnimeApp/2.0 (https://yooickuu.github.io/yooickuu.com/)';
 
@@ -85,72 +92,48 @@ async function loadExistingCatalog() {
   try {
     const raw = await readFile(CATALOG_PATH, 'utf8');
     return JSON.parse(raw);
-  } catch {
+  } catch (error) {
+    if(error.code !== 'ENOENT') throw error;
     return { policyVersion: 3, updatedAt: new Date().toISOString(), items: [] };
   }
 }
 
-function extractKnownIDs(catalog) {
-  const known = new Set();
-  for (const item of catalog.items || []) {
-    if (item.id) known.add(String(item.id));
-    if (item.ids?.mal) known.add(`mal:${item.ids.mal}`);
-    if (item.ids?.shikimori) known.add(`shikimori:${item.ids.shikimori}`);
-    if (item.ids?.anilist) known.add(`anilist:${item.ids.anilist}`);
-    if (item.ids?.kodik) known.add(`kodik:${item.ids.kodik}`);
-  }
-  return known;
-}
-
 export async function seedCatalog({ targetCount = 30, onlyOngoings = false } = {}) {
+  if(!Number.isSafeInteger(targetCount)||targetCount<1) throw Error('Count must be a positive integer');
   console.log(`Starting anime catalogue seeder (target: ${targetCount}, ongoingsOnly: ${onlyOngoings})...`);
 
-  const catalog = await loadExistingCatalog();
-  const knownIDs = extractKnownIDs(catalog);
+  const {publication:catalog} = normalizeSeedCatalog(await loadExistingCatalog());
+  const knownIDs = new Set();
+  catalog.items.forEach(item=>remember(knownIDs,item));
+  let progress={};
+  try {progress=JSON.parse(await readFile(PROGRESS_PATH,'utf8'));} catch(error) {if(error.code!=='ENOENT')throw error;}
+  const mode=onlyOngoings?'ongoing':'all';
+  const saved=progress[mode]||{page:1,retryPages:[]};
+  let added=0,skipped=0,failed=0,scanned=0;
+  const retryPages=new Set(saved.retryPages||[]);
+  const checkpoint=async page=>{
+    catalog.updatedAt=new Date().toISOString();
+    await saveJSON(CATALOG_PATH,catalog);
+    progress[mode]={page,retryPages:[...retryPages],updatedAt:catalog.updatedAt};
+    await saveJSON(PROGRESS_PATH,progress);
+  };
   console.log(`Existing titles in catalog: ${catalog.items.length}`);
 
-  // Load AnimeGO catalogue for complementary Kodik voiceovers
-  let animeGoList = [];
-  try {
-    const goRaw = await readFile('checks/animego-catalogue.json', 'utf8');
-    animeGoList = JSON.parse(goRaw).items || [];
-    console.log(`Loaded ${animeGoList.length} AnimeGO index entries for voiceover matching.`);
-  } catch {
-    console.log('AnimeGO catalogue index not available, proceeding with primary sources.');
-  }
-
-  // Fetch candidate releases from AniLibria
-  let page = 1;
-  let added = 0;
-
-  while (added < targetCount && page <= 10) {
+  // Resume the catalogue scan; check its first page for newly released titles too.
+  for await (const batch of seedPages({startPage:saved.page,retryPages:[...retryPages],fetchPage:async page=>{
     const url = `${ANILIBRIA_BASE}catalog/releases?limit=25&page=${page}${onlyOngoings ? '&is_ongoing=true' : ''}`;
-    let releaseList;
-    try {
-      const resp = await fetchJSON(url);
-      releaseList = resp.data || [];
-    } catch (e) {
-      console.warn(`Failed to fetch AniLibria page ${page}:`, e.message);
-      break;
-    }
-
-    if (!releaseList.length) break;
-
+    return fetchJSON(url);
+  }})) {
+    const {page,items:releaseList,resumePage}=batch;
+    retryPages.delete(page);
     for (const brief of releaseList) {
       if (added >= targetCount) break;
 
       const malId = brief.mal?.id;
       const shikiId = brief.shikimori?.id;
 
-      // Strict duplicate check
-      if (malId && knownIDs.has(`mal:${malId}`)) {
-        console.log(`[Skip duplicate] MAL ID ${malId} already in catalog`);
-        continue;
-      }
-      if (shikiId && knownIDs.has(`shikimori:${shikiId}`)) {
-        console.log(`[Skip duplicate] Shikimori ID ${shikiId} already in catalog`);
-        continue;
-      }
+      scanned++;
+      if(isKnown(knownIDs,{ids:{anilibria:brief.id,mal:malId,shikimori:shikiId}})) {skipped++;continue;}
 
       console.log(`\nProcessing: "${brief.name.main}" (MAL: ${malId}, Shikimori: ${shikiId})...`);
 
@@ -160,10 +143,11 @@ export async function seedCatalog({ targetCount = 30, onlyOngoings = false } = {
         fullRelease = await fetchJSON(`${ANILIBRIA_BASE}releases/${brief.id}`);
       } catch (e) {
         console.warn(`Could not fetch details for release ${brief.id}:`, e.message);
-        continue;
+        retryPages.add(page);failed++;continue;
       }
 
       if (!fullRelease.episodes?.length) {
+        retryPages.add(page);
         console.log(`Release ${brief.id} has no released episodes yet, skipping.`);
         continue;
       }
@@ -252,56 +236,8 @@ export async function seedCatalog({ targetCount = 30, onlyOngoings = false } = {
         continue;
       }
 
-      // Check for complementary Kodik voiceovers in AnimeGO index
-      const matchedGo = animeGoList.find(x =>
-        (brief.name.english && x.english && x.english.toLowerCase() === brief.name.english.toLowerCase()) ||
-        (brief.name.main && x.title && x.title.toLowerCase() === brief.name.main.toLowerCase())
-      );
-
-      if (matchedGo) {
-        console.log(`Found complementary AnimeGO title #${matchedGo.id} for "${title}". Probing Kodik voices...`);
-        try {
-          const goData = await goRelease(matchedGo.id);
-          const goVoicesList = await goVoices(matchedGo.id, episodes[0].number);
-          if (goVoicesList?.length) {
-            console.log(`Attaching ${goVoicesList.length} Kodik audio options: ${goVoicesList.map(v => v.label).join(', ')}`);
-            for (const v of goVoicesList) {
-              if (v.label.toLowerCase().includes('anilibria')) continue; // Avoid duplicate AniLibria
-
-              for (const ep of episodes) {
-                // Find matching episode on AnimeGO
-                const goEp = goData.episodes?.find(e => e.ordinal === ep.number);
-                if (!goEp) continue;
-
-                const qSeen = new Set();
-                const kodikSources = [];
-                for (const s of ep.audio[0].sources) {
-                  const q = Math.min(s.quality, 720);
-                  if (!qSeen.has(q)) {
-                    qSeen.add(q);
-                    kodikSources.push({ ...s, quality: q });
-                  }
-                }
-
-                ep.audio.push({
-                  id: `kodik-${v.id}`,
-                  dubId: v.label,
-                  label: `${v.label} (Kodik)`,
-                  language: v.language || (v.subtitles ? 'ja' : 'ru'),
-                  original: v.subtitles === true,
-                  duration: ep.audio[0].duration,
-                  sources: kodikSources,
-                  subtitles: [],
-                  opening: { absent: true },
-                  ending: { absent: true }
-                });
-              }
-            }
-          }
-        } catch (e) {
-          console.log(`Could not attach Kodik voices for #${matchedGo.id}: ${e.message}`);
-        }
-      }
+      // Additional voices require their own resolved streams. Never relabel
+      // AniLibria URLs as another dub or invent lower-resolution variants.
 
       const canonicalId = malId ? `mal-${malId}` : shikiId ? `shikimori-${shikiId}` : `lib-${brief.id}`;
 
@@ -312,7 +248,7 @@ export async function seedCatalog({ targetCount = 30, onlyOngoings = false } = {
           shikimori: shikiId || null,
           anilist: anilistData?.id || null,
           anilibria: brief.id,
-          kodik: matchedGo ? matchedGo.id : null
+          kodik: null
         },
         title,
         originalTitle,
@@ -338,7 +274,12 @@ export async function seedCatalog({ targetCount = 30, onlyOngoings = false } = {
         episodes
       };
 
+      if(isKnown(knownIDs,animeRecord)){skipped++;continue;}
+      if(!createApprovedCatalogue({policyVersion:catalog.policyVersion,items:[animeRecord]}).items.length){
+        retryPages.add(page);failed++;console.warn(`Not publishable yet: ${title}`);continue;
+      }
       catalog.items.push(animeRecord);
+      remember(knownIDs,animeRecord);
       knownIDs.add(canonicalId);
       if (malId) knownIDs.add(`mal:${malId}`);
       if (shikiId) knownIDs.add(`shikimori:${shikiId}`);
@@ -351,18 +292,21 @@ export async function seedCatalog({ targetCount = 30, onlyOngoings = false } = {
       await wait(500);
     }
 
-    page++;
+    console.log(`Page ${page}: +${added} new, ${skipped} existing, ${failed} pending; scanned ${scanned}`);
+    if(added>=targetCount&&page<resumePage)retryPages.add(page);
+    await checkpoint(added>=targetCount?resumePage:batch.nextPage);
+    if(added>=targetCount) break;
   }
 
   catalog.updatedAt = new Date().toISOString();
-  await writeFile(CATALOG_PATH, JSON.stringify(catalog, null, 2));
+  await saveJSON(CATALOG_PATH, catalog);
   console.log(`\nSuccessfully saved ${catalog.items.length} titles to ${CATALOG_PATH}.`);
   return catalog;
 }
 
 // If executed directly
 if (process.argv[1]?.endsWith('seed-catalog.mjs')) {
-  const count = Number(process.argv[2]) || 20;
+  const count = process.argv[2]===undefined?20:Number(process.argv[2]);
   seedCatalog({ targetCount: count }).catch(err => {
     console.error('Fatal seeder error:', err);
     process.exit(1);

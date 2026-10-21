@@ -8,6 +8,9 @@ export const publishedItems=approved.items;
 export const isPublished=id=>publishedItems.some(a=>a.id===id);
 export const combinedCatalogue=requestCache(async(options={})=>{
  let items=publishedItems.filter(a=>(!options.query||[a.title,a.alt].join(' ').toLocaleLowerCase().includes(options.query.toLocaleLowerCase()))&&(!options.ongoing||a.ongoing)&&(!options.genre||options.genre==='all'||a.genres?.includes(options.genre)));
+ if(!options.sort||options.sort==='picked'||options.sort==='latest')items.reverse();
+ else if(options.sort==='newest')items.sort((a,b)=>(b.year||0)-(a.year||0));
+ else if(options.sort==='oldest')items.sort((a,b)=>(a.year||0)-(b.year||0));
  const total=items.length,page=Math.max(1,Number(options.page)||1);
  return {items:items.slice((page-1)*24,page*24).map(registerAnime),total,pages:Math.max(1,Math.ceil(total/24)),partial:false};
 });

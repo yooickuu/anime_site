@@ -20,3 +20,15 @@ test('publication still rejects duplicates, unsafe URLs and missing evidence',()
  a.episodes[0].audio[0].subtitles[0].url='javascript:bad';
  assert.equal(createApprovedCatalogue({policyVersion:3,items:[a]},{now}).items.length,0);
 });
+test('relaxed publication admits provider-only identities, episode zero, and safely discards invalid skip times',()=>{
+ const a=valid();a.ids={anilibria:123};a.episodes[0].number=0;a.releasedEpisodes=[0,2];
+ a.episodes[0].audio[0].ending={start:1,end:999999};
+ const publication={policyVersion:3,items:[a]};
+ const c=createApprovedCatalogue(publication,{now});
+ assert.equal(c.items.length,1);assert.deepEqual(c.find(a.id).episodeNumbers,[0,2]);
+ assert.equal(c.video(a.id,1).ending,null);
+ assert.equal(a.episodes[0].audio[0].ending.end,999999);
+ assert.equal(createApprovedCatalogue(publication,{now,strict:true}).items.length,0);
+ const duplicate=structuredClone(a);duplicate.id='other-id';
+ assert.equal(createApprovedCatalogue({policyVersion:3,items:[a,duplicate]},{now}).items.length,1);
+});
