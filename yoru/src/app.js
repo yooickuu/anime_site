@@ -345,7 +345,7 @@ function renderGrid() {
   if (page!=="home" && sort === "newest") items.sort((a, b) => b.year - a.year);
   if (page!=="home" && sort === "alphabetical")
     items.sort((a, b) => title(a).localeCompare(title(b), lang));
-  if(page==='home')items=items.slice(0,500);
+  
   grid.innerHTML = items
     .map((a) => {
       const e = state.entries[a.id];
