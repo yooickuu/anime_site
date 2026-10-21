@@ -22,6 +22,7 @@ export const defaults = () => ({
     quality: 720,
     volume: 1,
     muted: false,
+    subtitles: 'off',
     audioByAnime: {},
     theme: "dark",
     appearance: "graphite",

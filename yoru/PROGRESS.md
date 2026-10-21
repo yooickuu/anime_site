@@ -342,3 +342,41 @@ All data below local gitignored checks/admission/probes; do NOT confuse it with 
 3. Implement verified subtitle playback and approved manifest resolver, then actual browser test of assembled mix. Current failclosed stub ensures no false approval but means import not operational yet. Keep no fake proofs/placeholder qualities. Honest0 until first full verification passes.
 4. Evidence model currently all reviews expire24h (including art/player). Before automatic updater, replace permanent visual/identity approval with content-bound review reuse; retain fresh network probes. Do not advertise autoupdater as implemented. No cron for new sources yet.
 5. Publish only truly admitted titles; ongoing episodes withheld until full same template. Save proper numerical reports. Never count 249subtitle-directory matches or250AniListmetadata as newly loaded playable anime.
+
+## 21 October — STOP at user quota request; batch250 source offers saved, ZERO published
+
+**User explicitly requested save and stop. Do not keep collecting until resumed.**
+
+### Final rule (supersedes earlier strict all-four-resolution text)
+- User explicitly reversed the proposed rollback: KEEP exception allowing one genuine1080p rendition per selected audio. Lower360/480/720 are still sought, but not admission blockers. Never fabricate buttons/resolutions; HLS requires actual full variants, not I-FRAME seek frames. Other requirements remain2distinctRU+1EN+originalJA, selectable synchronizedRU/EN/JA subtitles, all released episodes, verified OP/ED/player/auto-next/fullscreen, good exact-title artwork, ongoing updater, no duplicate cards.
+- Latest artwork request: each admitted title must have its own high-resolution grayscale detail background full-width, large2/3+region, smooth fade, not stretched or tiny corner. New approved model now passes reviewed backdrop directly; renderer prioritizes it over legacy artwork and does not replace approved backdrop with old poster on load error. Existing visual CSS not reworked/visually verified this turn.
+
+### Actual batch completed, local reports (gitignored; preserve)
+Command: `python3 scripts/collect-source-offers.py --limit 250 --zoko`
+- 250 candidates; fetched all1873 AniLiberty catalogue records in38 pages and matched by explicit MAL IDs. Got150 release episode lists for146 candidates; compared148 lists to Shikimori GraphQL (`shikimori.io`, not unresponsive `.one`). Explicit Shikimori id->malId equality checked, never assume namespaces equivalent.
+- Lists contain3026 episodes;6 lists have gaps against current metadata.69 lists have no detected gaps/duplicates and API1080 URLs on every returned episode. **These are API inventory checks, not decoded videos or full-template approvals.** Some lists may include specials; semantic matching remains.
+- Zoko discovery500 requests (250 MAL IDs x sub/dub, episode1ONLY),491 configurations with stream URLs;241 candidates have both episode1configurations,139 also have AniLiberty lists. NOT491 anime, not491 verified streams, not full EN/JA episode coverage. Audio language is provider-claimed, not listened.
+- Exact results: `checks/admission/source-offers.json` (merged by candidate), `zoko-batch.json`, resumable6-hour request cache `source-cache/`. Script uses4 workers;403/429 stops requests for thathost, no blind retries. Saves checkpoints every25 results. No publication side effects, no secrets in requests.
+- Zoko subtitle language labels predominantlyEN. JA leads: MAL34933,36649,8074. RU leads: MAL35062,33487,38040,60543. These are first-episode labels only, unsynchronized/unverified. Jimaku matches249/250 already saved, not complete subtitles.
+- **Published0, fully approved0.** Do not reinterpret batch inventories as all episodes playback-tested. `src/published-catalog.json` still empty(policy2).
+
+### Source blockers / resume leads
+- Zoko embed `https://zokoanime.video/stream/mal/{malId}/{episode}/{sub|dub}` public `window.__P` config is base64 XOR otaku-embed-v1 data; no third-party JS executed. Config extraction based on current primary ani-cli source `/tmp/yomiku-ani-cli.txt`. YourName32281 sub/dub masters on hls.dramahot.top have genuine360/480/720/1080 entries fetched with embed Referer and noOrigin. With our GitHubOrigin return403, including with embedReferer; noReferer also403. **Browser delivery unresolved, no working frontend claim.** No segments decoded/played. Don't blindly repeat500 master requests with known blocked Origin.
+- HiAnime.at search and episode/server APIs work (YourName765;episode13116), ZokoMALmapping confirmed for thatone title. Other250 directMAL requests still need release/content mapping proof and full episode inventories.
+- Alternative HD1 YourName embed `https://megaplay.buzz/stream/s-2/57910/sub?s=tcdn` (anddub) not tested. Earlier `/stream/ani/...` errors do NOT disprove thisroute.
+- AllManga search works, episode API always AA_CRYPTO_MISSING; persisted-query approach also failed. Don't spend another quota repeating known failures. No authorization bypass done.
+- AniLiberty API bulk `/anime/releases/list?ids=...&limit=50` includes ALL episode entries, far more efficient than one-title calls. Official OpenAPI `https://api.anilibria.app/storage/api/docs/v1?aniliberty-api-v1-docs.json`, local `/tmp/yomiku-liberty-openapi.json`. OneRUdub; need second distinctstudio. Prior YourName6826 only480/720 stillfails1080 minimum.
+- AnimeParadise Frieren prior1080-only now eligible quality-wise, EN VTT exists, all other evidence incomplete. Prior probes retained.
+
+### Code this turn / verification
+- Policy2 accepts genuine1080 alone, validates every offered rendition, and safehttps URLs. Shikimori added canonicalID namespace and merge conflict checks. `media-renditions.js` parses API MP4arrays and real HLSvariants, never manufactures proof.
+- Added `approved-catalog.js`: only audited publication can resolve exact episode/audio; no legacy provider fallback. Maps source-specific OP/ED and actual quality/subtitles into player.
+- Added nativeVTT subtitle controller + RU/EN/JA selector in own player, prefs/off/quality-reuse/cleanup. Native video crossoriginanonymous. **Unit-tested only, browser playback/subtitle QA still pending.** `scripts/audit-admission.mjs` intentionally stillplayerSubtitlesReady:false until actual verification; don't silently markready.
+- Added detail-artwork helper so approved cards use exact reviewed image. Artwork min800x1200poster/1920x1080background checks plusvisual review stillrequired; this does not prove real downloaded pixels, evidence must come from actual inspection.
+- 145 Node tests passed, `npm run check` and build passed. Tests include1080-only,no phantom lower choices,subtitlesafety/lifecycle,reviewedbackgroundmapping,approvedruntimegating. No visual or actual live playback QA claimed.
+- **Not deployed thisturn.** dist/app.js built locally. Save localcommit; don't push incomplete playback as ready. Old Supabase functionv6 remains deployed, new catalogue empty, old public snapshots removed priorreset.
+
+### Next work, avoid more foundation-only cycles
+1. Read saved source-offers.json, resume from existing reports/cache. Don't refetch catalogue250 blindly. Prioritize source combinations with complete RU1080inventory and both EN/JAoffers; resolve browserdelivery, secondRU and exact subtitletiming first. Find whether the required combination actually exists before spending on thousands of per-episode decode tests.
+2. Full-template admission still cannot happen until realplayback/subtitles/OPED/release evidence obtained. Do not promise100/250. User angry about zeroactualpublications; be direct about both counts and blockers, not more prepared/soon claims.
+3. Source enrichment currently saves/joins actual offers into quarantine; automatic conversion into verified admission schema and ongoing refresh adapter/schedule are NOT finished. Existing assembleCandidates handles verified source rows, but providerclaims must not be labelled passed.

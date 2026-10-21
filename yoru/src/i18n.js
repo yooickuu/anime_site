@@ -625,6 +625,7 @@ for(const [key,values] of Object.entries(playerRefinements))['ru','en','ja'].for
 const watchRefresh={
  heroTitle:['Аниме под твоё настроение.','Anime for every mood.','今の気分に、ぴったりのアニメ。'],
  heroCopy:['Знакомые миры и неожиданные открытия. Выбирай аниме — мы запомним, где ты остановился.','Familiar worlds and unexpected discoveries. Find your next anime. We’ll remember where you left off.','大好きな世界も、思いがけない出会いも。次に観たいアニメを見つけよう。続きはいつでもここから。'],
+ audioEnglish:['английская','English','英語'],subtitles:['Субтитры','Subtitles','字幕'],subtitlesOff:['Выключены','Off','オフ'],subtitlesError:['Не удалось загрузить субтитры','Could not load subtitles','字幕を読み込めませんでした'],
  season:['Сезон','Season','シーズン'],audio:['Озвучка','Audio','音声'],audioRussian:['русская','Russian','ロシア語'],audioJapanese:['японская · оригинал','Japanese · original','日本語・オリジナル'],
  backToCatalogue:['К каталогу','Back to catalogue','作品一覧へ'],moreStories:['Ещё истории','More to discover','ほかの作品もチェック'],synopsis:['О сюжете','The story','あらすじ'],
  previousPoster:['Предыдущий постер','Previous poster','前のポスター'],nextPoster:['Следующий постер','Next poster','次のポスター'],

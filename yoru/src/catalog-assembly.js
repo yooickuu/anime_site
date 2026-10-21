@@ -19,14 +19,14 @@ export function assembleCandidates(records,{now=Date.now()}={}){
  const items=[...groups.values()].map(rows=>{
   const aliases=unique(rows.flatMap(identityKeys)).sort(),ids={};
   const issues=[];
-  for(const kind of ['mal','anilist']){
+  for(const kind of ['mal','anilist','shikimori']){
    const values=aliases.filter(k=>k.startsWith(kind+':')).map(k=>Number(k.split(':')[1]));
    if(values.length>1)issues.push({code:'conflicting_canonical_ids',path:`ids.${kind}`});
    if(values.length===1)ids[kind]=values[0];
   }
   const base=rows.find(r=>fresh(r.evidence?.identity,now))||rows[0];
   const result=structuredClone(base);
-  result.ids=ids;result.id=ids.mal?`mal-${ids.mal}`:ids.anilist?`anilist-${ids.anilist}`:base.id;
+  result.ids=ids;result.id=ids.mal?`mal-${ids.mal}`:ids.anilist?`anilist-${ids.anilist}`:ids.shikimori?`shikimori-${ids.shikimori}`:base.id;
   result.sourceRefs=unique(rows.flatMap(r=>r.sourceRefs||[`${r.provider||r.metadataSource||'unknown'}:${r.id}`]));
   result.evidence={...result.evidence};
   // Playback approval for an individual provider does not certify this newly

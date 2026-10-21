@@ -1,3 +1,5 @@
+import {createSubtitles} from './subtitles.js';
+import {detailArtwork} from './detail-artwork.js';
 import {soundPreferences,preferredAudio,resumeTime} from './playback-preferences.js';
 import {within,nextHero,fadeHero} from './hero-rotation.js';
 import {revealSurfaces} from './motion.js';
@@ -74,6 +76,7 @@ let onlineItems = [],
   typeFilter = "all",
   ongoingOnly = false,
   playback = null,
+  subtitleController = null,
   controlsCleanup = null,
   automationCleanup = null,
   playerSeasons = [],
@@ -210,7 +213,7 @@ function render(newWatch=false) {
 function homeHTML() {
  return `<section class="cinematic-hero" id="hero-art">${heroArtHTML()}</section><section class="section"><div class="section-head"><h2>${t('continue')}</h2>${user?'<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button>':''}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
 }
-function bannerFor(a){return artwork[a?.malId]?.banner||a?.banner||'';}
+function bannerFor(a){return a?.catalogApproved?(a.banner||''):(artwork[a?.malId]?.banner||a?.banner||'');}
 function heroPool(){return publishedItems.slice(0,10); }
 function heroImage(a){return matchMedia('(max-width:600px)').matches?(a.heroMobile||a.image):(a.hero||bannerFor(a));}
 function heroArtHTML(){
@@ -405,7 +408,7 @@ async function openDetails(id) {
   $("#details").className = "details-dialog";
   $("#details").innerHTML =
     `<div class="details-toolbar">${closeButton("details")}</div>` +
-    `<div class="details-artwork ${bannerFor(a)?'':'portrait-art'}" aria-hidden="true"><img class="details-art-fill" src="${esc(artwork[a.malId]?.detailsBanner||bannerFor(a)||cover(a))}" alt="" data-art-fill="${esc(a.id)}"><img class="details-manga" data-details-art="${esc(a.id)}" src="${esc(artwork[a.malId]?.detailsBanner||bannerFor(a)||cover(a))}" alt=""><div class="details-art-shade"></div></div><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
+    `<div class="details-artwork ${bannerFor(a)?'':'portrait-art'}" aria-hidden="true"><img class="details-art-fill" src="${esc(detailArtwork(a,artwork))}" alt="" data-art-fill="${esc(a.id)}"><img class="details-manga" data-details-art="${esc(a.id)}" src="${esc(detailArtwork(a,artwork))}" alt=""><div class="details-art-shade"></div></div><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
       user && ready
         ? `<div class="detail-library"><label>${t("status")}<select id="detail-status"><option value="">${t("none")}</option>${state.statuses
             .filter((s) => s.id !== "favorites")
@@ -821,6 +824,7 @@ async function openPlayer(id, requested, pushRoute=true) {
     recordProgress();
     $$("dialog[open]").forEach((d) => d.close());
     controlsCleanup?.();controlsCleanup=null;
+    subtitleController?.destroy();subtitleController=null;
     playback?.destroy();
     playback = null;
     const previous=latestProgress(id);
@@ -857,7 +861,7 @@ function renderEpisodes() {
   const audio=audioChoices(current,episode);
   if(!audio.some(x=>x.id===selectedAudio))selectedAudio=preferredAudio(audio,state.preferences,current.id);
   $('#audio-control').hidden=!audio.length;
-  $('#audio-picker').innerHTML=audio.map(x=>`<option value="${x.id}" ${x.id===selectedAudio?'selected':''}>${esc(x.label)} · ${t(x.language==='ja'?'audioJapanese':'audioRussian')}</option>`).join('');
+  $('#audio-picker').innerHTML=audio.map(x=>`<option value="${esc(x.id)}" ${x.id===selectedAudio?'selected':''}>${esc(x.label)} · ${t(x.language==='ja'?'audioJapanese':x.language==='en'?'audioEnglish':'audioRussian')}</option>`).join('');
   const navigation=episodeNavigation(episode,current.episodes);
   $("#previous-episode").hidden=!navigation.previous;
   $("#next-episode").hidden=!navigation.next;
@@ -900,7 +904,7 @@ async function updateSource(play = false, refresh = false, position) {
         $('#quality').value=String(fallback.quality);enhanceSelects($('#watch-page'));
         const saved=state.progress[sourceKey];
         recordReady=false;
-        playback.load({url:fallback.url,stream:fallback.url.includes('.m3u8'),autoplay:play,startAt:video.currentTime||resumeTime(saved,!!user,position),speed:Number(state.preferences.speed)||1,onState:onStatus,onMetadata});return;
+        playback.load({url:fallback.url,stream:fallback.stream??fallback.url.includes('.m3u8'),autoplay:play,startAt:video.currentTime||resumeTime(saved,!!user,position),speed:Number(state.preferences.speed)||1,onState:onStatus,onMetadata});return;
       }
       $("#source-empty").hidden=false;
       $("#source-status").textContent=t(status==='unsupported'?'videoUnsupported':'videoError');
@@ -923,19 +927,24 @@ async function updateSource(play = false, refresh = false, position) {
   try {
     if(current.animeGoId){const loadingAnime=current;await prepareEpisodeAudio(loadingAnime,episode).catch(()=>{loadingAnime.currentGoVoices=[];loadingAnime.goVoiceOrdinal=null;});if(generation!==sourceGeneration)return;selectedAudio=preferredAudio(audioChoices(current,episode),state.preferences,current.id);renderEpisodes();}
     if(!isPublished(current.id))throw Error('noSource');
-    else if(current.providerId || current.animeVostId || current.animeGoId){
+    else if(current.catalogApproved){
       const info=await videoEpisode(current,episode,refresh,selectedAudio);
       if(generation!==sourceGeneration)return;
       providerTiming=info;
       availableSources=info?.sources||[];
       const selected=chooseQuality(info?.sources||[],state.preferences.quality);
-      url=selected?.url;stream=info?.stream!==false;
+      url=selected?.url;stream=selected?.stream??(info?.stream??url?.includes('.m3u8'));
+      const subs=subtitleController?.set(info?.subtitles||[],state.preferences.subtitles)||[];
+      $('#subtitle-control').hidden=!subs.length;
+      $('#subtitle-picker').innerHTML=`<option value="off">${t('subtitlesOff')}</option>`+subs.map(s=>`<option value="${s.language}">${esc({ru:'Русский',en:'English',ja:'日本語'}[s.language])}</option>`).join('');
+      $('#subtitle-picker').value=subs.some(s=>s.language===state.preferences.subtitles)?state.preferences.subtitles:'off';
+      enhanceSelects($('#watch-page'));
       if(info?.sources?.length){
         $("#quality-control").hidden=false;
         $("#quality").innerHTML=info.sources.map(q=>`<option value="${q.quality}" ${q.quality===selected?.quality?'selected':''}>${q.quality}p</option>`).join('');
         enhanceSelects($("#watch-page"));
       }
-    }else url=await mediaSource(current.id,episode);
+    }else throw Error('notAdmitted');
     if(generation!==sourceGeneration)return;
     if(!url)throw Error('noSource');
     const saved=state.progress[sourceKey];
@@ -993,13 +1002,15 @@ async function switchEpisode(n, play = false) {
 }
 function attachVideo() {
   const video = $("#video");
+  subtitleController?.destroy();
+  subtitleController=createSubtitles(video,{onError:()=>toast(t('subtitlesError'))});
   controlsCleanup?.();
   controlsCleanup=attachControls($(".video-shell"), video, t, () => toast(t("playerActionError")), {sound:soundPreferences(state.preferences),onSoundChange:saveSoundPreferences});
   automationCleanup?.();
   automationCleanup=attachPlaybackAutomation(video,{
     context:()=>({ready:recordReady&&!!current&&page==='watch',token:sourceGeneration,
       timing:providerTiming,preferences:state.preferences,episode,total:current?.episodes,
-      hasNext:!!current&&(hasRemoteSource(current.id,episode+1)||!!(current.providerId||current.animeVostId||current.animeGoId))}),
+      hasNext:!!current&&isPublished(current.id)&&episode<current.episodes}),
     onSkip:kind=>{if(kind==='opening')toast(t('introSkipped'));},
     onTick:()=>{if(Date.now()-lastProgress>5000){recordProgress();lastProgress=Date.now();}},
     onEnded:next=>{
@@ -1012,6 +1023,7 @@ function attachVideo() {
 }
 function stopWatching(){
   recordProgress();controlsCleanup?.();controlsCleanup=null;automationCleanup?.();automationCleanup=null;sourceKey=null;recordReady=false;++sourceGeneration;
+  subtitleController?.destroy();subtitleController=null;
   playback?.destroy();playback=null;current=null;closeSelectMenu();
 }
 async function loadAutomaticSkips(){
@@ -1391,6 +1403,9 @@ document.addEventListener("change", (event) => {
     const playing=!$('#video').paused;recordProgress();selectedAudio=input.value;
     mutate({type:'preferences',patch:{audio:selectedAudio,audioByAnime:{...state.preferences.audioByAnime,[current.id]:selectedAudio}}});updateSource(playing,false,$('#video').currentTime);
   }
+  if(input.id==='subtitle-picker'){
+    subtitleController?.select(input.value);mutate({type:'preferences',patch:{subtitles:input.value}});
+  }
   if (input.id === "episode-picker") switchEpisode(Number(input.value),!!state.preferences.autoPlay);
   if (input.id === "season-picker") openPlayer(input.value);
   if (input.id === "quality") {
@@ -1553,7 +1568,7 @@ document.addEventListener("error", event => {
   if(img.dataset.artFill){img.hidden=true;return;}
   if(img.dataset.detailsArt){
     const a=byId(img.dataset.detailsArt);
-    if(a&&!img.dataset.artFallback){img.dataset.artFallback='true';img.dataset.poster=a.id;img.src=cover(a);img.closest('.details-artwork')?.classList.add('portrait-art');}
+    if(a&&!a.catalogApproved&&!img.dataset.artFallback){img.dataset.artFallback='true';img.dataset.poster=a.id;img.src=cover(a);img.closest('.details-artwork')?.classList.add('portrait-art');}
     return;
   }
   if(!img.dataset.poster)return;

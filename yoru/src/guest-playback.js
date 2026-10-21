@@ -1,6 +1,6 @@
 import {applyOperation} from './state.js';
 
-const playbackPreferences=new Set(['autoSkip','autoNext','autoPlay','speed','quality','audio','audioByAnime','volume','muted','language']);
+const playbackPreferences=new Set(['autoSkip','autoNext','autoPlay','speed','quality','audio','audioByAnime','volume','muted','language','subtitles']);
 // Guest playback state is in memory only, never queued for account persistence.
 export function applyGuestPlaybackOperation(state,op){
  if(op.type==='preferences'){

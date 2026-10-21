@@ -1,8 +1,9 @@
-export const admissionPolicy = Object.freeze({version:1,batchSize:250,qualities:[360,480,720,1080],audio:{ru:2,en:1,ja:1},subtitles:['ru','en','ja']});
+export const admissionPolicy = Object.freeze({version:2,batchSize:250,qualities:[360,480,720,1080],requiredQualities:[1080],qualityMode:'real-available-hd',audio:{ru:2,en:1,ja:1},subtitles:['ru','en','ja']});
 export const normalized = s => String(s||'').normalize('NFKC').trim().toLocaleLowerCase().replace(/\s+/g,' ');
 export const fresh = (proof,now) => proof?.passed===true && Number.isFinite(Date.parse(proof.checkedAt)) && Date.parse(proof.checkedAt)<=now && now-Date.parse(proof.checkedAt)<=86400000;
+const mediaURL=value=>{try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}};
 export function identityKeys(a){
- return ['mal','anilist'].flatMap(k=>Number.isSafeInteger(a.ids?.[k])&&a.ids[k]>0?[`${k}:${a.ids[k]}`]:[]);
+ return ['mal','anilist','shikimori'].flatMap(k=>Number.isSafeInteger(a.ids?.[k])&&a.ids[k]>0?[`${k}:${a.ids[k]}`]:[]);
 }
 // Only local verifier output belongs in evidence. Provider claims are not proof.
 export function auditAdmission(a,{now=Date.now(),playerSubtitlesReady=false}={}){
@@ -17,7 +18,7 @@ export function auditAdmission(a,{now=Date.now(),playerSubtitlesReady=false}={})
  if(new Set(actual).size!==actual.length||expected?.length!==actual.length||expected?.some(n=>!actual.includes(n)))fail('episode_coverage_mismatch','episodes');
  for(const [key,minWidth,minHeight] of [['poster',800,1200],['backdrop',1920,1080]]){
   const image=a.artwork?.[key];
-  if(!image?.url||image.width<minWidth||image.height<minHeight||!Number.isFinite(image.width)||!Number.isFinite(image.height))fail('artwork_resolution_missing',`artwork.${key}`);
+  if(!mediaURL(image?.url)||image.width<minWidth||image.height<minHeight||!Number.isFinite(image.width)||!Number.isFinite(image.height))fail('artwork_resolution_missing',`artwork.${key}`);
   if(!fresh(image?.review,now))fail('artwork_visual_review_missing',`artwork.${key}`);
  }
  if(!fresh(a.evidence?.playerDesktop,now)||!fresh(a.evidence?.playerMobile,now))fail('player_acceptance_missing','evidence.player');
@@ -52,13 +53,19 @@ export function auditAudioTrack(track,{now=Date.now(),path="audio"}={}){
  const issues=[],fail=(code,path)=>issues.push({code,path});
    const p=path;
    if(!fresh(track.languageReview,now))fail('audio_language_unverified',p);
-   for(const quality of admissionPolicy.qualities){
-    const s=track.sources?.find(x=>x.quality===quality);
-    if(!s?.url||s.height!==quality||!fresh(s.probe,now)||s.probe?.decoded!==true||s.probe?.browserPlayable!==true)fail('quality_unverified',`${p}.${quality}`);
+   // Latest user decision: a genuine 1080 rendition may be admitted alone.
+   // Never invent lower resolutions; continue discovery for the missing ones.
+   const sources=track.sources||[];
+   for(const quality of admissionPolicy.requiredQualities)if(!sources.some(s=>s.quality===quality))fail('quality_unverified',`${p}.${quality}`);
+   const qualities=new Set();
+   for(const s of sources){
+    if(!admissionPolicy.qualities.includes(s.quality)||qualities.has(s.quality))fail('invalid_quality',`${p}.${s.quality}`);
+    qualities.add(s.quality);
+    if(!mediaURL(s.url)||s.height!==s.quality||!fresh(s.probe,now)||s.probe?.decoded!==true||s.probe?.browserPlayable!==true)fail('quality_unverified',`${p}.${s.quality}`);
    }
    for(const language of admissionPolicy.subtitles){
     const sub=track.subtitles?.find(s=>s.language===language);
-    if(!sub?.url||sub.format!=='vtt'||!fresh(sub.review,now)||sub.review?.synchronized!==true)fail('subtitle_unverified',`${p}.subtitles.${language}`);
+    if(!mediaURL(sub?.url)||sub.format!=='vtt'||!fresh(sub.review,now)||sub.review?.synchronized!==true)fail('subtitle_unverified',`${p}.subtitles.${language}`);
    }
    for(const kind of ['opening','ending']){
     const mark=track[kind];

@@ -1,9 +1,10 @@
 // Publication allowlist only. Legacy adapters are quarantined in legacy-sources.js.
 import publication from './published-catalog.json' with {type:'json'};
-import {auditAdmission} from './catalog-admission.js';
+import {createApprovedCatalogue} from './approved-catalog.js';
 import {registerAnime} from './catalog.js';
 import {requestCache} from './request-cache.js';
-export const publishedItems=publication.policyVersion===1?publication.items.filter(a=>auditAdmission(a,{playerSubtitlesReady:false}).passed):[];
+const approved=createApprovedCatalogue(publication);
+export const publishedItems=approved.items;
 export const isPublished=id=>publishedItems.some(a=>a.id===id);
 export const combinedCatalogue=requestCache(async(options={})=>{
  let items=publishedItems.filter(a=>(!options.query||[a.title,a.alt].join(' ').toLocaleLowerCase().includes(options.query.toLocaleLowerCase()))&&(!options.ongoing||a.ongoing)&&(!options.genre||options.genre==='all'||a.genres?.includes(options.genre)));
@@ -15,4 +16,4 @@ export async function findWatchRelease(id){return publishedItems.find(a=>a.id===
 export async function discoveryIndex(){return publishedItems;}
 export async function prepareEpisodeAudio(){}
 export async function releaseSeasons(a){return publishedItems.filter(x=>x.id===a.id||(a.franchiseId&&x.franchiseId===a.franchiseId));}
-export async function videoEpisode(){throw Error('notAdmitted');}
+export async function videoEpisode(a,index,_refresh=false,audioId){return approved.video(a.id,index,audioId);}

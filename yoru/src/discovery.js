@@ -7,11 +7,12 @@ export function discoveryChoice(items,entries={},recent=[],random=Math.random){
  return weighted[Math.min(weighted.length-1,Math.floor(random()*weighted.length))];
 }
 export function watchRoute(hash){
- const match=hash.match(/^#watch\/((?:mal|lib|vost|kitsu|go)-\d+|sintel)\/([1-9]\d*)$/);
+ const match=hash.match(/^#watch\/((?:mal|anilist|shikimori|lib|vost|kitsu|go)-\d+|sintel)\/([1-9]\d*)$/);
  if(!match||!Number.isSafeInteger(Number(match[2])))return null;
  return {id:match[1],episode:Number(match[2])};
 }
 export function audioChoices(a,episode=null){
+ if(a.catalogApproved)return a.episodeManifest?.[(episode||1)-1]?.tracks||[];
  const row=episode!==null?a.episodeManifest?.[episode-1]:null,allowed=row?.audio;
  const base=[a.providerId&&{id:'liberty',label:'AniLiberty',language:'ru'},a.animeVostId&&{id:'vost',label:'AnimeVost',language:'ru'}].filter(x=>x&&(!allowed||allowed.includes(x.id)));
  const go=(episode===null?(a.goVoices||[]):a.goVoiceOrdinal===row?.ordinal?(a.currentGoVoices||[]):[]);
