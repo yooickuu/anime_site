@@ -380,3 +380,39 @@ Command: `python3 scripts/collect-source-offers.py --limit 250 --zoko`
 1. Read saved source-offers.json, resume from existing reports/cache. Don't refetch catalogue250 blindly. Prioritize source combinations with complete RU1080inventory and both EN/JAoffers; resolve browserdelivery, secondRU and exact subtitletiming first. Find whether the required combination actually exists before spending on thousands of per-episode decode tests.
 2. Full-template admission still cannot happen until realplayback/subtitles/OPED/release evidence obtained. Do not promise100/250. User angry about zeroactualpublications; be direct about both counts and blockers, not more prepared/soon claims.
 3. Source enrichment currently saves/joins actual offers into quarantine; automatic conversion into verified admission schema and ongoing refresh adapter/schedule are NOT finished. Existing assembleCandidates handles verified source rows, but providerclaims must not be labelled passed.
+
+
+## 21 October — resumed batch, user permits save at low quota; policy3 permits720
+
+### Latest decisions and stop
+- User renewed quota and reaffirmed per-title/per-dub automatic OP/ED skip, auto-next and autoplay checks, with short staged verification rather than heavy repeated full passes.
+- Kodik mail never delivered. Read providedPDF via macOSPDFKit(Swift; pypdf unavailable): DNS `unable to look up host kodik.biz: Name or service not known`, NOT evidence of mailbox/account blocking. Live DNS for kodik.biz/info/api.com failed too; animego.me resolved. User then said ignoreletter and continue. Do not request another email to same address or repeat PDF parsing.
+- **NEW explicit user rule: if1080missing,720is allowed.** Code policy3minimumQuality720, either genuine720or1080 suffices per selected track; loweroptionsonlyifreal. Allotherrequirementsunchanged. Keepthisrule, don'trevertto1080minimum.
+- User lowquota, allowed save ifcannotfinish; saving now. Publication stillEMPTY; no admittedtitleclaimed.
+
+### Actual new source/probe work, preserve reports
+- Fresh AnimeGO public APIs for3films: go711 / MAL38329 / releaseep38798; go1771 / MAL40456 / ep38842; go2132 / MAL48561 / ep38879. Completeoneepisodefromsource, oldbackupMALlinks are hints pendingfreshidentityverification.
+- Kodik embeds resolve successfully using existing `server/animego.js` publicplayerresolver, withoutAPIkey. Got5additionalRUtracks: 711StudijnaiaBanda+AniStar,1771StudijnaiaBanda,2132professional-multivoice+JAMCLUB. Alloffer360/480/720, no1080. New720permission makes these eligiblequality-wise. Rawtemporarysources `checks/admission/probes/second-ru-movies.json`. RefreshURLs nexttime; notpermanentpublicassets.
+- AnimeGO responses ALSOcontainAniboomplayers (legacyparseVoices onlyextractsKodik). Raw allplayers `go-all-players-38798.json`,38842,38879. TestedJJK Aniboompublicembed returned404; don'tclaimworking1080. HD1 MegaPlay `/stream/s-2/57910/sub?s=tcdn` returnsHTMLerror410 withHTTP200 (saved `megaplay-hd1-your-name.html`); noactualvideo.
+- ZokoJJK ENmaster only1080 (valid fullvariant). Actualvariant AND firstsegment rejectourGitHubOrigin+Refererwith403. ServerRefererZoko/noOriginfetchworks. `zoko-delivery.json`, `jjk-en-master.m3u8`, `jjk-en-variant.m3u8`. **Requires permitted delivery solution or another provider; playlist-onlyrelay won'tfixsegment403.** NoSupabaseproxydeployed, noaccounts/paymentchanges.
+- Importantdiscovery: Zoko'slangfields oftenall`en` whilelabelsactuallyRussian/Japanese/etc. Newintakeusesexplicitlabel,flagsconflicts,excludesforced/signs-only; neverlabelsverified. Acrosssaved500configs9MALIDsclaimRU+EN+JAfullsubtitlelabels:523,9756,30,32,164,199,37086,39195,431. Previouslang-onlycountsunderestimated. ThesearelabelsONLY, notsyncproof. CouldtargetBeastars39195 (12episodes,AniLiberty8479all1080),Madoka9756(12,Lib3401),KakeguruiXX37086(12,Lib8031). MoviesclassicslackexistingLib/oldGoMALmapping, needcanonicalcrosswalk.
+- JJK48561ENdubconfig hasRussian-labelledVTT despite lang=en. Downloadedactualfiles `jjk-russian.vtt`(1484cues,31673Cyrilliccharacters),`jjk-english.vtt`(1392cues). Nottimingcompared. JimakuJJK329 hasretimedSRT,NetflixJA,AmazonJA;Mugen3338BD/NetflixJA;Bunny1471multipleJAASS/SRT. SavedentryHTML `jimaku-{329,3338,1471}.html`. NoJAfiledownload/conversiondone.
+
+### Actual browser check, useful progress but not admission
+- StartedisolatedprivateQA at127.0.0.1:4174 with app's REALcreatePlayback(hls.js), nativevideo, sourceURLsfromrawreport. Files `checks/player-smoke/{index.html,main.js,bundle.js,tracks.json}` localgitignored. ItdoesNOTpublishcandidatesorchangeproductioncatalogue.
+- CUAChromeprovedgo711StudijnaiaBanda playsactualfilm: screenshotfilmopening,342decodedframesat17s;AX555framesat26.6s,1280x720,duration5396.416,playing. Muted; doNOTclaimauditedspokenlanguage/fullmovie/skip/fullscreen/mobile.
+- Short7-trackbatchthenran. AXfinalpartialread: first2RUtracks timedoutat0 despitefirsttrackhavingplayedmanualearlier;1771StudijnaiaBanda decodedframe1280x720duration7008.001;2132professionalmultivoice showeddecoded-frame(truncatedAX). LastZokoEN/JAhaderrors. Fullresultsnotretrieved: nextCua scrollreturnednoWindowsAvailable(Chromeclosed/windowgone). Don'tcallall5RUtracksproven. QA mayloseframesinbackground; reviseharnesstimeouts/visibility beforeassumingdeadstream. Notproofautoplayinproduction.
+- QAserverwas toolsession55466 localhost4174; check/stopexactserverifstillrunning; don'tkillotheruserprocesses. NoSafari/accountinteraction.
+
+### Code changes saved this turn
+- `catalog-admission.js` policy3minimum720andfiniteduration; publishesonlyactualavailablequalities. ManifestpolicyVersion3empty. Docsupdated;policytestsgenuine720allowed,false480labelandmissingtrackfail.
+- `approved-skip-times.js` runtimeguard: approvedOP/EDonlyapplyifactualvideodurationmatchesreviewedrecordingwithin1second,andbounds/reviewvalid. Unexpectedads/differentcutdisablemarks;approvedtitlescannotfallthrough togeneralAniSkipguesses. apponMetadataappliesguard. Needactualper-cutreviewbeforeadmission; doesn'tmanufactureOP/ED.
+- `subtitle-intake.js` discoverylabelnormalization+lightVTTstructure/scriptinspection; NOsynchronizationproof. Notyetwiredinto`collect-source-offers.py`; reuseinsupplementarycollectorbeforenextbatch. Doesnotchangepublicnativeplayerlanguageprefs.
+- Focused19tests passedbeforelatest2newtests; finalnpmtest/check/buildresult follows. No publication/deploythisturn.
+
+### Next steps without repeating preparation
+1. Preservepolicy3 andsavednetwork/browserresults. Don'trerun250metadata/500firsteprequests. FinishrealworkingEN/JAdelivery (currently403alsosegments),complementRUwithpublicKodik720whereavailable, collectactualsubsfromknownleads.
+2. BrowserruntimeisusableforRU. Publicationstillblockedbyunverifiedfullassembledtemplate,NOTjustqualityanymore. Don'tpromisealmostallanimeunderhard4audio/3sub/allseriesrule. Stateexactprogressand0publishedhonestly.
+3. Automaticper-episoderefresh,publicationpipeline,subtitlebrowserQAandcontent-boundreviewreuse(still24hproofexpiry)remainunfinishedfrompriorcheckpoint. Avoidanotherquotaofonlyvalidators; prioritizesmallcompleteplayablebundleoridentifyactualexternalblocker.
+
+- Final validation:148tests passed,syntaxcheck+buildpassed; updatedemptypublicationpolicyVersion3explicitly (compactJSONhadnotmatchedinitialtextreplace). Noanimepublished.

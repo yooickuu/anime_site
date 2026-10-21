@@ -14,7 +14,9 @@
     "audit:catalog": "node scripts/audit-catalog.mjs",
     "audit:video": "node scripts/audit-video.mjs",
     "audit:animevost": "node scripts/audit-animevost.mjs",
-    "update:animevost": "node scripts/update-animevost.mjs && node scripts/link-catalogues.mjs"
+    "update:animevost": "node scripts/update-animevost.mjs && node scripts/link-catalogues.mjs",
+    "seed": "node scripts/seed-catalog.mjs",
+    "update:ongoings": "node scripts/update-ongoings.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.99.2",

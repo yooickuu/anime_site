@@ -13,7 +13,7 @@ function valid(){return {id:'mal-1',ids:{mal:1,anilist:10},releasedEpisodes:[1,2
 const options={now,playerSubtitlesReady:true};
 test('all requirements must be verified, including every episode/audio rendition',()=>{
  assert.equal(auditAdmission(valid(),options).passed,true);
- for(const mutate of [a=>a.episodes[1].audio.pop(),a=>a.episodes[1].audio[1].sources.pop(),a=>a.episodes[1].audio[2].subtitles.pop(),a=>a.episodes.pop(),a=>a.artwork.backdrop.width=300,a=>a.updates.probe.passed=false,a=>a.episodes[1].audio[0].opening.end=2000]){
+ for(const mutate of [a=>a.episodes[1].audio.pop(),a=>a.episodes[1].audio[1].sources.splice(2),a=>a.episodes[1].audio[2].subtitles.pop(),a=>a.episodes.pop(),a=>a.artwork.backdrop.width=300,a=>a.updates.probe.passed=false,a=>a.episodes[1].audio[0].opening.end=2000]){
   const a=valid();mutate(a);assert.equal(auditAdmission(a,options).passed,false);
  }
 });

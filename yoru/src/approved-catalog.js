@@ -1,13 +1,13 @@
 import {auditBatch,admissionPolicy} from './catalog-admission.js';
 
 // Provider IDs and cached cards cannot resolve media: only this audited manifest.
-export function createApprovedCatalogue(publication,{now=Date.now(),playerSubtitlesReady=true}={}){
+export function createApprovedCatalogue(publication,{now=Date.now(),playerSubtitlesReady=true,strict=false}={}){
  const records=new Map();
  const items=publication?.policyVersion===admissionPolicy.version?publication.items||[]:[];
- const audited=auditBatch(items,{now,playerSubtitlesReady});
+ const audited=auditBatch(items,{now,playerSubtitlesReady,strict});
  items.forEach((item,i)=>{if(audited[i].passed){const copy=structuredClone(item);copy.episodes.sort((a,b)=>a.number-b.number);records.set(item.id,copy);}});
  const model=a=>({...a,catalogApproved:true,catalogOnly:false,malId:a.ids?.mal,
-  image:a.artwork.poster.url,banner:a.artwork.backdrop.url,detailsBanner:a.artwork.backdrop.url,
+  image:a.artwork?.poster?.url||a.image,banner:a.artwork?.backdrop?.url||a.banner,detailsBanner:a.artwork?.backdrop?.url||a.banner,
   episodes:a.episodes.length,episodeNumbers:a.episodes.map(e=>e.number),
   episodeManifest:a.episodes.map(e=>({ordinal:e.number,audio:e.audio.map(t=>t.id),tracks:e.audio.map(t=>({id:t.id,label:t.label||t.dubId,language:t.language,original:t.original===true}))}))});
  return {

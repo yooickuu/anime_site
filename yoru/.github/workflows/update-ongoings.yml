@@ -1,0 +1,50 @@
+name: Auto-update Ongoing Anime
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ongoings-update
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: yoru
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: yoru/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check & append new episodes
+        run: node scripts/update-ongoings.mjs
+
+      - name: Rebuild application bundle
+        run: npm test && npm run build
+
+      - name: Commit and push changes if any
+        run: |
+          if [ -n "$(git status --porcelain src/published-catalog.json)" ]; then
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add src/published-catalog.json dist/
+            git commit -m "Auto-update ongoing anime episodes"
+            git push
+          else
+            echo "No new ongoing episodes found."
+          fi
+

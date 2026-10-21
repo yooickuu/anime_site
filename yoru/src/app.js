@@ -1,4 +1,5 @@
 import {createSubtitles} from './subtitles.js';
+import {approvedSkipTimes} from './approved-skip-times.js';
 import {detailArtwork} from './detail-artwork.js';
 import {soundPreferences,preferredAudio,resumeTime} from './playback-preferences.js';
 import {within,nextHero,fadeHero} from './hero-rotation.js';
@@ -879,6 +880,7 @@ async function updateSource(play = false, refresh = false, position) {
   playback ||= createPlayback(video);
   const onMetadata=()=>{
     if(generation!==sourceGeneration)return;
+    if(current?.catalogApproved)providerTiming={...providerTiming,...approvedSkipTimes(providerTiming,video.duration)};
     recordReady=true;
     loadAutomaticSkips();
   };
@@ -1032,7 +1034,7 @@ async function loadAutomaticSkips(){
   const notice=$('#skip-availability');
   if(!state.preferences.autoSkip){if(notice)notice.textContent='';return;}
   if(notice)notice.textContent=t('skipLoading');
-  const fallback=(!providerTiming?.opening||!providerTiming?.ending)?await automaticSkipTimes(current.malId,Number(current.episodeNumbers?.[episode-1]??episode),video.duration):{};
+  const fallback=!current.catalogApproved&&(!providerTiming?.opening||!providerTiming?.ending)?await automaticSkipTimes(current.malId,Number(current.episodeNumbers?.[episode-1]??episode),video.duration):{};
   if(own!==sourceGeneration||key!==sourceKey)return;
   providerTiming={...providerTiming,opening:providerTiming?.opening||fallback.opening,ending:providerTiming?.ending||fallback.ending};
   if(notice)notice.textContent=providerTiming.opening||providerTiming.ending?'':t('skipUnavailable');
