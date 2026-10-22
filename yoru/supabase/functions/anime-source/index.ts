@@ -1,3 +1,4 @@
+import {publishedKodikVideo} from '../../../server/published-kodik.js';
 import {snapshotRelease as goRelease,snapshotVoices as goVoices,snapshotVideo as goVideo,snapshotHealth,positiveID} from '../../../server/animego.js';
 const origins=new Set(['https://yooickuu.github.io','http://127.0.0.1:4173','http://localhost:4173','http://127.0.0.1:5500','http://localhost:5500']);
 let healthCache:{at:number,ready:boolean,status:string,detail?:string}|null=null;
@@ -21,6 +22,7 @@ Deno.serve(async req=>{
   const raw=await req.text();if(raw.length>512)return reply({error:'invalid_request'},400);
   let body;try{body=JSON.parse(raw);}catch{return reply({error:'invalid_request'},400);}
   if(!body||typeof body!=='object')return reply({error:'invalid_request'},400);
+  if(body.action==='kodik-video')return reply(await publishedKodikVideo(body.id,body.episode,body.audio));
   const id=Number(body.id),ordinal=Number(body.ordinal);
   if(!positiveID(id))return reply({error:'invalid_id'},400);
   if(body.action==='release')return reply(await goRelease(id));

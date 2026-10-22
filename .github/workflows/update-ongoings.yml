@@ -1,49 +1,68 @@
 name: Auto-update Ongoing Anime
 on:
   schedule:
-    # Run every 6 hours
     - cron: '0 */6 * * *'
   workflow_dispatch:
-
 permissions:
   contents: write
-
+  pages: write
+  id-token: write
 concurrency:
-  group: ongoings-update
-  cancel-in-progress: true
-
+  group: pages
+  cancel-in-progress: false
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
     defaults:
       run:
         working-directory: yoru
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: yoru/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Check & append new episodes
-        run: node scripts/update-ongoings.mjs
-
-      - name: Rebuild application bundle
+      - run: npm ci
+      - name: Refresh released episodes
+        env:
+          KODIK_TOKEN: ${{ secrets.KODIK_TOKEN }}
+        run: npm run update:ongoings
+      - name: Validate and build
         run: npm test && npm run build
-
-      - name: Commit and push changes if any
+      - name: Commit complete publication
+        id: commit
         run: |
-          if [ -n "$(git status --porcelain src/published-catalog.json)" ]; then
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action"
-            git add src/published-catalog.json dist/
-            git commit -m "Auto-update ongoing anime episodes"
-            git push
+          if ! git diff --quiet -- src/published-catalog.json; then
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config user.name "github-actions[bot]"
+            git add src/published-catalog.json dist/ ../app.js ../index.html ../published-catalog.json ../catalog-build.json ../style.css ../redesign.css ../scenes.css ../data/kodik/
+            git commit -m "Update ongoing episodes and publication"
+            git push origin HEAD:main
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           else
-            echo "No new ongoing episodes found."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
+      # A push by GITHUB_TOKEN does not trigger pages.yml. Deploy this artifact explicitly.
+      - uses: actions/configure-pages@v5
+        if: steps.commit.outputs.changed == 'true'
+      - uses: actions/upload-pages-artifact@v4
+        if: steps.commit.outputs.changed == 'true'
+        with:
+          path: yoru/dist
+  deploy:
+    needs: update
+    if: needs.update.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish updated episodes
+        id: deployment
+        uses: actions/deploy-pages@v4

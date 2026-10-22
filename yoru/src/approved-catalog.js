@@ -12,10 +12,10 @@ export function createApprovedCatalogue(publication,{now=Date.now(),playerSubtit
  })}))}));
  const audited=auditBatch(items,{now,playerSubtitlesReady,strict});
  items.forEach((item,i)=>{if(audited[i].passed){const copy=structuredClone(item);copy.episodes.sort((a,b)=>a.number-b.number);records.set(item.id,copy);}});
- const model=a=>({...a,catalogApproved:true,catalogOnly:false,malId:a.ids?.mal,
+ const model=a=>({...a,catalogApproved:true,catalogOnly:false,audienceRating:a.audienceRating||a.rating||a.score,malId:a.ids?.mal,
   image:a.artwork?.poster?.url||a.image,banner:a.artwork?.backdrop?.url||a.banner,detailsBanner:a.artwork?.backdrop?.url||a.banner,
   episodes:a.episodes.length,episodeNumbers:a.episodes.map(e=>e.number),
-  episodeManifest:a.episodes.map(e=>({ordinal:e.number,audio:e.audio.map(t=>t.id),tracks:e.audio.map(t=>({id:t.id,label:t.label||t.dubId,language:t.language,original:t.original===true}))}))});
+  episodeManifest:a.episodes.map(e=>({ordinal:e.ordinal??e.number,season:e.season??1,audio:e.audio.map(t=>t.id),tracks:e.audio.map(t=>({id:t.id,label:t.label||t.dubId,language:t.language,original:t.original===true}))}))});
  return {
   items:[...records.values()].map(model),
   find(id){const a=records.get(id);return a?model(a):null;},
@@ -25,7 +25,7 @@ export function createApprovedCatalogue(publication,{now=Date.now(),playerSubtit
    const e=a.episodes[index-1],track=audioId?e.audio.find(t=>t.id===audioId):e.audio[0];
    if(!track)throw Error('audioUnavailable');
    return structuredClone({sources:track.sources,subtitles:track.subtitles,duration:track.duration,
-    audioId:track.id,ordinal:e.number,recordingId:track.recordingId,cutId:track.cutId,
+    audioId:track.id,ordinal:e.ordinal??e.number,providerRef:track.providerRef,recordingId:track.recordingId,cutId:track.cutId,
     opening:track.opening,ending:track.ending});
   },
  };

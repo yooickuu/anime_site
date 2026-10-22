@@ -16,13 +16,15 @@
     "audit:animevost": "node scripts/audit-animevost.mjs",
     "update:animevost": "node scripts/update-animevost.mjs && node scripts/link-catalogues.mjs",
     "seed": "node scripts/seed-catalog.mjs",
-    "update:ongoings": "node scripts/update-ongoings.mjs"
+    "update:ongoings": "node scripts/update-ongoings.mjs",
+    "seed:anilibria": "node scripts/seed-anilibria.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.99.2",
     "hls.js": "1.7.3"
   },
   "devDependencies": {
-    "esbuild": "0.25.12"
+    "esbuild": "0.25.12",
+    "sharp": "^0.34.5"
   }
 }

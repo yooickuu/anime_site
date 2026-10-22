@@ -25,7 +25,7 @@ test('each admitted card uses its own full-resolution backdrop and cannot fall b
  const a=valid(),card=createApprovedCatalogue({policyVersion:3,items:[a]},{now}).find(a.id);
  assert.equal(card.banner,a.artwork.backdrop.url);
  assert.equal(detailArtwork(card,{1:{detailsBanner:'https://example.test/wrong.jpg'}}),a.artwork.backdrop.url);
- delete card.artwork.backdrop;assert.equal(detailArtwork(card), '');
+ delete card.artwork.backdrop;assert.equal(detailArtwork(card),card.artwork.poster.url);
  delete a.artwork.backdrop;assert.equal(createApprovedCatalogue({policyVersion:3,items:[a]},{now}).items.length,0);
 });
 

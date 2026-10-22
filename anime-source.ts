@@ -146,6 +146,26 @@ async function snapshotHealth() {
   return true;
 }
 
+// server/published-kodik.js
+var manifestCache = /* @__PURE__ */ new Map();
+async function publishedKodikVideo(id, index, audio, { fetcher = fetch, resolve = kodikVideo } = {}) {
+  if (!/^(mal|shikimori|lib)-\d+$/.test(id) || !Number.isSafeInteger(index) || index < 1 || !/^kodik-\d+$/.test(audio)) throw Error("invalid_request");
+  let cached2 = manifestCache.get(id);
+  if (!cached2 || Date.now() > cached2.until) {
+    const response = await fetcher(`https://yooickuu.github.io/anime_site/data/kodik/${id}.json`, { signal: AbortSignal.timeout(1e4) });
+    if (!response.ok) throw Error("episode_missing");
+    const data = await response.json();
+    if (data.id !== id || !Array.isArray(data.episodes)) throw Error("invalid_manifest");
+    cached2 = { data, until: Date.now() + 6e4 };
+    manifestCache.set(id, cached2);
+    if (manifestCache.size > 100) manifestCache.delete(manifestCache.keys().next().value);
+  }
+  const track = cached2.data.episodes[index - 1]?.tracks?.find((t) => t.audioId === audio);
+  if (!track || !validEmbed(track.url) || audio !== `kodik-${track.translationId}`) throw Error("audio_missing");
+  const video = await resolve(track.url, track.ordinal);
+  return { ...video, audioId: audio };
+}
+
 // supabase/functions/anime-source/index.ts
 var origins = /* @__PURE__ */ new Set(["https://yooickuu.github.io", "http://127.0.0.1:4173", "http://localhost:4173", "http://127.0.0.1:5500", "http://localhost:5500"]);
 var healthCache = null;
@@ -189,6 +209,7 @@ Deno.serve(async (req) => {
       return reply({ error: "invalid_request" }, 400);
     }
     if (!body || typeof body !== "object") return reply({ error: "invalid_request" }, 400);
+    if (body.action === "kodik-video") return reply(await publishedKodikVideo(body.id, body.episode, body.audio));
     const id = Number(body.id), ordinal = Number(body.ordinal);
     if (!positiveID(id)) return reply({ error: "invalid_id" }, 400);
     if (body.action === "release") return reply(await snapshotRelease(id));

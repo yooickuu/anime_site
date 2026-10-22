@@ -1,4 +1,5 @@
 const paths = {
+  subtitles: '<rect x="2" y="4" width="20" height="16" rx="3"/><path d="M5 10h3m3 0h3m3 0h2M5 14h6m3 0h5"/>',
   image: '<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/>',
   eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
   eyeOff: '<path d="m3 3 18 18M10 5a11 11 0 0 1 12 7 17 17 0 0 1-4 5M6 6a20 20 0 0 0-4 6s3.5 7 10 7c2 0 4-.8 5-1.5"/>',

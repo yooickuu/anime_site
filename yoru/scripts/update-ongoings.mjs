@@ -1,3 +1,6 @@
+import {KodikAPI,catalogParams,mergeKodikRelease} from './lib/kodik-api.mjs';
+import {assembleRelease,loadToken,saveJSON} from './seed-catalog.mjs';
+import {createApprovedCatalogue} from '../src/approved-catalog.js';
 /**
  * update-ongoings.mjs
  * Cron script to check for newly aired episodes of ongoing anime
@@ -24,13 +27,14 @@ async function fetchJSON(url) {
 export async function updateOngoings() {
   console.log('Checking for ongoing anime updates...');
 
+  const token=await loadToken(),api=token?new KodikAPI(token):null;
   let catalog;
   try {
     const raw = await readFile(CATALOG_PATH, 'utf8');
     catalog = JSON.parse(raw);
   } catch (e) {
     console.error('Failed to read published-catalog.json:', e.message);
-    return;
+    throw e;
   }
 
   const ongoings = (catalog.items || []).filter(item => item.ongoing === true);
@@ -39,7 +43,26 @@ export async function updateOngoings() {
   let updatedCount = 0;
   let newEpisodesCount = 0;
 
+  let failures=0;
   for (const item of ongoings) {
+    if(item.kodikIds?.length){
+      if(!api){console.warn(`Kodik update skipped for ${item.id}: KODIK_TOKEN missing`);continue;}
+      try{
+        let updated=item;
+        for await(const batch of api.pages('/search',{...catalogParams,shikimori_id:item.ids.shikimori})){
+          for(const release of batch.results){
+            const revision=release.updated_at||String(release.episodes_count);
+            if(updated.kodikRevisions?.[release.id]===revision)continue;
+            const incoming=await assembleRelease(release);
+            const merged=mergeKodikRelease(updated,incoming);
+            if(!createApprovedCatalogue({policyVersion:3,items:[merged]}).items.length)throw Error('catalogue_validation_failed');
+            merged.kodikRevisions={...updated.kodikRevisions,[release.id]:revision};updated=merged;
+          }
+        }
+        if(updated!==item){newEpisodesCount+=Math.max(0,updated.episodes.length-item.episodes.length);catalog.items[catalog.items.indexOf(item)]=updated;updatedCount++;}
+      }catch(error){failures++;console.warn(`Kodik update pending for ${item.id}: ${error.message}`);}
+      continue;
+    }
     const anilibriaId = item.ids?.anilibria;
     if (!anilibriaId) continue;
 
@@ -49,7 +72,7 @@ export async function updateOngoings() {
     try {
       release = await fetchJSON(`${ANILIBRIA_BASE}releases/${anilibriaId}`);
     } catch (e) {
-      console.warn(`Could not fetch AniLibria release ${anilibriaId}: ${e.message}`);
+      failures++;console.warn(`Could not fetch AniLibria release ${anilibriaId}: ${e.message}`);
       continue;
     }
 
@@ -122,10 +145,10 @@ export async function updateOngoings() {
 
   if (updatedCount > 0) {
     catalog.updatedAt = new Date().toISOString();
-    await writeFile(CATALOG_PATH, JSON.stringify(catalog, null, 2));
+    await saveJSON(CATALOG_PATH, catalog);
     console.log(`\nUpdated catalogue: added ${newEpisodesCount} new episode(s) across ${updatedCount} title(s).`);
   } else {
-    console.log('\nAll ongoings are up to date. No new episodes found.');
+    console.log(failures?`Проверка завершилась с ошибками: ${failures}. Существующие серии сохранены.`:'\nNo new episodes found.');
   }
 }
 

@@ -1,3 +1,6 @@
+import curatedSpotlight from './spotlight.json';
+import {episodeSeasonOptions} from './catalog-seasons.js';
+import {normalizeGenre,matchesType,searchScore,suggestions,selectSpotlight} from './catalog-query.js';
 import {createSubtitles} from './subtitles.js';
 import {approvedSkipTimes} from './approved-skip-times.js';
 import {detailArtwork} from './detail-artwork.js';
@@ -214,8 +217,9 @@ function render(newWatch=false) {
 function homeHTML() {
  return `<section class="cinematic-hero" id="hero-art">${heroArtHTML()}</section><section class="section"><div class="section-head"><h2>${t('continue')}</h2>${user?'<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button>':''}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
 }
-function bannerFor(a){return a?.catalogApproved?(a.banner||''):(artwork[a?.malId]?.banner||a?.banner||'');}
-function heroPool(){return publishedItems.slice(0,10); }
+function bannerFor(a){return a?.catalogApproved?detailArtwork(a):(artwork[a?.malId]?.banner||a?.banner||'');}
+const spotlightItems=selectSpotlight(publishedItems,10,curatedSpotlight);
+function heroPool(){return spotlightItems;}
 function heroImage(a){return matchMedia('(max-width:600px)').matches?(a.heroMobile||a.image):(a.hero||bannerFor(a));}
 function heroArtHTML(){
  const pool=heroPool(),front=pool[heroIndex%pool.length];if(!front)return `<div class="hero-content"><span class="hero-eyebrow">yomiku</span><h1>${t('catalogRebuilding')}</h1><p>${t('catalogRebuildingHint')}</p><button class="button glass-button" data-nav="library">${t('library')}</button></div>`;
@@ -256,7 +260,7 @@ async function rotateHero(direction=1){
 function startHero(){
  clearInterval(heroTimer);
  preloadNextHero();
- if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ // Reduced-motion users still get rotation, without cross-fade animation.
  heroTimer=setInterval(()=>{const node=$('#hero-art');if(node&&!document.hidden&&!node.querySelector(':focus-visible')&&!$('dialog[open]'))rotateHero();},7000);
 }
 function continueHTML() {
@@ -307,7 +311,7 @@ function catalogShell() {
     )}</select><label><input type="checkbox" id="ongoing-only" ${ongoingOnly ? "checked" : ""}> ${t("ongoingOnly")}</label></div><label class="genre-filter">${t('genre')}<select id="genre-filter"><option value="all">${t('allGenres')}</option>${Object.entries(genreLabels).map(([v,n])=>`<option value="${esc(v)}" ${genre===v?'selected':''}>${n[langIndex(lang)]}</option>`).join('')}</select></label><div id="results-caption" class="results-caption" aria-live="polite"></div><div class="anime-grid" id="anime-grid"></div><div id="catalog-status" class="catalog-status" aria-live="polite"></div><div class="empty" id="empty" hidden><span>${icon("search")}</span><h3>${t("empty")}</h3><p>${t("emptyHint")}</p><button class="button soft" data-action="reset">${t("reset")}</button></div></section></div>`;
 }
 function genreText(g) {
-  return genreLabels[g]?.[langIndex(lang)] || g || "";
+  return genreLabels[normalizeGenre(g)]?.[langIndex(lang)] || g || "";
 }
 function renderGrid() {
   const grid = $("#anime-grid");
@@ -335,10 +339,10 @@ function renderGrid() {
               ? !!e?.favorite
               : (e?.status === list || e?.legacyLists?.includes(list)))) &&
       (page !== "library" && !catalogError || (
-        (genre === "all" || a.genres.includes(genre)) &&
+        (genre === "all" || a.genres.some(g=>normalizeGenre(g)===normalizeGenre(genre))) &&
         (!ongoingOnly || a.ongoing) &&
-        (typeFilter === "all" || (typeFilter === "series" ? ["TV","ONA","WEB"] : typeFilter.split(",")).includes(a.type || (a.episodes === 1 ? "MOVIE" : "TV"))) &&
-        [a.title,a.alt,...Object.values(a.translations||{}).map(v=>v[0])].join(" ").toLocaleLowerCase().replaceAll("ё","е").includes(query.toLocaleLowerCase().replaceAll("ё","е").trim())
+        matchesType(a,typeFilter) &&
+        searchScore(a,query)>0
       ))
     );
   });
@@ -365,7 +369,7 @@ function renderGrid() {
             ? `<p>${t("fallback")}</p><button class="button soft" data-action="reload-catalog">${t("retry")}</button>`
             : `${catalogPartial ? `<p>${t("partialCatalog")}</p>` : ""}<div class="catalog-pagination"><button class="button soft" data-catalog-page="${catalogPage-1}" ${catalogPage<=1?"disabled":""}>${t("previous")}</button><form id="catalog-page-form"><label>${t("page")} <input name="page" type="number" inputmode="numeric" min="1" max="${catalogPages}" value="${catalogPage}" aria-label="${t("page")}" required> / ${catalogPages}</label><button class="icon-button" aria-label="${t("goPage")}">${icon("arrow")}</button></form><button class="button soft" data-catalog-page="${catalogPage+1}" ${catalogPage>=catalogPages?"disabled":""}>${t("nextPage")}</button></div>${catalogPage < catalogPages ? `<button class="text-button" data-action="load-more">${t("loadMore")}</button>` : ""}`;
   $("#results-caption").textContent =
-    query || genre !== "all" || page === "library"
+    page === 'catalog' || query || genre !== "all" || page === "library"
       ? `${t("found")}: ${page === "library" || catalogError ? items.length : (catalogTotal ?? items.length).toLocaleString(lang)}`
       : "";
 }
@@ -855,14 +859,15 @@ async function openPlayer(id, requested, pushRoute=true) {
 function renderEpisodes() {
   if (!current || !$("#episode-picker")) return;
   $("#episode-control").hidden = current.episodes <= 1;
-  $("#episode-picker").innerHTML = Array.from({length:current.episodes},(_,i)=>`<option value="${i+1}" ${i+1===episode?'selected':''}>${t('episode')} ${esc(current.episodeNumbers?.[i] ?? i+1)}</option>`).join('');
-  $("#season-control").hidden = playerSeasons.length <= 1;
-  $("#season-picker").innerHTML = playerSeasons.map(a=>`<option value="${esc(a.id)}" ${a.id===current.id?'selected':''}>${esc(title(a))}</option>`).join('');
-  $('#watch-episode-label').textContent=current.episodes===1&&current.type==='MOVIE'?t('movie'):t('episode')+' '+(current.episodeNumbers?.[episode-1]??episode);
+  const seasonView=episodeSeasonOptions(current,episode);
+  $("#episode-picker").innerHTML=seasonView.episodes.map(e=>`<option value="${e.index}" ${e.index===episode?'selected':''}>${t('episode')} ${esc(e.ordinal)}</option>`).join('');
+  $("#season-control").hidden = false;
+  $("#season-picker").innerHTML=seasonView.seasons.length>1?seasonView.seasons.map(n=>`<option value="season:${n}" ${n===seasonView.active?'selected':''}>${t('season')} ${n}</option>`).join(''):playerSeasons.map((a,i)=>`<option value="${esc(a.id)}" ${a.id===current.id?'selected':''}>${playerSeasons.length===1?t('season')+' '+seasonView.active:esc(title(a))}</option>`).join('');
+  $('#watch-episode-label').textContent=current.episodes===1&&current.type==='MOVIE'?t('movie'):t('episode')+' '+(current.episodeManifest?.[episode-1]?.ordinal??current.episodeNumbers?.[episode-1]??episode);
   const audio=audioChoices(current,episode);
-  if(!audio.some(x=>x.id===selectedAudio))selectedAudio=preferredAudio(audio,state.preferences,current.id);
+  if(!selectedAudio)selectedAudio=preferredAudio(audio,state.preferences,current.id);
   $('#audio-control').hidden=!audio.length;
-  $('#audio-picker').innerHTML=audio.map(x=>`<option value="${esc(x.id)}" ${x.id===selectedAudio?'selected':''}>${esc(x.label)} · ${t(x.language==='ja'?'audioJapanese':x.language==='en'?'audioEnglish':'audioRussian')}</option>`).join('');
+  $('#audio-picker').innerHTML=(selectedAudio&&!audio.some(x=>x.id===selectedAudio)?`<option value="${esc(selectedAudio)}" selected disabled>${t('audioUnavailable')}</option>`:'')+audio.map(x=>`<option value="${esc(x.id)}" ${x.id===selectedAudio?'selected':''}>${esc(x.label)} · ${t(x.language==='ja'?'audioJapanese':x.language==='en'?'audioEnglish':x.language==='ru'?'audioRussian':'audioOther')}</option>`).join('');
   const navigation=episodeNavigation(episode,current.episodes);
   $("#previous-episode").hidden=!navigation.previous;
   $("#next-episode").hidden=!navigation.next;
@@ -937,7 +942,7 @@ async function updateSource(play = false, refresh = false, position) {
       const selected=chooseQuality(info?.sources||[],state.preferences.quality);
       url=selected?.url;stream=selected?.stream??(info?.stream??url?.includes('.m3u8'));
       const subs=subtitleController?.set(info?.subtitles||[],state.preferences.subtitles)||[];
-      $('#subtitle-control').hidden=!subs.length;
+      $('#subtitle-control').hidden=false;
       $('#subtitle-picker').innerHTML=`<option value="off">${t('subtitlesOff')}</option>`+subs.map(s=>`<option value="${s.language}">${esc({ru:'Русский',en:'English',ja:'日本語'}[s.language])}</option>`).join('');
       $('#subtitle-picker').value=subs.some(s=>s.language===state.preferences.subtitles)?state.preferences.subtitles:'off';
       enhanceSelects($('#watch-page'));
@@ -1034,7 +1039,7 @@ async function loadAutomaticSkips(){
   const notice=$('#skip-availability');
   if(!state.preferences.autoSkip){if(notice)notice.textContent='';return;}
   if(notice)notice.textContent=t('skipLoading');
-  const fallback=!current.catalogApproved&&(!providerTiming?.opening||!providerTiming?.ending)?await automaticSkipTimes(current.malId,Number(current.episodeNumbers?.[episode-1]??episode),video.duration):{};
+  const fallback=!current.catalogApproved&&(!providerTiming?.opening||!providerTiming?.ending)?await automaticSkipTimes(current.malId,Number(current.episodeManifest?.[episode-1]?.ordinal??current.episodeNumbers?.[episode-1]??episode),video.duration):{};
   if(own!==sourceGeneration||key!==sourceKey)return;
   providerTiming={...providerTiming,opening:providerTiming?.opening||fallback.opening,ending:providerTiming?.ending||fallback.ending};
   if(notice)notice.textContent=providerTiming.opening||providerTiming.ending?'':t('skipUnavailable');
@@ -1340,9 +1345,9 @@ document.addEventListener("input", (event) => {
       input.setSelectionRange(caret[0]??query.length,caret[1]??query.length);
     }
     for(const input of $$("#search,#catalog-search"))if(input!==event.target && input.value!==query)input.value=query;
-    renderGrid();
+    showSearchSuggestions(event.target.id);
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => loadCatalogue(), 350);
+    searchTimer = setTimeout(() => loadCatalogue(), 80);
   }
 });
 document.addEventListener("change", (event) => {
@@ -1409,7 +1414,10 @@ document.addEventListener("change", (event) => {
     subtitleController?.select(input.value);mutate({type:'preferences',patch:{subtitles:input.value}});
   }
   if (input.id === "episode-picker") switchEpisode(Number(input.value),!!state.preferences.autoPlay);
-  if (input.id === "season-picker") openPlayer(input.value);
+  if(input.id==='season-picker'){
+   if(input.value.startsWith('season:')){const season=Number(input.value.slice(7)),i=current.episodeManifest.findIndex(e=>(e.season??1)===season);if(i>=0)switchEpisode(i+1,!!state.preferences.autoPlay);}
+   else openPlayer(input.value);
+  }
   if (input.id === "quality") {
     const v=$("#video"),play=!!v && !v.paused;
     recordProgress();
@@ -1587,3 +1595,26 @@ window.addEventListener('yoru:source-ready',()=>{combinedCatalogue.clear();resol
 window.addEventListener('scroll',()=>document.querySelector('.header')?.classList.toggle('scrolled',window.scrollY>40),{passive:true});
 
 document.addEventListener('load',event=>{const img=event.target;if(!(img instanceof HTMLImageElement))return;if(img.id==='profile-banner-image'){img.parentElement?.classList.toggle('portrait-banner',img.naturalHeight>img.naturalWidth);const fill=img.parentElement?.querySelector('.profile-banner-fill');if(fill){fill.src=img.currentSrc;fill.hidden=false;}}if(img.dataset.detailsArt){const fill=img.closest('.details-artwork')?.querySelector('.details-art-fill');if(fill){fill.hidden=false;if(fill.getAttribute('src')!==img.getAttribute('src'))fill.src=img.getAttribute('src');}}if(img.dataset.detailsArt&&img.naturalWidth<img.naturalHeight){img.closest('.details-artwork')?.classList.add('portrait-art');void improvePoster(img,byId(img.dataset.detailsArt));}else if(img.dataset.poster)void improvePoster(img,byId(img.dataset.poster));},true);
+
+function closeSearchSuggestions(){
+ document.querySelectorAll('.search-suggestions').forEach(n=>n.remove());
+ document.querySelectorAll('#search,#catalog-search').forEach(n=>{n.setAttribute('aria-expanded','false');n.removeAttribute('aria-activedescendant');});
+}
+function showSearchSuggestions(id){
+ closeSearchSuggestions();const input=document.getElementById(id);if(!input)return;
+ const items=suggestions(publishedItems,query);if(!items.length)return;
+ const panel=document.createElement('div');panel.id='search-suggestions';panel.className='search-suggestions';panel.setAttribute('role','listbox');
+ panel.innerHTML=items.map((a,i)=>`<button type="button" role="option" id="suggestion-${i}" aria-selected="false" data-details="${esc(a.id)}"><img src="${esc(cover(a))}" alt=""><span><strong>${esc(title(a))}</strong><small>${a.year||''} · ${esc(a.type||'')}</small></span></button>`).join('');
+ input.parentElement.append(panel);input.setAttribute('role','combobox');input.setAttribute('aria-autocomplete','list');input.setAttribute('aria-controls',panel.id);input.setAttribute('aria-expanded','true');
+}
+document.addEventListener('keydown',event=>{
+ const panel=document.querySelector('.search-suggestions');if(!panel||!['search','catalog-search'].includes(event.target.id))return;
+ const options=[...panel.querySelectorAll('[role="option"]')],old=options.findIndex(o=>o.getAttribute('aria-selected')==='true');
+ if(['ArrowDown','ArrowUp'].includes(event.key)){
+  event.preventDefault();const index=event.key==='ArrowDown'?(old+1)%options.length:(old<=0?options.length-1:old-1);
+  options.forEach((o,i)=>o.setAttribute('aria-selected',String(i===index)));event.target.setAttribute('aria-activedescendant',options[index].id);options[index].scrollIntoView({block:'nearest'});
+ }else if(event.key==='Enter'&&old>=0){event.preventDefault();options[old].click();closeSearchSuggestions();}
+ else if(event.key==='Escape')closeSearchSuggestions();
+});
+document.addEventListener('click',event=>{if(event.target.closest('.search-suggestions button')||!event.target.closest('.search,.catalog-search'))closeSearchSuggestions();});
+document.addEventListener('focusin',event=>{if(!event.target.closest('.search,.catalog-search'))closeSearchSuggestions();});

@@ -1,314 +1,70 @@
-/**
- * seed-catalog.mjs
- * Backend seeder for Yoru anime catalogue.
- * Gathers titles, all available dubs/subs/qualities, ensures deduplication,
- * fetches high-resolution banners/posters, and publishes to src/published-catalog.json.
- */
-
-import { readFile, writeFile, rename } from 'node:fs/promises';
-import { createApprovedCatalogue } from '../src/approved-catalog.js';
-import {normalizeSeedCatalog} from './normalize-seed-catalog.mjs';
-import { seedPages, remember, isKnown } from './seed-progress.mjs';
-
-const CATALOG_PATH = 'src/published-catalog.json';
-const PROGRESS_PATH = 'src/seed-progress.json';
-async function saveJSON(path, data) {
-  await writeFile(path + '.tmp', JSON.stringify(data, null, 2));
-  await rename(path + '.tmp', path);
+import {mapLimit} from './lib/concurrency.mjs';
+import {readFile,writeFile,rename,mkdir} from 'node:fs/promises';
+import {pathToFileURL} from 'node:url';
+import {KodikAPI,catalogParams,allEpisodes,translationIdentity,mergeKodikRelease} from './lib/kodik-api.mjs';
+import {probeImage,probeStream} from './lib/media-probe.mjs';
+import {kodikVideo} from '../server/animego.js';
+import {fetchShikimori,fetchAniListMetadata} from './seed-anilibria.mjs';
+import {createApprovedCatalogue} from '../src/approved-catalog.js';
+import {normalizeType,normalizeGenre} from '../src/catalog-query.js';
+const catalogPath='src/published-catalog.json',cursorPath='src/kodik-progress.json';
+export async function saveJSON(path,data){await writeFile(path+'.tmp',JSON.stringify(data,null,2));await rename(path+'.tmp',path);}
+export async function loadJSON(path,fallback){try{return JSON.parse(await readFile(path,'utf8'));}catch(e){if(e.code==='ENOENT')return fallback;throw e;}}
+export async function loadToken(){
+ // .env is ignored by git; never put a token in catalogues, URLs in logs or cursors.
+ try{const raw=await readFile('.env','utf8');const value=raw.match(/^KODIK_TOKEN\s*=\s*["']?([^\s"'\r\n]+)["']?\s*$/m)?.[1];return process.env.KODIK_TOKEN||value;}catch(e){if(e.code!=='ENOENT')throw e;return process.env.KODIK_TOKEN;}
 }
-const ANILIBRIA_BASE = 'https://anilibria.top/api/v1/anime/';
-const USER_AGENT = 'YoruAnimeApp/2.0 (https://yooickuu.github.io/yooickuu.com/)';
-
-const wait = ms => new Promise(r => setTimeout(r, ms));
-
-function cleanDescription(text = '') {
-  if (!text) return '';
-  return text
-    .replace(/\[\/?(?:b|i|u|url|img|spoiler|character|person|anime|manga)[^\]]*\]/gi, '')
-    .replace(/<[^>]*>/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+const metaCache=new Map();
+async function metadata(id){if(!metaCache.has(id))metaCache.set(id,Promise.all([fetchShikimori(id),fetchAniListMetadata(id)]));return metaCache.get(id);}
+export async function assembleRelease(release,{getMetadata=metadata,imageProbe=probeImage,resolve=kodikVideo,streamProbe=probeStream}={}){
+ const shiki=Number(release.shikimori_id);if(!Number.isSafeInteger(shiki)||shiki<=0)throw Error('shikimori_identity_missing');
+ const translation=translationIdentity(release),rows=allEpisodes(release),m=release.material_data||{};
+ const [sh,al]=await getMetadata(shiki);const type=normalizeType(m.anime_kind||sh?.kind||(release.type==='anime'?'MOVIE':'TV'));
+ const clean=v=>String(v||'').replace(/<[^>]*>|\[\/?[^\]]+\]/g,' ').replace(/\s+/g,' ').trim();
+ let poster;for(const url of [sh?.poster?.originalUrl,al?.coverImage?.extraLarge,m.poster_url,m.anime_poster_url].filter(Boolean)){try{poster=await imageProbe(url);if(poster.height<300)throw Error('poster_small');break;}catch{poster=null;}}
+ if(!poster)throw Error('broken_poster');
+ let backdrop;for(const url of [al?.bannerImage,...(release.screenshots||[])].filter(Boolean)){try{backdrop=await imageProbe(url);if(backdrop.width<400)throw Error('backdrop_small');break;}catch{backdrop=null;}}
+ // A valid poster of this anime is preferable to another title's shared backdrop.
+ backdrop||=poster;if(backdrop.width<400)throw Error('backdrop_small');
+ const episodes=await mapLimit(rows,4,async(row,index)=>{
+  const media=await resolve(row.url,row.ordinal);const sources=[];let duration=0;
+  for(const source of media.sources||[]){if(![360,480,720,1080].includes(source.quality))continue;try{for(const s of await streamProbe(source)){duration=Math.max(duration,s.duration);if(!sources.some(v=>v.quality===s.quality))sources.push({quality:s.quality,url:s.url,stream:true,checkedAt:s.checkedAt});}}catch{}}
+  if(!sources.length||!duration)throw Error(`no_working_stream_s${row.season}_e${row.ordinal}`);
+  if(type==='SPECIAL'&&duration<180&&!clean(sh?.description))throw Error('short_special_without_shikimori_description');
+  return {number:rows.some(r=>r.season!==rows[0].season)?index+1:row.ordinal,ordinal:row.ordinal,season:row.season,audio:[{...translation,duration,sources,subtitles:[],opening:null,ending:null,providerRef:{provider:'kodik',releaseId:String(release.id),translationId:String(release.translation.id),url:row.url,season:row.season,ordinal:row.ordinal}}]};
+ });
+ const mal=Number(sh?.malId||al?.idMal)||null;
+ return {id:mal?`mal-${mal}`:`shikimori-${shiki}`,ids:{shikimori:shiki,mal,anilist:al?.id||null,kodik:String(release.id)},kodikIds:[String(release.id)],kodikRevisions:{[release.id]:release.updated_at||String(release.episodes_count)},title:sh?.russian||release.title,originalTitle:release.title_orig||al?.title?.romaji||'',alt:[release.other_title,al?.title?.english,al?.title?.native].filter(Boolean).join(' '),description:clean(sh?.description||m.description||al?.description),year:release.year,type,genres:(sh?.genres?.map(g=>g.russian||g.name)||m.anime_genres||al?.genres||[]).map(normalizeGenre),rating:Number(sh?.score||m.shikimori_rating||Number(al?.averageScore)/10)||null,popularity:al?.popularity||0,ongoing:(m.anime_status||sh?.status)==='ongoing',relatedMalIds:(al?.relations?.edges||[]).filter(e=>['PREQUEL','SEQUEL'].includes(e.relationType)&&e.node.type==='ANIME').map(e=>e.node.idMal).filter(Boolean),artwork:{poster,backdrop},releasedEpisodes:episodes.map(e=>e.number),episodes};
 }
-
-async function fetchJSON(url, options = {}) {
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'User-Agent': USER_AGENT,
-      Accept: 'application/json',
-      ...options.headers
-    },
-    signal: AbortSignal.timeout(15000)
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
-  return res.json();
+export async function seedCatalog({targetCount=30,token,api,assemble=assembleRelease}={}){
+ if(!Number.isSafeInteger(targetCount)||targetCount<1)throw Error('Количество должно быть положительным целым числом');
+ api||=new KodikAPI(token||await loadToken());
+ const catalog=await loadJSON(catalogPath,{policyVersion:3,items:[]});
+ const progress=await loadJSON(cursorPath,{next:'/list',processed:{},pending:[]});
+ const report={startedAt:new Date().toISOString(),checked:0,added:0,merged:0,skipped:0,pending:[]};
+ const byIdentity=new Map(catalog.items.flatMap(a=>[a.ids?.shikimori&&[`shikimori:${a.ids.shikimori}`,a],a.ids?.mal&&[`mal:${a.ids.mal}`,a]].filter(Boolean)));
+ const persist=async next=>{catalog.updatedAt=new Date().toISOString();await saveJSON(catalogPath,catalog);await saveJSON(cursorPath,{...progress,next});await mkdir('checks',{recursive:true});await saveJSON('checks/kodik-last-report.json',report);};
+ async function ingest(release){
+  report.checked++;const key=String(release.id),revision=release.updated_at||release.episodes_count||'unknown';
+  if(progress.processed[key]===revision){report.skipped++;return;}
+  try{
+   const incoming=await assemble(release),existing=byIdentity.get(`shikimori:${incoming.ids.shikimori}`)||byIdentity.get(`mal:${incoming.ids.mal}`);
+   const merged=mergeKodikRelease(existing,incoming);
+   if(!createApprovedCatalogue({policyVersion:3,items:[merged]}).items.length)throw Error('catalogue_validation_failed');
+   if(existing){catalog.items[catalog.items.indexOf(existing)]=merged;report.merged++;}else{catalog.items.push(merged);report.added++;}
+   for(const [kind,id]of Object.entries(merged.ids))if(id)byIdentity.set(`${kind}:${id}`,merged);
+   progress.processed[key]=revision;progress.pending=progress.pending.filter(id=>id!==key);
+   console.log(`✓ ${merged.title}: ${merged.episodes.length} серий; новых ${report.added}/${targetCount}, дополнено ${report.merged}`);
+  }catch(error){if(!progress.pending.includes(key))progress.pending.push(key);report.pending.push({id:key,reason:error.message});console.warn(`Пропущен ${key}: ${error.message}`);}
+ }
+ // Retry previous failures without losing the main pagination cursor.
+ for(const id of [...progress.pending]){for await(const batch of api.pages('/search',{...catalogParams,id}))for(const r of batch.results)await ingest(r);if(report.added>=targetCount){await persist(progress.next);return report;}}
+ // Refresh first page when resuming, to catch newly released titles.
+ if(progress.next&&progress.next!=='/list'){const first=await api.request('/list',catalogParams);for(const r of first.results){await ingest(r);if(report.added>=targetCount){await persist(progress.next);return report;}}}
+ for await(const batch of api.pages(progress.next||'/list',catalogParams)){
+  for(const release of batch.results){await ingest(release);await persist(batch.page);if(report.added>=targetCount)return report;}
+  await persist(batch.next_page||'/list');
+ }
+ console.log(`Готово: новых ${report.added}, дополнено ${report.merged}, на проверку позже ${report.pending.length}`);return report;
 }
-
-async function fetchShikimori(malOrShikiId) {
-  try {
-    const query = `query($id: String) {
-      animes(ids: $id, limit: 1) {
-        id malId name russian description score status
-        genres { id name russian }
-        poster { originalUrl }
-      }
-    }`;
-    const data = await fetchJSON('https://shikimori.io/api/graphql', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, variables: { id: String(malOrShikiId) } })
-    });
-    return data.data?.animes?.[0] || null;
-  } catch (e) {
-    return null;
-  }
-}
-
-async function fetchAniListMetadata(malId) {
-  try {
-    const query = `query($idMal: Int) {
-      Media(idMal: $idMal, type: ANIME) {
-        id
-        idMal
-        bannerImage
-        coverImage { extraLarge large }
-        title { english romaji native }
-        genres
-        description(asHtml: false)
-      }
-    }`;
-    const data = await fetchJSON('https://graphql.anilist.co', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, variables: { idMal: Number(malId) } })
-    });
-    return data.data?.Media || null;
-  } catch (e) {
-    return null;
-  }
-}
-
-async function loadExistingCatalog() {
-  try {
-    const raw = await readFile(CATALOG_PATH, 'utf8');
-    return JSON.parse(raw);
-  } catch (error) {
-    if(error.code !== 'ENOENT') throw error;
-    return { policyVersion: 3, updatedAt: new Date().toISOString(), items: [] };
-  }
-}
-
-export async function seedCatalog({ targetCount = 30, onlyOngoings = false } = {}) {
-  if(!Number.isSafeInteger(targetCount)||targetCount<1) throw Error('Count must be a positive integer');
-  console.log(`Starting anime catalogue seeder (target: ${targetCount}, ongoingsOnly: ${onlyOngoings})...`);
-
-  const {publication:catalog} = normalizeSeedCatalog(await loadExistingCatalog());
-  const knownIDs = new Set();
-  catalog.items.forEach(item=>remember(knownIDs,item));
-  let progress={};
-  try {progress=JSON.parse(await readFile(PROGRESS_PATH,'utf8'));} catch(error) {if(error.code!=='ENOENT')throw error;}
-  const mode=onlyOngoings?'ongoing':'all';
-  const saved=progress[mode]||{page:1,retryPages:[]};
-  let added=0,skipped=0,failed=0,scanned=0;
-  const retryPages=new Set(saved.retryPages||[]);
-  const checkpoint=async page=>{
-    catalog.updatedAt=new Date().toISOString();
-    await saveJSON(CATALOG_PATH,catalog);
-    progress[mode]={page,retryPages:[...retryPages],updatedAt:catalog.updatedAt};
-    await saveJSON(PROGRESS_PATH,progress);
-  };
-  console.log(`Existing titles in catalog: ${catalog.items.length}`);
-
-  // Resume the catalogue scan; check its first page for newly released titles too.
-  for await (const batch of seedPages({startPage:saved.page,retryPages:[...retryPages],fetchPage:async page=>{
-    const url = `${ANILIBRIA_BASE}catalog/releases?limit=50&page=${page}&sort_by=code${onlyOngoings ? '&is_ongoing=true' : ''}`;
-    return fetchJSON(url);
-  }})) {
-    const {page,items:releaseList,resumePage}=batch;
-    retryPages.delete(page);
-    for (const brief of releaseList) {
-      if (added >= targetCount) break;
-
-      const malId = brief.mal?.id;
-      const shikiId = brief.shikimori?.id;
-
-      scanned++;
-      if(isKnown(knownIDs,{ids:{anilibria:brief.id,mal:malId,shikimori:shikiId}})) {skipped++;continue;}
-
-      console.log(`\nProcessing: "${brief.name.main}" (MAL: ${malId}, Shikimori: ${shikiId})...`);
-
-      // Fetch full release details
-      let fullRelease;
-      try {
-        fullRelease = await fetchJSON(`${ANILIBRIA_BASE}releases/${brief.id}`);
-      } catch (e) {
-        console.warn(`Could not fetch details for release ${brief.id}:`, e.message);
-        retryPages.add(page);failed++;continue;
-      }
-
-      if (!fullRelease.episodes?.length) {
-        retryPages.add(page);
-        console.log(`Release ${brief.id} has no released episodes yet, skipping.`);
-        continue;
-      }
-
-      // Fetch metadata from Shikimori & AniList
-      const [shikiData, anilistData] = await Promise.all([
-        (shikiId || malId) ? fetchShikimori(shikiId || malId) : null,
-        malId ? fetchAniListMetadata(malId) : null
-      ]);
-
-      const title = shikiData?.russian || brief.name.main;
-      const originalTitle = shikiData?.name || anilistData?.title?.native || brief.name.english || '';
-      const altNames = [
-        brief.name.english,
-        brief.name.alternative,
-        anilistData?.title?.romaji,
-        anilistData?.title?.english,
-        shikiData?.name
-      ].filter(Boolean).join(' ');
-
-      const description = cleanDescription(shikiData?.description || fullRelease.description || anilistData?.description || '');
-      const year = brief.year || anilistData?.seasonYear || (fullRelease.created_at ? new Date(fullRelease.created_at).getFullYear() : 2024);
-      const isOngoing = Boolean(brief.is_ongoing);
-
-      // Genres
-      const genres = shikiData?.genres?.map(g => g.russian || g.name)
-        || fullRelease.genres?.map(g => g.name)
-        || anilistData?.genres
-        || ['Аниме'];
-
-      // Artwork: ensure high-resolution poster & backdrop
-      let posterUrl = anilistData?.coverImage?.extraLarge
-        || shikiData?.poster?.originalUrl
-        || (brief.poster?.optimized?.src ? `https://anilibria.top${brief.poster.optimized.src}` : null)
-        || (brief.poster?.src ? `https://anilibria.top${brief.poster.src}` : null);
-
-      let backdropUrl = anilistData?.bannerImage
-        || 'https://s4.anilist.co/file/anilistcdn/media/anime/banner/101922-33MtJGsUSxga.jpg'; // high-res default fallback if no banner
-
-      if (!backdropUrl || !backdropUrl.startsWith('https://')) {
-        backdropUrl = posterUrl;
-      }
-
-      // Build episodes with AniLibria tracks
-      const episodes = [];
-      for (const ep of fullRelease.episodes) {
-        const sources = [];
-        if (ep.hls_1080) sources.push({ quality: 1080, url: ep.hls_1080, stream: true });
-        if (ep.hls_720) sources.push({ quality: 720, url: ep.hls_720, stream: true });
-        if (ep.hls_480) sources.push({ quality: 480, url: ep.hls_480, stream: true });
-
-        if (!sources.length) continue;
-
-        const duration = Number(ep.duration) || 1420;
-        const opening = (ep.opening?.start != null && ep.opening?.stop != null && ep.opening.stop > ep.opening.start)
-          ? { start: Number(ep.opening.start), end: Number(ep.opening.stop) }
-          : { absent: true };
-
-        const ending = (ep.ending?.start != null && ep.ending?.stop != null && ep.ending.stop > ep.ending.start)
-          ? { start: Number(ep.ending.start), end: Number(ep.ending.stop) }
-          : { absent: true };
-
-        const audio = [
-          {
-            id: 'anilibria',
-            dubId: 'AniLibria',
-            label: 'AniLibria (RU)',
-            language: 'ru',
-            original: false,
-            duration,
-            sources,
-            subtitles: [],
-            opening,
-            ending
-          }
-        ];
-
-        episodes.push({
-          number: Number(ep.ordinal),
-          audio
-        });
-      }
-
-      if (!episodes.length) {
-        console.log(`No valid video streams found for ${title}, skipping.`);
-        continue;
-      }
-
-      // Additional voices require their own resolved streams. Never relabel
-      // AniLibria URLs as another dub or invent lower-resolution variants.
-
-      const canonicalId = malId ? `mal-${malId}` : shikiId ? `shikimori-${shikiId}` : `lib-${brief.id}`;
-
-      const animeRecord = {
-        id: canonicalId,
-        ids: {
-          mal: malId || null,
-          shikimori: shikiId || null,
-          anilist: anilistData?.id || null,
-          anilibria: brief.id,
-          kodik: null
-        },
-        title,
-        originalTitle,
-        alt: `${title} ${altNames}`,
-        year,
-        type: brief.type?.value || 'TV',
-        genres,
-        description,
-        ongoing: isOngoing,
-        releasedEpisodes: episodes.map(e => e.number),
-        artwork: {
-          poster: {
-            url: posterUrl,
-            width: 800,
-            height: 1200
-          },
-          backdrop: {
-            url: backdropUrl,
-            width: 1920,
-            height: 1080
-          }
-        },
-        episodes
-      };
-
-      if(isKnown(knownIDs,animeRecord)){skipped++;continue;}
-      if(!createApprovedCatalogue({policyVersion:catalog.policyVersion,items:[animeRecord]}).items.length){
-        retryPages.add(page);failed++;console.warn(`Not publishable yet: ${title}`);continue;
-      }
-      catalog.items.push(animeRecord);
-      remember(knownIDs,animeRecord);
-      knownIDs.add(canonicalId);
-      if (malId) knownIDs.add(`mal:${malId}`);
-      if (shikiId) knownIDs.add(`shikimori:${shikiId}`);
-      if (animeRecord.ids.anilist) knownIDs.add(`anilist:${animeRecord.ids.anilist}`);
-
-      added++;
-      console.log(`✔ Added [${added}/${targetCount}]: "${title}" (${episodes.length} episodes, ${episodes[0].audio.length} audio tracks)`);
-
-      // Gentle pause to respect upstream rate limits
-      await wait(500);
-    }
-
-    console.log(`Page ${page}: +${added} new, ${skipped} existing, ${failed} pending; scanned ${scanned}`);
-    if(added>=targetCount&&page<resumePage)retryPages.add(page);
-    await checkpoint(added>=targetCount?resumePage:batch.nextPage);
-    if(added>=targetCount) break;
-  }
-
-  catalog.updatedAt = new Date().toISOString();
-  await saveJSON(CATALOG_PATH, catalog);
-  console.log(`\nSuccessfully saved ${catalog.items.length} titles to ${CATALOG_PATH}.`);
-  return catalog;
-}
-
-// If executed directly
-if (process.argv[1]?.endsWith('seed-catalog.mjs')) {
-  const count = process.argv[2]===undefined?20:Number(process.argv[2]);
-  seedCatalog({ targetCount: count }).catch(err => {
-    console.error('Fatal seeder error:', err);
-    process.exit(1);
-  });
-}
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)seedCatalog({targetCount:Number(process.argv[2]||30)}).catch(e=>{console.error(e.message);process.exitCode=1;});
