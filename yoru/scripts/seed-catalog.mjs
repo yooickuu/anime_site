@@ -121,7 +121,7 @@ export async function seedCatalog({ targetCount = 30, onlyOngoings = false } = {
 
   // Resume the catalogue scan; check its first page for newly released titles too.
   for await (const batch of seedPages({startPage:saved.page,retryPages:[...retryPages],fetchPage:async page=>{
-    const url = `${ANILIBRIA_BASE}catalog/releases?limit=25&page=${page}${onlyOngoings ? '&is_ongoing=true' : ''}`;
+    const url = `${ANILIBRIA_BASE}catalog/releases?limit=50&page=${page}&sort_by=code${onlyOngoings ? '&is_ongoing=true' : ''}`;
     return fetchJSON(url);
   }})) {
     const {page,items:releaseList,resumePage}=batch;
