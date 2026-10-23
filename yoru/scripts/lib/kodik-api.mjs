@@ -5,11 +5,20 @@ export function apiPage(value='/list'){
  u.searchParams.delete('token');return u.pathname+u.search;
 }
 export class KodikAPI{
- constructor(token,{fetcher=fetch}={}){if(!token)throw Error('KODIK_TOKEN не задан. Добавьте свой ключ в .env (см. KODIK_SETUP.md).');this.token=token;this.fetcher=fetcher;}
+ constructor(token,{fetcher=fetch}={}){if(!token)throw Error('KODIK_API_TOKEN (или KODIK_TOKEN) не задан. Добавьте свой ключ в .env (см. KODIK_SETUP.md).');this.token=token;this.fetcher=fetcher;}
  async request(page='/list',params={}){
   const u=new URL(apiPage(page),API);for(const [k,v]of Object.entries(params))u.searchParams.set(k,String(v));
   u.searchParams.set('token',this.token);
-  const r=await this.fetcher(u,{signal:AbortSignal.timeout(20000)});
+  let r;
+  for(let attempt=0;attempt<3;attempt++){
+   try{
+    r=await this.fetcher(u,{signal:AbortSignal.timeout(20000)});
+    if(r.ok||(r.status!==429&&r.status<500))break;
+    if(attempt===2)break;
+    await r.body?.cancel();
+   }catch(error){if(attempt===2)throw Error('kodik_network_unavailable');}
+   await new Promise(resolve=>setTimeout(resolve,1000*(attempt+1)));
+  }
   if(!r.ok)throw Error(`kodik_http_${r.status}`);
   const d=await r.json();if(d.error||!Array.isArray(d.results))throw Error('kodik_access_or_response_error');
   return {...d,next_page:d.next_page?apiPage(d.next_page):null};
@@ -53,6 +62,17 @@ export function allEpisodes(release){
 export function mergeKodikRelease(existing,incoming){
  if(!existing)return incoming;
  const result=structuredClone(existing),added=structuredClone(incoming);
+ // Legacy manifests lack season metadata. Kodik uses franchise season numbers
+ // (e.g. JoJo part 6), which must not duplicate the same numbered episodes.
+ const seasons=new Set(added.episodes.map(e=>e.season??1));
+ if(seasons.size===1&&result.episodes.every(e=>e.season==null)){
+  const season=[...seasons][0];for(const e of result.episodes)e.season=season;
+ }
+ result.ids={...result.ids,...Object.fromEntries(Object.entries(added.ids||{}).filter(([,v])=>v!=null))};
+ result.artwork=added.artwork||result.artwork;
+ result.description=added.description||result.description;
+ result.rating=added.rating||result.rating;
+
  result.kodikRevisions={...result.kodikRevisions,...added.kodikRevisions};
  result.kodikIds=[...new Set([...(result.kodikIds||[]),...(added.kodikIds||[])])];
  result.relatedMalIds=[...new Set([...(result.relatedMalIds||[]),...(added.relatedMalIds||[])])];

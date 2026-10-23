@@ -1,6 +1,6 @@
 import sharp from 'sharp';
-const siteOrigin='https://yooickuu.github.io';
-const mediaHeaders={Origin:siteOrigin,Referer:siteOrigin+'/anime_site/'};
+const siteOrigin=process.env.SITE_ORIGIN||'https://yomiku.site';
+const mediaHeaders={Origin:siteOrigin,Referer:siteOrigin+'/'};
 function requireCORS(response){const allow=response.headers.get('access-control-allow-origin');if(allow!=='*'&&allow!==siteOrigin)throw Error('media_cors_unavailable');}
 import {hlsRenditions} from '../../src/hls-renditions.js';
 export async function bytes(url,max=12000000,{headers={},cors=false}={}){

@@ -1,4 +1,9 @@
 const rows = {
+  releaseYear: ["Год выхода", "Release year", "公開年"],
+  allYears: ["Все годы", "All years", "すべての年"],
+  minimumRating: ["Минимальный рейтинг", "Minimum rating", "最低評価"],
+  anyRating: ["Любой рейтинг", "Any rating", "すべての評価"],
+  ratingFrom: ["Рейтинг от", "Rating from", "評価以上"],
   bannerFit: ["Целиком", "Full image", "全体を表示"],
   bannerCrop: ["Обрезать", "Crop", "切り抜く"],
   style_forest: ["Хвойный лес", "Forest", "深い森"],

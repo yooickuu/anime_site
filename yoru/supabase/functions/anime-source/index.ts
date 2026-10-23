@@ -1,6 +1,6 @@
 import {publishedKodikVideo} from '../../../server/published-kodik.js';
 import {snapshotRelease as goRelease,snapshotVoices as goVoices,snapshotVideo as goVideo,snapshotHealth,positiveID} from '../../../server/animego.js';
-const origins=new Set(['https://yooickuu.github.io','http://127.0.0.1:4173','http://localhost:4173','http://127.0.0.1:5500','http://localhost:5500']);
+const origins=new Set(['https://yomiku.site','https://www.yomiku.site','https://yooickuu.github.io','http://127.0.0.1:4173','http://localhost:4173','http://127.0.0.1:5500','http://localhost:5500']);
 let healthCache:{at:number,ready:boolean,status:string,detail?:string}|null=null;
 const limits=new Map<string,{at:number,count:number}>();
 Deno.serve(async req=>{
@@ -9,7 +9,7 @@ Deno.serve(async req=>{
  const reply=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers});
  if(origin&&!origins.has(origin))return reply({error:'origin_not_allowed'},403);
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'GET, POST, OPTIONS'}});
- if(req.method==='GET'){if(!healthCache||Date.now()-healthCache.at>60000){try{await snapshotHealth();healthCache={at:Date.now(),ready:true,status:'ok'};}catch(e){const m=e instanceof Error?e.message:'unknown';healthCache={at:Date.now(),ready:false,status:/^[a-z_]+(?:_\d+)?$/.test(m)?m:'source_unavailable',detail:m.replace(/https?:\/\/[^\s)]+/g,'[upstream]').slice(0,180)};}}return reply({ready:healthCache.ready,version:6,guestPlayback:true,sourceStatus:healthCache.status,...(healthCache.detail?{detail:healthCache.detail}:{})});}
+ if(req.method==='GET'){if(!healthCache||Date.now()-healthCache.at>60000){try{await snapshotHealth();healthCache={at:Date.now(),ready:true,status:'ok'};}catch(e){const m=e instanceof Error?e.message:'unknown';healthCache={at:Date.now(),ready:false,status:/^[a-z_]+(?:_\d+)?$/.test(m)?m:'source_unavailable',detail:m.replace(/https?:\/\/[^\s)]+/g,'[upstream]').slice(0,180)};}}return reply({ready:healthCache.ready,version:7,kodikPlayback:true,guestPlayback:true,sourceStatus:healthCache.status,...(healthCache.detail?{detail:healthCache.detail}:{})});}
  if(req.method!=='POST')return reply({error:'method_not_allowed'},405);
  // Public read-only catalogue/video endpoint. Account data stays behind Auth/RLS.
  try{

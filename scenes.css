@@ -194,3 +194,10 @@ footer .brand .brand-symbol{width:36px;height:36px}footer .brand .brand-name{fon
 .video-controls #subtitle-control{min-width:70px;max-width:150px}.video-controls #subtitle-control .select-trigger{min-height:38px}
 @media(max-width:600px){.search-suggestions{min-width:0;width:max(100%,230px);max-width:88vw;max-height:350px}.details-dialog .details-artwork{height:76%;min-height:520px}.video-controls{flex-wrap:wrap}.video-controls #subtitle-control{max-width:112px}.cinematic-hero .hero-backdrop{object-position:center}}
 .video-controls #subtitle-control{display:flex;align-items:center;gap:4px}.video-controls #subtitle-control>svg{width:18px;height:18px;flex-shrink:0}.video-controls #subtitle-control .site-select{min-width:0}.header .search{overflow:visible}
+
+/* Fixed square metrics override legacy button minimum sizes and flex bases. */
+.header .header-tools .avatar{--avatar-size:44px;width:var(--avatar-size)!important;height:var(--avatar-size)!important;min-width:var(--avatar-size)!important;max-width:var(--avatar-size)!important;min-height:var(--avatar-size)!important;max-height:var(--avatar-size)!important;flex:0 0 var(--avatar-size)!important;box-sizing:border-box;border-radius:50%!important;padding:0!important;overflow:hidden}
+.header .header-tools .avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.catalog-options{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.catalog-options .select-trigger{min-height:42px;height:42px}
+@media(max-width:600px){.header .header-tools .avatar{--avatar-size:36px}.catalog-options>.site-select{flex:1 1 130px}.catalog-options .select-trigger{width:100%}}

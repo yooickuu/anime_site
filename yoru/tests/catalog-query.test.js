@@ -23,3 +23,10 @@ test('curated high-resolution promotions can never introduce unpublished titles'
  const a={id:'a',image:'poster'},extra=[{id:'a',hero:'assets/a.webp',popularity:100},{id:'unpublished',hero:'assets/b.webp',popularity:1000}];
  const pool=selectSpotlight([a,a],10,extra);assert.equal(pool.length,1);assert.equal(pool[0].hero,'assets/a.webp');assert.equal(pool[0].id,'a');
 });
+
+test('year and rating filters combine with genre and ignore missing ratings',()=>{
+ const rows=[{...items[0],rating:8.4},{...items[2],rating:7.2},{...items[3]}];
+ assert.deepEqual(queryCatalogue(rows,{year:'2017',genre:'action',minRating:8}).map(a=>a.id),['one']);
+ assert.deepEqual(queryCatalogue(rows,{minRating:8}).map(a=>a.id),['one']);
+ assert.equal(queryCatalogue(rows,{year:2008,minRating:6}).length,0);
+});

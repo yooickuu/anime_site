@@ -17,7 +17,8 @@
     "update:animevost": "node scripts/update-animevost.mjs && node scripts/link-catalogues.mjs",
     "seed": "node scripts/seed-catalog.mjs",
     "update:ongoings": "node scripts/update-ongoings.mjs",
-    "seed:anilibria": "node scripts/seed-anilibria.mjs"
+    "seed:anilibria": "node scripts/seed-anilibria.mjs",
+    "add-anime": "node scripts/add-anime.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.99.2",

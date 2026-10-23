@@ -23,6 +23,10 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: yoru/package-lock.json
+      - name: Check Kodik secret availability
+        env:
+          KODIK_API_TOKEN: ${{ secrets.KODIK_API_TOKEN || secrets.KODIK_TOKEN }}
+        run: node -e "if(process.env.KODIK_API_TOKEN){console.log('Kodik secret is configured')}else{console.error('Kodik secret is missing');process.exit(1)}"
       - run: npm ci
       - run: npm test
       - run: npm run build

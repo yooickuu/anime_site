@@ -77,7 +77,7 @@ let onlineItems = [],
   catalogError = false,
   catalogGeneration = 0,
   searchTimer,
-  typeFilter = "all",
+  typeFilter = "all", yearFilter = "all", ratingFilter = "0",
   ongoingOnly = false,
   playback = null,
   subtitleController = null,
@@ -294,7 +294,7 @@ function catalogShell() {
     page === "library"
       ? collection?.name || (status ? statusName(status) : t("library"))
       : t("catalog");
-  return `${page==='catalog'?discoveryHTML():''}<div class="library-layout ${page === "library" ? "with-sidebar" : ""}">${page === "library" ? `<aside class="library-sidebar"><h3>${t("library")}</h3><button class="list-nav ${list === "all" ? "active" : ""}" data-list="all">${t("allStories")} <span>${savedCount()}</span></button>${state.statuses.map((s) => `<button class="list-nav ${list === s.id ? "active" : ""}" data-list="${esc(s.id)}">${esc(statusName(s))}<span>${Object.values(state.entries).filter((e) => (s.id === "favorites" ? e.favorite : (e.status === s.id || e.legacyLists?.includes(s.id)))).length}</span></button>`).join("")}<button class="text-button" data-action="manage-statuses">${icon("settings")} ${t("manageStatuses")}</button><button class="text-button" data-action="create-status">${icon("plus")} ${t("createCollection")}</button></aside>` : ""}<section class="section catalog-section" id="catalog"><div class="section-head"><div><h2>${esc(heading)}</h2></div>${collection ? `<div><button class="text-button" data-edit-collection="${esc(collection.id)}">${t("rename")}</button><button class="text-button danger" data-delete-collection="${esc(collection.id)}">${t("remove")}</button></div>` : `<label class="sort-label">${t("order")} <select id="sort" aria-label="${t("order")}">${(page === "library" ? ["picked", "newest", "alphabetical"] : ["picked", "hiddenGems", "latest", "newest", "oldest"]).map((v) => `<option value="${v}" ${sort === v ? "selected" : ""}>${t(v)}</option>`).join("")}</select></label>`}</div>${list === "ongoing" ? `<p class="notice">${t("ongoingHint")}</p>` : ""}<label class="catalog-search"><input id="catalog-search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"></label><div class="catalog-options">${page !== "library" ? `<label class="available-filter"><input type="checkbox" id="catalog-available" ${catalogScope==='watchable'?'checked':''}>${t('availableOnly')}</label>` : ""}<select id="type-filter" aria-label="${t("allTypes")}">${[
+  return `${page==='catalog'?discoveryHTML():''}<div class="library-layout ${page === "library" ? "with-sidebar" : ""}">${page === "library" ? `<aside class="library-sidebar"><h3>${t("library")}</h3><button class="list-nav ${list === "all" ? "active" : ""}" data-list="all">${t("allStories")} <span>${savedCount()}</span></button>${state.statuses.map((s) => `<button class="list-nav ${list === s.id ? "active" : ""}" data-list="${esc(s.id)}">${esc(statusName(s))}<span>${Object.values(state.entries).filter((e) => (s.id === "favorites" ? e.favorite : (e.status === s.id || e.legacyLists?.includes(s.id)))).length}</span></button>`).join("")}<button class="text-button" data-action="manage-statuses">${icon("settings")} ${t("manageStatuses")}</button><button class="text-button" data-action="create-status">${icon("plus")} ${t("createCollection")}</button></aside>` : ""}<section class="section catalog-section" id="catalog"><div class="section-head"><div><h2>${esc(heading)}</h2></div>${collection ? `<div><button class="text-button" data-edit-collection="${esc(collection.id)}">${t("rename")}</button><button class="text-button danger" data-delete-collection="${esc(collection.id)}">${t("remove")}</button></div>` : `<label class="sort-label">${t("order")} <select id="sort" aria-label="${t("order")}">${(page === "library" ? ["picked", "newest", "alphabetical"] : ["picked", "hiddenGems", "latest", "newest", "oldest"]).map((v) => `<option value="${v}" ${sort === v ? "selected" : ""}>${t(v)}</option>`).join("")}</select></label>`}</div>${list === "ongoing" ? `<p class="notice">${t("ongoingHint")}</p>` : ""}<label class="catalog-search"><input id="catalog-search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"></label><div class="catalog-options"><select id="type-filter" aria-label="${t("allTypes")}">${[
     ["all", "allTypes"],
     ["series", "series"],
     ["MOVIE", "movies"],
@@ -308,7 +308,7 @@ function catalogShell() {
     )
     .join(
       "",
-    )}</select><label><input type="checkbox" id="ongoing-only" ${ongoingOnly ? "checked" : ""}> ${t("ongoingOnly")}</label></div><label class="genre-filter">${t('genre')}<select id="genre-filter"><option value="all">${t('allGenres')}</option>${Object.entries(genreLabels).map(([v,n])=>`<option value="${esc(v)}" ${genre===v?'selected':''}>${n[langIndex(lang)]}</option>`).join('')}</select></label><div id="results-caption" class="results-caption" aria-live="polite"></div><div class="anime-grid" id="anime-grid"></div><div id="catalog-status" class="catalog-status" aria-live="polite"></div><div class="empty" id="empty" hidden><span>${icon("search")}</span><h3>${t("empty")}</h3><p>${t("emptyHint")}</p><button class="button soft" data-action="reset">${t("reset")}</button></div></section></div>`;
+    )}</select>${page==='catalog'?`<select id="year-filter" aria-label="${t('releaseYear')}"><option value="all">${t('allYears')}</option>${[...new Set(publishedItems.map(a=>a.year).filter(Boolean))].sort((a,b)=>b-a).map(y=>`<option value="${y}" ${String(yearFilter)===String(y)?'selected':''}>${y}</option>`).join('')}</select><select id="rating-filter" aria-label="${t('minimumRating')}">${[0,6,7,8,9].map(n=>`<option value="${n}" ${Number(ratingFilter)===n?'selected':''}>${n?t('ratingFrom')+' '+n:t('anyRating')}</option>`).join('')}</select>`:''}<label><input type="checkbox" id="ongoing-only" ${ongoingOnly ? "checked" : ""}> ${t("ongoingOnly")}</label></div><label class="genre-filter">${t('genre')}<select id="genre-filter"><option value="all">${t('allGenres')}</option>${Object.entries(genreLabels).map(([v,n])=>`<option value="${esc(v)}" ${genre===v?'selected':''}>${n[langIndex(lang)]}</option>`).join('')}</select></label><div id="results-caption" class="results-caption" aria-live="polite"></div><div class="anime-grid" id="anime-grid"></div><div id="catalog-status" class="catalog-status" aria-live="polite"></div><div class="empty" id="empty" hidden><span>${icon("search")}</span><h3>${t("empty")}</h3><p>${t("emptyHint")}</p><button class="button soft" data-action="reset">${t("reset")}</button></div></section></div>`;
 }
 function genreText(g) {
   return genreLabels[normalizeGenre(g)]?.[langIndex(lang)] || g || "";
@@ -1136,7 +1136,7 @@ document.addEventListener("click", async (event) => {
     if(b.dataset.planMinutes){eveningMinutes=Number(b.dataset.planMinutes);$('#evening-plan').outerHTML=eveningHTML();$('#evening-plan [data-plan-minutes="'+eveningMinutes+'"]').focus({preventScroll:true});return;}
     if(b.dataset.account){b.disabled=true;try{await switchAccount(b.dataset.account);}finally{b.disabled=false;}return;}
     if (b.dataset.close) $("#" + b.dataset.close).close();
-    if(b.dataset.discover){catalogueView=b.dataset.discover;catalogScope='all';query='';genre='all';typeFilter='all';ongoingOnly=false;navigate('catalog');}
+    if(b.dataset.discover){catalogueView=b.dataset.discover;catalogScope='all';query='';genre='all';typeFilter='all';yearFilter='all';ratingFilter='0';ongoingOnly=false;navigate('catalog');}
     if (b.dataset.nav) navigate(b.dataset.nav);
     if (b.dataset.list) navigate("library", b.dataset.list);
     if (b.dataset.details) {b.disabled=true;try{await openDetails(b.dataset.details);}finally{b.disabled=false;}}
@@ -1254,7 +1254,7 @@ document.addEventListener("click", async (event) => {
       case "reset":
         query = "";
         genre = "all";
-        typeFilter = "all";
+        typeFilter = "all"; yearFilter = "all"; ratingFilter = "0";
         ongoingOnly = false;
         catalogueView = "all";
         loadCatalogue();
@@ -1354,7 +1354,8 @@ document.addEventListener("change", (event) => {
   const input = event.target;
   if(input.id==='genre-filter'){genre=input.value;if(page==='library')renderGrid();else loadCatalogue();}
   if(input.id==='catalog-view'){catalogueView=input.value;loadCatalogue();}
-  if(input.id==='catalog-available'){catalogScope=input.checked?'watchable':'all';loadCatalogue();}
+  if(input.id==='year-filter'){yearFilter=input.value;loadCatalogue();}
+  if(input.id==='rating-filter'){ratingFilter=input.value;loadCatalogue();}
   if (input.id === "language") {
     lang = input.value;
     if (user && ready)
@@ -1552,7 +1553,7 @@ async function loadCatalogue(more = false, targetPage = 1) {
       genre,
       sort,
       type: typeFilter,
-      ongoing: ongoingOnly,
+      ongoing: ongoingOnly, year: yearFilter, minRating: Number(ratingFilter),
     });
     if (generation !== catalogGeneration) return;
     onlineItems = more ? [...new Map([...onlineItems, ...result.items].map(a=>[a.id,a])).values()] : result.items;

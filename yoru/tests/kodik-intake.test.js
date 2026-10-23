@@ -55,3 +55,9 @@ test('parallel episode checks are bounded and retain original order',async()=>{
  let active=0,max=0;const result=await mapLimit([3,2,1,0],2,async n=>{active++;max=Math.max(max,active);await new Promise(r=>setTimeout(r,n));active--;return n;});
  assert.deepEqual(result,[3,2,1,0]);assert.equal(max,2);
 });
+
+test('legacy single-season entries align with Kodik franchise season without repeating episodes',()=>{
+ const a={ids:{mal:9},episodes:[{number:1,audio:[{id:'lib'}]},{number:2,audio:[{id:'lib'}]}]};
+ const b={ids:{shikimori:9,mal:null},episodes:[{number:1,ordinal:1,season:6,audio:[{id:'kodik-2'}]},{number:2,ordinal:2,season:6,audio:[{id:'kodik-2'}]}]};
+ const merged=mergeKodikRelease(a,b);assert.equal(merged.episodes.length,2);assert.equal(merged.episodes[0].season,6);assert.equal(merged.episodes[0].audio.length,2);assert.equal(merged.ids.mal,9);
+});

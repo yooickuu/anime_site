@@ -33,7 +33,7 @@ test('snapshot resolver serves guest episodes and checks video without calling A
   throw Error('Unexpected upstream '+url);
  };
  vm.runInNewContext(result.outputFiles[0].text,{Request,Response,Headers,URL,URLSearchParams,AbortSignal,TextDecoder,Uint8Array,atob,fetch:fetcher,Deno:{env:{get:k=>k==='SUPABASE_URL'?'https://project.supabase.co':'public'},serve:fn=>handler=fn}});
- const health=await (await handler(new Request('https://project.supabase.co/functions/v1/anime-source'))).json();assert.equal(health.ready,true);assert.equal(health.version,6);assert.equal(health.guestPlayback,true);
+ const health=await (await handler(new Request('https://project.supabase.co/functions/v1/anime-source'))).json();assert.equal(health.ready,true);assert.equal(health.version,7);assert.equal(health.guestPlayback,true);
  const r=await handler(new Request('https://project.supabase.co/functions/v1/anime-source',{method:'POST',body:JSON.stringify({action:'release',id:4013})}));
  assert.equal(r.status,200);const release=await r.json();assert.equal(release.episodes.length,1);assert.equal(release.voices[0].language,'ja');assert.equal(release.voices[0].url,undefined);
  assert.ok(calls.every(x=>!x.includes('animego.me')&&!x.includes('/auth/')));

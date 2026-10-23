@@ -31,7 +31,7 @@ jobs:
       - run: npm ci
       - name: Refresh released episodes
         env:
-          KODIK_TOKEN: ${{ secrets.KODIK_TOKEN }}
+          KODIK_API_TOKEN: ${{ secrets.KODIK_API_TOKEN || secrets.KODIK_TOKEN }}
         run: npm run update:ongoings
       - name: Validate and build
         run: npm test && npm run build

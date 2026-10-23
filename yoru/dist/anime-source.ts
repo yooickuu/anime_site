@@ -152,7 +152,7 @@ async function publishedKodikVideo(id, index, audio, { fetcher = fetch, resolve 
   if (!/^(mal|shikimori|lib)-\d+$/.test(id) || !Number.isSafeInteger(index) || index < 1 || !/^kodik-\d+$/.test(audio)) throw Error("invalid_request");
   let cached2 = manifestCache.get(id);
   if (!cached2 || Date.now() > cached2.until) {
-    const response = await fetcher(`https://yooickuu.github.io/anime_site/data/kodik/${id}.json`, { signal: AbortSignal.timeout(1e4) });
+    const response = await fetcher(`https://yomiku.site/data/kodik/${id}.json`, { signal: AbortSignal.timeout(1e4) });
     if (!response.ok) throw Error("episode_missing");
     const data = await response.json();
     if (data.id !== id || !Array.isArray(data.episodes)) throw Error("invalid_manifest");
@@ -167,7 +167,7 @@ async function publishedKodikVideo(id, index, audio, { fetcher = fetch, resolve 
 }
 
 // supabase/functions/anime-source/index.ts
-var origins = /* @__PURE__ */ new Set(["https://yooickuu.github.io", "http://127.0.0.1:4173", "http://localhost:4173", "http://127.0.0.1:5500", "http://localhost:5500"]);
+var origins = /* @__PURE__ */ new Set(["https://yomiku.site", "https://www.yomiku.site", "https://yooickuu.github.io", "http://127.0.0.1:4173", "http://localhost:4173", "http://127.0.0.1:5500", "http://localhost:5500"]);
 var healthCache = null;
 var limits = /* @__PURE__ */ new Map();
 Deno.serve(async (req) => {
@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
         healthCache = { at: Date.now(), ready: false, status: /^[a-z_]+(?:_\d+)?$/.test(m) ? m : "source_unavailable", detail: m.replace(/https?:\/\/[^\s)]+/g, "[upstream]").slice(0, 180) };
       }
     }
-    return reply({ ready: healthCache.ready, version: 6, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
+    return reply({ ready: healthCache.ready, version: 7, kodikPlayback: true, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
   }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   try {

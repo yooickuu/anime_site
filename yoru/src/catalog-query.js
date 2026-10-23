@@ -46,7 +46,7 @@ export function searchScore(item,query){
  return 0;
 }
 export function queryCatalogue(items,options={}){
- const rows=items.map((item,index)=>({item,index,score:searchScore(item,options.query)})).filter(({item,score})=>score>0&&matchesType(item,options.type)&&(!options.ongoing||item.ongoing)&&(!options.genre||options.genre==='all'||item.genres?.some(g=>normalizeGenre(g)===normalizeGenre(options.genre))));
+ const rows=items.map((item,index)=>({item,index,score:searchScore(item,options.query)})).filter(({item,score})=>score>0&&(!options.year||options.year==='all'||Number(item.year)===Number(options.year))&&(!options.minRating||Number(item.audienceRating||item.rating||item.score)>=Number(options.minRating))&&matchesType(item,options.type)&&(!options.ongoing||item.ongoing)&&(!options.genre||options.genre==='all'||item.genres?.some(g=>normalizeGenre(g)===normalizeGenre(options.genre))));
  rows.sort((a,b)=>options.query?b.score-a.score||b.index-a.index:options.sort==='newest'?(b.item.year||0)-(a.item.year||0):options.sort==='oldest'?(a.item.year||0)-(b.item.year||0):options.sort==='alphabetical'?a.item.title.localeCompare(b.item.title):options.view==='popular'?(Number(b.item.audienceRating||b.item.rating||b.item.score)||0)-(Number(a.item.audienceRating||a.item.rating||a.item.score)||0):b.index-a.index);
  return rows.map(r=>r.item);
 }
