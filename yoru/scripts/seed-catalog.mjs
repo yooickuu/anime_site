@@ -51,7 +51,7 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
  const report={startedAt:new Date().toISOString(),checked:0,added:0,merged:0,skipped:0,pending:[]};
  const byIdentity=new Map(catalog.items.flatMap(a=>[a.ids?.shikimori&&[`shikimori:${a.ids.shikimori}`,a],a.ids?.mal&&[`mal:${a.ids.mal}`,a]].filter(Boolean)));
  const persist=async next=>{catalog.updatedAt=new Date().toISOString();await saveJSON(catalogPath,catalog);await saveJSON(cursorPath,{...progress,next});await mkdir('checks',{recursive:true});await saveJSON('checks/kodik-last-report.json',report);};
- async function ingest(release){
+ async function ingest(release,expand=true){
   report.checked++;const key=String(release.id),revision=release.updated_at||release.episodes_count||'unknown';
   if(progress.processed[key]===revision){report.skipped++;return;}
   try{
@@ -63,6 +63,24 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
    for(const [kind,id]of Object.entries(merged.ids))if(id)byIdentity.set(`${kind}:${id}`,merged);
    progress.processed[key]=revision;progress.pending=progress.pending.filter(id=>id!==key);
    console.log(`✓ ${merged.title}: ${merged.episodes.length} серий; новых ${report.added}/${targetCount}, дополнено ${report.merged}`);
+   if(expand){
+    try{
+     const variants=[];
+     for await(const batch of api.pages('/search',{...catalogParams,shikimori_id:incoming.ids.shikimori}))variants.push(...batch.results);
+     const translations=new Set(merged.episodes.flatMap(e=>e.audio.filter(t=>t.providerRef?.provider==='kodik').map(t=>String(t.providerRef.translationId))));
+     // Collect up to three distinct Kodik translations; prioritize original Japanese.
+     variants.sort((a,b)=>Number(b.translation?.type==='subtitles')-Number(a.translation?.type==='subtitles'));
+     for(const variant of variants){
+      if(String(variant.shikimori_id)!==String(incoming.ids.shikimori))continue;
+      if(translations.size>=3||report.checked>=maxChecks)break;
+      const translation=String(variant.translation?.id||'');if(!translation||translations.has(translation))continue;
+      await ingest(variant,false);
+      const latest=byIdentity.get(`shikimori:${incoming.ids.shikimori}`);
+      if(latest?.episodes.some(e=>e.audio.some(t=>t.providerRef?.translationId===translation)))translations.add(translation);
+     }
+    }catch(error){console.warn(`Дополнительные озвучки ${incoming.id} проверим позже: ${error.message}`);}
+   }
+
   }catch(error){if(!progress.pending.includes(key))progress.pending.push(key);report.pending.push({id:key,reason:error.message});console.warn(`Пропущен ${key}: ${error.message}`);}
  }
  // Retry a bounded part of the queue; failures must not starve unseen pages.
@@ -75,7 +93,7 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
  for await(const batch of api.pages(progress.next||'/list',catalogParams)){
   const releases=[...batch.results].sort((a,b)=>Number(byIdentity.has(`shikimori:${a.shikimori_id}`))-Number(byIdentity.has(`shikimori:${b.shikimori_id}`)));
   for(let i=0;i<releases.length;i+=2){
-   await mapLimit(releases.slice(i,i+Math.min(2,targetCount-report.added,maxChecks-report.checked)),2,ingest);
+   await mapLimit(releases.slice(i,i+Math.min(2,targetCount-report.added,maxChecks-report.checked)),2,release=>ingest(release));
    await persist(batch.page);if(stop())return report;
   }
   await persist(batch.next_page||'/list');

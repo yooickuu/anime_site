@@ -445,3 +445,10 @@ Command: `python3 scripts/collect-source-offers.py --limit 250 --zoko`
 - New UI: remove source availability checkbox; year and minimum rating filters; rigid square avatar dimensions across responsive header. Prior search, seasons, subtitles and artwork features retained.
 - Backend anime-source v7 supports yomiku.site and exact Kodik track refresh. User asked to deploy from local setup page; deployment confirmation and live check pending. 171 tests passed before final build. No claim of thousands of new titles or all streams tested globally.
 - Deployment confirmed: live anime-source returns version7, kodikPlayback:true, guestPlayback:true and CORS for https://yomiku.site. Old AnimeGO health sourceStatus remains source_unavailable; test new kodik-video action separately. First NEW Kodik-only title admitted: mal-28285 Trinity Seven OVA, one episode, verified 360/480/720 streams. Current raw catalogue 1826.
+
+## 2026-10-23 — multi-translation batch and resolver EOF
+- Added per-title Kodik search by exact Shikimori ID: importer combines up to three verified distinct translations (prioritizes subtitle/original candidates); bounded by batch check budget. Regression confirms three tracks, one card. No claim every title has three available tracks.
+- 174 tests pass; build has 1826/1826 visible, no additional bulk import performed. npm run add-anime -- 100 imports/builds/scoped-commits/pushes.
+- Preserved Google verification in build output. Fixed mobile player controls: subtitle, speed and quality menus now have distinct grid areas.
+- User deployed diagnostic v9: live Kodik resolver returned reached unexpected EOF, not an API-token rejection. Prepared v10: Deno HTTP/1.1 with idle pooling disabled, bounded retry for truncated connections, safe official HTTPS redirects, same transport for published manifest. Certificate verification stays enabled.
+- v10 is built and user was asked to Deploy. LIVE SUCCESS NOT YET CONFIRMED. Next: GET anime-source?source=kodik and POST kodik-video mal-28285/episode1/kodik-4243. Do not mark playback fixed based only on local tests. Browser/native pipe unavailable; no visual/mobile screenshot QA claimed.

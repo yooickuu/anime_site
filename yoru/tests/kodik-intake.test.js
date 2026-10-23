@@ -61,3 +61,41 @@ test('legacy single-season entries align with Kodik franchise season without rep
  const b={ids:{shikimori:9,mal:null},episodes:[{number:1,ordinal:1,season:6,audio:[{id:'kodik-2'}]},{number:2,ordinal:2,season:6,audio:[{id:'kodik-2'}]}]};
  const merged=mergeKodikRelease(a,b);assert.equal(merged.episodes.length,2);assert.equal(merged.episodes[0].season,6);assert.equal(merged.episodes[0].audio.length,2);assert.equal(merged.ids.mal,9);
 });
+
+import {textFetch} from '../server/animego.js';
+test('upstream redirects accept official HTTPS destinations and reject arbitrary destinations',async()=>{
+ const before=globalThis.fetch;
+ try{
+  let calls=0;globalThis.fetch=async()=>++calls===1?new Response(null,{status:302,headers:{location:'https://yomiku.site/data/test.json'}}):new Response('okay');
+  assert.equal(await textFetch('https://yooickuu.github.io/anime_site/data/test.json'),'okay');
+  globalThis.fetch=async()=>new Response(null,{status:302,headers:{location:'http://127.0.0.1/private'}});
+  await assert.rejects(textFetch('https://kodikplayer.com/video/1/abc/720p'),/redirect_blocked/);
+ }finally{globalThis.fetch=before;}
+});
+
+test('upstream retries truncated responses once using Deno HTTP/1 with TLS verification intact',async()=>{
+ const before=globalThis.fetch,deno=globalThis.Deno;let calls=0,settings;
+ try{
+  globalThis.Deno={createHttpClient:options=>{settings=options;return {testClient:true};}};
+  globalThis.fetch=async(url,options)=>{assert.equal(options.client.testClient,true);if(++calls===1)throw Error('reached unexpected EOF');return new Response('complete');};
+  assert.equal(await textFetch('https://kodikplayer.com/video/1/abc/720p'),'complete');
+  assert.equal(calls,2);assert.equal(settings.http2,false);assert.equal(settings.http1,true);assert.equal(settings.unsafelyIgnoreCertificateErrors,undefined);
+ }finally{globalThis.fetch=before;if(deno===undefined)delete globalThis.Deno;else globalThis.Deno=deno;}
+});
+
+import {seedCatalog} from '../scripts/seed-catalog.mjs';
+import {mkdtemp,mkdir,readFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+test('a batch expands one title into three distinct translations without duplicate cards',async()=>{
+ const cwd=process.cwd(),dir=await mkdtemp(join(tmpdir(),'kodik-batch-'));
+ try{
+  process.chdir(dir);await mkdir('src');
+  const variants=[release,{...release,id:'serial-10',translation:{id:2,type:'voice',title:'Second studio'}},{...release,id:'serial-11',translation:{id:3,type:'subtitles',title:'Субтитры'}}];
+  const api={async *pages(path){yield {results:path==='/search'?variants:[release],page:'/list',next_page:null};}};
+  const report=await seedCatalog({targetCount:1,api,assemble:r=>assembleRelease(r,dependencies)});
+  const saved=JSON.parse(await readFile('src/published-catalog.json','utf8'));
+  assert.equal(report.added,1);assert.equal(saved.items.length,1);
+  for(const episode of saved.items[0].episodes)assert.deepEqual(episode.audio.map(t=>t.id).sort(),['kodik-1','kodik-2','kodik-3']);
+ }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
+});

@@ -1,9 +1,9 @@
 import {build} from 'esbuild';
-import {copyFile,readFile,writeFile,mkdir} from 'node:fs/promises';
+import {copyFile,readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {createApprovedCatalogue} from '../src/approved-catalog.js';
 // Pages deploys dist, so root-level domain verification must be included there.
-for (const file of ['CNAME', 'kodik.txt']) {
+for (const file of ['CNAME', 'kodik.txt', ...(await readdir('..')).filter(name=>/^google[a-z0-9]+\.html$/.test(name))]) {
   try { await copyFile(`../${file}`, `dist/${file}`); }
   catch (error) { if (error.code !== 'ENOENT') throw error; }
 }

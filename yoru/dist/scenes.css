@@ -201,3 +201,21 @@ footer .brand .brand-symbol{width:36px;height:36px}footer .brand .brand-name{fon
 .catalog-options{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .catalog-options .select-trigger{min-height:42px;height:42px}
 @media(max-width:600px){.header .header-tools .avatar{--avatar-size:36px}.catalog-options>.site-select{flex:1 1 130px}.catalog-options .select-trigger{width:100%}}
+/* Subtitle selection has its own grid area; it must not overlap playback speed. */
+@media(max-width:600px){
+ .watch-page .video-controls{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-areas:"seek seek seek time time" "play mute cinema pip full" "speed speed quality subs subs";gap:4px;padding:6px}
+ .watch-page .video-controls .video-seek{grid-area:seek;width:100%;margin:0}
+ .watch-page .video-controls .video-time{grid-area:time;justify-self:end;font-size:10px}
+ .watch-page .video-controls [data-video=play]{grid-area:play}
+ .watch-page .video-controls [data-video=mute]{grid-area:mute}
+ .watch-page .video-controls [data-action=cinema]{grid-area:cinema}
+ .watch-page .video-controls [data-video=pip]{grid-area:pip}
+ .watch-page .video-controls [data-video=fullscreen]{grid-area:full}
+ .watch-page .video-controls .video-option{grid-area:speed;min-width:0}
+ .watch-page .video-controls #quality-control{grid-area:quality}
+ .watch-page .video-controls #subtitle-control{grid-area:subs;min-width:0;max-width:none}
+ .watch-page .video-controls .icon-button{width:40px;height:40px;min-height:40px;justify-self:center;padding:0}
+ .watch-page .video-controls .site-select{min-width:0;max-width:none;width:100%}
+ .watch-page .video-controls .select-trigger{width:100%;height:36px;min-height:36px;padding:0 5px}
+ .watch-page .player-pickers>label,.catalog-options>.site-select{min-width:0}
+}
