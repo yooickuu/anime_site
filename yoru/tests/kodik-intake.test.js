@@ -121,8 +121,18 @@ test('popular mode follows ranked IDs, verifies releases and resumes after the a
   const api={async *pages(path,params){searched.push(params.shikimori_id);yield {results:[release],page:'/search',next_page:null};}};
   const getPopular=async page=>page===1?[{id:9},{id:10}]:[];
   const report=await seedCatalog({targetCount:1,order:'popular',api,getPopular,assemble:r=>assembleRelease(r,dependencies)});
-  assert.equal(report.added,1);assert.ok(searched.every(id=>id===9));
+  assert.equal(report.added,1);assert.deepEqual(searched,[9]);
   const progress=JSON.parse(await readFile('src/kodik-progress.json','utf8'));
   assert.deepEqual(progress.popular,{page:1,index:1});assert.equal(progress.next,'/list');
+ }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
+});
+
+test('failed releases are not retried repeatedly within the same batch',async()=>{
+ const cwd=process.cwd(),dir=await mkdtemp(join(tmpdir(),'kodik-once-'));let checks=0;
+ try{
+  process.chdir(dir);await mkdir('src');
+  const api={async *pages(){yield {results:[release,release],page:'/list',next_page:null};}};
+  const report=await seedCatalog({targetCount:1,api,assemble:async()=>{checks++;throw Error('broken_poster');}});
+  assert.equal(checks,1);assert.equal(report.added,0);assert.equal(report.pending.length,1);assert.equal(report.skipped,1);
  }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
 });

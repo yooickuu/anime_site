@@ -32,7 +32,7 @@ export async function assembleRelease(release,{getMetadata=metadata,imageProbe=p
  let backdrop;for(const url of [al?.bannerImage,...(m.screenshots||[]),...(release.screenshots||[])].filter(Boolean)){try{backdrop=await retry(()=>imageProbe(url));if(backdrop.width<400)throw Error('backdrop_small');break;}catch{backdrop=null;}}
  // A valid poster of this anime is preferable to another title's shared backdrop.
  backdrop||=poster;if(backdrop.width<400)throw Error('backdrop_small');
- const episodes=await mapLimit(rows,4,async(row,index)=>{
+ const episodes=await mapLimit(rows,6,async(row,index)=>{
   const media=await retry(()=>resolve(row.url,row.ordinal));const sources=[];let duration=0;
   // Check real renditions concurrently, retaining every episode and segment check.
   const candidates=(media.sources||[]).filter(s=>[360,480,720,1080].includes(s.quality));
@@ -59,12 +59,21 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
  const catalog=await loadJSON(catalogPath,{policyVersion:3,items:[]});
  const progress=await loadJSON(cursorPath,{next:'/list',processed:{},pending:[]});
  const stop=()=>report.added>=targetCount||report.checked>=maxChecks;
+ const attempted=new Set(),variantsCache=new Map();
+ async function variantsFor(id){
+  if(!variantsCache.has(id))variantsCache.set(id,(async()=>{const rows=[];for await(const batch of api.pages('/search',{...catalogParams,shikimori_id:id}))rows.push(...batch.results);return rows;})().catch(error=>{variantsCache.delete(id);throw error;}));
+  return variantsCache.get(id);
+ }
  const report={startedAt:new Date().toISOString(),checked:0,added:0,merged:0,skipped:0,pending:[]};
  const byIdentity=new Map(catalog.items.flatMap(a=>[a.ids?.shikimori&&[`shikimori:${a.ids.shikimori}`,a],a.ids?.mal&&[`mal:${a.ids.mal}`,a]].filter(Boolean)));
  const persist=async next=>{catalog.updatedAt=new Date().toISOString();await saveJSON(catalogPath,catalog);await saveJSON(cursorPath,{...progress,next});await mkdir('checks',{recursive:true});await saveJSON('checks/kodik-last-report.json',report);};
  async function ingest(release,expand=true){
-  report.checked++;const key=String(release.id),revision=release.updated_at||release.episodes_count||'unknown';
-  if(progress.processed[key]===revision){report.skipped++;return;}
+  const key=String(release.id),revision=release.updated_at||release.episodes_count||'unknown';
+  if(progress.processed[key]===revision||attempted.has(key)){report.skipped++;return;}
+  const known=byIdentity.get(`shikimori:${release.shikimori_id}`);
+  // Extra translations must not keep a batch busy once all episodes already have three.
+  if(known?.episodes?.length&&known.episodes.every(e=>new Set(e.audio.filter(t=>t.providerRef?.provider==='kodik').map(t=>t.providerRef.translationId)).size>=3)&&!known.episodes.some(e=>e.audio.some(t=>String(t.providerRef?.translationId)===String(release.translation?.id)))){report.skipped++;return;}
+  attempted.add(key);report.checked++;
   try{
    console.log(`Проверка ${release.title}: ${release.episodes_count||1} серий (${report.checked}/${maxChecks})`);
    const incoming=await assemble(release),existing=byIdentity.get(`shikimori:${incoming.ids.shikimori}`)||byIdentity.get(`mal:${incoming.ids.mal}`);
@@ -76,8 +85,7 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
    console.log(`✓ ${merged.title}: ${merged.episodes.length} серий; новых ${report.added}/${targetCount}, дополнено ${report.merged}`);
    if(expand){
     try{
-     const variants=[];
-     for await(const batch of api.pages('/search',{...catalogParams,shikimori_id:incoming.ids.shikimori}))variants.push(...batch.results);
+     const variants=[...await variantsFor(incoming.ids.shikimori)];
      const translations=new Set(merged.episodes.flatMap(e=>e.audio.filter(t=>t.providerRef?.provider==='kodik').map(t=>String(t.providerRef.translationId))));
      // Collect up to three distinct Kodik translations; prioritize original Japanese.
      variants.sort((a,b)=>Number(b.translation?.type==='subtitles')-Number(a.translation?.type==='subtitles'));
@@ -102,12 +110,9 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
    for(let i=progress.popular.index;i<rows.length;i++){
     const id=Number(rows[i].id);scanned++;
     if(!byIdentity.has(`shikimori:${id}`)&&!byIdentity.has(`mal:${id}`)){
-     for await(const batch of api.pages('/search',{...catalogParams,shikimori_id:id})){
-      for(const release of batch.results){
-       if(Number(release.shikimori_id)!==id)continue;
-       await ingest(release);
-       if(byIdentity.has(`shikimori:${id}`)||stop())break;
-      }
+     for(const release of await variantsFor(id)){
+      if(Number(release.shikimori_id)!==id)continue;
+      await ingest(release);
       if(byIdentity.has(`shikimori:${id}`)||stop())break;
      }
     }
@@ -127,8 +132,10 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
  // New identities first within a page; translations are still merged by exact IDs.
  for await(const batch of api.pages(progress.next||'/list',catalogParams)){
   const releases=[...batch.results].sort((a,b)=>Number(byIdentity.has(`shikimori:${a.shikimori_id}`))-Number(byIdentity.has(`shikimori:${b.shikimori_id}`)));
-  for(let i=0;i<releases.length;i+=2){
-   await mapLimit(releases.slice(i,i+Math.min(2,targetCount-report.added,maxChecks-report.checked)),2,release=>ingest(release));
+  for(let i=0;i<releases.length;){
+   const size=Math.min(2,targetCount-report.added,maxChecks-report.checked);
+   if(size<1)return report;
+   await mapLimit(releases.slice(i,i+size),2,release=>ingest(release));i+=size;
    await persist(batch.page);if(stop())return report;
   }
   await persist(batch.next_page||'/list');

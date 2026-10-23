@@ -464,3 +464,9 @@ Command: `python3 scripts/collect-source-offers.py --limit 250 --zoko`
 - Added --popular to add-anime/seed: Shikimori popularity-ranked IDs -> exact Kodik search -> same verified multi-translation ingest. Existing titles skipped, independently persisted popular page/index; ordinary Kodik cursor unchanged. Bounded candidate scan and release checks. No bulk import started by agent while user's old importer is active.
 - Live read-only Shikimori popularity query returned HTTP200: Attack on Titan, Death Note, Fullmetal Alchemist Brotherhood, One Punch Man, Demon Slayer. No guessed Kodik popularity sorting.
 - Command: npm run add-anime -- 100 --popular. Do not start alongside an active import. 177 tests pass; filters unchanged.
+
+## 2026-10-23 — remove duplicate import work
+- Observed active ordinary import (no --popular): at ~7 min, checkpoint had 24 added / 59 merged; three duplicate failures. Did not interrupt user process or overwrite data.
+- Each release attempted once per batch; Shikimori-ID Kodik variant searches shared within run (popular lookup reused by audio expansion). Already fully covered titles do not spend checks adding a fourth unrelated translation. Increased bounded episode workers 4 -> 6; real rendition/segment/artwork checks unchanged.
+- Fixed ordinary-page batch index advancing by 2 when only 1 release was attempted; failed single candidates no longer cause the next record to be skipped.
+- 178 tests passed. Existing running process uses previously loaded code; changes apply after restart/next run. Saved checkpoint batches survive Ctrl+C, in-flight work may repeat. Use npm run add-anime -- 100 --popular and never two simultaneous importers.
