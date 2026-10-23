@@ -1,6 +1,6 @@
 {
   "policyVersion": 3,
-  "updatedAt": "2026-10-23T10:16:34.437Z",
+  "updatedAt": "2026-10-23T10:52:42.386Z",
   "items": [
     {
       "id": "mal-63140",
@@ -6293,7 +6293,8 @@
       "releasedEpisodes": [
         1,
         2,
-        3
+        3,
+        4
       ],
       "artwork": {
         "poster": {
@@ -6421,6 +6422,40 @@
               "ending": {
                 "start": 1325,
                 "end": 1415
+              }
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "audio": [
+            {
+              "id": "anilibria",
+              "dubId": "AniLibria",
+              "label": "AniLibria (RU)",
+              "language": "ru",
+              "original": false,
+              "duration": 1421,
+              "sources": [
+                {
+                  "quality": 720,
+                  "url": "https://cache.libria.fun/videos/media/ts/10297/4/720/f411721440182c92dbb239b94e007a1d.m3u8?countryIso=US&isAuthorized=0&isWithVideoAds=1&isWithVideoAdsAlways=1",
+                  "stream": true
+                },
+                {
+                  "quality": 480,
+                  "url": "https://cache.libria.fun/videos/media/ts/10297/4/480/4eb511aff0d1b316fc1856661869906f.m3u8?countryIso=US&isAuthorized=0&isWithVideoAds=1&isWithVideoAdsAlways=1",
+                  "stream": true
+                }
+              ],
+              "subtitles": [],
+              "opening": {
+                "start": 130,
+                "end": 220
+              },
+              "ending": {
+                "start": 1322,
+                "end": 1412
               }
             }
           ]
