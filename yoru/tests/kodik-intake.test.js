@@ -99,3 +99,17 @@ test('a batch expands one title into three distinct translations without duplica
   for(const episode of saved.items[0].episodes)assert.deepEqual(episode.audio.map(t=>t.id).sort(),['kodik-1','kodik-2','kodik-3']);
  }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
 });
+
+test('season selector follows complete sequel chains without matching similar names',()=>{
+ const a={id:'a',ids:{mal:1},relatedMalIds:[2],year:2020},b={id:'b',ids:{mal:2},relatedMalIds:[3],year:2021},c={id:'c',malId:3,year:2022},other={id:'other',ids:{mal:4},title:'Same name',year:2019};
+ for(const current of [a,b,c])assert.deepEqual(localSeasons([other,c,b,a],current).map(x=>x.id),['a','b','c']);
+});
+test('rendition checks run concurrently but still reject broken renditions and check every episode',async()=>{
+ let active=0,max=0,calls=0;
+ const a=await assembleRelease(release,{...dependencies,resolve:async url=>({sources:[360,480,720,1080].map(quality=>({quality,url}))}),streamProbe:async s=>{
+  calls++;active++;max=Math.max(max,active);await new Promise(r=>setTimeout(r,5));active--;
+  if(s.quality===1080)throw Error('media_http_404');return [{...s,duration:1400}];
+ }});
+ assert.equal(calls,8);assert.ok(max>2&&max<=6);
+ for(const e of a.episodes)assert.deepEqual(e.audio[0].sources.map(s=>s.quality),[360,480,720]);
+});

@@ -21,7 +21,7 @@ export async function loadToken(){
 
 const metaCache=new Map();
 async function metadata(id){if(!metaCache.has(id))metaCache.set(id,Promise.all([fetchShikimori(id),fetchAniListMetadata(id)]));const result=await metaCache.get(id);if(!result.some(Boolean))metaCache.delete(id);return result;}
-async function retry(work){let error;for(let n=0;n<2;n++){try{return await work();}catch(e){error=e;if(n===0)await new Promise(r=>setTimeout(r,500));}}throw error;}
+async function retry(work){let error;for(let n=0;n<2;n++){try{return await work();}catch(e){error=e;if(/(?:media_http_|segment_http_|upstream_)(?:400|401|403|404|410|422)$/.test(e.message))throw e;if(n===0)await new Promise(r=>setTimeout(r,500));}}throw error;}
 export async function assembleRelease(release,{getMetadata=metadata,imageProbe=probeImage,resolve=kodikVideo,streamProbe=probeStream}={}){
  const shiki=Number(release.shikimori_id);if(!Number.isSafeInteger(shiki)||shiki<=0)throw Error('shikimori_identity_missing');
  const translation=translationIdentity(release),rows=allEpisodes(release),m=release.material_data||{};
@@ -34,7 +34,10 @@ export async function assembleRelease(release,{getMetadata=metadata,imageProbe=p
  backdrop||=poster;if(backdrop.width<400)throw Error('backdrop_small');
  const episodes=await mapLimit(rows,4,async(row,index)=>{
   const media=await retry(()=>resolve(row.url,row.ordinal));const sources=[];let duration=0;
-  for(const source of media.sources||[]){if(![360,480,720,1080].includes(source.quality))continue;try{for(const s of await retry(()=>streamProbe(source))){duration=Math.max(duration,s.duration);if(!sources.some(v=>v.quality===s.quality))sources.push({quality:s.quality,url:s.url,stream:true,checkedAt:s.checkedAt});}}catch{}}
+  // Check real renditions concurrently, retaining every episode and segment check.
+  const candidates=(media.sources||[]).filter(s=>[360,480,720,1080].includes(s.quality));
+  const checked=await mapLimit(candidates,3,async source=>{try{return await retry(()=>streamProbe(source));}catch{return [];}});
+  for(const list of checked)for(const s of list){duration=Math.max(duration,s.duration);if(!sources.some(v=>v.quality===s.quality))sources.push({quality:s.quality,url:s.url,stream:true,checkedAt:s.checkedAt});}
   if(!sources.length||!duration)throw Error(`no_working_stream_s${row.season}_e${row.ordinal}`);
   if(type==='SPECIAL'&&duration<180&&!clean(sh?.description))throw Error('short_special_without_shikimori_description');
   return {number:rows.some(r=>r.season!==rows[0].season)?index+1:row.ordinal,ordinal:row.ordinal,season:row.season,audio:[{...translation,duration,sources,subtitles:[],opening:null,ending:null,providerRef:{provider:'kodik',releaseId:String(release.id),translationId:String(release.translation.id),url:row.url,season:row.season,ordinal:row.ordinal}}]};
