@@ -459,3 +459,8 @@ Command: `python3 scripts/collect-source-offers.py --limit 250 --zoko`
 - Renditions now checked concurrently (3 per episode, with existing 4-episode/2-release bounds); permanent 400/401/403/404/410/422 errors no longer retried immediately. Real stream/segment checks for every episode, artwork checks and short-special Shikimori description rule retained.
 - Season menu traverses explicit sequel/prequel links in both directions, allowing 3+ loaded seasons; never matches unrelated titles by guessed names. Missing metadata or unloaded seasons cannot be inferred.
 - 176 tests passed, including concurrency/permanent-404 rejection and chained seasons. User's live importer files intentionally excluded from this code commit.
+
+## 2026-10-23 — popular-first import
+- Added --popular to add-anime/seed: Shikimori popularity-ranked IDs -> exact Kodik search -> same verified multi-translation ingest. Existing titles skipped, independently persisted popular page/index; ordinary Kodik cursor unchanged. Bounded candidate scan and release checks. No bulk import started by agent while user's old importer is active.
+- Live read-only Shikimori popularity query returned HTTP200: Attack on Titan, Death Note, Fullmetal Alchemist Brotherhood, One Punch Man, Demon Slayer. No guessed Kodik popularity sorting.
+- Command: npm run add-anime -- 100 --popular. Do not start alongside an active import. 177 tests pass; filters unchanged.

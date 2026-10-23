@@ -113,3 +113,16 @@ test('rendition checks run concurrently but still reject broken renditions and c
  assert.equal(calls,8);assert.ok(max>2&&max<=6);
  for(const e of a.episodes)assert.deepEqual(e.audio[0].sources.map(s=>s.quality),[360,480,720]);
 });
+
+test('popular mode follows ranked IDs, verifies releases and resumes after the admitted title',async()=>{
+ const cwd=process.cwd(),dir=await mkdtemp(join(tmpdir(),'kodik-popular-'));
+ try{
+  process.chdir(dir);await mkdir('src');const searched=[];
+  const api={async *pages(path,params){searched.push(params.shikimori_id);yield {results:[release],page:'/search',next_page:null};}};
+  const getPopular=async page=>page===1?[{id:9},{id:10}]:[];
+  const report=await seedCatalog({targetCount:1,order:'popular',api,getPopular,assemble:r=>assembleRelease(r,dependencies)});
+  assert.equal(report.added,1);assert.ok(searched.every(id=>id===9));
+  const progress=JSON.parse(await readFile('src/kodik-progress.json','utf8'));
+  assert.deepEqual(progress.popular,{page:1,index:1});assert.equal(progress.next,'/list');
+ }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
+});

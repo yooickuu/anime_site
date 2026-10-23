@@ -17,7 +17,7 @@ try{
  if(branch!=='main')throw Error('Открой ветку main перед публикацией.');
  run('git',['fetch','origin']);
  if(gitText('rev-list','--count','HEAD..origin/main')!=='0')run('git',['merge','--ff-only','origin/main']);
- run(process.execPath,['scripts/seed-catalog.mjs',String(count)]);
+ run(process.execPath,['scripts/seed-catalog.mjs',String(count),...(process.argv.includes('--popular')?['--popular']:[])]);
  run('npm',['run','build']);
  const files=['src/published-catalog.json','src/kodik-progress.json','dist/app.js','dist/index.html','dist/catalog-build.json','dist/published-catalog.json','dist/data/kodik','../app.js','../index.html','../catalog-build.json','../published-catalog.json','../data/kodik'];
  run('git',['add','--',...files.filter(existsSync)]);

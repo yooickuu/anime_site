@@ -45,7 +45,15 @@ export async function assembleRelease(release,{getMetadata=metadata,imageProbe=p
  const mal=Number(sh?.malId||al?.idMal)||null;
  return {id:mal?`mal-${mal}`:`shikimori-${shiki}`,ids:{shikimori:shiki,mal,anilist:al?.id||null,kodik:String(release.id)},kodikIds:[String(release.id)],kodikRevisions:{[release.id]:release.updated_at||String(release.episodes_count)},title:sh?.russian||release.title,originalTitle:release.title_orig||al?.title?.romaji||'',alt:[release.other_title,al?.title?.english,al?.title?.native].filter(Boolean).join(' '),description:clean(sh?.description||m.description||al?.description),year:release.year,type,genres:(sh?.genres?.map(g=>g.russian||g.name)||m.anime_genres||al?.genres||[]).map(normalizeGenre),rating:Number(sh?.score||m.shikimori_rating||Number(al?.averageScore)/10)||null,popularity:al?.popularity||0,ongoing:(m.anime_status||sh?.status)==='ongoing',relatedMalIds:(al?.relations?.edges||[]).filter(e=>['PREQUEL','SEQUEL'].includes(e.relationType)&&e.node.type==='ANIME').map(e=>e.node.idMal).filter(Boolean),artwork:{poster,backdrop},releasedEpisodes:episodes.map(e=>e.number),episodes};
 }
-export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetCount*10),retryLimit=3,token,api,assemble=assembleRelease}={}){
+export async function popularAnimePage(page,{fetcher=fetch}={}){
+ const url=new URL('https://shikimori.io/api/animes');url.search=new URLSearchParams({order:'popularity',limit:'50',page:String(page),censored:'true'});
+ const response=await fetcher(url,{headers:{'User-Agent':'yomiku/1.0 (+https://yomiku.site/)'},signal:AbortSignal.timeout(15000)});
+ if(!response.ok)throw Error(`popularity_http_${response.status}`);
+ const rows=await response.json();if(!Array.isArray(rows)||rows.some(a=>!Number.isSafeInteger(Number(a.id))||Number(a.id)<=0))throw Error('invalid_popularity_page');
+ return rows;
+}
+export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetCount*10),retryLimit=3,token,api,assemble=assembleRelease,order='updated',getPopular=popularAnimePage}={}){
+ if(!['updated','popular'].includes(order))throw Error('invalid_import_order');
  if(!Number.isSafeInteger(targetCount)||targetCount<1)throw Error('Количество должно быть положительным целым числом');
  api||=new KodikAPI(token||await loadToken());
  const catalog=await loadJSON(catalogPath,{policyVersion:3,items:[]});
@@ -86,6 +94,30 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
 
   }catch(error){if(!progress.pending.includes(key))progress.pending.push(key);report.pending.push({id:key,reason:error.message});console.warn(`Пропущен ${key}: ${error.message}`);}
  }
+ if(order==='popular'){
+  progress.popular??={page:1,index:0};let scanned=0;
+  console.log('Приоритет: популярные аниме Shikimori, которых ещё нет в каталоге.');
+  while(!stop()&&scanned<maxChecks){
+   const rows=await getPopular(progress.popular.page);if(!rows.length)break;
+   for(let i=progress.popular.index;i<rows.length;i++){
+    const id=Number(rows[i].id);scanned++;
+    if(!byIdentity.has(`shikimori:${id}`)&&!byIdentity.has(`mal:${id}`)){
+     for await(const batch of api.pages('/search',{...catalogParams,shikimori_id:id})){
+      for(const release of batch.results){
+       if(Number(release.shikimori_id)!==id)continue;
+       await ingest(release);
+       if(byIdentity.has(`shikimori:${id}`)||stop())break;
+      }
+      if(byIdentity.has(`shikimori:${id}`)||stop())break;
+     }
+    }
+    progress.popular.index=i+1;await persist(progress.next);
+    if(stop()||scanned>=maxChecks)return report;
+   }
+   progress.popular={page:progress.popular.page+1,index:0};await persist(progress.next);
+  }
+  return report;
+ }
  // Retry a bounded part of the queue; failures must not starve unseen pages.
  const retryIds=progress.pending.splice(0,retryLimit);progress.pending.push(...retryIds);
  for(const id of retryIds){
@@ -103,4 +135,4 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
  }
  console.log(`Готово: новых ${report.added}, дополнено ${report.merged}, на проверку позже ${report.pending.length}`);return report;
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)seedCatalog({targetCount:Number(process.argv[2]||30)}).catch(e=>{console.error(e.message);process.exitCode=1;});
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)seedCatalog({targetCount:Number(process.argv[2]||30),order:process.argv.includes('--popular')?'popular':'updated'}).catch(e=>{console.error(e.message);process.exitCode=1;});
