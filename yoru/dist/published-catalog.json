@@ -917310,6 +917310,124 @@
           ]
         }
       ]
+    },
+    {
+      "id": "mal-61990",
+      "ids": {
+        "mal": 61990,
+        "shikimori": 61990,
+        "anilist": 195539,
+        "anilibria": 10364,
+        "kodik": null
+      },
+      "title": "Киберпанк: Бегущие по краю 2",
+      "originalTitle": "Cyberpunk: Edgerunners 2",
+      "alt": "Киберпанк: Бегущие по краю 2 Cyberpunk: Edgerunners 2 Cyberpunk: Edgerunners 2 Cyberpunk: Edgerunners 2 Cyberpunk: Edgerunners 2",
+      "year": 2026,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Фантастика",
+        "Жестокость"
+      ],
+      "description": "Найт-Сити по-прежнему горит неоновыми огнями, ослепляя тех, кто пришёл сюда за властью, и маня тех, кто готов поставить на кон всё ради славы или свободы. Корпорация «Арасака» продолжает укреплять своё влияние, банды борются за территории, а наёмники выполняют опасные заказы в надежде заработать. В этом городе технологии способны сделать человека сильнее, быстрее и опаснее, но ни один имплант не защищает от потери самого себя. Чем больше имплантов получает человек, тем выше риск киберпсихоза, когда чрезмерная нагрузка на психику может привести к потере рассудка. Уик Кингсли ищет своё место в мегаполисе, который равнодушно забыл о его былом величии. Ди неотступно следует за тенями своего прошлого. Роман Каракс пытается заработать продажей подпольных видеозаписей. В то же самое время Талия Ян ведёт свою бескомпромиссную войну со всеми миром за право быть собой, отвергая чужие законы и диктуя этому городу собственные. У каждого из них есть свой веский повод продолжать этот танец со смертью, однако Найт-Сити глух к молитвам. Станут ли они легендами, о которых будут говорить ещё долго, или их истории затеряются среди тысяч судеб, поглощённых безжалостным городом?",
+      "ongoing": true,
+      "releasedEpisodes": [
+        1,
+        2
+      ],
+      "artwork": {
+        "poster": {
+          "url": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx195539-4LdfmKIHzuxr.png",
+          "width": 800,
+          "height": 1200
+        },
+        "backdrop": {
+          "url": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/195539-lO5SUdp4SOrq.jpg",
+          "width": 1920,
+          "height": 1080
+        }
+      },
+      "episodes": [
+        {
+          "number": 1,
+          "audio": [
+            {
+              "id": "anilibria",
+              "dubId": "AniLibria",
+              "label": "AniLibria (RU)",
+              "language": "ru",
+              "original": false,
+              "duration": 1708,
+              "sources": [
+                {
+                  "quality": 1080,
+                  "url": "https://cache-rfn.libria.fun/videos/media/ts/10364/1/1080/0bc48ce61c34c35ccee9983ef04e7c73.m3u8?countryIso=KZ&isAuthorized=0&isWithVideoAds=1&isWithVideoAdsAlways=1",
+                  "stream": true
+                },
+                {
+                  "quality": 720,
+                  "url": "https://cache-rfn.libria.fun/videos/media/ts/10364/1/720/c639bab0ca2aedfb2041ab507eb93985.m3u8?countryIso=KZ&isAuthorized=0&isWithVideoAds=1&isWithVideoAdsAlways=1",
+                  "stream": true
+                },
+                {
+                  "quality": 480,
+                  "url": "https://cache-rfn.libria.fun/videos/media/ts/10364/1/480/4ed92ec0c4f088898a2f74275ec6e00f.m3u8?countryIso=KZ&isAuthorized=0&isWithVideoAds=1&isWithVideoAdsAlways=1",
+                  "stream": true
+                }
+              ],
+              "subtitles": [],
+              "opening": {
+                "start": 65,
+                "end": 168
+              },
+              "ending": {
+                "start": 1508,
+                "end": 1706
+              }
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "audio": [
+            {
+              "id": "anilibria",
+              "dubId": "AniLibria",
+              "label": "AniLibria (RU)",
+              "language": "ru",
+              "original": false,
+              "duration": 1653,
+              "sources": [
+                {
+                  "quality": 1080,
+                  "url": "https://cache-rfn.libria.fun/videos/media/ts/10364/2/1080/19128d58c9bdbbd11dd349a7a0871111.m3u8?countryIso=KZ&isAuthorized=0&isWithVideoAds=1&isWithVideoAdsAlways=1",
+                  "stream": true
+                },
+                {
+                  "quality": 720,
+                  "url": "https://cache-rfn.libria.fun/videos/media/ts/10364/2/720/ed97d0d5d95b3cf2b30ab2a8246bdcd6.m3u8?countryIso=KZ&isAuthorized=0&isWithVideoAds=1&isWithVideoAdsAlways=1",
+                  "stream": true
+                },
+                {
+                  "quality": 480,
+                  "url": "https://cache-rfn.libria.fun/videos/media/ts/10364/2/480/a09110a41b386192be69cf111dd6fcbf.m3u8?countryIso=KZ&isAuthorized=0&isWithVideoAds=1&isWithVideoAdsAlways=1",
+                  "stream": true
+                }
+              ],
+              "subtitles": [],
+              "opening": {
+                "start": 10,
+                "end": 100
+              },
+              "ending": {
+                "start": 1465,
+                "end": 1653
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
