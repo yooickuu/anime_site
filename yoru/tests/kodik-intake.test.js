@@ -161,9 +161,9 @@ test('empty upstream JSON is retried, but repeated invalid responses are not acc
  }finally{globalThis.fetch=before;}
 });
 import {refreshKodikMedia} from '../src/kodik-playback.js';
-test('resolver outage retains verified same-audio links and never swaps Japanese for Russian',async()=>{
+test('resolver outage rejects stale direct links and never swaps Japanese for Russian',async()=>{
  const media={audioId:'kodik-2',sources:[{quality:720,url:'https://media.test/ja.m3u8'}]},config={supabaseUrl:'https://test.supabase.co'};
- const d=await refreshKodikMedia(media,config,'mal-1',1,{fetcher:async()=>new Response('',{status:502})});assert.equal(d.refreshFailed,true);assert.equal(d.sources[0].url,media.sources[0].url);
+ await assert.rejects(refreshKodikMedia(media,config,'mal-1',1,{fetcher:async()=>new Response('',{status:502})}),/providerError/);
  await assert.rejects(refreshKodikMedia(media,config,'mal-1',1,{fetcher:async()=>Response.json({audioId:'kodik-1',sources:media.sources})}),/audioUnavailable/);
 });
 

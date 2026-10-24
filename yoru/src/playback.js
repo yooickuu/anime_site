@@ -48,7 +48,7 @@ export function createPlayback(video, onState = () => {}, {schedule=setTimeout,c
     listen('playing', () => emit('playing'));
     listen('waiting', () => emit('buffering'));
     listen('error', () => { if (video.getAttribute('src')) emit('error'); });
-    if (stream && Hls.isSupported()) {
+    if (stream && !video.canPlayType?.('application/vnd.apple.mpegurl') && Hls.isSupported()) {
       hls = new Hls({ startPosition: startAt > 0 ? startAt : -1, maxBufferLength: 30, maxMaxBufferLength: 60 });
       const transport = hls;
       hls.on(Hls.Events.ERROR, (_, data) => {

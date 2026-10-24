@@ -220,6 +220,128 @@ async function snapshotHealth() {
   return true;
 }
 
+// server/media-proxy.js
+var encoder = new TextEncoder();
+var decoder = new TextDecoder();
+var cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS", "Access-Control-Allow-Headers": "Range", "Access-Control-Expose-Headers": "Content-Range, Accept-Ranges, Content-Length", "X-Content-Type-Options": "nosniff" };
+var encode = (bytes) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+var decode = (value) => Uint8Array.from(atob(value.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+function mediaURL(value, base) {
+  const u = new URL(value, base);
+  if (u.protocol !== "https:" || u.username || u.password || u.port || !(u.hostname === "solodcdn.com" || u.hostname.endsWith(".solodcdn.com"))) throw Error("media_host_not_allowed");
+  if (u.href.length > 6e3) throw Error("media_url_too_long");
+  return u;
+}
+function createMediaProxy({ secret, endpoint, fetcher = fetch, now = Date.now, cryptoAPI = crypto }) {
+  if (!secret) throw Error("proxy_not_configured");
+  const key = cryptoAPI.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
+  async function sign(url, expires = Math.floor(now() / 1e3) + 7200) {
+    const target = mediaURL(url).href, payload = encode(encoder.encode(JSON.stringify({ url: target, expires })));
+    const signature = encode(new Uint8Array(await cryptoAPI.subtle.sign("HMAC", await key, encoder.encode(payload))));
+    const result = new URL(endpoint);
+    result.search = "";
+    result.searchParams.set("stream", "1");
+    result.searchParams.set("p", payload);
+    result.searchParams.set("s", signature);
+    return result.href;
+  }
+  async function verify(url) {
+    const p = url.searchParams.get("p") || "", s = url.searchParams.get("s") || "";
+    if (p.length > 9e3 || !s || !p) throw Error("invalid_media_signature");
+    let data;
+    try {
+      if (!await cryptoAPI.subtle.verify("HMAC", await key, decode(s), encoder.encode(p))) throw Error();
+      data = JSON.parse(decoder.decode(decode(p)));
+    } catch {
+      throw Error("invalid_media_signature");
+    }
+    if (!Number.isSafeInteger(data.expires) || data.expires <= now() / 1e3 || data.expires > now() / 1e3 + 7210) throw Error("media_signature_expired");
+    return { ...data, url: mediaURL(data.url).href };
+  }
+  async function playlist(text, base, expires) {
+    if (!text.trimStart().startsWith("#EXTM3U")) throw Error("invalid_media_playlist");
+    return (await Promise.all(text.split(/\r?\n/).map(async (line) => {
+      if (!line.trim()) return line;
+      if (!line.startsWith("#")) return sign(mediaURL(line.trim(), base).href, expires);
+      const matches = [...line.matchAll(/\bURI="([^"]+)"/g)];
+      for (const m of matches) line = line.replace(m[0], `URI="${await sign(mediaURL(m[1], base).href, expires)}"`);
+      return line;
+    }))).join("\n");
+  }
+  async function upstream(url, request) {
+    let target = mediaURL(url);
+    const range = request.headers.get("range");
+    if (range && !/^bytes=(?:\d+-\d*|-\d+)$/.test(range)) throw Error("invalid_media_range");
+    for (let i = 0; i < 4; i++) {
+      const response = await fetcher(target.href, { ...transportOptions(), method: request.method === "HEAD" ? "HEAD" : "GET", redirect: "manual", signal: AbortSignal.any([request.signal, AbortSignal.timeout(25e3)]), headers: { Referer: "https://kodik.cc/", Origin: "https://kodik.cc/", "Accept-Encoding": "identity", ...range ? { Range: range } : {} } });
+      if ([301, 302, 303, 307, 308].includes(response.status)) {
+        const location = response.headers.get("location");
+        await response.body?.cancel();
+        if (!location) throw Error("invalid_media_redirect");
+        target = mediaURL(location, target);
+        continue;
+      }
+      return { response, url: target.href };
+    }
+    throw Error("media_redirect_loop");
+  }
+  async function handle(request) {
+    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+    if (!["GET", "HEAD"].includes(request.method)) return new Response(null, { status: 405, headers: cors });
+    let token;
+    try {
+      token = await verify(new URL(request.url));
+    } catch {
+      return new Response("Invalid or expired media link", { status: 403, headers: { ...cors, "Cache-Control": "no-store" } });
+    }
+    try {
+      const { response: r, url } = await upstream(token.url, request);
+      if (!r.ok) {
+        await r.body?.cancel();
+        return new Response(null, { status: [403, 404, 410, 416].includes(r.status) ? r.status : 502, headers: { ...cors, "Cache-Control": "no-store" } });
+      }
+      const isPlaylist = /\.m3u8(?:$|\?)/i.test(url) || /mpegurl/i.test(r.headers.get("content-type") || "");
+      const headers = { ...cors, "Cache-Control": "private, max-age=30", "Content-Type": isPlaylist ? "application/x-mpegURL" : /\.ts(?:$|\?)/i.test(url) ? "video/mp2t" : /\.(?:m4s|mp4)(?:$|\?)/i.test(url) ? "video/mp4" : "application/octet-stream" };
+      if (request.method === "HEAD") {
+        await r.body?.cancel();
+        return new Response(null, { status: r.status, headers });
+      }
+      if (isPlaylist) {
+        const reader = r.body.getReader();
+        let size = 0, parts = [];
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            size += value.length;
+            if (size > 2e6) throw Error("media_playlist_too_large");
+            parts.push(value);
+          }
+        } finally {
+          await reader.cancel().catch(() => {
+          });
+        }
+        const bytes = new Uint8Array(size);
+        let offset = 0;
+        for (const part of parts) {
+          bytes.set(part, offset);
+          offset += part.length;
+        }
+        return new Response(await playlist(decoder.decode(bytes), url, token.expires), { headers });
+      }
+      for (const name of ["content-range", "accept-ranges"]) if (r.headers.has(name)) headers[name] = r.headers.get(name);
+      return new Response(r.body, { status: r.status, headers });
+    } catch {
+      return new Response("Media upstream unavailable", { status: 502, headers: { ...cors, "Cache-Control": "no-store" } });
+    }
+  }
+  async function video(value) {
+    const sources = await Promise.all(value.sources.map(async (s) => ({ ...s, url: await sign(s.url), stream: true })));
+    return { ...value, sources, url: (sources.find((s) => s.quality === 720) || sources[0])?.url, stream: true, proxied: true };
+  }
+  return { sign, verify, playlist, handle, video };
+}
+
 // server/published-kodik.js
 var manifestCache = /* @__PURE__ */ new Map();
 async function fetchManifest(url) {
@@ -259,6 +381,17 @@ var origins = /* @__PURE__ */ new Set(["https://yomiku.site", "https://www.yomik
 var healthCache = null;
 var limits = /* @__PURE__ */ new Map();
 Deno.serve(async (req) => {
+  const requestURL = new URL(req.url);
+  const secret = Deno.env.get("VIDEO_PROXY_SECRET") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  const endpoint = (Deno.env.get("SUPABASE_URL") || requestURL.origin) + "/functions/v1/anime-source";
+  const proxy = () => createMediaProxy({ secret, endpoint });
+  if (requestURL.searchParams.get("stream") === "1") {
+    try {
+      return await proxy().handle(req);
+    } catch {
+      return new Response("Proxy is not configured", { status: 503, headers: { "Access-Control-Allow-Origin": "*" } });
+    }
+  }
   const origin = req.headers.get("Origin") || "";
   const headers = { "Content-Type": "application/json", "Cache-Control": "no-store", "Vary": "Origin", ...origins.has(origin) ? { "Access-Control-Allow-Origin": origin } : {} };
   const reply = (body, status = 200) => new Response(JSON.stringify(body), { status, headers });
@@ -267,10 +400,10 @@ Deno.serve(async (req) => {
   if (req.method === "GET" && new URL(req.url).searchParams.get("source") === "kodik") {
     try {
       const video = await publishedKodikVideo("mal-28285", 1, "kodik-4243");
-      return reply({ ready: true, version: 15, qualities: video.sources.map((s) => s.quality) });
+      return reply({ ready: true, version: 16, qualities: video.sources.map((s) => s.quality) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "unknown";
-      return reply({ ready: false, version: 15, detail: message.replace(/https?:\/\/[^\s)]+/g, "[upstream]").replace(/[a-zA-Z0-9]{24,}/g, "[redacted]").slice(0, 220) }, 502);
+      return reply({ ready: false, version: 16, detail: message.replace(/https?:\/\/[^\s)]+/g, "[upstream]").replace(/[a-zA-Z0-9]{24,}/g, "[redacted]").slice(0, 220) }, 502);
     }
   }
   if (req.method === "GET") {
@@ -283,7 +416,7 @@ Deno.serve(async (req) => {
         healthCache = { at: Date.now(), ready: false, status: /^[a-z_0-9]+$/.test(m) ? m : "source_unavailable", detail: m.replace(/https?:\/\/[^\s)]+/g, "[upstream]").slice(0, 180) };
       }
     }
-    return reply({ ready: healthCache.ready, version: 15, kodikPlayback: true, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
+    return reply({ ready: healthCache.ready, version: 16, kodikPlayback: true, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
   }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   try {
@@ -306,13 +439,13 @@ Deno.serve(async (req) => {
       return reply({ error: "invalid_request" }, 400);
     }
     if (!body || typeof body !== "object") return reply({ error: "invalid_request" }, 400);
-    if (body.action === "kodik-video") return reply(await publishedKodikVideo(body.id, body.episode, body.audio, { season: body.season, ordinal: body.ordinal }));
+    if (body.action === "kodik-video") return reply(await proxy().video(await publishedKodikVideo(body.id, body.episode, body.audio, { season: body.season, ordinal: body.ordinal })));
     const id = Number(body.id), ordinal = Number(body.ordinal);
     if (!positiveID(id)) return reply({ error: "invalid_id" }, 400);
     if (body.action === "release") return reply(await snapshotRelease(id));
     if (!Number.isFinite(ordinal) || ordinal < 0 || ordinal > 1e4) return reply({ error: "invalid_episode" }, 400);
     if (body.action === "voices") return reply({ voices: (await snapshotVoices(id, ordinal)).map(({ url, ...v }) => v) });
-    if (body.action === "video" && /^go-\d+$/.test(body.audio || "")) return reply(await snapshotVideo(id, ordinal, body.audio));
+    if (body.action === "video" && /^go-\d+$/.test(body.audio || "")) return reply(await proxy().video(await snapshotVideo(id, ordinal, body.audio)));
     return reply({ error: "invalid_request" }, 400);
   } catch (error) {
     const message = error instanceof Error ? error.message : "";

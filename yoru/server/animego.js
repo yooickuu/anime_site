@@ -14,7 +14,7 @@ export function parseStreams(links={}){const result=[];for(const [q,list]of Obje
 const cache=new Map();
 async function cached(key,ttl,load){const old=cache.get(key);if(old&&old.until>Date.now())return old.promise;const promise=load();cache.set(key,{until:Date.now()+ttl,promise});if(cache.size>600)cache.delete(cache.keys().next().value);try{return await promise;}catch(e){cache.delete(key);throw e;}}
 let upstreamClient;
-function transportOptions(){
+export function transportOptions(){
  if(typeof globalThis.Deno?.createHttpClient!=='function')return {};
  // Some upstream servers terminate Deno HTTP/2 connections prematurely.
  upstreamClient??=globalThis.Deno.createHttpClient({http1:true,http2:false,poolMaxIdlePerHost:4});

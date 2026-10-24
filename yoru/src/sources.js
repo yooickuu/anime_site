@@ -1,6 +1,6 @@
 import metadata from './catalog-metadata.json' with {type:'json'};
 import {withMetadata} from './catalog-metadata.js';
-import {kodikEmbedURL} from './kodik-iframe.js';
+import {refreshKodikMedia} from './kodik-playback.js';
 import {localSeasons,franchiseSeasons} from './catalog-seasons.js';
 import {queryCatalogue} from './catalog-query.js';
 // Publication allowlist only. Legacy adapters are quarantined in legacy-sources.js.
@@ -46,11 +46,12 @@ export const releaseSeasons=requestCache(async a=>{
   return localSeasons(publishedItems,{...a,relatedMalIds});
  }catch{return local;}
 },{ttl:3600000});
-// Official iframe mode reads only the exact saved episode/translation URL.
-// No direct stream extraction or Supabase request is involved.
-export async function iframeEpisode(a,index,audioId){
+export async function videoEpisode(a,index,refresh=false,audioId){
  const media=(await mediaCatalogue(a.id)).video(a.id,index,audioId);
- const embedURL=kodikEmbedURL(media);
- if(!embedURL)throw Error('audioUnavailable');
- return {...media,embedURL};
+ if(media.providerRef?.provider!=='kodik')return media;
+ // Kodik manifests and segments must share the signed proxy transport.
+ // Never fall back to old direct CDN URLs after a proxy failure.
+ const config=globalThis.window?.YORU_CONFIG;
+ if(!config?.supabaseUrl)throw Error('providerError');
+ return refreshKodikMedia(media,config,a.id,index);
 }

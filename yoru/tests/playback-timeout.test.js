@@ -46,3 +46,11 @@ test('episode/quality replacement keeps native video attached without an empty s
  h.player.destroy();
  assert.deepEqual(actions,['pause','empty-src']);
 });
+
+test('Safari native HLS loads the signed proxy URL and preserves its position',()=>{
+ const h=harness();h.video.canPlayType=type=>type==='application/vnd.apple.mpegurl'?'probably':'';
+ const url='https://project.supabase.co/functions/v1/anime-source?stream=1&p=signed&s=signature';
+ h.player.load({url,stream:true,startAt:42});assert.equal(h.video.src,url);
+ h.video.dispatchEvent(new Event('loadedmetadata'));assert.equal(h.video.currentTime,42);
+ h.player.destroy();
+});
