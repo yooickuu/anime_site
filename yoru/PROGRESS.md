@@ -505,3 +505,14 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - Tests log `/tmp/yomiku-tests.log`; sweep `/tmp/yomiku-refresh.log`. Previous coverage `/tmp/yomiku-coverage.log`.
 - BeforethisturnHEAD advanced byuserimports to0de7396 (100batch),0f8733b(10batch) beyond526811c; preserveuserimportchanges.
 - GitHubnotyetupdatedwithfixes; currentlocalrawcatalog73MB, runtime17MB, bundle18MB. Checkfiles<100MB beforepush. No publicsource tokens inrepo.
+
+## 2026-10-24 — resume / publication follow-up
+- Verified checkpoint0c90fdf was already pushed externally: origin/main matched it; GitHub Actions run40061093815 completed successfully. Do not say checkpoint stilllocal.
+- Latest197tests+syntax+fullbuildpassed2179/2179. Addedregression: existing3dubs cannot cause longernewtranslationmissingepisodes tobeskipped. Existingcoverage52beforebulk ->19stillbelowpreviousShikimori expected AFTERbulk, savedchecks/remaining-coverage-after-refresh.json. Catalogue35883episodeentries; notallfilesplayed.
+- User clarifiedportraitCh/B **should fillwindow with cropping**: latestCSSusescoverandfocal50%20%(mobile18%)onlyforportrait. Landscapecontain. RemovedduplicateblurredimageHTMLandblurfromdetails-copy. Preferhigherresolutionownposter whenownbackdropverticalandsmaller. VisualQAblockedCUAcgWindowNotFound; do not claimmanualvisualverification.
+- v13 deployed viaSafari, thenv14deployedbyuser. Healthv14confirmed: `player_upstream_invalid_json_0_empty`. Manifestnowloadsfromraw.githubusercontent.com/yooickuu/anime_site/main/data/kodik, so diagnosisisolatesPOSTtoKodik(notourJSON). LocalNode samerequestpasses3renditions andreturns200application/json11969bytes;CloudDeno returns200emptybody. v14preservesupstreamSetCookiefromplayerHTML, sendsnormalAJAXheaders; stillfails. Noevidencetokeninvalid. Don'taskuserrepeatunchangeddeploy.
+- Serverexactlookup now acceptsordinal+seasonfromclient topreventwrongvideoaftercatalogueindexreordering. Testedwithmain+extras sameordinal.
+- Serverbackend failure remainsUNRESOLVED; existingnative-directURLscanplayuntilURLsexpire; link-onlynewtracksrequireworkingresolver. Do not claimfinishedvideo.
+- Backend filescurrentlyv14. Noofficialiframefallbackaddedbecauseuserwantsownplayer; thatwouldneedexplicitlyexplainedtradeoff.
+- BrowserbindingfailurecgWindowNotFoundSafari+Chrome; localdevserverrestartedprocesssession39651servesdist4173. UserassistedDeploy14.
+- Userreceivedhoneststatus: latestUI/importpublishing,19coveragegaps,serveremptyresponsepending.

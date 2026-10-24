@@ -87,7 +87,9 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
   if(progress.processed[key]===revision||attempted.has(key)){report.skipped++;return;}
   const known=byIdentity.get(`shikimori:${release.shikimori_id}`);
   // Extra translations must not keep a batch busy once all episodes already have three.
-  if(known?.episodes?.length&&known.episodes.every(e=>new Set(e.audio.filter(t=>t.providerRef?.provider==='kodik').map(t=>t.providerRef.translationId)).size>=3)&&!known.episodes.some(e=>e.audio.some(t=>String(t.providerRef?.translationId)===String(release.translation?.id)))){report.skipped++;return;}
+  const knownRows=new Set((known?.episodes||[]).map(e=>`${e.season??1}:${e.ordinal??e.number}`));
+  let fullyCovered=false;try{fullyCovered=allEpisodes(release).every(e=>knownRows.has(`${e.season}:${e.ordinal}`));}catch{}
+  if(fullyCovered&&known?.episodes?.length&&known.episodes.every(e=>new Set(e.audio.filter(t=>t.providerRef?.provider==='kodik').map(t=>t.providerRef.translationId)).size>=3)&&!known.episodes.some(e=>e.audio.some(t=>String(t.providerRef?.translationId)===String(release.translation?.id)))){report.skipped++;return;}
   attempted.add(key);report.checked++;
   try{
    console.log(`Проверка ${release.title}: ${release.episodes_count||1} серий (${report.checked}/${maxChecks})`);

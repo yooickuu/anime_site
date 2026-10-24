@@ -237,3 +237,14 @@ body.dark[data-style] .details-dialog{width:100vw;max-width:100vw;max-height:100
 .season-tabs button{min-height:44px;padding:10px 16px;border:0;border-radius:14px;background:rgba(var(--surface-rgb),.5);color:var(--muted);font:inherit;cursor:pointer}
 .season-tabs button[aria-selected=true]{background:color-mix(in srgb,var(--accent) 23%,transparent);color:var(--text)}
 @media(max-width:600px){.details-dialog .details-artwork{height:max(66vh,600px)}.season-tabs button{font-size:12px;padding:10px 12px}}
+
+/* A single intact frame: no enlarged duplicate, blur, transforms or crop. */
+.details-dialog .details-artwork{display:block;position:absolute;inset:0 0 auto;width:100%;height:max(70vh,720px);min-height:50vh;overflow:visible;mask-image:none;-webkit-mask-image:none;pointer-events:none}
+.details-dialog .details-manga,.details-dialog .portrait-art .details-manga{display:block;position:static;width:100%;height:100%;max-width:100%;max-height:none;object-fit:contain;object-position:center top;transform:none;filter:grayscale(1);opacity:.68;mask-image:linear-gradient(to bottom,#000 0%,#000 78%,#000c 90%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 78%,#000c 90%,transparent 100%)}
+.details-dialog .details-art-fill,.details-dialog .details-art-shade{display:none}
+body.dark[data-style] .details-copy{backdrop-filter:none;-webkit-backdrop-filter:none;background:linear-gradient(135deg,rgba(var(--surface-rgb),.68),rgba(var(--surface-rgb),.35))!important}
+@media(max-width:600px){.details-dialog .details-artwork{height:max(70vh,620px)}.details-dialog .details-manga{object-position:center top}}
+
+/* Portrait backdrops fill the window with a character-oriented focal point. */
+.details-dialog .portrait-art .details-manga{object-fit:cover;object-position:50% 20%;width:100%;height:100%;filter:grayscale(1);transform:none}
+@media(max-width:600px){.details-dialog .portrait-art .details-manga{object-position:50% 18%}}

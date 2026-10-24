@@ -58,10 +58,11 @@ async function textFetch(url, options = {}) {
   }
 }
 async function readUpstream(url, options = {}) {
+  const { onHeaders, ...requestOptions } = options;
   const allowed = /* @__PURE__ */ new Set([new URL(url).hostname, "kodikplayer.com", "kodik.info", "kodik.biz", "kodik.cc", "yomiku.site", "www.yomiku.site"]);
   let current = new URL(url), method = options.method || "GET", body = options.body;
   for (let hop = 0; hop < 4; hop++) {
-    const r = await fetch(current, { ...options, ...transportOptions(), method, body, headers: { "Accept-Encoding": "identity", "User-Agent": "yomiku/1.0 (+https://yomiku.site/)", ...options.headers }, redirect: "manual", signal: AbortSignal.timeout(15e3) });
+    const r = await fetch(current, { ...requestOptions, ...transportOptions(), method, body, headers: { "Accept-Encoding": "identity", "User-Agent": "yomiku/1.0 (+https://yomiku.site/)", ...options.headers }, redirect: "manual", signal: AbortSignal.timeout(15e3) });
     if ([301, 302, 303, 307, 308].includes(r.status)) {
       const location = r.headers.get("location");
       await r.body?.cancel();
@@ -79,6 +80,7 @@ async function readUpstream(url, options = {}) {
       await r.body?.cancel();
       throw Error("upstream_" + r.status);
     }
+    onHeaders?.(r.headers);
     const reader = r.body.getReader();
     let size = 0, parts = [];
     try {
@@ -111,7 +113,7 @@ async function jsonFetch(url, options = {}) {
     try {
       return JSON.parse(text);
     } catch {
-      if (attempt === 2) throw Error("upstream_invalid_json");
+      if (attempt === 2) throw Error("upstream_invalid_json_" + text.length + "_" + (text.trim().startsWith("<") ? "html" : text.trim() ? "text" : "empty"));
     }
   }
 }
@@ -128,7 +130,15 @@ async function kodikVideo(url, ordinal) {
   });
 }
 async function resolveKodikPlayer(url, ordinal) {
-  const html = await textFetch(url);
+  const cookies = /* @__PURE__ */ new Map();
+  const onHeaders = (headers) => {
+    for (const value of headers.getSetCookie?.() || []) {
+      const pair = value.split(";")[0], i = pair.indexOf("=");
+      if (i > 0) cookies.set(pair.slice(0, i), pair.slice(i + 1));
+    }
+  };
+  const sessionHeaders = () => ({ "Cookie": [...cookies].map(([k, v]) => k + "=" + v).join(";"), "Cache-Control": "no-cache" });
+  const html = await textFetch(url, { onHeaders, headers: { "Referer": "https://yomiku.site/", "Cache-Control": "no-cache" } });
   const params = JSON.parse(html.match(/var\s+urlParams\s*=\s*'([^']+)'/)?.[1] || "null");
   const script = html.match(/src="(\/assets\/js\/app\.player_single\.[a-z0-9]+\.js)"/)?.[1];
   if (!params || !script) throw Error("player_changed");
@@ -146,7 +156,7 @@ async function resolveKodikPlayer(url, ordinal) {
     body[key] = html.match(new RegExp("vInfo\\." + key + "\\s*=\\s*'([^']+)'"))?.[1];
     if (!body[key]) throw Error("player_changed");
   }
-  const data = await jsonFetch("https://kodikplayer.com" + endpoint, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", "Referer": url, "Origin": "https://kodikplayer.com" }, body: new URLSearchParams(body).toString() });
+  const data = await jsonFetch("https://kodikplayer.com" + endpoint, { method: "POST", onHeaders, headers: { ...sessionHeaders(), "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8", "X-Requested-With": "XMLHttpRequest", "Referer": url, "Origin": "https://kodikplayer.com", "Accept": "application/json, text/javascript, */*; q=0.01" }, body: new URLSearchParams(body).toString() });
   const sources = parseStreams(data.links);
   if (!sources.length) throw Error("no_streams");
   return { sources, url: (sources.find((s) => s.quality === 720) || sources[0]).url, stream: true, ordinal: Number(ordinal), opening: null, ending: null };
@@ -204,14 +214,18 @@ async function snapshotHealth() {
 // server/published-kodik.js
 var manifestCache = /* @__PURE__ */ new Map();
 async function fetchManifest(url) {
-  const data = await jsonFetch(url);
-  return { ok: true, json: async () => data };
+  try {
+    const data = await jsonFetch(url);
+    return { ok: true, json: async () => data };
+  } catch (error) {
+    throw Error("manifest_" + error.message);
+  }
 }
-async function publishedKodikVideo(id, index, audio, { fetcher = fetchManifest, resolve = kodikVideo } = {}) {
+async function publishedKodikVideo(id, index, audio, { fetcher = fetchManifest, resolve = kodikVideo, season, ordinal } = {}) {
   if (!/^(mal|shikimori|lib)-\d+$/.test(id) || !Number.isSafeInteger(index) || index < 1 || !/^kodik-\d+$/.test(audio)) throw Error("invalid_request");
   let cached2 = manifestCache.get(id);
   if (!cached2 || Date.now() > cached2.until) {
-    const response = await fetcher(`https://yomiku.site/data/kodik/${id}.json`, { signal: AbortSignal.timeout(1e4) });
+    const response = await fetcher(`https://raw.githubusercontent.com/yooickuu/anime_site/main/data/kodik/${id}.json`, { signal: AbortSignal.timeout(1e4) });
     if (!response.ok) throw Error("episode_missing");
     const data = await response.json();
     if (data.id !== id || !Array.isArray(data.episodes)) throw Error("invalid_manifest");
@@ -219,9 +233,15 @@ async function publishedKodikVideo(id, index, audio, { fetcher = fetchManifest, 
     manifestCache.set(id, cached2);
     if (manifestCache.size > 100) manifestCache.delete(manifestCache.keys().next().value);
   }
-  const track = cached2.data.episodes[index - 1]?.tracks?.find((t) => t.audioId === audio);
+  const exact = Number.isFinite(ordinal) && Number.isInteger(season);
+  const track = exact ? cached2.data.episodes.flatMap((e) => e.tracks || []).find((t) => t.audioId === audio && t.ordinal === ordinal && t.season === season) : cached2.data.episodes[index - 1]?.tracks?.find((t) => t.audioId === audio);
   if (!track || !validEmbed(track.url) || audio !== `kodik-${track.translationId}`) throw Error("audio_missing");
-  const video = await resolve(track.url, track.ordinal);
+  let video;
+  try {
+    video = await resolve(track.url, track.ordinal);
+  } catch (error) {
+    throw Error("player_" + error.message);
+  }
   return { ...video, audioId: audio };
 }
 
@@ -238,10 +258,10 @@ Deno.serve(async (req) => {
   if (req.method === "GET" && new URL(req.url).searchParams.get("source") === "kodik") {
     try {
       const video = await publishedKodikVideo("mal-28285", 1, "kodik-4243");
-      return reply({ ready: true, version: 12, qualities: video.sources.map((s) => s.quality) });
+      return reply({ ready: true, version: 14, qualities: video.sources.map((s) => s.quality) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "unknown";
-      return reply({ ready: false, version: 12, detail: message.replace(/https?:\/\/[^\s)]+/g, "[upstream]").replace(/[a-zA-Z0-9]{24,}/g, "[redacted]").slice(0, 220) }, 502);
+      return reply({ ready: false, version: 14, detail: message.replace(/https?:\/\/[^\s)]+/g, "[upstream]").replace(/[a-zA-Z0-9]{24,}/g, "[redacted]").slice(0, 220) }, 502);
     }
   }
   if (req.method === "GET") {
@@ -251,10 +271,10 @@ Deno.serve(async (req) => {
         healthCache = { at: Date.now(), ready: true, status: "ok" };
       } catch (e) {
         const m = e instanceof Error ? e.message : "unknown";
-        healthCache = { at: Date.now(), ready: false, status: /^[a-z_]+(?:_\d+)?$/.test(m) ? m : "source_unavailable", detail: m.replace(/https?:\/\/[^\s)]+/g, "[upstream]").slice(0, 180) };
+        healthCache = { at: Date.now(), ready: false, status: /^[a-z_0-9]+$/.test(m) ? m : "source_unavailable", detail: m.replace(/https?:\/\/[^\s)]+/g, "[upstream]").slice(0, 180) };
       }
     }
-    return reply({ ready: healthCache.ready, version: 12, kodikPlayback: true, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
+    return reply({ ready: healthCache.ready, version: 14, kodikPlayback: true, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
   }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   try {
@@ -277,7 +297,7 @@ Deno.serve(async (req) => {
       return reply({ error: "invalid_request" }, 400);
     }
     if (!body || typeof body !== "object") return reply({ error: "invalid_request" }, 400);
-    if (body.action === "kodik-video") return reply(await publishedKodikVideo(body.id, body.episode, body.audio));
+    if (body.action === "kodik-video") return reply(await publishedKodikVideo(body.id, body.episode, body.audio, { season: body.season, ordinal: body.ordinal }));
     const id = Number(body.id), ordinal = Number(body.ordinal);
     if (!positiveID(id)) return reply({ error: "invalid_id" }, 400);
     if (body.action === "release") return reply(await snapshotRelease(id));
@@ -287,7 +307,7 @@ Deno.serve(async (req) => {
     return reply({ error: "invalid_request" }, 400);
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
-    console.warn("anime-source failure", /^[a-z_]+(?:_\d+)?$/.test(message) ? message : error instanceof Error ? error.name : "unknown");
-    return reply({ error: ["episode_missing", "audio_missing", "incomplete_playlist", "changed_playlist"].includes(message) ? message : "source_unavailable", sourceStatus: /^[a-z_]+(?:_\d+)?$/.test(message) ? message : "network_or_response_error" }, 502);
+    console.warn("anime-source failure", /^[a-z_0-9]+$/.test(message) ? message : error instanceof Error ? error.name : "unknown");
+    return reply({ error: ["episode_missing", "audio_missing", "incomplete_playlist", "changed_playlist"].includes(message) ? message : "source_unavailable", sourceStatus: /^[a-z_0-9]+$/.test(message) ? message : "network_or_response_error" }, 502);
   }
 });

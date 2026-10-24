@@ -10,10 +10,10 @@ Deno.serve(async req=>{
  if(origin&&!origins.has(origin))return reply({error:'origin_not_allowed'},403);
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'GET, POST, OPTIONS'}});
  if(req.method==='GET'&&new URL(req.url).searchParams.get('source')==='kodik'){
-  try{const video=await publishedKodikVideo('mal-28285',1,'kodik-4243');return reply({ready:true,version:12,qualities:video.sources.map(s=>s.quality)});}
-  catch(error){const message=error instanceof Error?error.message:'unknown';return reply({ready:false,version:12,detail:message.replace(/https?:\/\/[^\s)]+/g,'[upstream]').replace(/[a-zA-Z0-9]{24,}/g,'[redacted]').slice(0,220)},502);}
+  try{const video=await publishedKodikVideo('mal-28285',1,'kodik-4243');return reply({ready:true,version:14,qualities:video.sources.map(s=>s.quality)});}
+  catch(error){const message=error instanceof Error?error.message:'unknown';return reply({ready:false,version:14,detail:message.replace(/https?:\/\/[^\s)]+/g,'[upstream]').replace(/[a-zA-Z0-9]{24,}/g,'[redacted]').slice(0,220)},502);}
  }
- if(req.method==='GET'){if(!healthCache||Date.now()-healthCache.at>60000){try{await snapshotHealth();healthCache={at:Date.now(),ready:true,status:'ok'};}catch(e){const m=e instanceof Error?e.message:'unknown';healthCache={at:Date.now(),ready:false,status:/^[a-z_]+(?:_\d+)?$/.test(m)?m:'source_unavailable',detail:m.replace(/https?:\/\/[^\s)]+/g,'[upstream]').slice(0,180)};}}return reply({ready:healthCache.ready,version:12,kodikPlayback:true,guestPlayback:true,sourceStatus:healthCache.status,...(healthCache.detail?{detail:healthCache.detail}:{})});}
+ if(req.method==='GET'){if(!healthCache||Date.now()-healthCache.at>60000){try{await snapshotHealth();healthCache={at:Date.now(),ready:true,status:'ok'};}catch(e){const m=e instanceof Error?e.message:'unknown';healthCache={at:Date.now(),ready:false,status:/^[a-z_0-9]+$/.test(m)?m:'source_unavailable',detail:m.replace(/https?:\/\/[^\s)]+/g,'[upstream]').slice(0,180)};}}return reply({ready:healthCache.ready,version:14,kodikPlayback:true,guestPlayback:true,sourceStatus:healthCache.status,...(healthCache.detail?{detail:healthCache.detail}:{})});}
  if(req.method!=='POST')return reply({error:'method_not_allowed'},405);
  // Public read-only catalogue/video endpoint. Account data stays behind Auth/RLS.
  try{
@@ -26,7 +26,7 @@ Deno.serve(async req=>{
   const raw=await req.text();if(raw.length>512)return reply({error:'invalid_request'},400);
   let body;try{body=JSON.parse(raw);}catch{return reply({error:'invalid_request'},400);}
   if(!body||typeof body!=='object')return reply({error:'invalid_request'},400);
-  if(body.action==='kodik-video')return reply(await publishedKodikVideo(body.id,body.episode,body.audio));
+  if(body.action==='kodik-video')return reply(await publishedKodikVideo(body.id,body.episode,body.audio,{season:body.season,ordinal:body.ordinal}));
   const id=Number(body.id),ordinal=Number(body.ordinal);
   if(!positiveID(id))return reply({error:'invalid_id'},400);
   if(body.action==='release')return reply(await goRelease(id));
@@ -34,5 +34,5 @@ Deno.serve(async req=>{
   if(body.action==='voices')return reply({voices:(await goVoices(id,ordinal)).map(({url,...v})=>v)});
   if(body.action==='video'&&/^go-\d+$/.test(body.audio||''))return reply(await goVideo(id,ordinal,body.audio));
   return reply({error:'invalid_request'},400);
- }catch(error){const message=error instanceof Error?error.message:'';console.warn('anime-source failure',/^[a-z_]+(?:_\d+)?$/.test(message)?message:(error instanceof Error?error.name:'unknown'));return reply({error:['episode_missing','audio_missing','incomplete_playlist','changed_playlist'].includes(message)?message:'source_unavailable',sourceStatus:/^[a-z_]+(?:_\d+)?$/.test(message)?message:'network_or_response_error'},502);}
+ }catch(error){const message=error instanceof Error?error.message:'';console.warn('anime-source failure',/^[a-z_0-9]+$/.test(message)?message:(error instanceof Error?error.name:'unknown'));return reply({error:['episode_missing','audio_missing','incomplete_playlist','changed_playlist'].includes(message)?message:'source_unavailable',sourceStatus:/^[a-z_0-9]+$/.test(message)?message:'network_or_response_error'},502);}
 });

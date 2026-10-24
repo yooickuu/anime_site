@@ -27,10 +27,11 @@ export async function textFetch(url,options={}){
  }
 }
 async function readUpstream(url,options={}){
+ const {onHeaders,...requestOptions}=options;
  const allowed=new Set([new URL(url).hostname,'kodikplayer.com','kodik.info','kodik.biz','kodik.cc','yomiku.site','www.yomiku.site']);
  let current=new URL(url),method=options.method||'GET',body=options.body;
  for(let hop=0;hop<4;hop++){
-  const r=await fetch(current,{...options,...transportOptions(),method,body,headers:{'Accept-Encoding':'identity','User-Agent':'yomiku/1.0 (+https://yomiku.site/)',...options.headers},redirect:'manual',signal:AbortSignal.timeout(15000)});
+  const r=await fetch(current,{...requestOptions,...transportOptions(),method,body,headers:{'Accept-Encoding':'identity','User-Agent':'yomiku/1.0 (+https://yomiku.site/)',...options.headers},redirect:'manual',signal:AbortSignal.timeout(15000)});
   if([301,302,303,307,308].includes(r.status)){
    const location=r.headers.get('location');await r.body?.cancel();
    if(!location)throw Error('upstream_redirect_missing');const next=new URL(location,current);
@@ -39,6 +40,7 @@ async function readUpstream(url,options={}){
    current=next;continue;
   }
   if(!r.ok){await r.body?.cancel();throw Error('upstream_'+r.status);}
+  onHeaders?.(r.headers);
   const reader=r.body.getReader();let size=0,parts=[];
   try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>3000000)throw Error('upstream_too_large');parts.push(value);}}finally{try{await reader.cancel();}catch{}}
   const bytes=new Uint8Array(size);let i=0;for(const p of parts){bytes.set(p,i);i+=p.length;}return new TextDecoder().decode(bytes);
@@ -48,7 +50,7 @@ async function readUpstream(url,options={}){
 export async function jsonFetch(url,options={}){
  for(let attempt=0;attempt<3;attempt++){
   const text=await textFetch(url,options);
-  try{return JSON.parse(text);}catch{if(attempt===2)throw Error('upstream_invalid_json');}
+  try{return JSON.parse(text);}catch{if(attempt===2)throw Error('upstream_invalid_json_'+text.length+'_'+(text.trim().startsWith('<')?'html':text.trim()?'text':'empty'));}
  }
 }
 export async function goJSON(path){if(!/^\/player\/(?:\d+(?:\/episodes\?page=\d+)?|videos\/\d+)$/.test(path))throw Error('invalid_path');const raw=await textFetch(GO_ORIGIN+path,{headers:{'X-Requested-With':'XMLHttpRequest',Accept:'application/json'}});const d=JSON.parse(raw);if(d.status!=='success'||typeof d.data?.content!=='string')throw Error('invalid_player');return d.data;}
@@ -56,7 +58,11 @@ export async function goRelease(id){if(!positiveID(id))throw Error('invalid_id')
 export async function goVoices(animeId,ordinal){const release=await goRelease(animeId);const episode=release.episodes.find(e=>e.ordinal===Number(ordinal));if(!episode)throw Error('episode_missing');return cached('voices:'+episode.id,120000,async()=>parseVoices((await goJSON('/player/videos/'+episode.id)).content));}
 export async function goVideo(animeId,ordinal,audio){const voices=await goVoices(animeId,ordinal),voice=voices.find(v=>v.id===audio);if(!voice)throw Error('audio_missing');return kodikVideo(voice.url,ordinal);}
 export async function kodikVideo(url,ordinal){if(!validEmbed(url))throw Error('invalid_embed');return cached('stream:'+url,45000,async()=>{for(let attempt=0;attempt<3;attempt++){try{return await resolveKodikPlayer(url,ordinal);}catch(error){if(attempt===2||!/upstream_invalid_json|unexpected EOF/.test(error.message))throw error;}}});}
-async function resolveKodikPlayer(url,ordinal){const html=await textFetch(url);const params=JSON.parse(html.match(/var\s+urlParams\s*=\s*'([^']+)'/)?.[1]||'null');const script=html.match(/src="(\/assets\/js\/app\.player_single\.[a-z0-9]+\.js)"/)?.[1];if(!params||!script)throw Error('player_changed');const endpoint=await cached(script,3600000,async()=>{const js=await textFetch('https://kodikplayer.com'+script);const encoded=js.match(/type:"POST",url:atob\("([^"]+)"\)/)?.[1];if(!encoded)throw Error('player_changed');const path=atob(encoded);if(!/^\/[a-z0-9_-]+$/.test(path))throw Error('invalid_endpoint');return path;});const body={};for(const key of ['d','d_sign','pd','pd_sign','ref','ref_sign'])body[key]=params[key]||'';for(const key of ['type','id','hash']){body[key]=html.match(new RegExp("vInfo\\."+key+"\\s*=\\s*'([^']+)'"))?.[1];if(!body[key])throw Error('player_changed');}const data=await jsonFetch('https://kodikplayer.com'+endpoint,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Referer':url,'Origin':'https://kodikplayer.com'},body:new URLSearchParams(body).toString()});const sources=parseStreams(data.links);if(!sources.length)throw Error('no_streams');return {sources,url:(sources.find(s=>s.quality===720)||sources[0]).url,stream:true,ordinal:Number(ordinal),opening:null,ending:null};}
+async function resolveKodikPlayer(url,ordinal){
+ const cookies=new Map();
+ const onHeaders=headers=>{for(const value of headers.getSetCookie?.()||[]){const pair=value.split(';')[0],i=pair.indexOf('=');if(i>0)cookies.set(pair.slice(0,i),pair.slice(i+1));}};
+ const sessionHeaders=()=>({'Cookie':[...cookies].map(([k,v])=>k+'='+v).join(';'),'Cache-Control':'no-cache'});
+ const html=await textFetch(url,{onHeaders,headers:{'Referer':'https://yomiku.site/','Cache-Control':'no-cache'}});const params=JSON.parse(html.match(/var\s+urlParams\s*=\s*'([^']+)'/)?.[1]||'null');const script=html.match(/src="(\/assets\/js\/app\.player_single\.[a-z0-9]+\.js)"/)?.[1];if(!params||!script)throw Error('player_changed');const endpoint=await cached(script,3600000,async()=>{const js=await textFetch('https://kodikplayer.com'+script);const encoded=js.match(/type:"POST",url:atob\("([^"]+)"\)/)?.[1];if(!encoded)throw Error('player_changed');const path=atob(encoded);if(!/^\/[a-z0-9_-]+$/.test(path))throw Error('invalid_endpoint');return path;});const body={};for(const key of ['d','d_sign','pd','pd_sign','ref','ref_sign'])body[key]=params[key]||'';for(const key of ['type','id','hash']){body[key]=html.match(new RegExp("vInfo\\."+key+"\\s*=\\s*'([^']+)'"))?.[1];if(!body[key])throw Error('player_changed');}const data=await jsonFetch('https://kodikplayer.com'+endpoint,{method:'POST',onHeaders,headers:{...sessionHeaders(),'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','X-Requested-With':'XMLHttpRequest','Referer':url,'Origin':'https://kodikplayer.com','Accept':'application/json, text/javascript, */*; q=0.01'},body:new URLSearchParams(body).toString()});const sources=parseStreams(data.links);if(!sources.length)throw Error('no_streams');return {sources,url:(sources.find(s=>s.quality===720)||sources[0]).url,stream:true,ordinal:Number(ordinal),opening:null,ending:null};}
 
 export function validEmbed(value){try{const u=new URL(value);return u.protocol==='https:'&&u.hostname==='kodikplayer.com'&&!u.port&&!u.username&&!u.password&&/^\/(?:seria|serial|video)\/\d+\/[a-z0-9]+\//.test(u.pathname);}catch{return false;}}
 const SNAPSHOT_BASE='https://yomiku.site/data/animego-episodes/';

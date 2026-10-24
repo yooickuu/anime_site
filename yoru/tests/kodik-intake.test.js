@@ -247,3 +247,25 @@ test('light reimport retains direct stream cache only for the identical episode 
  incoming.episodes[0].audio[0].providerRef.url=link(99);
  assert.equal(mergeKodikRelease(a,incoming).episodes[0].audio[0].sources.length,0);
 });
+test('fresh-video lookup keeps season and ordinal stable after catalogue reordering',async()=>{
+ const options={season:1,ordinal:1,fetcher:async url=>{
+  assert.ok(url.startsWith('https://raw.githubusercontent.com/yooickuu/anime_site/main/data/kodik/'));
+  return {ok:true,json:async()=>({id:'mal-999992',episodes:[{tracks:[{audioId:'kodik-1',translationId:'1',season:0,ordinal:1,url:link(81)}]},{tracks:[{audioId:'kodik-1',translationId:'1',season:1,ordinal:1,url:link(82)}]}]})};
+ },resolve:async url=>({sources:[{quality:720,url}]})};
+ const m=await publishedKodikVideo('mal-999992',1,'kodik-1',options);
+ assert.equal(m.sources[0].url,link(82));
+ await assert.rejects(publishedKodikVideo('mal-999992',1,'kodik-1',{...options,ordinal:99}),/audio_missing/);
+});
+test('three existing dubs never prevent a longer translation adding missing episodes',async()=>{
+ const cwd=process.cwd(),dir=await mkdtemp(join(tmpdir(),'kodik-complement-'));
+ try{
+  process.chdir(dir);await mkdir('src');
+  const a=await assembleRelease(release,dependencies);
+  for(const e of a.episodes)e.audio=Array.from({length:3},(_,i)=>({...e.audio[0],id:'kodik-'+(i+1),providerRef:{...e.audio[0].providerRef,translationId:String(i+1)}}));
+  await import('node:fs/promises').then(fs=>fs.writeFile('src/published-catalog.json',JSON.stringify({policyVersion:3,items:[a]})));
+  const r={...release,id:'serial-4',translation:{id:4,type:'voice',title:'Fourth dub'},episodes_count:3,seasons:{1:{episodes:{1:link(1),2:link(2),3:link(3)}}}};
+  const api={async *pages(path){yield {results:path==='/list'?[r]:[],page:'/list',next_page:null};}};
+  await seedCatalog({targetCount:1,api,assemble:r=>assembleRelease(r,{...dependencies,deepProbe:false})});
+  const saved=JSON.parse(await readFile('src/published-catalog.json'));assert.equal(saved.items.length,1);assert.equal(saved.items[0].episodes.length,3);
+ }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
+});
