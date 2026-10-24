@@ -248,3 +248,10 @@ body.dark[data-style] .details-copy{backdrop-filter:none;-webkit-backdrop-filter
 /* Portrait backdrops fill the window with a character-oriented focal point. */
 .details-dialog .portrait-art .details-manga{object-fit:cover;object-position:50% 20%;width:100%;height:100%;filter:grayscale(1);transform:none}
 @media(max-width:600px){.details-dialog .portrait-art .details-manga{object-position:50% 18%}}
+
+/* Official provider fallback stays inside the existing fullscreen container. */
+.kodik-fallback{display:block;position:absolute;inset:0;width:100%;height:100%;border:0;background:#080808}
+.iframe-mode .video-controls{display:flex!important;justify-content:flex-end;min-height:44px;opacity:1!important;transform:none!important}
+.iframe-mode .video-controls>:not([data-action="cinema"]):not([data-video="fullscreen"]){display:none!important}
+.iframe-mode .video-loading{display:none!important}
+.iframe-mode .video-wrap{position:relative}

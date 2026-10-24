@@ -516,3 +516,9 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - Backend filescurrentlyv14. Noofficialiframefallbackaddedbecauseuserwantsownplayer; thatwouldneedexplicitlyexplainedtradeoff.
 - BrowserbindingfailurecgWindowNotFoundSafari+Chrome; localdevserverrestartedprocesssession39651servesdist4173. UserassistedDeploy14.
 - Userreceivedhoneststatus: latestUI/importpublishing,19coveragegaps,serveremptyresponsepending.
+
+## 2026-10-24 — official iframe fallback (user explicitly requested)
+- Added exact-track Kodik iframe fallback for resolver errors, empty JSON/streams and mismatched resolver audio. Trusted HTTPS Kodik hosts only; no arbitrary iframe URL. First resolver attempt bounded to 8 seconds when fallback is available; following fallback episodes avoid repeated failing resolver calls for this session. Saved direct streams still take priority.
+- Bridge validates postMessage source+origin, restores playback position/sound and connects known skip timings, progress and end events to existing automation. Reserve mode uses official Kodik controls; outer fullscreen/cinema remain. No guarantee of provider availability or autoplay permission. Cloud v14 empty-response root cause remains unresolved, but fallback no longer depends on that server path.
+- Previous portrait background fill/focal crop and fade retained. Catalogue unchanged: 2179/2179 visible.
+- 201 tests passed, syntax check and full build passed. New tests cover 502/empty/wrong-audio fallback, URL restrictions, message isolation, resume, skip and single next-episode dispatch. Native browser visual/live playback QA remains unavailable (cgWindowNotFound); no all-video claim.

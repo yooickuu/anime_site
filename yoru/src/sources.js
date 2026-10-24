@@ -1,3 +1,4 @@
+import {kodikEmbedURL} from './kodik-iframe.js';
 import metadata from './catalog-metadata.json' with {type:'json'};
 import {withMetadata} from './catalog-metadata.js';
 import {refreshKodikMedia} from './kodik-playback.js';
@@ -46,12 +47,13 @@ export const releaseSeasons=requestCache(async a=>{
   return localSeasons(publishedItems,{...a,relatedMalIds});
  }catch{return local;}
 },{ttl:3600000});
-export async function videoEpisode(a,index,refresh=false,audioId){
+export async function videoEpisode(a,index,refresh=false,audioId,preferIframe=false){
  const media=(await mediaCatalogue(a.id)).video(a.id,index,audioId);
  if(media.providerRef?.provider!=='kodik')return media;
  // The importer verified these exact rendition URLs. Refresh only after a
  // playback failure, rather than blocking every episode behind an edge request.
  if(!refresh&&media.sources?.length)return media;
+ if(preferIframe&&kodikEmbedURL(media))return {...media,embedURL:kodikEmbedURL(media)};
  const config=globalThis.window?.YORU_CONFIG;
  if(!config?.supabaseUrl)throw Error('providerError');
  return refreshKodikMedia(media,config,a.id,index);
