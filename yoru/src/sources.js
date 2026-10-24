@@ -1,6 +1,6 @@
 import metadata from './catalog-metadata.json' with {type:'json'};
 import {withMetadata} from './catalog-metadata.js';
-import {refreshKodikMedia} from './kodik-playback.js';
+import {kodikEmbedURL} from './kodik-iframe.js';
 import {localSeasons,franchiseSeasons} from './catalog-seasons.js';
 import {queryCatalogue} from './catalog-query.js';
 // Publication allowlist only. Legacy adapters are quarantined in legacy-sources.js.
@@ -46,13 +46,11 @@ export const releaseSeasons=requestCache(async a=>{
   return localSeasons(publishedItems,{...a,relatedMalIds});
  }catch{return local;}
 },{ttl:3600000});
-export async function videoEpisode(a,index,refresh=false,audioId){
+// Official iframe mode reads only the exact saved episode/translation URL.
+// No direct stream extraction or Supabase request is involved.
+export async function iframeEpisode(a,index,audioId){
  const media=(await mediaCatalogue(a.id)).video(a.id,index,audioId);
- if(media.providerRef?.provider!=='kodik')return media;
- // The importer verified these exact rendition URLs. Refresh only after a
- // playback failure, rather than blocking every episode behind an edge request.
- if(!refresh&&media.sources?.length)return media;
- const config=globalThis.window?.YORU_CONFIG;
- if(!config?.supabaseUrl)throw Error('providerError');
- return refreshKodikMedia(media,config,a.id,index);
+ const embedURL=kodikEmbedURL(media);
+ if(!embedURL)throw Error('audioUnavailable');
+ return {...media,embedURL};
 }

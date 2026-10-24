@@ -276,3 +276,13 @@ test('resolver failure never substitutes an embedded third-party player',async()
  await assert.rejects(refreshKodikMedia(media,config,'mal-1',1,{fetcher:async()=>new Response('',{status:502})}),/providerError/);
  await assert.rejects(refreshKodikMedia(media,config,'mal-1',1,{fetcher:async()=>Response.json({audioId:'kodik-42',sources:[]})}),/audioUnavailable/);
 });
+
+import {kodikRequestParameters} from '../server/animego.js';
+test('Kodik POST referrer is decoded once before form serialization; signatures stay intact',()=>{
+ const original='https://yomiku.site/watch?next=%2Fcatalog&title=тест';
+ const params={ref:encodeURIComponent(original),ref_sign:'signed:123',d:'yomiku.site',d_sign:'domain:123'};
+ const form=new URLSearchParams(kodikRequestParameters(params));
+ assert.equal(form.get('ref'),original);assert.equal(form.get('ref_sign'),'signed:123');
+ assert.equal(form.get('d_sign'),'domain:123');assert.equal(kodikRequestParameters({}).ref,'');
+ assert.throws(()=>kodikRequestParameters({ref:'%XX'}),/invalid_referrer_encoding/);
+});

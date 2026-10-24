@@ -260,3 +260,10 @@ body.dark[data-style] .details-dialog{width:100vw;max-width:100vw;max-height:100
  .details-dialog .details-manga{object-position:50% 25%}
  .details-dialog .portrait-art .details-manga{object-position:50% 18%}
 }
+
+/* Official Kodik mode: one frame, no nested native player or external controls. */
+.watch-main .kodik-shell{border:0!important;background:transparent;box-shadow:none;border-radius:12px;overflow:hidden}
+.watch-main .kodik-shell .video-wrap{position:relative;width:100%;height:auto;aspect-ratio:16/9;overflow:hidden;border-radius:12px;background:#080808}
+.kodik-player-frame{display:block;position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:12px;overflow:hidden;aspect-ratio:16/9}
+.kodik-shell:fullscreen .video-wrap{height:100%;aspect-ratio:auto;border-radius:0}
+.kodik-shell:fullscreen .kodik-player-frame{border-radius:0}

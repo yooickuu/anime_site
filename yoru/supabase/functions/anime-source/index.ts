@@ -10,10 +10,10 @@ Deno.serve(async req=>{
  if(origin&&!origins.has(origin))return reply({error:'origin_not_allowed'},403);
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'GET, POST, OPTIONS'}});
  if(req.method==='GET'&&new URL(req.url).searchParams.get('source')==='kodik'){
-  try{const video=await publishedKodikVideo('mal-28285',1,'kodik-4243');return reply({ready:true,version:14,qualities:video.sources.map(s=>s.quality)});}
-  catch(error){const message=error instanceof Error?error.message:'unknown';return reply({ready:false,version:14,detail:message.replace(/https?:\/\/[^\s)]+/g,'[upstream]').replace(/[a-zA-Z0-9]{24,}/g,'[redacted]').slice(0,220)},502);}
+  try{const video=await publishedKodikVideo('mal-28285',1,'kodik-4243');return reply({ready:true,version:15,qualities:video.sources.map(s=>s.quality)});}
+  catch(error){const message=error instanceof Error?error.message:'unknown';return reply({ready:false,version:15,detail:message.replace(/https?:\/\/[^\s)]+/g,'[upstream]').replace(/[a-zA-Z0-9]{24,}/g,'[redacted]').slice(0,220)},502);}
  }
- if(req.method==='GET'){if(!healthCache||Date.now()-healthCache.at>60000){try{await snapshotHealth();healthCache={at:Date.now(),ready:true,status:'ok'};}catch(e){const m=e instanceof Error?e.message:'unknown';healthCache={at:Date.now(),ready:false,status:/^[a-z_0-9]+$/.test(m)?m:'source_unavailable',detail:m.replace(/https?:\/\/[^\s)]+/g,'[upstream]').slice(0,180)};}}return reply({ready:healthCache.ready,version:14,kodikPlayback:true,guestPlayback:true,sourceStatus:healthCache.status,...(healthCache.detail?{detail:healthCache.detail}:{})});}
+ if(req.method==='GET'){if(!healthCache||Date.now()-healthCache.at>60000){try{await snapshotHealth();healthCache={at:Date.now(),ready:true,status:'ok'};}catch(e){const m=e instanceof Error?e.message:'unknown';healthCache={at:Date.now(),ready:false,status:/^[a-z_0-9]+$/.test(m)?m:'source_unavailable',detail:m.replace(/https?:\/\/[^\s)]+/g,'[upstream]').slice(0,180)};}}return reply({ready:healthCache.ready,version:15,kodikPlayback:true,guestPlayback:true,sourceStatus:healthCache.status,...(healthCache.detail?{detail:healthCache.detail}:{})});}
  if(req.method!=='POST')return reply({error:'method_not_allowed'},405);
  // Public read-only catalogue/video endpoint. Account data stays behind Auth/RLS.
  try{

@@ -23,17 +23,17 @@ test('source health remains false when the upstream catalogue rejects server req
 test('snapshot resolver serves guest episodes and checks video without calling AnimeGO',async()=>{
  const result=await build({entryPoints:['supabase/functions/anime-source/index.ts'],bundle:true,write:false,format:'iife',platform:'neutral',target:'es2022'});let handler;const calls=[];
  const snapshot={id:4013,total:1,episodes:[{id:10,ordinal:1,voices:[{id:'go-76',label:'Субтитры',language:'ja',subtitles:true,url:'https://kodikplayer.com/video/10/abcdef/720p'}]}]};
- const fetcher=async(url)=>{url=String(url);calls.push(url);
+ const fetcher=async(url,options)=>{url=String(url);calls.push(url);
   if(url.endsWith('/auth/v1/user'))return Response.json({id:'user'});
   if(url.endsWith('/4013.json'))return Response.json(snapshot);
-  if(url.includes('/video/10/'))return new Response(`var urlParams = '{}'; vInfo.type = 'video'; vInfo.id = '10'; vInfo.hash = 'abcdef'; <script src="/assets/js/app.player_single.abc.js"></script>`);
+  if(url.includes('/video/10/'))return new Response(`var urlParams = '{"ref":"https%3A%2F%2Fyomiku.site%2F","ref_sign":"signature"}'; vInfo.type = 'video'; vInfo.id = '10'; vInfo.hash = 'abcdef'; <script src="/assets/js/app.player_single.abc.js"></script>`);
   if(url.endsWith('.js'))return new Response('type:"POST",url:atob("L2FwaQ==")');
-  if(url.endsWith('/api'))return Response.json({links:{720:[{src:'https://cdn.example/720.m3u8'}]}});
+  if(url.endsWith('/api')){const form=new URLSearchParams(options.body);assert.equal(form.get('ref'),'https://yomiku.site/');assert.equal(form.get('ref_sign'),'signature');return Response.json({links:{720:[{src:'https://cdn.example/720.m3u8'}]}});}
   if(url==='https://cdn.example/720.m3u8')return new Response('#EXTM3U\n#EXTINF:10\n1.ts');
   throw Error('Unexpected upstream '+url);
  };
  vm.runInNewContext(result.outputFiles[0].text,{Request,Response,Headers,URL,URLSearchParams,AbortSignal,TextDecoder,Uint8Array,atob,fetch:fetcher,Deno:{env:{get:k=>k==='SUPABASE_URL'?'https://project.supabase.co':'public'},serve:fn=>handler=fn}});
- const health=await (await handler(new Request('https://project.supabase.co/functions/v1/anime-source'))).json();assert.equal(health.ready,true);assert.equal(health.version,14);assert.equal(health.guestPlayback,true);
+ const health=await (await handler(new Request('https://project.supabase.co/functions/v1/anime-source'))).json();assert.equal(health.ready,true);assert.equal(health.version,15);assert.equal(health.guestPlayback,true);
  const r=await handler(new Request('https://project.supabase.co/functions/v1/anime-source',{method:'POST',body:JSON.stringify({action:'release',id:4013})}));
  assert.equal(r.status,200);const release=await r.json();assert.equal(release.episodes.length,1);assert.equal(release.voices[0].language,'ja');assert.equal(release.voices[0].url,undefined);
  assert.ok(calls.every(x=>!x.includes('animego.me')&&!x.includes('/auth/')));

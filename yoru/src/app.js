@@ -21,15 +21,13 @@ import {createProfileDraft, createAvatarLoader} from './profile.js';
 import {watchView} from './watch-view.js';
 import {attachPlaybackAutomation} from './playback-automation.js';
 import {automaticSkipTimes} from './autoskip.js';
-import {discoveryChoice,watchRoute,audioChoices} from './discovery.js';
+import {discoveryChoice,watchRoute,audioChoices as allAudioChoices} from './discovery.js';
 import {initSelectMenus, enhanceSelects, closeSelectMenu} from './select-menu.js';
-import {createPlayback} from './playback.js';
+import {createKodikIframe} from './kodik-iframe.js';
 import {cropAvatar,cropBanner} from './avatar-crop.js';
 import {authErrorKey} from "./public-config.js";
-import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons, knownSeasons} from "./sources.js";
+import {combinedCatalogue, resolveRelease, iframeEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons, knownSeasons} from "./sources.js";
 import {icon} from "./icons.js";
-import {controlsHTML, attachControls} from "./player-controls.js";
-import { chooseQuality } from "./provider.js";
 import {
   anime,
   demo,
@@ -172,7 +170,7 @@ async function fromHash() {
   const route=watchRoute(location.hash);
   if(route){
     page='watch';
-    if(current?.id===route.id && $('#video')){if(episode!==route.episode)await switchEpisode(route.episode,false);return;}
+    if(current?.id===route.id && $('#kodik-player')){if(episode!==route.episode)await switchEpisode(route.episode,false);return;}
     render();
     if(authResolved && (!user || ready))await openPlayer(route.id,route.episode,false);
     return;
@@ -850,7 +848,7 @@ async function openPlayer(id, requested, pushRoute=true) {
     attachVideo();
     renderEpisodes();
     const playerId = current.id;
-    releaseSeasons(a).then(items=>{if(current?.id===playerId && (page==='watch' && !!$('#video'))){playerSeasons=items;renderEpisodes();}}).catch(()=>{});
+    releaseSeasons(a).then(items=>{if(current?.id===playerId && (page==='watch' && !!$('#kodik-player'))){playerSeasons=items;renderEpisodes();}}).catch(()=>{});
     await updateSource(true);
   } finally {
     playerOpening = false;
@@ -877,114 +875,43 @@ function renderEpisodes() {
   $("#next-episode").hidden=!navigation.next;
   enhanceSelects($("#watch-page"));
 }
+function audioChoices(a,index){return allAudioChoices(a,index).filter(track=>track.id.startsWith('kodik-'));}
 let recordReady = false;
-async function updateSource(play = false, refresh = false, position, triedAudio = new Set()) {
-  const generation = ++sourceGeneration;
-  sourceKey = null;
-  recordReady = false;
-  providerTiming = null;
-  const video = $("#video");
-  if (!video || !current) return;
-  playback?.suspend();
-  playback ||= createPlayback(video);
-  const onMetadata=()=>{
-    if(generation!==sourceGeneration)return;
-    if(current?.catalogApproved)providerTiming={...providerTiming,...approvedSkipTimes(providerTiming,video.duration)};
-    recordReady=true;
-    loadAutomaticSkips();
-  };
-  triedAudio.add(selectedAudio);
-  const tryOtherAudio=()=>{
-    const next=audioChoices(current,episode).find(t=>!triedAudio.has(t.id));
-    if(!next)return false;
-    selectedAudio=next.id;renderEpisodes();
-    toast(t('audioAutoFallback')+' '+next.label);
-    void updateSource(play,false,video.currentTime||position,triedAudio);return true;
-  };
-  let availableSources=[],attemptedURLs=new Set(),nextPrepared=false;
-  const onStatus = status=>{
-    if(generation!==sourceGeneration || page!=='watch' || !$('#video'))return;
-    if(status==='playing'&&!nextPrepared&&state.preferences.autoNext&&episode<current.episodes){
-      nextPrepared=true;
-      const upcoming={...current},nextIndex=episode+1,preferred=selectedAudio;
-      // Resolve only next-episode metadata, never download the next video in the background.
-      (async()=>{await prepareEpisodeAudio(upcoming,nextIndex);
-        const choices=audioChoices(upcoming,nextIndex);
-        const audio=choices.find(x=>x.id===preferred)?.id||preferredAudio(choices,state.preferences,upcoming.id);
-        // Prefetch only the stored manifest; no resolver request before playback.
-      })().catch(()=>{});
-    }
-    const loading=$(".video-loading");
-    if(loading)loading.hidden=!['loading','buffering'].includes(status);
-    if(['error','unsupported'].includes(status)){
-      if(status==='error'&&!refresh&&providerTiming?.providerRef?.provider==='kodik'){
-        void updateSource(play,true,video.currentTime||position,triedAudio);return;
-      }
-      const fallback=availableSources.find(s=>!attemptedURLs.has(s.url));
-      if(fallback){
-        attemptedURLs.add(fallback.url);
-        $('#quality').value=String(fallback.quality);enhanceSelects($('#watch-page'));
-        const saved=state.progress[sourceKey];
-        recordReady=false;
-        playback.load({url:fallback.url,stream:fallback.stream??fallback.url.includes('.m3u8'),autoplay:play,startAt:video.currentTime||resumeTime(saved,!!user,position),speed:Number(state.preferences.speed)||1,onState:onStatus,onMetadata});return;
-      }
-      if(tryOtherAudio())return;
-      $("#source-empty").hidden=false;
-      $("#source-status").textContent=t(status==='unsupported'?'videoUnsupported':'videoError');
-    }else if(status==='autoplayBlocked'){
-      if(loading)loading.hidden=true;
-    }else if(['ready','playing'].includes(status)){
-      $("#source-empty").hidden=true;
-      $("#source-status").textContent=current.id==='sintel'?'Sintel · Blender Foundation · CC BY 3.0':'';
-    }
-  };
-  sourceKey = `${current.id}:${episode}`;
-
-  $("#player-title").textContent=title(current);
-  $("#source-status").textContent='';
-  $("#source-empty").hidden=true;
-  $(".video-loading").hidden=false;
-  $("#quality-control").hidden=true;
-  renderEpisodes();
-  let url=null,stream=false;
-  try {
-    if(current.animeGoId){const loadingAnime=current;await prepareEpisodeAudio(loadingAnime,episode).catch(()=>{loadingAnime.currentGoVoices=[];loadingAnime.goVoiceOrdinal=null;});if(generation!==sourceGeneration)return;selectedAudio=preferredAudio(audioChoices(current,episode),state.preferences,current.id);renderEpisodes();}
-    if(!isPublished(current.id))throw Error('noSource');
-    else if(current.catalogApproved){
-      const info=await videoEpisode(current,episode,refresh,selectedAudio);
-      if(generation!==sourceGeneration)return;
-      providerTiming=info;
-      availableSources=info?.sources||[];
-      const selected=chooseQuality(info?.sources||[],state.preferences.quality);
-      url=selected?.url;stream=selected?.stream??(info?.stream??url?.includes('.m3u8'));
-      enhanceSelects($('#watch-page'));
-      if(info?.sources?.length){
-        $("#quality-control").hidden=false;
-        $("#quality").innerHTML=info.sources.map(q=>`<option value="${q.quality}" ${q.quality===selected?.quality?'selected':''}>${q.quality}p</option>`).join('');
-        enhanceSelects($("#watch-page"));
-      }
-    }else throw Error('notAdmitted');
-    if(generation!==sourceGeneration)return;
-    if(!url)throw Error('noSource');
-    const saved=state.progress[sourceKey];
-    attemptedURLs.add(url);
-    playback.load({url,stream:stream||url.includes('.m3u8'),autoplay:play,startAt:resumeTime(saved,!!user,position),speed:Number(state.preferences.speed)||1,onState:onStatus,onMetadata});
-  }catch(error){
-    if(generation!==sourceGeneration)return;
-    if(tryOtherAudio())return;
-    $(".video-loading").hidden=true;
-    $("#source-empty").hidden=false;
-    $("#source-status").textContent=t(error.message==='providerBlocked'?'providerBlocked':error.message==='noSource'?'noSource':'videoError');
-  }
+async function updateSource(play=false,refresh=false,position){
+ const generation=++sourceGeneration;
+ recordReady=false;sourceKey=null;providerTiming=null;
+ automationCleanup?.();playback?.destroy();playback=null;
+ const container=$('#kodik-player');if(!container||!current)return;
+ container.replaceChildren();
+ sourceKey=`${current.id}:${episode}`;
+ $('#player-title').textContent=title(current);
+ $('#source-empty').hidden=true;$('#source-status').textContent='';$('.video-loading').hidden=false;
+ const choices=audioChoices(current,episode);
+ if(!choices.some(track=>track.id===selectedAudio))selectedAudio=preferredAudio(choices,state.preferences,current.id);
+ renderEpisodes();
+ try{
+  const info=await iframeEpisode(current,episode,selectedAudio);
+  if(generation!==sourceGeneration)return;
+  providerTiming=info;
+  playback=createKodikIframe({container,url:info.embedURL,title:title(current),autoplay:play,
+   startAt:resumeTime(state.progress[sourceKey],!!user,position),sound:soundPreferences(state.preferences),speed:Number(state.preferences.speed)||1,
+   onReady:media=>{if(generation!==sourceGeneration)return;recordReady=true;providerTiming={...info,...approvedSkipTimes(info,media.duration)};loadAutomaticSkips();},
+   onError:()=>{if(generation===sourceGeneration){$('#source-empty').hidden=false;$('#source-status').textContent=t('videoError');}}
+  });
+  $('.video-loading').hidden=true;attachVideo();
+ }catch(error){
+  if(generation!==sourceGeneration)return;
+  $('.video-loading').hidden=true;$('#source-empty').hidden=false;$('#source-status').textContent=t(error.message==='audioUnavailable'?'audioUnavailable':'providerError');
+ }
 }
 function saveSoundPreferences(){
-  const video=$('#video');if(!video||(user&&!ready))return;
+  const video=playback;if(!video||(user&&!ready))return;
   const patch=soundPreferences(video),saved=soundPreferences(state.preferences);
   if(patch.volume!==saved.volume||patch.muted!==saved.muted)mutate({type:'preferences',patch});
 }
 function recordProgress() {
   saveSoundPreferences();
-  const video = $("#video");
+  const video = playback;
   if (
     !user || !ready ||
     !current ||
@@ -1022,9 +949,7 @@ async function switchEpisode(n, play = false) {
   await updateSource(play);
 }
 function attachVideo() {
-  const video = $("#video");
-  controlsCleanup?.();
-  controlsCleanup=attachControls($(".video-shell"), video, t, () => toast(t("playerActionError")), {sound:soundPreferences(state.preferences),onSoundChange:saveSoundPreferences});
+  const video=playback;if(!video)return;
   automationCleanup?.();
   automationCleanup=attachPlaybackAutomation(video,{
     context:()=>({ready:recordReady&&!!current&&page==='watch',token:sourceGeneration,
@@ -1045,7 +970,7 @@ function stopWatching(){
   playback?.destroy();playback=null;current=null;closeSelectMenu();
 }
 async function loadAutomaticSkips(){
-  const video=$('#video'),own=sourceGeneration,key=sourceKey;
+  const video=playback,own=sourceGeneration,key=sourceKey;
   if(!video||!current)return;
   const notice=$('#skip-availability');
   if(!state.preferences.autoSkip){if(notice)notice.textContent='';return;}
@@ -1381,7 +1306,7 @@ document.addEventListener("change", (event) => {
     lang = input.value;
     if (user && ready)
       mutate({ type: "preferences", patch: { language: lang } });
-    if(page==='watch'&&current){const playing=!$('#video').paused;recordProgress();playback?.destroy();render(true);attachVideo();renderEpisodes();updateSource(playing);}else render();
+    if(page==='watch'&&current){const playing=!!playback&&!playback.paused,position=playback?.currentTime;recordProgress();playback?.destroy();playback=null;render(true);renderEpisodes();updateSource(playing,false,position);}else render();
     if($('#details').open&&detailId)openDetails(detailId);
   }
   if (input.id === "sort") {
@@ -1429,22 +1354,11 @@ document.addEventListener("change", (event) => {
     });
   if(input.dataset.preference==='autoSkip')loadAutomaticSkips();
   if(input.id==='audio-picker'){
-    const playing=!$('#video').paused;recordProgress();selectedAudio=input.value;
-    mutate({type:'preferences',patch:{audio:selectedAudio,audioByAnime:{...state.preferences.audioByAnime,[current.id]:selectedAudio}}});updateSource(playing,false,$('#video').currentTime);
+    const playing=!!playback&&!playback.paused,position=playback?.currentTime;recordProgress();selectedAudio=input.value;
+    mutate({type:'preferences',patch:{audio:selectedAudio,audioByAnime:{...state.preferences.audioByAnime,[current.id]:selectedAudio}}});updateSource(playing,false,position);
   }
   if (input.id === "episode-picker") switchEpisode(Number(input.value),!!state.preferences.autoPlay);
   if(input.id==='season-picker')void selectSeason(input.value);
-  if (input.id === "quality") {
-    const v=$("#video"),play=!!v && !v.paused;
-    recordProgress();
-    if(mutate({type:'preferences',patch:{quality:Number(input.value)}}))updateSource(play,false,v?.currentTime);
-  }
-  if (input.id === "speed") {
-    const speed = Number(input.value);
-    if ($("#video")) $("#video").playbackRate = speed;
-    mutate({ type: "preferences", patch: { speed } });
-  }
-
   if(input.id === "banner-file"){const file=input.files[0];input.value="";void uploadBanner(file);}
   if (input.id === "avatar-file") { const file=input.files[0];input.value="";uploadAvatar(file); }
 });
@@ -1502,11 +1416,13 @@ document.addEventListener("keydown", (event) => {
     return;
   }
   if(page!=='watch'||document.querySelector('dialog[open]'))return;
-  const action=playerShortcut(event),v=$('#video');
+  const action=playerShortcut(event),v=playback;
   if(!action||!v)return;
   event.preventDefault();
-  const selector={fullscreen:'[data-video="fullscreen"]',mute:'[data-video="mute"]',cinema:'[data-action="cinema"]',play:'[data-video="play"]'}[action];
-  if(selector){$(selector)?.click();return;}
+  if(action==='play'){v.paused?v.play():v.pause();return;}
+  if(action==='mute'){v.muted=!v.muted;saveSoundPreferences();return;}
+  if(action==='cinema'){$('#watch-page')?.classList.toggle('cinema');return;}
+  if(action==='fullscreen'){const shell=$('.video-shell');if(document.fullscreenElement)document.exitFullscreen?.();else shell?.requestFullscreen?.().catch(()=>{});return;}
   if(Number.isFinite(v.duration))v.currentTime=Math.min(v.duration,Math.max(0,v.currentTime+(action==='back'?-10:10)));
 
 });

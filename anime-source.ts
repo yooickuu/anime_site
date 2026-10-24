@@ -129,6 +129,16 @@ async function kodikVideo(url, ordinal) {
     }
   });
 }
+function kodikRequestParameters(params) {
+  const body = {};
+  for (const key of ["d", "d_sign", "pd", "pd_sign", "ref", "ref_sign"]) body[key] = params[key] || "";
+  try {
+    body.ref = decodeURIComponent(body.ref);
+  } catch {
+    throw Error("invalid_referrer_encoding");
+  }
+  return body;
+}
 async function resolveKodikPlayer(url, ordinal) {
   const cookies = /* @__PURE__ */ new Map();
   const onHeaders = (headers) => {
@@ -150,8 +160,7 @@ async function resolveKodikPlayer(url, ordinal) {
     if (!/^\/[a-z0-9_-]+$/.test(path)) throw Error("invalid_endpoint");
     return path;
   });
-  const body = {};
-  for (const key of ["d", "d_sign", "pd", "pd_sign", "ref", "ref_sign"]) body[key] = params[key] || "";
+  const body = kodikRequestParameters(params);
   for (const key of ["type", "id", "hash"]) {
     body[key] = html.match(new RegExp("vInfo\\." + key + "\\s*=\\s*'([^']+)'"))?.[1];
     if (!body[key]) throw Error("player_changed");
@@ -258,10 +267,10 @@ Deno.serve(async (req) => {
   if (req.method === "GET" && new URL(req.url).searchParams.get("source") === "kodik") {
     try {
       const video = await publishedKodikVideo("mal-28285", 1, "kodik-4243");
-      return reply({ ready: true, version: 14, qualities: video.sources.map((s) => s.quality) });
+      return reply({ ready: true, version: 15, qualities: video.sources.map((s) => s.quality) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "unknown";
-      return reply({ ready: false, version: 14, detail: message.replace(/https?:\/\/[^\s)]+/g, "[upstream]").replace(/[a-zA-Z0-9]{24,}/g, "[redacted]").slice(0, 220) }, 502);
+      return reply({ ready: false, version: 15, detail: message.replace(/https?:\/\/[^\s)]+/g, "[upstream]").replace(/[a-zA-Z0-9]{24,}/g, "[redacted]").slice(0, 220) }, 502);
     }
   }
   if (req.method === "GET") {
@@ -274,7 +283,7 @@ Deno.serve(async (req) => {
         healthCache = { at: Date.now(), ready: false, status: /^[a-z_0-9]+$/.test(m) ? m : "source_unavailable", detail: m.replace(/https?:\/\/[^\s)]+/g, "[upstream]").slice(0, 180) };
       }
     }
-    return reply({ ready: healthCache.ready, version: 14, kodikPlayback: true, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
+    return reply({ ready: healthCache.ready, version: 15, kodikPlayback: true, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
   }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   try {
