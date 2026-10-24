@@ -45,7 +45,7 @@ async function cached(key, ttl, load) {
 var upstreamClient;
 function transportOptions() {
   if (typeof globalThis.Deno?.createHttpClient !== "function") return {};
-  upstreamClient ??= globalThis.Deno.createHttpClient({ http1: true, http2: false, poolMaxIdlePerHost: 0 });
+  upstreamClient ??= globalThis.Deno.createHttpClient({ http1: true, http2: false, poolMaxIdlePerHost: 4 });
   return { client: upstreamClient };
 }
 async function textFetch(url, options = {}) {
@@ -105,32 +105,51 @@ async function readUpstream(url, options = {}) {
   }
   throw Error("upstream_redirect_loop");
 }
+async function jsonFetch(url, options = {}) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const text = await textFetch(url, options);
+    try {
+      return JSON.parse(text);
+    } catch {
+      if (attempt === 2) throw Error("upstream_invalid_json");
+    }
+  }
+}
 async function kodikVideo(url, ordinal) {
   if (!validEmbed(url)) throw Error("invalid_embed");
   return cached("stream:" + url, 45e3, async () => {
-    const html = await textFetch(url);
-    const params = JSON.parse(html.match(/var\s+urlParams\s*=\s*'([^']+)'/)?.[1] || "null");
-    const script = html.match(/src="(\/assets\/js\/app\.player_single\.[a-z0-9]+\.js)"/)?.[1];
-    if (!params || !script) throw Error("player_changed");
-    const endpoint = await cached(script, 36e5, async () => {
-      const js = await textFetch("https://kodikplayer.com" + script);
-      const encoded = js.match(/type:"POST",url:atob\("([^"]+)"\)/)?.[1];
-      if (!encoded) throw Error("player_changed");
-      const path = atob(encoded);
-      if (!/^\/[a-z0-9_-]+$/.test(path)) throw Error("invalid_endpoint");
-      return path;
-    });
-    const body = {};
-    for (const key of ["d", "d_sign", "pd", "pd_sign", "ref", "ref_sign"]) body[key] = params[key] || "";
-    for (const key of ["type", "id", "hash"]) {
-      body[key] = html.match(new RegExp("vInfo\\." + key + "\\s*=\\s*'([^']+)'"))?.[1];
-      if (!body[key]) throw Error("player_changed");
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        return await resolveKodikPlayer(url, ordinal);
+      } catch (error) {
+        if (attempt === 2 || !/upstream_invalid_json|unexpected EOF/.test(error.message)) throw error;
+      }
     }
-    const data = JSON.parse(await textFetch("https://kodikplayer.com" + endpoint, { method: "POST", body: new URLSearchParams(body) }));
-    const sources = parseStreams(data.links);
-    if (!sources.length) throw Error("no_streams");
-    return { sources, url: (sources.find((s) => s.quality === 720) || sources[0]).url, stream: true, ordinal: Number(ordinal), opening: null, ending: null };
   });
+}
+async function resolveKodikPlayer(url, ordinal) {
+  const html = await textFetch(url);
+  const params = JSON.parse(html.match(/var\s+urlParams\s*=\s*'([^']+)'/)?.[1] || "null");
+  const script = html.match(/src="(\/assets\/js\/app\.player_single\.[a-z0-9]+\.js)"/)?.[1];
+  if (!params || !script) throw Error("player_changed");
+  const endpoint = await cached(script, 36e5, async () => {
+    const js = await textFetch("https://kodikplayer.com" + script);
+    const encoded = js.match(/type:"POST",url:atob\("([^"]+)"\)/)?.[1];
+    if (!encoded) throw Error("player_changed");
+    const path = atob(encoded);
+    if (!/^\/[a-z0-9_-]+$/.test(path)) throw Error("invalid_endpoint");
+    return path;
+  });
+  const body = {};
+  for (const key of ["d", "d_sign", "pd", "pd_sign", "ref", "ref_sign"]) body[key] = params[key] || "";
+  for (const key of ["type", "id", "hash"]) {
+    body[key] = html.match(new RegExp("vInfo\\." + key + "\\s*=\\s*'([^']+)'"))?.[1];
+    if (!body[key]) throw Error("player_changed");
+  }
+  const data = await jsonFetch("https://kodikplayer.com" + endpoint, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", "Referer": url, "Origin": "https://kodikplayer.com" }, body: new URLSearchParams(body).toString() });
+  const sources = parseStreams(data.links);
+  if (!sources.length) throw Error("no_streams");
+  return { sources, url: (sources.find((s) => s.quality === 720) || sources[0]).url, stream: true, ordinal: Number(ordinal), opening: null, ending: null };
 }
 function validEmbed(value) {
   try {
@@ -185,8 +204,8 @@ async function snapshotHealth() {
 // server/published-kodik.js
 var manifestCache = /* @__PURE__ */ new Map();
 async function fetchManifest(url) {
-  const raw = await textFetch(url);
-  return { ok: true, json: async () => JSON.parse(raw) };
+  const data = await jsonFetch(url);
+  return { ok: true, json: async () => data };
 }
 async function publishedKodikVideo(id, index, audio, { fetcher = fetchManifest, resolve = kodikVideo } = {}) {
   if (!/^(mal|shikimori|lib)-\d+$/.test(id) || !Number.isSafeInteger(index) || index < 1 || !/^kodik-\d+$/.test(audio)) throw Error("invalid_request");
@@ -219,10 +238,10 @@ Deno.serve(async (req) => {
   if (req.method === "GET" && new URL(req.url).searchParams.get("source") === "kodik") {
     try {
       const video = await publishedKodikVideo("mal-28285", 1, "kodik-4243");
-      return reply({ ready: true, version: 10, qualities: video.sources.map((s) => s.quality) });
+      return reply({ ready: true, version: 12, qualities: video.sources.map((s) => s.quality) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "unknown";
-      return reply({ ready: false, version: 10, detail: message.replace(/https?:\/\/[^\s)]+/g, "[upstream]").replace(/[a-zA-Z0-9]{24,}/g, "[redacted]").slice(0, 220) }, 502);
+      return reply({ ready: false, version: 12, detail: message.replace(/https?:\/\/[^\s)]+/g, "[upstream]").replace(/[a-zA-Z0-9]{24,}/g, "[redacted]").slice(0, 220) }, 502);
     }
   }
   if (req.method === "GET") {
@@ -235,7 +254,7 @@ Deno.serve(async (req) => {
         healthCache = { at: Date.now(), ready: false, status: /^[a-z_]+(?:_\d+)?$/.test(m) ? m : "source_unavailable", detail: m.replace(/https?:\/\/[^\s)]+/g, "[upstream]").slice(0, 180) };
       }
     }
-    return reply({ ready: healthCache.ready, version: 10, kodikPlayback: true, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
+    return reply({ ready: healthCache.ready, version: 12, kodikPlayback: true, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
   }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   try {

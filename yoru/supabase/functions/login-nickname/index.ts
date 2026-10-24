@@ -1,5 +1,5 @@
 // Public sign-in endpoint. No email address is returned before password verification.
-const allowed=new Set(['https://yooickuu.github.io','http://127.0.0.1:4173','http://localhost:4173','http://127.0.0.1:5500','http://localhost:5500']);
+const allowed=new Set(['https://yomiku.site','https://www.yomiku.site','https://yooickuu.github.io','http://127.0.0.1:4173','http://localhost:4173','http://127.0.0.1:5500','http://localhost:5500']);
 Deno.serve(async request=>{
  const origin=request.headers.get('origin');
  const headers={'Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin',

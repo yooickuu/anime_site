@@ -48,7 +48,7 @@ export async function fetchShikimori(malOrShikiId) {
   try {
     const query = `query($id: String) {
       animes(ids: $id, limit: 1) {
-        id malId name russian description score status
+        id malId name russian description score status episodes episodesAired kind
         genres { id name russian }
         poster { originalUrl }
       }

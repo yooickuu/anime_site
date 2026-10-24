@@ -1,6 +1,6 @@
-import {kodikVideo,validEmbed,textFetch} from './animego.js';
+import {kodikVideo,validEmbed,jsonFetch} from './animego.js';
 const manifestCache=new Map();
-async function fetchManifest(url){const raw=await textFetch(url);return {ok:true,json:async()=>JSON.parse(raw)};}
+async function fetchManifest(url){const data=await jsonFetch(url);return {ok:true,json:async()=>data};}
 export async function publishedKodikVideo(id,index,audio,{fetcher=fetchManifest,resolve=kodikVideo}={}){
  if(!/^(mal|shikimori|lib)-\d+$/.test(id)||!Number.isSafeInteger(index)||index<1||!/^kodik-\d+$/.test(audio))throw Error('invalid_request');
  let cached=manifestCache.get(id);

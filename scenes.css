@@ -219,3 +219,21 @@ footer .brand .brand-symbol{width:36px;height:36px}footer .brand .brand-name{fon
  .watch-page .video-controls .select-trigger{width:100%;height:36px;min-height:36px;padding:0 5px}
  .watch-page .player-pickers>label,.catalog-options>.site-select{min-width:0}
 }
+
+/* Keep the complete foreground artwork visible; fade the padded space below it. */
+/* The foreground keeps the complete frame; its softer duplicate fills the edges. */
+.details-dialog .details-artwork{height:max(80%,760px);max-height:none;padding:0;box-sizing:border-box;mask-image:none;-webkit-mask-image:none}
+.details-dialog .details-manga,.details-dialog .portrait-art .details-manga{width:100%;height:calc(100% - 120px);max-height:none;min-height:0;object-fit:contain;object-position:center top;mask-image:linear-gradient(#000 68%,#000d 80%,transparent 100%);-webkit-mask-image:linear-gradient(#000 68%,#000d 80%,transparent 100%);opacity:.75}
+.details-dialog .details-art-fill{width:100%;height:100%;opacity:.42;filter:grayscale(1) blur(2px);mask-image:linear-gradient(#000 30%,#000d 55%,#0005 78%,transparent 100%);-webkit-mask-image:linear-gradient(#000 30%,#000d 55%,#0005 78%,transparent 100%)}
+.details-dialog .details-art-shade{background:linear-gradient(transparent 35%,rgba(var(--surface-rgb),.15) 70%,transparent)}
+@media(max-width:600px){.details-dialog .details-artwork{height:760px;min-height:80%;padding:0}.details-dialog .details-manga{object-position:center top}}
+/* Full-window title art: intact foreground over a softly faded edge fill. */
+body.dark[data-style] .details-dialog{width:100vw;max-width:100vw;max-height:100dvh;margin:0;border-radius:0;inset:0;box-sizing:border-box}
+.details-dialog .details-artwork{width:100%;height:max(66vh,760px);min-height:50vh;max-height:none;overflow:visible;mask-image:linear-gradient(#000 65%,#000c 80%,transparent);-webkit-mask-image:linear-gradient(#000 65%,#000c 80%,transparent)}
+.details-dialog .details-manga,.details-dialog .portrait-art .details-manga{width:100%;height:calc(100% - 100px);object-fit:contain;object-position:center top;mask-image:none;-webkit-mask-image:none;filter:grayscale(1);opacity:.72}
+.details-dialog .details-art-fill{object-fit:cover;object-position:center;mask-image:none;-webkit-mask-image:none;opacity:.32}
+.details-dialog .details-layout,.details-dialog .details-toolbar{max-width:1180px;margin-left:auto;margin-right:auto}
+.season-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 12px}
+.season-tabs button{min-height:44px;padding:10px 16px;border:0;border-radius:14px;background:rgba(var(--surface-rgb),.5);color:var(--muted);font:inherit;cursor:pointer}
+.season-tabs button[aria-selected=true]{background:color-mix(in srgb,var(--accent) 23%,transparent);color:var(--text)}
+@media(max-width:600px){.details-dialog .details-artwork{height:max(66vh,600px)}.season-tabs button{font-size:12px;padding:10px 12px}}

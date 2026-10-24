@@ -23,7 +23,7 @@ test('Japanese translations require Japanese metadata and preserve their own tra
  assert.equal(translationIdentity({...jp,material_data:{countries:['Китай']}}).language,'zh');
  assert.throws(()=>translationIdentity({...jp,material_data:{}}),/language_unknown/);
 });
-const dependencies={getMetadata:async()=>[{russian:'Название',malId:9,description:'Описание',poster:{originalUrl:'https://example.test/poster'}},null],imageProbe:async url=>({url,width:800,height:1200}),resolve:async url=>({sources:[{quality:720,url}]}),streamProbe:async s=>[{...s,duration:1400,checkedAt:'2026-10-22'}]};
+const dependencies={deepProbe:true,getMetadata:async()=>[{russian:'Название',malId:9,description:'Описание',poster:{originalUrl:'https://example.test/poster'}},null],imageProbe:async url=>({url,width:800,height:1200}),resolve:async url=>({sources:[{quality:720,url}]}),streamProbe:async s=>[{...s,duration:1400,checkedAt:'2026-10-22'}]};
 test('assembly keeps exact stream per episode and rejects a release with any missing episode stream',async()=>{
  const a=await assembleRelease(release,dependencies);assert.equal(a.episodes.length,2);assert.equal(a.episodes[1].audio[0].providerRef.url,link(2));
  await assert.rejects(assembleRelease(release,{...dependencies,resolve:async url=>({sources:url===link(1)?[{quality:720,url}]:[]})}),/no_working_stream/);
@@ -135,4 +135,115 @@ test('failed releases are not retried repeatedly within the same batch',async()=
   const report=await seedCatalog({targetCount:1,api,assemble:async()=>{checks++;throw Error('broken_poster');}});
   assert.equal(checks,1);assert.equal(report.added,0);assert.equal(report.pending.length,1);assert.equal(report.skipped,1);
  }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
+});
+
+import {firstMainEpisode,seasonMenu,franchiseSeasons} from '../src/catalog-seasons.js';
+test('opening a title chooses main episodes while keeping extras and other seasons accessible',()=>{
+ const a={id:'a',ids:{mal:1},episodeManifest:[{season:0,ordinal:1},...Array.from({length:25},(_,i)=>({season:1,ordinal:i+1}))]},b={id:'b',ids:{mal:2}};
+ assert.equal(firstMainEpisode(a),2);assert.equal(episodeSeasonOptions(a,firstMainEpisode(a)).episodes.length,25);
+ assert.deepEqual(seasonMenu(a,[a,b],2).map(x=>x.value),['season:1','release:b:1','season:0']);
+ assert.equal(firstMainEpisode({episodeManifest:[{season:0,ordinal:1}]}),1);
+});
+test('newly fetched relations replace stale current-card metadata',()=>{
+ const a={id:'a',ids:{mal:1}},b={id:'b',ids:{mal:2}};
+ assert.deepEqual(localSeasons([a,b],{...a,relatedMalIds:[2]}).map(x=>x.id),['a','b']);
+});
+test('franchise links connect loaded seasons even across an unloaded intermediate season',()=>{
+ const a={id:'a',ids:{shikimori:1}},c={id:'c',ids:{shikimori:3}},other={id:'other',ids:{shikimori:4}};
+ const links=[{source_id:1,target_id:2,relation:'sequel'},{source_id:2,target_id:3,relation:'sequel'},{source_id:1,target_id:4,relation:'summary'}];
+ assert.deepEqual(franchiseSeasons([a,c,other],a,links).map(x=>x.id),['a','c']);
+});
+import {jsonFetch} from '../server/animego.js';
+test('empty upstream JSON is retried, but repeated invalid responses are not accepted',async()=>{
+ const before=globalThis.fetch;let calls=0;
+ try{globalThis.fetch=async()=>new Response(++calls===1?'':'{"links":{}}');assert.deepEqual(await jsonFetch('https://kodikplayer.com/api'),{links:{}});assert.equal(calls,2);
+ globalThis.fetch=async()=>new Response('');await assert.rejects(jsonFetch('https://kodikplayer.com/api'),/upstream_invalid_json/);
+ }finally{globalThis.fetch=before;}
+});
+import {refreshKodikMedia} from '../src/kodik-playback.js';
+test('resolver outage retains verified same-audio links and never swaps Japanese for Russian',async()=>{
+ const media={audioId:'kodik-2',sources:[{quality:720,url:'https://media.test/ja.m3u8'}]},config={supabaseUrl:'https://test.supabase.co'};
+ const d=await refreshKodikMedia(media,config,'mal-1',1,{fetcher:async()=>new Response('',{status:502})});assert.equal(d.refreshFailed,true);assert.equal(d.sources[0].url,media.sources[0].url);
+ await assert.rejects(refreshKodikMedia(media,config,'mal-1',1,{fetcher:async()=>Response.json({audioId:'kodik-1',sources:media.sources})}),/audioUnavailable/);
+});
+
+test('popular batch checks two releases concurrently with a global cap of two',async()=>{
+ const cwd=process.cwd(),dir=await mkdtemp(join(tmpdir(),'kodik-parallel-'));let active=0,max=0;
+ try{
+  process.chdir(dir);await mkdir('src');
+  const api={async *pages(path,params){const id=Number(params.shikimori_id);yield {results:[{...release,id:'serial-'+id,shikimori_id:id}],page:'/search',next_page:null};}};
+  const report=await seedCatalog({targetCount:2,order:'popular',api,getPopular:async()=>[{id:9},{id:10}],assemble:async r=>{active++;max=Math.max(max,active);await new Promise(resolve=>setTimeout(resolve,10));const a=await assembleRelease(r,{...dependencies,getMetadata:async()=>[{malId:Number(r.shikimori_id),poster:{originalUrl:'https://example.test/poster'}},null]});active--;return a;}});
+  assert.equal(report.added,2);assert.equal(max,2);
+  const saved=JSON.parse(await readFile('src/published-catalog.json'));assert.equal(saved.items.length,2);assert.equal(new Set(saved.items.map(a=>a.id)).size,2);
+ }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
+});
+
+test('season menu orders main groups first and preserves parts of a season',()=>{
+ const make=(id,season)=>({id,type:'TV',episodeManifest:[{season,ordinal:1}]});
+ const a=make('a',3),b=make('b',3),c=make('c',4);
+ const rows=seasonMenu(b,[a,b,c]);
+ assert.deepEqual(rows.map(e=>[e.displaySeason,e.part||null]),[[3,1],[3,2],[4,null]]);
+ assert.equal(rows.filter(e=>e.selected).length,1);
+ assert.equal(rows[1].value,'season:3');
+});
+test('prequel edges order same-year seasons even when records arrive reversed',()=>{
+ const a={id:'a',ids:{mal:1},year:2020,relatedMalIds:[2],relations:[{id:2,relation:'sequel'}]},b={id:'b',ids:{mal:2},year:2020};
+ assert.deepEqual(localSeasons([b,a],b).map(a=>a.id),['a','b']);
+});
+import {metadataFromAniList,withMetadata} from '../src/catalog-metadata.js';
+import {titleFor,descriptionFor,registerAnime,byId} from '../src/catalog.js';
+test('published metadata preserves separate English and Japanese titles and English synopsis',()=>{
+ const meta=metadataFromAniList({title:{english:'Title',native:'タイトル'},description:'<b>Story</b>',relations:{edges:[]}});
+ const a=withMetadata({title:'Название',description:'Описание',ids:{mal:991}}, {991:meta});
+ assert.equal(titleFor(a,'en'),'Title');assert.equal(titleFor(a,'ja'),'タイトル');assert.equal(descriptionFor(a,'en'),'Story');assert.equal(descriptionFor(a,'ru'),'Описание');
+});
+test('account snapshots cannot erase live episodes or translated metadata',()=>{
+ registerAnime({id:'test-published',catalogApproved:true,episodeManifest:[{ordinal:1}],translations:{en:['Title','Story']}});
+ registerAnime({id:'test-published',catalogApproved:true,translations:{en:['Title','']}});
+ assert.equal(byId('test-published').episodeManifest.length,1);assert.equal(descriptionFor(byId('test-published'),'en'),'Story');
+});
+import {seasonNavigation} from '../src/catalog-seasons.js';
+import {savedEpisodeIndex,rebaseProgress} from '../src/episode-manifest.js';
+test('first main episode does not navigate backwards into extras, resume keeps its season',()=>{
+ const a={episodeManifest:[{season:0,ordinal:1},{season:1,ordinal:1},{season:1,ordinal:2}]};
+ assert.deepEqual(seasonNavigation(a,2),{previous:null,next:3});
+ const saved={id:'a',episode:2,ordinal:1,season:1,time:42};
+ assert.equal(savedEpisodeIndex(saved,[1,2,3],a.episodeManifest),2);
+ assert.equal(rebaseProgress({'a:2':saved},'a',[1,2,3],a.episodeManifest)['a:2'].time,42);
+});
+import {requireEpisodeCoverage} from '../scripts/seed-catalog.mjs';
+test('future imports cannot pass a truncated release just because provider pagination is complete',()=>{
+ const rows=Array.from({length:24},(_,i)=>({season:1,ordinal:i+1}));
+ assert.throws(()=>requireEpisodeCoverage(rows,{status:'released',episodes:366}),/incomplete_catalogue_24_of_366/);
+ assert.throws(()=>requireEpisodeCoverage(rows,{status:'ongoing',episodes:0,episodesAired:1180}),/incomplete_catalogue_24_of_1180/);
+ assert.doesNotThrow(()=>requireEpisodeCoverage(rows,{status:'ongoing',episodes:100,episodesAired:24}));
+});
+import {completeRelease,linkedEpisodes} from '../scripts/lib/kodik-api.mjs';
+import {createApprovedCatalogue} from '../src/approved-catalog.js';
+test('light import stores exact episode links without resolving or probing media',async()=>{
+ const a=await assembleRelease(release,{...dependencies,deepProbe:false,resolve:()=>{throw Error('must not resolve')},streamProbe:()=>{throw Error('must not probe')}});
+ assert.equal(a.episodes.length,2);assert.equal(a.episodes[1].audio[0].providerRef.url,link(2));assert.deepEqual(a.episodes[0].audio[0].sources,[]);
+ assert.equal(createApprovedCatalogue({policyVersion:3,items:[a]}).items.length,1);
+ a.episodes[0].audio[0].providerRef.url='https://evil.test/seria/1/abc/720p';
+ assert.equal(createApprovedCatalogue({policyVersion:3,items:[a]}).items.length,0);
+});
+test('incomplete list entry combines every search page before validating episode count',async()=>{
+ const first={...release,seasons:{1:{episodes:{1:link(1)}}}};
+ const api={async *pages(){yield {results:[first]};yield {results:[{...release,seasons:{1:{episodes:{2:link(2)}}}}]};}};
+ assert.equal(allEpisodes(await completeRelease(api,first)).length,2);
+ await assert.rejects(completeRelease({async *pages(){yield {results:[first]};}},first),/incomplete/);
+});
+test('specials and movies do not increment main season numbering, groups sort numerically',()=>{
+ const make=(id,type,season)=>({id,type,episodeManifest:[{season,ordinal:1}]});
+ const a=make('a','TV',1),b=make('b','TV',2),ova=make('ova','OVA',1),movie=make('movie','MOVIE',1),special=make('sp','SPECIAL',3);
+ const entries=seasonMenu(a,[b,ova,special,movie,a]);
+ assert.deepEqual(entries.filter(e=>!e.extra).map(e=>e.displaySeason),[1,2]);
+ assert.equal(entries.filter(e=>e.extra).length,3);
+ assert.equal(firstMainEpisode({episodeManifest:[{season:0,ordinal:1},{season:2,ordinal:1},{season:1,ordinal:2},{season:1,ordinal:1}]}),4);
+});
+test('light reimport retains direct stream cache only for the identical episode player',async()=>{
+ const a=await assembleRelease(release,dependencies),incoming={...a,episodes:linkedEpisodes(release)};
+ assert.equal(mergeKodikRelease(a,incoming).episodes[0].audio[0].sources.length,1);
+ incoming.episodes[0].audio[0].providerRef.url=link(99);
+ assert.equal(mergeKodikRelease(a,incoming).episodes[0].audio[0].sources.length,0);
 });

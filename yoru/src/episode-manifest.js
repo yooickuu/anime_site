@@ -22,10 +22,14 @@ export function episodeManifest(liberty=[],vost=[],expected=null) {
   return [...entries.values()].sort((a,b)=>a.ordinal-b.ordinal);
 }
 export function savedEpisodeNumber(progress){return progress.ordinal??progress.anime?.episodeNumbers?.[progress.episode-1]??progress.episode;}
-export function rebaseProgress(progress,id,numbers){
+export function savedEpisodeIndex(progress,numbers,manifest=[]){
+  const ordinal=Number(savedEpisodeNumber(progress));
+  return (progress.season!=null?manifest.findIndex(e=>e.season===progress.season&&e.ordinal===ordinal):numbers.indexOf(ordinal))+1;
+}
+export function rebaseProgress(progress,id,numbers,manifest=[]){
   const result=Object.fromEntries(Object.entries(progress).filter(([,p])=>p.id!==id));
   for(const p of Object.values(progress).filter(p=>p.id===id)){
-    const ordinal=savedEpisodeNumber(p),index=numbers.indexOf(Number(ordinal));
+    const ordinal=savedEpisodeNumber(p),index=savedEpisodeIndex(p,numbers,manifest)-1;
     const key=index<0?`${id}:unavailable:${ordinal}`:`${id}:${index+1}`;
     const value=index<0?p:{...p,ordinal,episode:index+1};
     if(!result[key]||(result[key].updated||0)<=(p.updated||0))result[key]=value;

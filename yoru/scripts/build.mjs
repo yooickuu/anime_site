@@ -1,7 +1,22 @@
+import {auditPlayerCatalogue} from './lib/player-audit.mjs';
 import {build} from 'esbuild';
 import {copyFile,readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {createApprovedCatalogue} from '../src/approved-catalog.js';
+const rawPublication=await readFile('src/published-catalog.json','utf8');
+const publication=JSON.parse(rawPublication);
+const playerAudit=auditPlayerCatalogue(publication);
+if(playerAudit.errors.length)throw Error('Player catalogue validation failed: '+JSON.stringify(playerAudit.errors.slice(0,10)));
+const runtime=createApprovedCatalogue(publication);
+const revision=createHash('sha256').update(rawPublication).digest('hex').slice(0,12);
+// Episode source URLs load only when a title is opened, not on every homepage visit.
+await writeFile('src/runtime-catalog.json',JSON.stringify({revision,items:runtime.items.map(({releasedEpisodes,kodikRevisions,kodikIds,...item})=>item)}));
+await mkdir('dist/data/media',{recursive:true});await mkdir('../data/media',{recursive:true});
+for(const item of publication.items){
+ if(!/^(mal|shikimori|lib)-\d+$/.test(item.id))throw Error('Invalid media title ID');
+ await writeFile(`dist/data/media/${item.id}.json`,JSON.stringify({policyVersion:3,items:[item]}));
+ await copyFile(`dist/data/media/${item.id}.json`,`../data/media/${item.id}.json`);
+}
 // Pages deploys dist, so root-level domain verification must be included there.
 for (const file of ['CNAME', 'kodik.txt', ...(await readdir('..')).filter(name=>/^google[a-z0-9]+\.html$/.test(name))]) {
   try { await copyFile(`../${file}`, `dist/${file}`); }
@@ -13,14 +28,13 @@ await copyFile('supabase/functions/login-nickname/index.ts','dist/login-nickname
 await copyFile('supabase/unique-nicknames.sql','dist/unique-nicknames.sql');
 await copyFile('supabase/account-deletion.sql', 'dist/account-deletion.sql');
 await copyFile('supabase/functions/delete-account/index.ts', 'dist/delete-account.ts');
-await build({entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
+await build({entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',charset:'utf8',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
 console.log('yooickuu built → dist/');
 
 await build({entryPoints:['supabase/functions/anime-source/index.ts'],bundle:true,outfile:'dist/anime-source.ts',format:'esm',platform:'neutral',target:['es2022']});
 
 // The deployed bundle embeds this manifest. Report rejected records instead of silently hiding them.
-const publication=JSON.parse(await readFile('src/published-catalog.json','utf8'));
-const visible=createApprovedCatalogue(publication).items.length;
+const visible=playerAudit.checked;
 console.log(`Catalogue: ${visible}/${publication.items.length} visible (${publication.items.length-visible} rejected)`);
 await copyFile('src/published-catalog.json','dist/published-catalog.json');
 const hash=createHash('sha256').update(await readFile('dist/app.js')).digest('hex').slice(0,12);

@@ -1,4 +1,4 @@
-import {KodikAPI,catalogParams,mergeKodikRelease} from './lib/kodik-api.mjs';
+import {KodikAPI,catalogParams,mergeKodikRelease,completeRelease} from './lib/kodik-api.mjs';
 import {assembleRelease,loadToken,saveJSON} from './seed-catalog.mjs';
 import {createApprovedCatalogue} from '../src/approved-catalog.js';
 /**
@@ -53,7 +53,7 @@ export async function updateOngoings() {
           for(const release of batch.results){
             const revision=release.updated_at||String(release.episodes_count);
             if(updated.kodikRevisions?.[release.id]===revision)continue;
-            const incoming=await assembleRelease(release);
+            const incoming=await assembleRelease(await completeRelease(api,release));
             const merged=mergeKodikRelease(updated,incoming);
             if(!createApprovedCatalogue({policyVersion:3,items:[merged]}).items.length)throw Error('catalogue_validation_failed');
             merged.kodikRevisions={...updated.kodikRevisions,[release.id]:revision};updated=merged;

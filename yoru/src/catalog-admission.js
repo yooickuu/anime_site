@@ -121,12 +121,17 @@ export function auditAudioTrack(track, { now = Date.now(), path = "audio", stric
   const fail = (code, p) => issues.push({ code, path: p });
   const p = path;
 
-  if (!Number.isFinite(track.duration) || track.duration <= 0) fail('duration_unverified', p);
+  // Lightweight imports explicitly store a validated provider link, not invented streams/quality.
+  let linked=false;
+  if(!strict&&track.validation==='provider-link'&&track.providerRef?.provider==='kodik'){
+    try{const u=new URL(track.providerRef.url);linked=u.protocol==='https:'&&['kodikplayer.com','kodik.info','kodik.biz','kodik.cc'].includes(u.hostname)&&!u.username&&!u.password&&!u.port&&/^\/(seria|video|serial)\/\d+\/[a-z0-9]+\//i.test(u.pathname)&&track.id===`kodik-${track.providerRef.translationId}`&&Number.isFinite(track.providerRef.ordinal);}catch{}
+  }
+  if (!linked&&(!Number.isFinite(track.duration) || track.duration <= 0)) fail('duration_unverified', p);
   if (strict && !fresh(track.languageReview, now, maxAge)) fail('audio_language_unverified', p);
 
   const sources = track.sources || [];
   const minQuality = strict ? admissionPolicy.minimumQuality : 360;
-  if (!sources.some(s => admissionPolicy.qualities.includes(s.quality) && s.quality >= minQuality)) {
+  if (!linked&&!sources.some(s => admissionPolicy.qualities.includes(s.quality) && s.quality >= minQuality)) {
     fail('quality_unverified', `${p}.minimumHD`);
   }
 

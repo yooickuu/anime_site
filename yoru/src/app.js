@@ -1,7 +1,6 @@
 import curatedSpotlight from './spotlight.json';
-import {episodeSeasonOptions} from './catalog-seasons.js';
+import {episodeSeasonOptions,firstMainEpisode,seasonMenu,seasonNavigation} from './catalog-seasons.js';
 import {normalizeGenre,matchesType,searchScore,suggestions,selectSpotlight} from './catalog-query.js';
-import {createSubtitles} from './subtitles.js';
 import {approvedSkipTimes} from './approved-skip-times.js';
 import {detailArtwork} from './detail-artwork.js';
 import {soundPreferences,preferredAudio,resumeTime} from './playback-preferences.js';
@@ -17,7 +16,7 @@ import {accountVault} from './account-switcher.js';
 import {playerShortcut} from './player-shortcuts.js';
 import {signInIdentifier} from './login.js';
 import {checkNickname,nicknameErrorKey,nicknameChecker} from './nicknames.js';
-import {savedEpisodeNumber} from './episode-manifest.js';
+import {savedEpisodeNumber,savedEpisodeIndex} from './episode-manifest.js';
 import {createProfileDraft, createAvatarLoader} from './profile.js';
 import {watchView} from './watch-view.js';
 import {attachPlaybackAutomation} from './playback-automation.js';
@@ -27,7 +26,7 @@ import {initSelectMenus, enhanceSelects, closeSelectMenu} from './select-menu.js
 import {createPlayback} from './playback.js';
 import {cropAvatar,cropBanner} from './avatar-crop.js';
 import {authErrorKey} from "./public-config.js";
-import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons} from "./sources.js";
+import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons, knownSeasons} from "./sources.js";
 import {icon} from "./icons.js";
 import {controlsHTML, attachControls} from "./player-controls.js";
 import { chooseQuality } from "./provider.js";
@@ -80,10 +79,10 @@ let onlineItems = [],
   typeFilter = "all", yearFilter = "all", ratingFilter = "0",
   ongoingOnly = false,
   playback = null,
-  subtitleController = null,
   controlsCleanup = null,
   automationCleanup = null,
   playerSeasons = [],
+  seasonGroup = 'main',
   providerTiming = null;
 const bookmark = icon("bookmark");
 const read = (key, fallback) => {
@@ -808,6 +807,7 @@ async function openPlayer(id, requested, pushRoute=true) {
   let a;
   try{a=await findWatchRelease(id);}catch{toast(t("providerError"));}
   if(!a){playerOpening=false;toast(t('releaseAwaitingReview'));if(page==='watch'&&!current)navigate('catalog');return;}
+  if(!requested){const first=knownSeasons(a).find(x=>['TV','ONA'].includes(x.type)&&x.episodeManifest?.some(e=>e.season>0));if(first){a=first;id=a.id;}}
   if (a.providerId || a.animeVostId || a.animeGoId || a.kitsuId || a.malId) {
     try {
       a = await resolveRelease(a);
@@ -829,21 +829,21 @@ async function openPlayer(id, requested, pushRoute=true) {
     recordProgress();
     $$("dialog[open]").forEach((d) => d.close());
     controlsCleanup?.();controlsCleanup=null;
-    subtitleController?.destroy();subtitleController=null;
     playback?.destroy();
     playback = null;
     const previous=latestProgress(id);
     const requestedProgress=requested?state.progress[`${id}:${requested}`]:previous;
-    const resumeIndex=requestedProgress&&a.episodeNumbers?a.episodeNumbers.indexOf(Number(savedEpisodeNumber(requestedProgress)))+1:0;
-    if(user&&a.episodeNumbers)mutate({type:'rebaseEpisodes',id:a.id,numbers:a.episodeNumbers});
+    const resumeIndex=requestedProgress&&a.episodeNumbers?savedEpisodeIndex(requestedProgress,a.episodeNumbers,a.episodeManifest):0;
+    if(user&&a.episodeNumbers)mutate({type:'rebaseEpisodes',id:a.id,numbers:a.episodeNumbers,manifest:a.episodeManifest});
     current = a;
     page='watch';
-    selectedAudio=preferredAudio(audioChoices(a),state.preferences,a.id);
-    playerSeasons = [a];
+    playerSeasons = knownSeasons(a);
     episode = Math.min(
       a.episodes,
-      Math.max(1, resumeIndex || requested || latestProgress(id)?.episode || 1),
+      Math.max(1, requested ? (resumeIndex || requested) : firstMainEpisode(a)),
     );
+    seasonGroup=seasonMenu(a,playerSeasons,episode).find(x=>x.selected)?.extra?'extras':'main';
+    selectedAudio=preferredAudio(audioChoices(a,episode),state.preferences,a.id);
     const hash=`#watch/${a.id}/${episode}`;
     if(pushRoute && location.hash!==hash)history.pushState(null,'',hash);else history.replaceState(null,'',hash);
     render(true);window.scrollTo({top:0,behavior:'instant'});
@@ -858,23 +858,27 @@ async function openPlayer(id, requested, pushRoute=true) {
 }
 function renderEpisodes() {
   if (!current || !$("#episode-picker")) return;
-  $("#episode-control").hidden = current.episodes <= 1;
+  $("#episode-control").hidden = false;
   const seasonView=episodeSeasonOptions(current,episode);
   $("#episode-picker").innerHTML=seasonView.episodes.map(e=>`<option value="${e.index}" ${e.index===episode?'selected':''}>${t('episode')} ${esc(e.ordinal)}</option>`).join('');
   $("#season-control").hidden = false;
-  $("#season-picker").innerHTML=seasonView.seasons.length>1?seasonView.seasons.map(n=>`<option value="season:${n}" ${n===seasonView.active?'selected':''}>${t('season')} ${n}</option>`).join(''):playerSeasons.map((a,i)=>`<option value="${esc(a.id)}" ${a.id===current.id?'selected':''}>${playerSeasons.length===1?t('season')+' '+seasonView.active:esc(title(a))}</option>`).join('');
+  const allSeasons=seasonMenu(current,playerSeasons,episode);
+  let visibleSeasons=allSeasons.filter(item=>!!item.extra===(seasonGroup==='extras'));
+  if(!visibleSeasons.length){seasonGroup=allSeasons[0]?.extra?'extras':'main';visibleSeasons=allSeasons;}
+  $$('[data-season-group]').forEach(button=>{button.setAttribute('aria-selected',String(button.dataset.seasonGroup===seasonGroup));button.hidden=!allSeasons.some(item=>!!item.extra===(button.dataset.seasonGroup==='extras'));});
+  $("#season-picker").innerHTML=visibleSeasons.map(item=>`<option value="${esc(item.value)}" ${item.selected?'selected':''}>${item.season===0?t('additionalEpisodes')+' · '+esc(title(item.title)):!item.displaySeason?(item.kind==='MOVIE'?t('movie'):esc(item.kind))+' · '+esc(title(item.title)):(lang==='ru'?item.displaySeason+' '+t('season'):t('season')+' '+item.displaySeason)+(item.part?' · '+t('seasonPart')+' '+item.part:'')}</option>`).join('');
   $('#watch-episode-label').textContent=current.episodes===1&&current.type==='MOVIE'?t('movie'):t('episode')+' '+(current.episodeManifest?.[episode-1]?.ordinal??current.episodeNumbers?.[episode-1]??episode);
   const audio=audioChoices(current,episode);
   if(!selectedAudio)selectedAudio=preferredAudio(audio,state.preferences,current.id);
   $('#audio-control').hidden=!audio.length;
   $('#audio-picker').innerHTML=(selectedAudio&&!audio.some(x=>x.id===selectedAudio)?`<option value="${esc(selectedAudio)}" selected disabled>${t('audioUnavailable')}</option>`:'')+audio.map(x=>`<option value="${esc(x.id)}" ${x.id===selectedAudio?'selected':''}>${esc(x.label)} · ${t(x.language==='ja'?'audioJapanese':x.language==='en'?'audioEnglish':x.language==='ru'?'audioRussian':'audioOther')}</option>`).join('');
-  const navigation=episodeNavigation(episode,current.episodes);
+  const navigation=seasonNavigation(current,episode);
   $("#previous-episode").hidden=!navigation.previous;
   $("#next-episode").hidden=!navigation.next;
   enhanceSelects($("#watch-page"));
 }
 let recordReady = false;
-async function updateSource(play = false, refresh = false, position) {
+async function updateSource(play = false, refresh = false, position, triedAudio = new Set()) {
   const generation = ++sourceGeneration;
   sourceKey = null;
   recordReady = false;
@@ -889,6 +893,14 @@ async function updateSource(play = false, refresh = false, position) {
     recordReady=true;
     loadAutomaticSkips();
   };
+  triedAudio.add(selectedAudio);
+  const tryOtherAudio=()=>{
+    const next=audioChoices(current,episode).find(t=>!triedAudio.has(t.id));
+    if(!next)return false;
+    selectedAudio=next.id;renderEpisodes();
+    toast(t('audioAutoFallback')+' '+next.label);
+    void updateSource(play,false,video.currentTime||position,triedAudio);return true;
+  };
   let availableSources=[],attemptedURLs=new Set(),nextPrepared=false;
   const onStatus = status=>{
     if(generation!==sourceGeneration || page!=='watch' || !$('#video'))return;
@@ -899,12 +911,15 @@ async function updateSource(play = false, refresh = false, position) {
       (async()=>{await prepareEpisodeAudio(upcoming,nextIndex);
         const choices=audioChoices(upcoming,nextIndex);
         const audio=choices.find(x=>x.id===preferred)?.id||preferredAudio(choices,state.preferences,upcoming.id);
-        await videoEpisode(upcoming,nextIndex,false,audio);
+        // Prefetch only the stored manifest; no resolver request before playback.
       })().catch(()=>{});
     }
     const loading=$(".video-loading");
     if(loading)loading.hidden=!['loading','buffering'].includes(status);
     if(['error','unsupported'].includes(status)){
+      if(status==='error'&&!refresh&&providerTiming?.providerRef?.provider==='kodik'){
+        void updateSource(play,true,video.currentTime||position,triedAudio);return;
+      }
       const fallback=availableSources.find(s=>!attemptedURLs.has(s.url));
       if(fallback){
         attemptedURLs.add(fallback.url);
@@ -913,6 +928,7 @@ async function updateSource(play = false, refresh = false, position) {
         recordReady=false;
         playback.load({url:fallback.url,stream:fallback.stream??fallback.url.includes('.m3u8'),autoplay:play,startAt:video.currentTime||resumeTime(saved,!!user,position),speed:Number(state.preferences.speed)||1,onState:onStatus,onMetadata});return;
       }
+      if(tryOtherAudio())return;
       $("#source-empty").hidden=false;
       $("#source-status").textContent=t(status==='unsupported'?'videoUnsupported':'videoError');
     }else if(status==='autoplayBlocked'){
@@ -941,10 +957,6 @@ async function updateSource(play = false, refresh = false, position) {
       availableSources=info?.sources||[];
       const selected=chooseQuality(info?.sources||[],state.preferences.quality);
       url=selected?.url;stream=selected?.stream??(info?.stream??url?.includes('.m3u8'));
-      const subs=subtitleController?.set(info?.subtitles||[],state.preferences.subtitles)||[];
-      $('#subtitle-control').hidden=false;
-      $('#subtitle-picker').innerHTML=`<option value="off">${t('subtitlesOff')}</option>`+subs.map(s=>`<option value="${s.language}">${esc({ru:'Русский',en:'English',ja:'日本語'}[s.language])}</option>`).join('');
-      $('#subtitle-picker').value=subs.some(s=>s.language===state.preferences.subtitles)?state.preferences.subtitles:'off';
       enhanceSelects($('#watch-page'));
       if(info?.sources?.length){
         $("#quality-control").hidden=false;
@@ -959,6 +971,7 @@ async function updateSource(play = false, refresh = false, position) {
     playback.load({url,stream:stream||url.includes('.m3u8'),autoplay:play,startAt:resumeTime(saved,!!user,position),speed:Number(state.preferences.speed)||1,onState:onStatus,onMetadata});
   }catch(error){
     if(generation!==sourceGeneration)return;
+    if(tryOtherAudio())return;
     $(".video-loading").hidden=true;
     $("#source-empty").hidden=false;
     $("#source-status").textContent=t(error.message==='providerBlocked'?'providerBlocked':error.message==='noSource'?'noSource':'videoError');
@@ -985,7 +998,8 @@ function recordProgress() {
   const value = {
     id: current.id,
     episode,
-    ordinal: current.episodeNumbers?.[episode-1]??episode,
+    season: current.episodeManifest?.[episode-1]?.season??1,
+    ordinal: current.episodeManifest?.[episode-1]?.ordinal??current.episodeNumbers?.[episode-1]??episode,
     time: video.currentTime,
     duration: video.duration,
     completed: video.ended || video.currentTime >= video.duration - 0.5,
@@ -1009,28 +1023,25 @@ async function switchEpisode(n, play = false) {
 }
 function attachVideo() {
   const video = $("#video");
-  subtitleController?.destroy();
-  subtitleController=createSubtitles(video,{onError:()=>toast(t('subtitlesError'))});
   controlsCleanup?.();
   controlsCleanup=attachControls($(".video-shell"), video, t, () => toast(t("playerActionError")), {sound:soundPreferences(state.preferences),onSoundChange:saveSoundPreferences});
   automationCleanup?.();
   automationCleanup=attachPlaybackAutomation(video,{
     context:()=>({ready:recordReady&&!!current&&page==='watch',token:sourceGeneration,
       timing:providerTiming,preferences:state.preferences,episode,total:current?.episodes,
-      hasNext:!!current&&isPublished(current.id)&&episode<current.episodes}),
+      hasNext:!!current&&isPublished(current.id)&&!!seasonNavigation(current,episode).next}),
     onSkip:kind=>{if(kind==='opening')toast(t('introSkipped'));},
     onTick:()=>{if(Date.now()-lastProgress>5000){recordProgress();lastProgress=Date.now();}},
     onEnded:next=>{
     recordProgress();
     renderEpisodes();
-    if (next) switchEpisode(next.episode, next.play);
+    if (next) switchEpisode(seasonNavigation(current,episode).next, next.play);
     }
   });
   video.addEventListener("pause", recordProgress);
 }
 function stopWatching(){
   recordProgress();controlsCleanup?.();controlsCleanup=null;automationCleanup?.();automationCleanup=null;sourceKey=null;recordReady=false;++sourceGeneration;
-  subtitleController?.destroy();subtitleController=null;
   playback?.destroy();playback=null;current=null;closeSelectMenu();
 }
 async function loadAutomaticSkips(){
@@ -1121,10 +1132,20 @@ function showAbout() {
     `<span class="overline">yomiku</span><h2>${t("about")}</h2><p>${t("aboutCopy")}</p><p>${t("sources")}<br>${t("catalogRebuilding")}</p><button class="button primary" data-close="about-dialog">${t("close")}</button>`;
   $("#about-dialog").showModal();
 }
+async function selectSeason(value){
+ if(value.startsWith('release:')){const [,id,season]=value.split(':');const a=playerSeasons.find(a=>a.id===id)||byId(id);const i=a?.episodeManifest?.findIndex(e=>(e.season??1)===Number(season));if(a&&i>=0)await openPlayer(id,i+1);}
+ else if(value.startsWith('season:')){const season=Number(value.slice(7)),i=current.episodeManifest.findIndex(e=>(e.season??1)===season);if(i>=0)await switchEpisode(i+1,!!state.preferences.autoPlay);}
+}
 document.addEventListener("click", async (event) => {
   const b = event.target.closest("button");
   if (!b) return;
   try {
+    if(b.dataset.seasonGroup){
+      seasonGroup=b.dataset.seasonGroup;
+      const entries=seasonMenu(current,playerSeasons,episode).filter(item=>!!item.extra===(seasonGroup==='extras'));
+      if(entries.length&&!entries.some(e=>e.selected))await selectSeason(entries[0].value);
+      renderEpisodes();return;
+    }
     if(b.dataset.styleChoice){
       const next=normalizeStyle(b.dataset.styleChoice);
       if(!mutate({type:'preferences',patch:{appearance:next,theme:'dark'}}))return;
@@ -1290,10 +1311,10 @@ document.addEventListener("click", async (event) => {
         await updateSource(true,true);
         break;
       case "previous":
-        await switchEpisode(episode - 1, !!state.preferences.autoPlay);
+        await switchEpisode(seasonNavigation(current,episode).previous, !!state.preferences.autoPlay);
         break;
       case "next":
-        await switchEpisode(episode + 1, !!state.preferences.autoPlay);
+        await switchEpisode(seasonNavigation(current,episode).next, !!state.preferences.autoPlay);
         break;
       case "banner": $('#banner-file')?.click();break;
       case "remove-banner": if(requireUser()){mutate({type:'preferences',patch:{banner:''}});bannerLoader.reset();render();}break;
@@ -1411,14 +1432,8 @@ document.addEventListener("change", (event) => {
     const playing=!$('#video').paused;recordProgress();selectedAudio=input.value;
     mutate({type:'preferences',patch:{audio:selectedAudio,audioByAnime:{...state.preferences.audioByAnime,[current.id]:selectedAudio}}});updateSource(playing,false,$('#video').currentTime);
   }
-  if(input.id==='subtitle-picker'){
-    subtitleController?.select(input.value);mutate({type:'preferences',patch:{subtitles:input.value}});
-  }
   if (input.id === "episode-picker") switchEpisode(Number(input.value),!!state.preferences.autoPlay);
-  if(input.id==='season-picker'){
-   if(input.value.startsWith('season:')){const season=Number(input.value.slice(7)),i=current.episodeManifest.findIndex(e=>(e.season??1)===season);if(i>=0)switchEpisode(i+1,!!state.preferences.autoPlay);}
-   else openPlayer(input.value);
-  }
+  if(input.id==='season-picker')void selectSeason(input.value);
   if (input.id === "quality") {
     const v=$("#video"),play=!!v && !v.paused;
     recordProgress();

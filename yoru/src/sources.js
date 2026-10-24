@@ -1,12 +1,26 @@
-import {localSeasons} from './catalog-seasons.js';
+import metadata from './catalog-metadata.json' with {type:'json'};
+import {withMetadata} from './catalog-metadata.js';
+import {refreshKodikMedia} from './kodik-playback.js';
+import {localSeasons,franchiseSeasons} from './catalog-seasons.js';
 import {queryCatalogue} from './catalog-query.js';
 // Publication allowlist only. Legacy adapters are quarantined in legacy-sources.js.
-import publication from './published-catalog.json' with {type:'json'};
+import publication from './runtime-catalog.json' with {type:'json'};
 import {createApprovedCatalogue} from './approved-catalog.js';
 import {registerAnime} from './catalog.js';
 import {requestCache} from './request-cache.js';
-const approved=createApprovedCatalogue(publication);
-export const publishedItems=approved.items;
+export const publishedItems=publication.items.map(a=>withMetadata(a,metadata));
+const mediaCatalogue=requestCache(async id=>{
+ if(!isPublished(id))throw Error('notAdmitted');
+ const url=new URL(`data/media/${encodeURIComponent(id)}.json`,globalThis.document?.baseURI||'https://yomiku.site/');
+ url.searchParams.set('v',publication.revision);
+ const response=await fetch(url,{signal:AbortSignal.timeout(10000)});
+ if(!response.ok)throw Error('providerError');
+ const data=await response.json();
+ if(data.items?.length!==1||data.items[0].id!==id)throw Error('invalid_manifest');
+ const catalogue=createApprovedCatalogue(data);
+ if(!catalogue.find(id))throw Error('notAdmitted');
+ return catalogue;
+},{ttl:3600000,max:12});
 export const isPublished=id=>publishedItems.some(a=>a.id===id);
 export const combinedCatalogue=requestCache(async(options={})=>{
  const items=queryCatalogue(publishedItems,options);
@@ -16,22 +30,29 @@ export const combinedCatalogue=requestCache(async(options={})=>{
 export const resolveRelease=requestCache(async a=>{const found=publishedItems.find(x=>x.id===a.id);if(!found)throw Error('notAdmitted');return registerAnime(found);});
 export async function findWatchRelease(id){return publishedItems.find(a=>a.id===id)||null;}
 export async function discoveryIndex(){return publishedItems;}
-export async function prepareEpisodeAudio(){}
+export async function prepareEpisodeAudio(a){if(a?.id&&isPublished(a.id))await mediaCatalogue(a.id);}
+export const knownSeasons=a=>localSeasons(publishedItems,a);
 export const releaseSeasons=requestCache(async a=>{
- const local=localSeasons(publishedItems,a);if(local.length>1||!(a.ids?.mal||a.malId))return local;
+ const local=localSeasons(publishedItems,a),shiki=a.ids?.shikimori||a.ids?.mal||a.malId;
+ if(!shiki)return local;
+ try{
+  const response=await fetch(`https://shikimori.io/api/animes/${Number(shiki)}/franchise`,{signal:AbortSignal.timeout(6000)});
+  if(response.ok){const data=await response.json();if(Array.isArray(data.links))return franchiseSeasons(publishedItems,a,data.links,data.nodes);}
+ }catch{}
+ if(!(a.ids?.mal||a.malId))return local;
  try{
   const response=await fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:'query($id:Int){Media(idMal:$id,type:ANIME){relations{edges{relationType node{idMal type}}}}}',variables:{id:Number(a.ids?.mal||a.malId)}}),signal:AbortSignal.timeout(6000)});
   if(!response.ok)return local;const data=await response.json();const relatedMalIds=(data.data?.Media?.relations?.edges||[]).filter(e=>['PREQUEL','SEQUEL'].includes(e.relationType)&&e.node.type==='ANIME').map(e=>e.node.idMal).filter(Boolean);
   return localSeasons(publishedItems,{...a,relatedMalIds});
  }catch{return local;}
 },{ttl:3600000});
-export async function videoEpisode(a,index,_refresh=false,audioId){
- const media=approved.video(a.id,index,audioId);
+export async function videoEpisode(a,index,refresh=false,audioId){
+ const media=(await mediaCatalogue(a.id)).video(a.id,index,audioId);
  if(media.providerRef?.provider!=='kodik')return media;
+ // The importer verified these exact rendition URLs. Refresh only after a
+ // playback failure, rather than blocking every episode behind an edge request.
+ if(!refresh&&media.sources?.length)return media;
  const config=globalThis.window?.YORU_CONFIG;
  if(!config?.supabaseUrl)throw Error('providerError');
- const response=await fetch(config.supabaseUrl+'/functions/v1/anime-source',{method:'POST',headers:{'Content-Type':'application/json',apikey:config.supabaseKey},body:JSON.stringify({action:'kodik-video',id:a.id,episode:index,audio:media.audioId}),signal:AbortSignal.timeout(18000)});
- if(!response.ok)throw Error('providerError');const fresh=await response.json();
- if(fresh.audioId!==media.audioId||!fresh.sources?.length)throw Error('audioUnavailable');
- return {...media,...fresh};
+ return refreshKodikMedia(media,config,a.id,index);
 }

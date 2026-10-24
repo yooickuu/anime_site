@@ -59,6 +59,21 @@ export function allEpisodes(release){
  const seen=new Set();for(const e of rows){const k=`${e.season}:${e.ordinal}`;if(seen.has(k))throw Error('duplicate_episode');seen.add(k);}
  if(!rows.length)throw Error('no_episodes');if(new Set(rows.map(e=>e.url)).size!==rows.length)throw Error('ambiguous_episode_links');return rows.sort((a,b)=>a.season-b.season||a.ordinal-b.ordinal);
 }
+// Resolve incomplete list entries using every search page, retaining all season maps.
+export async function completeRelease(api,release){
+ try{allEpisodes(release);return release;}catch(error){if(!['incomplete_episode_manifest','no_episodes'].includes(error.message))throw error;}
+ const merged={...release,seasons:structuredClone(release.seasons||{})};
+ for await(const page of api.pages('/search',{...catalogParams,id:release.id}))for(const row of page.results){
+  if(String(row.id)!==String(release.id))continue;
+  merged.episodes_count=Math.max(Number(merged.episodes_count)||0,Number(row.episodes_count)||0);
+  for(const [season,data]of Object.entries(row.seasons||{}))merged.seasons[season]={...data,episodes:{...merged.seasons[season]?.episodes,...data.episodes}};
+ }
+ allEpisodes(merged);return merged;
+}
+export function linkedEpisodes(release){
+ const rows=allEpisodes(release),translation=translationIdentity(release),multi=new Set(rows.map(e=>e.season)).size>1;
+ return rows.map((row,i)=>({number:multi?i+1:row.ordinal,ordinal:row.ordinal,season:row.season,audio:[{...translation,duration:null,sources:[],subtitles:[],opening:null,ending:null,validation:'provider-link',providerRef:{provider:'kodik',releaseId:String(release.id),translationId:String(release.translation.id),url:row.url,season:row.season,ordinal:row.ordinal}}]}));
+}
 export function mergeKodikRelease(existing,incoming){
  if(!existing)return incoming;
  const result=structuredClone(existing),added=structuredClone(incoming);
@@ -72,6 +87,9 @@ export function mergeKodikRelease(existing,incoming){
  result.artwork=added.artwork||result.artwork;
  result.description=added.description||result.description;
  result.rating=added.rating||result.rating;
+ result.translations={...result.translations,...added.translations};
+ result.airedAt=added.airedAt||result.airedAt;
+ result.relations=added.relations?.length?added.relations:result.relations;
 
  result.kodikRevisions={...result.kodikRevisions,...added.kodikRevisions};
  result.kodikIds=[...new Set([...(result.kodikIds||[]),...(added.kodikIds||[])])];
@@ -79,7 +97,7 @@ export function mergeKodikRelease(existing,incoming){
  for(const e of added.episodes){
   let prior=result.episodes.find(p=>(p.season??1)===(e.season??1)&&(p.ordinal??p.number)===(e.ordinal??e.number));
   if(!prior){result.episodes.push(e);continue;}
-  for(const t of e.audio){const n=prior.audio.findIndex(a=>a.id===t.id);if(n>=0)prior.audio[n]=t;else prior.audio.push(t);}
+  for(const t of e.audio){const n=prior.audio.findIndex(a=>a.id===t.id);if(n>=0){const old=prior.audio[n];prior.audio[n]=!t.sources?.length&&old.providerRef?.url===t.providerRef?.url?{...old,...t,sources:old.sources,duration:old.duration,opening:old.opening,ending:old.ending}:t;}else prior.audio.push(t);}
  }
  result.episodes.sort((a,b)=>(a.season??1)-(b.season??1)||(a.ordinal??a.number)-(b.ordinal??b.number));
  const multi=new Set(result.episodes.map(e=>e.season??1)).size>1;

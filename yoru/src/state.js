@@ -177,7 +177,7 @@ export function applyOperation(value, op) {
       s.preferences = { ...s.preferences, ...op.patch };
       break;
     case "rebaseEpisodes":
-      s.progress=rebaseProgress(s.progress,op.id,op.numbers);
+      s.progress=rebaseProgress(s.progress,op.id,op.numbers,op.manifest);
       break;
     case "progress":
       if ((s.progress[op.key]?.updated || 0) > (op.value.updated || 0)) break;

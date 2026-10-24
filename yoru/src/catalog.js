@@ -176,6 +176,10 @@ export const demo = {
 };
 export const remoteAnime = new Map();
 export const registerAnime = (a) => {
+  // Account snapshots omit episode manifests and translated descriptions.
+  // They must never replace the current published card after sign-in.
+  const existing=remoteAnime.get(a?.id);
+  if(existing?.catalogApproved&&existing.episodeManifest&&!a?.episodeManifest)return existing;
   if (a?.id) remoteAnime.set(a.id, a);
   return a;
 };
@@ -184,7 +188,7 @@ export const byId = (id) =>
   anime.find((a) => a.id === id) ||
   (id === "sintel" ? demo : null);
 export const titleFor = (a, lang) =>
-  a?.translations?.[lang]?.[0] || a?.title || "";
+  a?.translations?.[lang]?.[0] || (lang!=="ru"?a?.originalTitle:"") || a?.title || "";
 export const descriptionFor = (a, lang) =>
-  a?.translations?.[lang]?.[1] || a?.description || "";
+  a?.translations?.[lang]?.[1] || (lang==='ja'?a?.translations?.en?.[1]:'') || a?.description || "";
 export const cover = (a) => preferredPoster(a) || (a.providerId ? "" : `assets/${a.id}.jpg`);
