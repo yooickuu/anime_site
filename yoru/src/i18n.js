@@ -640,7 +640,6 @@ const watchRefresh={
  heroTitle:['Аниме под твоё настроение.','Anime for every mood.','今の気分に、ぴったりのアニメ。'],
  heroCopy:['Знакомые миры и неожиданные открытия. Выбирай аниме — мы запомним, где ты остановился.','Familiar worlds and unexpected discoveries. Find your next anime. We’ll remember where you left off.','大好きな世界も、思いがけない出会いも。次に観たいアニメを見つけよう。続きはいつでもここから。'],
  audioUnavailable:['Эта озвучка недоступна для серии','This audio is unavailable for this episode','このエピソードでは選択した音声を利用できません'],audioOther:['другая дорожка','Other audio','その他の音声'],audioEnglish:['английская','English','英語'],subtitles:['Субтитры','Subtitles','字幕'],subtitlesOff:['Выключены','Off','オフ'],subtitlesError:['Не удалось загрузить субтитры','Could not load subtitles','字幕を読み込めませんでした'],
- iframeFallback:['Резервный плеер Kodik','Kodik fallback player','Kodikの予備プレーヤー'],
  mainSeasons:['Сезоны','Seasons','シーズン'],specialMaterials:['Спешлы и доп. материалы','Specials and extras','特別編・その他'],audioAutoFallback:['Включена другая озвучка:','Switched audio:','音声を切り替えました：'],
  seasonPart: ['Часть','Part','パート'],
 additionalEpisodes:['Дополнительные серии','Additional episodes','追加エピソード'],season:['Сезон','Season','シーズン'],audio:['Озвучка','Audio','音声'],audioRussian:['русская','Russian','ロシア語'],audioJapanese:['японская · оригинал','Japanese · original','日本語・オリジナル'],

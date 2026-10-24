@@ -1,4 +1,3 @@
-import {createKodikIframe} from './kodik-iframe.js';
 import curatedSpotlight from './spotlight.json';
 import {episodeSeasonOptions,firstMainEpisode,seasonMenu,seasonNavigation} from './catalog-seasons.js';
 import {normalizeGenre,matchesType,searchScore,suggestions,selectSpotlight} from './catalog-query.js';
@@ -827,7 +826,7 @@ async function openPlayer(id, requested, pushRoute=true) {
   if ((a.providerId || a.animeVostId || a.animeGoId) && !a.episodes) {toast(t("noReleasedEpisodes"));playerOpening=false;return;}
   if ((user && !ready) || openingAccount!==authGeneration || location.hash!==openingHash) {playerOpening=false;return;}
   try {
-    recordProgress();clearIframePlayback();
+    recordProgress();
     $$("dialog[open]").forEach((d) => d.close());
     controlsCleanup?.();controlsCleanup=null;
     playback?.destroy();
@@ -878,22 +877,9 @@ function renderEpisodes() {
   $("#next-episode").hidden=!navigation.next;
   enhanceSelects($("#watch-page"));
 }
-let recordReady = false,iframePlayback=null,kodikIframeSession=false;
-function clearIframePlayback(){iframePlayback?.destroy();iframePlayback=null;const shell=$('.video-shell');shell?.classList.remove('iframe-mode');const video=$('#video');if(video)video.hidden=false;}
-function mountIframePlayback(info,play,position,generation){
- if(generation!==sourceGeneration)return;
- playback?.destroy();recordReady=false;providerTiming=info;kodikIframeSession=true;
- const shell=$('.video-shell'),video=$('#video');video.hidden=true;shell.classList.add('iframe-mode');shell.classList.remove('controls-idle');
- $('#source-empty').hidden=true;$('.video-loading').hidden=true;$('#source-status').textContent=t('iframeFallback');
- iframePlayback=createKodikIframe({container:$('.video-wrap'),url:info.embedURL,title:title(current),autoplay:play,startAt:resumeTime(state.progress[sourceKey],!!user,position),sound:soundPreferences(state.preferences),speed:Number(state.preferences.speed)||1,
- onReady:media=>{if(generation!==sourceGeneration)return;recordReady=true;providerTiming={...providerTiming,...approvedSkipTimes(providerTiming,media.duration)};},
- onError:()=>{if(generation===sourceGeneration){$('#source-empty').hidden=false;$('#source-status').textContent=t('videoError');}}});
- bindPlaybackAutomation(iframePlayback);
-}
-
+let recordReady = false;
 async function updateSource(play = false, refresh = false, position, triedAudio = new Set()) {
   const generation = ++sourceGeneration;
-  clearIframePlayback();
   sourceKey = null;
   recordReady = false;
   providerTiming = null;
@@ -901,7 +887,6 @@ async function updateSource(play = false, refresh = false, position, triedAudio 
   if (!video || !current) return;
   playback?.suspend();
   playback ||= createPlayback(video);
-  bindPlaybackAutomation(video);
   const onMetadata=()=>{
     if(generation!==sourceGeneration)return;
     if(current?.catalogApproved)providerTiming={...providerTiming,...approvedSkipTimes(providerTiming,video.duration)};
@@ -966,9 +951,8 @@ async function updateSource(play = false, refresh = false, position, triedAudio 
     if(current.animeGoId){const loadingAnime=current;await prepareEpisodeAudio(loadingAnime,episode).catch(()=>{loadingAnime.currentGoVoices=[];loadingAnime.goVoiceOrdinal=null;});if(generation!==sourceGeneration)return;selectedAudio=preferredAudio(audioChoices(current,episode),state.preferences,current.id);renderEpisodes();}
     if(!isPublished(current.id))throw Error('noSource');
     else if(current.catalogApproved){
-      const info=await videoEpisode(current,episode,refresh,selectedAudio,kodikIframeSession);
+      const info=await videoEpisode(current,episode,refresh,selectedAudio);
       if(generation!==sourceGeneration)return;
-      if(info.embedURL){mountIframePlayback(info,play,position,generation);return;}
       providerTiming=info;
       availableSources=info?.sources||[];
       const selected=chooseQuality(info?.sources||[],state.preferences.quality);
@@ -994,13 +978,13 @@ async function updateSource(play = false, refresh = false, position, triedAudio 
   }
 }
 function saveSoundPreferences(){
-  const video=iframePlayback||$('#video');if(!video||(user&&!ready))return;
+  const video=$('#video');if(!video||(user&&!ready))return;
   const patch=soundPreferences(video),saved=soundPreferences(state.preferences);
   if(patch.volume!==saved.volume||patch.muted!==saved.muted)mutate({type:'preferences',patch});
 }
 function recordProgress() {
   saveSoundPreferences();
-  const video = iframePlayback||$("#video");
+  const video = $("#video");
   if (
     !user || !ready ||
     !current ||
@@ -1041,9 +1025,6 @@ function attachVideo() {
   const video = $("#video");
   controlsCleanup?.();
   controlsCleanup=attachControls($(".video-shell"), video, t, () => toast(t("playerActionError")), {sound:soundPreferences(state.preferences),onSoundChange:saveSoundPreferences});
-  bindPlaybackAutomation(video);
-}
-function bindPlaybackAutomation(video){
   automationCleanup?.();
   automationCleanup=attachPlaybackAutomation(video,{
     context:()=>({ready:recordReady&&!!current&&page==='watch',token:sourceGeneration,
@@ -1060,7 +1041,7 @@ function bindPlaybackAutomation(video){
   video.addEventListener("pause", recordProgress);
 }
 function stopWatching(){
-  recordProgress();clearIframePlayback();controlsCleanup?.();controlsCleanup=null;automationCleanup?.();automationCleanup=null;sourceKey=null;recordReady=false;++sourceGeneration;
+  recordProgress();controlsCleanup?.();controlsCleanup=null;automationCleanup?.();automationCleanup=null;sourceKey=null;recordReady=false;++sourceGeneration;
   playback?.destroy();playback=null;current=null;closeSelectMenu();
 }
 async function loadAutomaticSkips(){
@@ -1448,8 +1429,8 @@ document.addEventListener("change", (event) => {
     });
   if(input.dataset.preference==='autoSkip')loadAutomaticSkips();
   if(input.id==='audio-picker'){
-    const media=iframePlayback||$('#video'),playing=!media.paused,position=media.currentTime;recordProgress();selectedAudio=input.value;
-    mutate({type:'preferences',patch:{audio:selectedAudio,audioByAnime:{...state.preferences.audioByAnime,[current.id]:selectedAudio}}});updateSource(playing,false,position);
+    const playing=!$('#video').paused;recordProgress();selectedAudio=input.value;
+    mutate({type:'preferences',patch:{audio:selectedAudio,audioByAnime:{...state.preferences.audioByAnime,[current.id]:selectedAudio}}});updateSource(playing,false,$('#video').currentTime);
   }
   if (input.id === "episode-picker") switchEpisode(Number(input.value),!!state.preferences.autoPlay);
   if(input.id==='season-picker')void selectSeason(input.value);
@@ -1521,11 +1502,9 @@ document.addEventListener("keydown", (event) => {
     return;
   }
   if(page!=='watch'||document.querySelector('dialog[open]'))return;
-  const action=playerShortcut(event),v=iframePlayback||$('#video');
+  const action=playerShortcut(event),v=$('#video');
   if(!action||!v)return;
   event.preventDefault();
-  if(iframePlayback&&action==='play'){v.paused?v.play():v.pause();return;}
-  if(iframePlayback&&action==='mute'){v.muted=!v.muted;saveSoundPreferences();return;}
   const selector={fullscreen:'[data-video="fullscreen"]',mute:'[data-video="mute"]',cinema:'[data-action="cinema"]',play:'[data-video="play"]'}[action];
   if(selector){$(selector)?.click();return;}
   if(Number.isFinite(v.duration))v.currentTime=Math.min(v.duration,Math.max(0,v.currentTime+(action==='back'?-10:10)));

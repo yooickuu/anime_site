@@ -269,3 +269,10 @@ test('three existing dubs never prevent a longer translation adding missing epis
   const saved=JSON.parse(await readFile('src/published-catalog.json'));assert.equal(saved.items.length,1);assert.equal(saved.items[0].episodes.length,3);
  }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
 });
+
+test('resolver failure never substitutes an embedded third-party player',async()=>{
+ const media={audioId:'kodik-42',providerRef:{provider:'kodik',translationId:42,url:'https://kodikplayer.com/seria/123/abc123/720p'},sources:[]};
+ const config={supabaseUrl:'https://example.test',supabaseKey:'public'};
+ await assert.rejects(refreshKodikMedia(media,config,'mal-1',1,{fetcher:async()=>new Response('',{status:502})}),/providerError/);
+ await assert.rejects(refreshKodikMedia(media,config,'mal-1',1,{fetcher:async()=>Response.json({audioId:'kodik-42',sources:[]})}),/audioUnavailable/);
+});
