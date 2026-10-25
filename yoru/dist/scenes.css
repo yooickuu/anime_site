@@ -287,3 +287,19 @@ main.home-container{margin-top:0!important;padding-top:0}
 .video-sound:focus-within .video-volume{opacity:1!important;visibility:visible!important;pointer-events:auto!important}
 @media(hover:hover){.video-sound:hover .video-volume{opacity:1!important;visibility:visible!important;pointer-events:auto!important}}
 @media(prefers-reduced-motion:reduce){.video-controls .video-sound .video-volume{transition:none}}
+
+/* Profile artwork also extends behind navigation without covering profile actions. */
+body:has(.profile-banner-stage){--profile-nav-space:94px;--profile-banner-height:440px}
+body:has(.profile-banner-stage) .header{position:fixed;inset:0 0 auto;width:100%;box-sizing:border-box}
+body.dark[data-style]:has(.profile-banner-stage) .header:not(.scrolled){background:linear-gradient(180deg,#090b1070,#090b1018 75%,transparent);box-shadow:none;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+main:has(.profile-banner-stage){margin-top:0!important;padding-top:0}
+.profile-banner-stage{height:calc(var(--profile-banner-height,440px) + var(--profile-nav-space,94px))}
+.profile-banner-heading{top:calc(var(--profile-nav-space,94px) + 28px)}
+.profile-cover-actions{top:calc(var(--profile-nav-space,94px) + 100px)}
+.profile-banner-error{top:calc(var(--profile-nav-space,94px) + 120px)}
+@media(max-width:800px){body:has(.profile-banner-stage){--profile-nav-space:132px;--profile-banner-height:380px}}
+@media(max-width:600px){
+ body:has(.profile-banner-stage){--profile-banner-height:330px}
+ .profile-banner-heading{top:calc(var(--profile-nav-space) + 22px)}
+ .profile-cover-actions{top:calc(var(--profile-nav-space) + 118px)}
+}
