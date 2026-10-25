@@ -549,3 +549,9 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - Shared bounded raw manifest cache (64x<=256KB) lasts600s; validates signature before cache hits and re-signs child URLs for current request expiry. VOD/master only; changing live media playlists no-store.
 - HLS network fatal recovery retries startLoad3 times with1500ms delay; cancels old episode retry callbacks. HLS response/startup budgets increased to allow server retries; resolver browser timeout180s. Native video only, no iframe.
 - 208 tests, syntax and npm build passed. Supabase v17 prepared in setup; user asked for manual Deploy because CUA native pipe unavailable. GitHub push alone does not deploy Supabase. No live source recovery claimed.
+
+## 2026-10-25 — catalogue UI and client retry only
+- Discovery tiles now apply actual controls: rating>=8, ongoing, MOVIE. Popularity descending default; ascending excludes unknown counts from front; update order uses per-title Kodik revision dates preserved as catalogUpdatedAt in runtime cards (8093/8210 known). No importer or Supabase17 code changes.
+- HLS three delayed reconnects now share one retry path with startup/network errors; duplicate pending errors do not consume attempts; playback resets consecutive-failure count. Resolver errors before HLS also receive three frontend retries, cancelled on episode/navigation changes. No iframe.
+- Home header overlays artwork; full-viewport hero; mobile horizontal masks removed. Safari desktop screenshot confirms background behind header. Real filter clicks confirmed456high-rating/115ongoing/1269movie results. Mobile CSS adjusted, no device verification.
+- 212tests, syntax, fullbuild passed8210/8210. Source catalogue/archive, streams, proxy and import unchanged. Final publication follows this entry.

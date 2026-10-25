@@ -71,5 +71,15 @@ test('HLS transient network errors restart loading; switching videos cancels pen
  assert.equal(states.at(-1),'buffering');assert.ok(!states.includes('unsupported'));
  const retry=[...timers.values()].find(t=>t.ms===1500);retry.fn();assert.equal(first.starts,1);
  first.callback(null,{fatal:true,type:'network'});const stale=[...timers.values()].filter(t=>t.ms===1500).at(-1);
- player.load({url:'https://example.test/b.m3u8',stream:true});stale.fn();assert.equal(first.starts,1);player.destroy();
+ player.load({url:'https://example.test/b.m3u8',stream:true});stale.fn();assert.equal(first.starts,1);
+ const second=FakeHls.instances[1];
+ for(let i=0;i<3;i++){
+  second.callback(null,{fatal:true,type:'network',response:{code:502}});
+  // Repeated events during the pause must not consume another attempt.
+  second.callback(null,{fatal:true,type:'network'});
+  assert.ok(!states.includes('error'));
+  const pending=[...timers.values()].filter(t=>t.ms===1500).at(-1);pending.fn();
+ }
+ assert.equal(second.starts,3);second.callback(null,{fatal:true,type:'network'});assert.equal(states.at(-1),'error');
+ player.destroy();
 });

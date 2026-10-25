@@ -31,9 +31,17 @@ export function createPlayback(video, onState = () => {}, {schedule=setTimeout,c
       notify(state);
     };
     const listen = (name, fn) => video.addEventListener(name, fn, { signal: events.signal });
-    let mediaRetries = 0, networkRetries = 0;
+    let mediaRetries = 0, networkRetries = 0, retryPending=false, failed=false;
+    const fail=()=>{if(failed||own!==generation)return;failed=true;cancel(retryTimer);cancel(startupTimer);hls?.stopLoad();emit('error');};
+    const armTimeout=()=>{cancel(startupTimer);startupTimer=schedule(()=>{if(own===generation&&video.readyState<2){if(hls)retryNetwork();else fail();}},startupTimeout);};
+    const retryNetwork=()=>{
+      if(own!==generation||failed||retryPending)return;
+      if(networkRetries>=3){fail();return;}
+      networkRetries++;retryPending=true;emit('buffering');cancel(startupTimer);
+      retryTimer=schedule(()=>{retryTimer=null;retryPending=false;if(own!==generation||failed)return;hls?.startLoad();armTimeout();},1500);
+    };
     emit('loading');
-    startupTimer=schedule(()=>{if(own===generation && video.readyState<2)emit('error');},startupTimeout);
+    armTimeout();
     listen('loadedmetadata', () => {
       if(!autoplay)emit('ready');
       if (startAt > 0 && Number.isFinite(video.duration)) video.currentTime = Math.min(startAt, Math.max(0, video.duration - 0.1));
@@ -45,9 +53,9 @@ export function createPlayback(video, onState = () => {}, {schedule=setTimeout,c
       });
     });
     listen('canplay', () => emit('ready'));
-    listen('playing', () => emit('playing'));
+    listen('playing', () => {networkRetries=0;retryPending=false;cancel(retryTimer);retryTimer=null;emit('playing');});
     listen('waiting', () => emit('buffering'));
-    listen('error', () => { if (video.getAttribute('src')) emit('error'); });
+    listen('error', () => {if(hls&&video.error?.code===2)retryNetwork();else if(video.getAttribute('src'))fail();});
     if (stream && !video.canPlayType?.('application/vnd.apple.mpegurl') && HlsClass.isSupported()) {
       hls = new HlsClass({ startPosition: startAt > 0 ? startAt : -1, maxBufferLength: 30, maxMaxBufferLength: 60, manifestLoadPolicy:{default:{...HlsClass.DefaultConfig.manifestLoadPolicy.default,maxTimeToFirstByteMs:85000,maxLoadTimeMs:90000}},fragLoadPolicy:{default:{...HlsClass.DefaultConfig.fragLoadPolicy.default,maxTimeToFirstByteMs:85000,maxLoadTimeMs:90000}},playlistLoadPolicy:{default:{...HlsClass.DefaultConfig.playlistLoadPolicy.default,maxTimeToFirstByteMs:85000,maxLoadTimeMs:90000}} });
       const transport = hls;
@@ -55,10 +63,9 @@ export function createPlayback(video, onState = () => {}, {schedule=setTimeout,c
         if (!data.fatal || own !== generation) return;
         if (data.type === HlsClass.ErrorTypes.MEDIA_ERROR && mediaRetries++ < 1) {
           transport.recoverMediaError();
-        } else if (data.type === HlsClass.ErrorTypes.NETWORK_ERROR && networkRetries++ < 3 && ![401,403,404,410].includes(data.response?.code)) {
-          emit('buffering');cancel(startupTimer);cancel(retryTimer);
-          retryTimer=schedule(()=>{if(own!==generation)return;transport.startLoad();startupTimer=schedule(()=>{if(own===generation&&video.readyState<2)emit('error');},startupTimeout);},1500);
-        } else { transport.stopLoad(); emit('error'); }
+        } else if (data.type === HlsClass.ErrorTypes.NETWORK_ERROR && ![401,403,404,410].includes(data.response?.code)) {
+          retryNetwork();
+        } else { fail(); }
       });
       hls.loadSource(url);
       hls.attachMedia(video);

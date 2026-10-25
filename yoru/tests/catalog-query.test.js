@@ -30,3 +30,10 @@ test('year and rating filters combine with genre and ignore missing ratings',()=
  assert.deepEqual(queryCatalogue(rows,{minRating:8}).map(a=>a.id),['one']);
  assert.equal(queryCatalogue(rows,{year:2008,minRating:6}).length,0);
 });
+test('discovery presets filter actual rows and sorts use popularity and update timestamps',async()=>{
+ const {discoveryOptions}=await import('../src/catalog-query.js');
+ const data=[{id:'a',title:'A',type:'TV',rating:9,popularity:100,ongoing:true,catalogUpdatedAt:100},{id:'b',title:'B',type:'movie',rating:7,popularity:20,catalogUpdatedAt:300},{id:'c',title:'C',type:'TV',rating:8,popularity:300,catalogUpdatedAt:200},{id:'d',title:'D',type:'TV'}];
+ const ids=o=>queryCatalogue(data,o).map(a=>a.id);
+ assert.deepEqual(ids({}),['c','a','b','d']);assert.deepEqual(ids({sort:'hiddenGems'}),['b','a','c','d']);assert.deepEqual(ids({sort:'latest'}),['b','c','a','d']);
+ assert.deepEqual(ids(discoveryOptions('topRated')),['a','c']);assert.deepEqual(ids(discoveryOptions('airingNow')),['a']);assert.deepEqual(ids(discoveryOptions('films')),['b']);
+});

@@ -45,9 +45,25 @@ export function searchScore(item,query){
  if(tokens.every(t=>words.some(w=>w.startsWith(t)||(t.length>=4&&near(t,w,t.length>=8?2:1)))))return 40;
  return 0;
 }
+export function discoveryOptions(view){
+ return view==='topRated'?{minRating:8,sort:'topRated'}:view==='airingNow'?{ongoing:true,sort:'picked'}:view==='films'?{type:'MOVIE',sort:'picked'}:{sort:'picked'};
+}
+const rating=a=>Number(a.audienceRating||a.rating||a.score)||0;
+const popularity=a=>Number(a.popularity||a.views||a.members)||0;
+const updated=a=>{const value=a.catalogUpdatedAt||a.updatedAt||a.updated_at||a.lastEpisodeAt;return typeof value==='number'?value:Date.parse(value)||0;};
 export function queryCatalogue(items,options={}){
- const rows=items.map((item,index)=>({item,index,score:searchScore(item,options.query)})).filter(({item,score})=>score>0&&(!options.year||options.year==='all'||Number(item.year)===Number(options.year))&&(!options.minRating||Number(item.audienceRating||item.rating||item.score)>=Number(options.minRating))&&matchesType(item,options.type)&&(!options.ongoing||item.ongoing)&&(!options.genre||options.genre==='all'||item.genres?.some(g=>normalizeGenre(g)===normalizeGenre(options.genre))));
- rows.sort((a,b)=>options.query?b.score-a.score||b.index-a.index:options.sort==='newest'?(b.item.year||0)-(a.item.year||0):options.sort==='oldest'?(a.item.year||0)-(b.item.year||0):options.sort==='alphabetical'?a.item.title.localeCompare(b.item.title):options.view==='popular'?(Number(b.item.audienceRating||b.item.rating||b.item.score)||0)-(Number(a.item.audienceRating||a.item.rating||a.item.score)||0):b.index-a.index);
+ const rows=items.map((item,index)=>({item,index,score:searchScore(item,options.query)})).filter(({item,score})=>score>0&&(!options.year||options.year==='all'||Number(item.year)===Number(options.year))&&(!options.minRating||rating(item)>=Number(options.minRating))&&matchesType(item,options.type)&&(!options.ongoing||item.ongoing)&&(!options.genre||options.genre==='all'||item.genres?.some(g=>normalizeGenre(g)===normalizeGenre(options.genre))));
+ const compare=(a,b)=>{
+  const x=a.item,y=b.item;
+  if(options.sort==='newest')return (y.year||0)-(x.year||0);
+  if(options.sort==='oldest')return (x.year||0)-(y.year||0);
+  if(options.sort==='alphabetical')return x.title.localeCompare(y.title);
+  if(options.sort==='latest')return updated(y)-updated(x);
+  if(options.sort==='topRated')return rating(y)-rating(x)||popularity(y)-popularity(x);
+  if(options.sort==='hiddenGems')return Number(popularity(y)>0)-Number(popularity(x)>0)||popularity(x)-popularity(y);
+  return popularity(y)-popularity(x);
+ };
+ rows.sort((a,b)=>(options.query?b.score-a.score:0)||compare(a,b)||b.index-a.index);
  return rows.map(r=>r.item);
 }
 export function suggestions(items,query,limit=7){return normalizeSearch(query)?queryCatalogue(items,{query}).slice(0,limit):[];}

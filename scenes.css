@@ -270,3 +270,12 @@ body.dark[data-style] .details-dialog{width:100vw;max-width:100vw;max-height:100
 .video-controls .video-volume{flex:0 1 80px;min-width:40px}
 .video-controls .video-option{flex:0 0 auto}
 @media(max-width:480px){.video-controls .video-time{display:none}.video-controls{gap:4px}.video-controls .video-option .select-trigger{font-size:11px;padding:5px;gap:3px}.video-controls .select-trigger svg{width:12px;height:12px}}
+
+/* Home artwork starts behind navigation; other pages retain their sticky header. */
+body:has(.home-container) .header{position:fixed;inset:0 0 auto;width:100%;box-sizing:border-box}
+body.dark[data-style]:has(.home-container) .header:not(.scrolled){background:linear-gradient(180deg,#090b1070,#090b1018 75%,transparent);box-shadow:none;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+main.home-container{margin-top:0!important;padding-top:0}
+.home-container .cinematic-hero{width:100vw;max-width:none;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);margin-top:0}
+@media(max-width:800px){
+ .home-container .cinematic-hero .hero-picture{mask-image:linear-gradient(#000 48%,#000e 65%,#0007 84%,transparent);-webkit-mask-image:linear-gradient(#000 48%,#000e 65%,#0007 84%,transparent);mask-composite:add;-webkit-mask-composite:source-over}
+}

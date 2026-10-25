@@ -12,7 +12,7 @@ export function createApprovedCatalogue(publication,{now=Date.now(),playerSubtit
  })}))}));
  const audited=auditBatch(items,{now,playerSubtitlesReady,strict});
  items.forEach((item,i)=>{if(audited[i].passed){const copy=structuredClone(item);copy.episodes.sort((a,b)=>a.number-b.number);records.set(item.id,copy);}});
- const model=a=>({...a,catalogApproved:true,catalogOnly:false,audienceRating:a.audienceRating||a.rating||a.score,malId:a.ids?.mal,
+ const model=a=>({...a,catalogUpdatedAt:Math.max(0,...[a.updatedAt,a.updated_at,a.lastEpisodeAt,...Object.values(a.kodikRevisions||{})].map(v=>typeof v==='number'?v:typeof v==='string'&&/^\d{4}-/.test(v)?Date.parse(v)||0:0)),catalogApproved:true,catalogOnly:false,audienceRating:a.audienceRating||a.rating||a.score,malId:a.ids?.mal,
   image:a.artwork?.poster?.url||a.image,banner:a.artwork?.backdrop?.url||a.banner,detailsBanner:a.artwork?.backdrop?.url||a.banner,
   episodes:a.episodes.length,episodeNumbers:a.episodes.map(e=>e.number),
   episodeManifest:a.episodes.map(e=>({ordinal:e.ordinal??e.number,season:e.season??1,audio:e.audio.map(t=>t.id),tracks:e.audio.map(t=>({id:t.id,label:t.label||t.dubId,language:t.language,original:t.original===true}))}))});
