@@ -28,7 +28,7 @@ import {initSelectMenus, enhanceSelects, closeSelectMenu} from './select-menu.js
 import {createPlayback} from './playback.js';
 import {cropAvatar,cropBanner} from './avatar-crop.js';
 import {authErrorKey} from "./public-config.js";
-import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons, knownSeasons, ensureFullCatalogLoaded} from "./sources.js";
+import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons, knownSeasons, catalogueYears} from "./sources.js";
 import {icon} from "./icons.js";
 import {controlsHTML, attachControls} from "./player-controls.js";
 import { chooseQuality } from "./provider.js";
@@ -309,7 +309,7 @@ function catalogShell() {
     )
     .join(
       "",
-    )}</select>${page==='catalog'?`<select id="year-filter" aria-label="${t('releaseYear')}"><option value="all">${t('allYears')}</option>${[...new Set(publishedItems.map(a=>a.year).filter(Boolean))].sort((a,b)=>b-a).map(y=>`<option value="${y}" ${String(yearFilter)===String(y)?'selected':''}>${y}</option>`).join('')}</select><select id="rating-filter" aria-label="${t('minimumRating')}">${[0,6,7,8,9].map(n=>`<option value="${n}" ${Number(ratingFilter)===n?'selected':''}>${n?t('ratingFrom')+' '+n:t('anyRating')}</option>`).join('')}</select>`:''}<label><input type="checkbox" id="ongoing-only" ${ongoingOnly ? "checked" : ""}> ${t("ongoingOnly")}</label></div><label class="genre-filter">${t('genre')}<select id="genre-filter"><option value="all">${t('allGenres')}</option>${Object.entries(genreLabels).map(([v,n])=>`<option value="${esc(v)}" ${genre===v?'selected':''}>${n[langIndex(lang)]}</option>`).join('')}</select></label><div id="results-caption" class="results-caption" aria-live="polite"></div><div class="anime-grid" id="anime-grid"></div><div id="catalog-status" class="catalog-status" aria-live="polite"></div><div class="empty" id="empty" hidden><span>${icon("search")}</span><h3>${t("empty")}</h3><p>${t("emptyHint")}</p><button class="button soft" data-action="reset">${t("reset")}</button></div></section></div>`;
+    )}</select>${page==='catalog'?`<select id="year-filter" aria-label="${t('releaseYear')}"><option value="all">${t('allYears')}</option>${catalogueYears.map(y=>`<option value="${y}" ${String(yearFilter)===String(y)?'selected':''}>${y}</option>`).join('')}</select><select id="rating-filter" aria-label="${t('minimumRating')}">${[0,6,7,8,9].map(n=>`<option value="${n}" ${Number(ratingFilter)===n?'selected':''}>${n?t('ratingFrom')+' '+n:t('anyRating')}</option>`).join('')}</select>`:''}<label><input type="checkbox" id="ongoing-only" ${ongoingOnly ? "checked" : ""}> ${t("ongoingOnly")}</label></div><label class="genre-filter">${t('genre')}<select id="genre-filter"><option value="all">${t('allGenres')}</option>${Object.entries(genreLabels).map(([v,n])=>`<option value="${esc(v)}" ${genre===v?'selected':''}>${n[langIndex(lang)]}</option>`).join('')}</select></label><div id="results-caption" class="results-caption" aria-live="polite"></div><div class="anime-grid" id="anime-grid"></div><div id="catalog-status" class="catalog-status" aria-live="polite"></div><div class="empty" id="empty" hidden><span>${icon("search")}</span><h3>${t("empty")}</h3><p>${t("emptyHint")}</p><button class="button soft" data-action="reset">${t("reset")}</button></div></section></div>`;
 }
 function genreText(g) {
   return genreLabels[normalizeGenre(g)]?.[langIndex(lang)] || g || "";
@@ -815,7 +815,7 @@ async function openPlayer(id, requested, pushRoute=true) {
   let a;
   try{a=await findWatchRelease(id);}catch{toast(t("providerError"));}
   if(!a){playerOpening=false;toast(t('releaseAwaitingReview'));if(page==='watch'&&!current)navigate('catalog');return;}
-  if(!requested){const first=knownSeasons(a).find(x=>['TV','ONA'].includes(x.type)&&x.episodeManifest?.some(e=>e.season>0));if(first){a=first;id=a.id;}}
+  if(!requested){const first=(await releaseSeasons(a)).find(x=>['TV','ONA'].includes(x.type)&&x.episodeManifest?.some(e=>e.season>0));if(first){a=first;id=a.id;}}
   if (a.providerId || a.animeVostId || a.animeGoId || a.kitsuId || a.malId) {
     try {
       a = await resolveRelease(a);
@@ -1378,7 +1378,7 @@ document.addEventListener("input", (event) => {
     for(const input of $$("#search,#catalog-search"))if(input!==event.target && input.value!==query)input.value=query;
     showSearchSuggestions(event.target.id);
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => loadCatalogue(), 80);
+    searchTimer = setTimeout(() => loadCatalogue(), 180);
   }
 });
 document.addEventListener("change", (event) => {
@@ -1581,7 +1581,7 @@ async function loadCatalogue(more = false, targetPage = 1) {
       ongoing: ongoingOnly, year: yearFilter, minRating: Number(ratingFilter),
     });
     if (generation !== catalogGeneration) return;
-    onlineItems = more ? [...new Map([...onlineItems, ...result.items].map(a=>[a.id,a])).values()] : result.items;
+    onlineItems = more ? [...new Map([...onlineItems, ...result.items].map(a=>[a.id,a])).values()].slice(-120) : result.items;
     catalogPage = more ? catalogPage + 1 : targetPage;
     catalogTotal = result.total;
     catalogPartial = result.partial;
@@ -1594,6 +1594,7 @@ async function loadCatalogue(more = false, targetPage = 1) {
     if (generation === catalogGeneration) {
       catalogBusy = false;
       renderGrid();
+      if(query&&['search','catalog-search'].includes(document.activeElement?.id))showSearchSuggestions(document.activeElement.id,onlineItems);
     }
   }
 }
@@ -1626,9 +1627,9 @@ function closeSearchSuggestions(){
  document.querySelectorAll('.search-suggestions').forEach(n=>n.remove());
  document.querySelectorAll('#search,#catalog-search').forEach(n=>{n.setAttribute('aria-expanded','false');n.removeAttribute('aria-activedescendant');});
 }
-function showSearchSuggestions(id){
+function showSearchSuggestions(id, pool=publishedItems){
  closeSearchSuggestions();const input=document.getElementById(id);if(!input)return;
- const items=suggestions(publishedItems,query);if(!items.length)return;
+ const items=suggestions(pool,query);if(!items.length)return;
  const panel=document.createElement('div');panel.id='search-suggestions';panel.className='search-suggestions';panel.setAttribute('role','listbox');
  panel.innerHTML=items.map((a,i)=>`<button type="button" role="option" id="suggestion-${i}" aria-selected="false" data-details="${esc(a.id)}"><img src="${esc(cover(a))}" alt=""><span><strong>${esc(title(a))}</strong><small>${a.year||''} · ${esc(a.type||'')}</small></span></button>`).join('');
  input.parentElement.append(panel);input.setAttribute('role','combobox');input.setAttribute('aria-autocomplete','list');input.setAttribute('aria-controls',panel.id);input.setAttribute('aria-expanded','true');
@@ -1644,7 +1645,3 @@ document.addEventListener('keydown',event=>{
 });
 document.addEventListener('click',event=>{if(event.target.closest('.search-suggestions button')||!event.target.closest('.search,.catalog-search'))closeSearchSuggestions();});
 document.addEventListener('focusin',event=>{if(!event.target.closest('.search,.catalog-search'))closeSearchSuggestions();});
-// Фоном загружаем всю остальную базу после запуска сайта
-setTimeout(() => {
-  ensureFullCatalogLoaded().catch(() => {});
-}, 1000);

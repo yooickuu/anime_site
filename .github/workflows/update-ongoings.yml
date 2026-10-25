@@ -41,7 +41,7 @@ jobs:
           if ! git diff --quiet -- src/published-catalog.json.gz; then
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git config user.name "github-actions[bot]"
-            git add src/published-catalog.json.gz src/runtime-catalog.json dist/ ../app.js ../index.html ../catalog-build.json ../style.css ../redesign.css ../scenes.css ../data/kodik/ ../data/media/
+            git add src/catalog-bootstrap.json ../data/catalog/ src/published-catalog.json.gz src/runtime-catalog.json dist/ ../app.js ../index.html ../catalog-build.json ../style.css ../redesign.css ../scenes.css ../data/kodik/ ../data/media/
             git commit -m "Update ongoing episodes and publication"
             git push origin HEAD:main
             echo "changed=true" >> "$GITHUB_OUTPUT"

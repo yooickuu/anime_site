@@ -1,3 +1,4 @@
+import {prepareChunks} from './lib/catalog-chunks.mjs';
 import {readCatalogueText,archiveCatalogue} from './lib/catalog-storage.mjs';
 import {auditPlayerCatalogue} from './lib/player-audit.mjs';
 import {build} from 'esbuild';
@@ -11,6 +12,15 @@ if(playerAudit.errors.length)throw Error('Player catalogue validation failed: '+
 await archiveCatalogue(rawPublication);
 const runtime=createApprovedCatalogue(publication);
 const revision=createHash('sha256').update(rawPublication).digest('hex').slice(0,12);
+// Generate browser-only views without changing the canonical catalogue or media schema.
+const chunks=prepareChunks(runtime.items,JSON.parse(await readFile('src/catalog-metadata.json','utf8')),revision);
+await writeFile('src/catalog-bootstrap.json',JSON.stringify(chunks.bootstrap));
+for(const base of ['dist/data/catalog','../data/catalog']){
+ await mkdir(base+'/cards',{recursive:true});await mkdir(base+'/browse',{recursive:true});
+ await writeFile(base+'/identities.json',JSON.stringify(chunks.identities));
+ for(const item of chunks.cards)await writeFile(`${base}/cards/${item.id}.json`,JSON.stringify(item));
+ for(const [sort,items] of Object.entries(chunks.orders))for(let i=0;i<items.length;i+=120)await writeFile(`${base}/browse/${sort}-${i/120}.json`,JSON.stringify(items.slice(i,i+120)));
+}
 // Episode source URLs load only when a title is opened, not on every homepage visit.
 await writeFile('src/runtime-catalog.json',JSON.stringify({revision,items:runtime.items.map(({releasedEpisodes,kodikRevisions,kodikIds,...item})=>item)}));
 await mkdir('dist/data/media',{recursive:true});await mkdir('../data/media',{recursive:true});
@@ -30,7 +40,9 @@ await copyFile('supabase/functions/login-nickname/index.ts','dist/login-nickname
 await copyFile('supabase/unique-nicknames.sql','dist/unique-nicknames.sql');
 await copyFile('supabase/account-deletion.sql', 'dist/account-deletion.sql');
 await copyFile('supabase/functions/delete-account/index.ts', 'dist/delete-account.ts');
-await build({entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',charset:'utf8',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
+const browserBuild=await build({metafile:true,entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',charset:'utf8',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
+if(Object.keys(browserBuild.metafile.inputs).some(p=>/(?:runtime-catalog|published-catalog|catalog-metadata)\.json$/.test(p)))throw Error('Heavy catalogue was bundled into the browser');
+if((await readFile('dist/app.js')).length>3*1024*1024)throw Error('Browser bundle exceeds memory safety budget');
 console.log('yooickuu built → dist/');
 
 await build({entryPoints:['supabase/functions/anime-source/index.ts'],bundle:true,outfile:'dist/anime-source.ts',format:'esm',platform:'neutral',target:['es2022']});
