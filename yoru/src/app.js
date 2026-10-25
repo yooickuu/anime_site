@@ -350,8 +350,14 @@ function renderGrid() {
   if (page!=="home" && sort === "newest") items.sort((a, b) => b.year - a.year);
   if (page!=="home" && sort === "alphabetical")
     items.sort((a, b) => title(a).localeCompare(title(b), lang));
-  if(page==='home')items=items.slice(0,10000);
-  grid.innerHTML = items
+
+  // --- Защита от краша Safari на телефонах ---
+  // На главной и в библиотеке показываем максимум 60 карточек за раз,
+  // чтобы мобильник не перегружал оперативную память
+  const displayLimit = (page === 'home' || page === 'library') ? 60 : items.length;
+  const renderItems = items.slice(0, displayLimit);
+
+  grid.innerHTML = renderItems
     .map((a) => {
       const e = state.entries[a.id];
       return `<article class="anime-card"><button class="poster-button" data-details="${a.id}" aria-label="${t("details")}: ${esc(title(a))}"><img src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}" loading="lazy">${a.ongoing ? `<span class="ongoing-badge" title="${t("ongoingTooltip")}" aria-label="${t("ongoingTooltip")}"><i></i>${t("airing")}</span>` : ""}${a.catalogOnly ? `<span class="catalog-only-badge">${t("catalogOnly")}</span>` : ""}<span class="poster-play">${icon("play")}</span><span class="poster-label">${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span></button><button class="save-button ${e ? "saved" : ""}" data-details="${a.id}" aria-label="${t("status")}: ${esc(title(a))}">${bookmark}</button><button class="anime-title" data-details="${a.id}">${esc(title(a))}</button>${audienceHTML(a)}<p class="anime-meta">${a.year} · ${esc(genreText(a.genres[0]))}${e?.rating ? " · " + e.rating + "/10" : ""}</p></article>`;
