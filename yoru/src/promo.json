@@ -1,0 +1,487 @@
+[
+  {
+    "id": "mal-199",
+    "ids": {
+      "shikimori": 199,
+      "mal": 199,
+      "anilist": 199,
+      "kodik": "movie-90970"
+    },
+    "title": "Унесённые призраками",
+    "originalTitle": "Sen to Chihiro no kamikakushi",
+    "alt": "Spirited Away Spirited Away 千と千尋の神隠し",
+    "year": 2001,
+    "type": "MOVIE",
+    "genres": [
+      "Приключения",
+      "Фэнтези",
+      "удостоено наград",
+      "мифология"
+    ],
+    "description": "Десятилетняя Тихиро Огино вместе с родителями садится в машину, чтобы добраться до нового дома, расположенного где-то в глубинке Японии. Решив срезать путь, они попадают в необычный лес, выбравшись из которого, оказываются на прогалине, откуда можно выйти лишь сквозь мощёный тоннель. Пройдя по нему, они оказываются в пустующем заброшенном городке, в котором нет ни души, зато прилавки ломятся от де",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Spirited Away",
+        "On the way to their new home, 10-year-old Chihiro Ogino's family stumbles upon a deserted theme park. Intrigued, the family investigates the park, though unbeknownst to them, it is secretly inhabited by spirits who sleep by day and appear at night. When Chihiro's mother and father eat food from a restaurant in the street, angry spirits turn them into pigs. Furthermore, a wide sea has appeared betw"
+      ],
+      "ja": [
+        "千と千尋の神隠し",
+        ""
+      ]
+    },
+    "airedAt": "2001-07-20",
+    "catalogUpdatedAt": 1717013386000,
+    "popularity": 486528,
+    "audienceRating": 8.77,
+    "rating": 8.77,
+    "malId": 199,
+    "image": "https://shikimori.io/uploads/poster/animes/199/8fffb098b0dfa011cd8431d46425d989.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/199-Sm2RU5PSqw7T.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/199-Sm2RU5PSqw7T.jpg",
+    "episodes": 1,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo/199-wide.webp",
+    "heroMobile": "assets/promo/199-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://www.ghibli.jp/gallery/chihiro020.jpg"
+  },
+  {
+    "id": "mal-431",
+    "ids": {
+      "shikimori": 431,
+      "mal": 431,
+      "anilist": 431,
+      "kodik": "movie-91091"
+    },
+    "title": "Ходячий замок",
+    "originalTitle": "Hauru no ugoku shiro",
+    "alt": "Блуждающий Замок Хоула Howl‘s Moving Castle ハウルの動く城",
+    "year": 2004,
+    "type": "MOVIE",
+    "genres": [
+      "Приключения",
+      "Драма",
+      "Фэнтези",
+      "Романтика",
+      "удостоено наград"
+    ],
+    "description": "Восемнадцатилетняя шляпница Софи ведёт тихую и ничем не примечательную городскую жизнь. Однако типичный её распорядок рушится, когда в окрестностях города объявляется Ходячий замок Хаула — колдуна, заключившего сделку с демоном огня Кальцифером и носящего дурную славу «похитителя» девичьих сердец. Вечером после работы очаровательный голубоглазый красавец, оказавшийся, как ни странно, самим Хаулом ",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Howl‘s Moving Castle",
+        "Sophie, a quiet girl working in a hat shop, finds her life thrown into turmoil when she is literally swept off her feet by a handsome but mysterious wizard named Howl. The vain and vengeful Witch of the Waste, jealous of their friendship, puts a spell on Sophie. In a life-changing adventure, Sophie climbs aboard Howl's magnificent flying castle and enters a magical world on a quest to break the sp"
+      ],
+      "ja": [
+        "ハウルの動く城",
+        ""
+      ]
+    },
+    "airedAt": "2004-11-20",
+    "catalogUpdatedAt": 1716662722000,
+    "popularity": 368126,
+    "audienceRating": 8.67,
+    "rating": 8.67,
+    "malId": 431,
+    "image": "https://shikimori.io/uploads/poster/animes/431/bb67bd4bdc737e57c477b36a5e9bfa82.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/431-fLBlvTgdqLCz.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/431-fLBlvTgdqLCz.jpg",
+    "episodes": 1,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo/431-wide.webp",
+    "heroMobile": "assets/promo/431-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://www.ghibli.jp/gallery/howl010.jpg"
+  },
+  {
+    "id": "mal-164",
+    "ids": {
+      "shikimori": 164,
+      "mal": 164,
+      "anilist": 164,
+      "kodik": "movie-38200"
+    },
+    "title": "Принцесса Мононоке",
+    "originalTitle": "Mononoke-hime",
+    "alt": "Princess Mononoke / Mononoke Hime Princess Mononoke もののけ姫",
+    "year": 1997,
+    "type": "MOVIE",
+    "genres": [
+      "Экшен",
+      "Приключения",
+      "Фэнтези",
+      "удостоено наград"
+    ],
+    "description": "Деревня народа эмиси затеряна где-то в горах средневековой Японии. Однажды на эту деревню нападает Наго, гигантский вепрь, одержимый ненавистью, превратившей его в демона. Ради спасения деревни сыну вождя Аситаке приходится убить проклятое животное, но самого его в руку ранит зверь, и вместе с раной ему передаётся проклятие. И теперь, согласно традициям племени, он должен быть изгнан, дабы в изгна",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Princess Mononoke",
+        "A calm village residing in the mountains comes under attack from a demon-possessed boar one day.\n\n\nAshitaka, a young man and prince of the tribe, engages the creature in an attempt to save his village. During the battle, the boar bites him on the arm, leaving it blackened and cursed. Following his village's traditions, Ashitaka is exiled and becomes a wanderer, looking for a solution to the curse "
+      ],
+      "ja": [
+        "もののけ姫",
+        ""
+      ]
+    },
+    "airedAt": "1997-07-12",
+    "catalogUpdatedAt": 1669030907000,
+    "popularity": 306003,
+    "audienceRating": 8.67,
+    "rating": 8.67,
+    "malId": 164,
+    "image": "https://shikimori.io/uploads/poster/animes/164/14aa48cc56b55626862a367e174bd845.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/164-Aj6MINy7VTfs.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/164-Aj6MINy7VTfs.jpg",
+    "episodes": 1,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo/164-wide.webp",
+    "heroMobile": "assets/promo/164-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://www.ghibli.jp/gallery/mononoke010.jpg"
+  },
+  {
+    "id": "mal-523",
+    "ids": {
+      "shikimori": 523,
+      "mal": 523,
+      "anilist": 523,
+      "kodik": "movie-91114"
+    },
+    "title": "Мой сосед Тоторо",
+    "originalTitle": "Tonari no Totoro",
+    "alt": "My Neighbor Totoro My Neighbor Totoro となりのトトロ",
+    "year": 1988,
+    "type": "MOVIE",
+    "genres": [
+      "Приключения",
+      "Сверхъестественное",
+      "удостоено наград"
+    ],
+    "description": "Главными героинями фильма являются две сестрички: 9-летняя Сацуки и 4-летняя Мэй . Когда заболевает их мать, им приходится переехать в деревню, в ветхий и полуразрушенный дом. В дом, рядом с которым испокон веков стоял Лес, и Лес не простой. Там обитают духи, Тоторо , добродушные волшебные существа всевозможных форм и размеров: от миниатюрных пушистых созданий до огромных и могучих Хранителей Леса",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "My Neighbor Totoro",
+        "Follow the adventures of Satsuki and her four-year-old sister Mei when they move into a new home in the countryside. To their delight they discover that their new neighbor is a mysterious forest spirit called Totoro who can be seen only through the eyes of a child. Totoro introduces them to extraordinary characters, including a cat that doubles as a bus, takes them on a journey through the wonders"
+      ],
+      "ja": [
+        "となりのトトロ",
+        ""
+      ]
+    },
+    "airedAt": "1988-04-16",
+    "catalogUpdatedAt": 1675625025000,
+    "popularity": 283936,
+    "audienceRating": 8.25,
+    "rating": 8.25,
+    "malId": 523,
+    "image": "https://shikimori.io/uploads/poster/animes/523/c866a8a7003240c38d7aeee8ed87e0ca.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/523-rl12Q0av1fCr.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/523-rl12Q0av1fCr.jpg",
+    "episodes": 1,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo/523-wide.webp",
+    "heroMobile": "assets/promo/523-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://www.ghibli.jp/gallery/totoro020.jpg"
+  },
+  {
+    "id": "mal-512",
+    "ids": {
+      "shikimori": 512,
+      "mal": 512,
+      "anilist": 512,
+      "kodik": "movie-90933"
+    },
+    "title": "Ведьмина служба доставки",
+    "originalTitle": "Majo no takkyûbin",
+    "alt": "Служба доставки Кики / Majo no Takkyuubin Kiki's Delivery Service 魔女の宅急便",
+    "year": 1989,
+    "type": "MOVIE",
+    "genres": [
+      "Приключения",
+      "Комедия",
+      "Драма",
+      "Фэнтези",
+      "удостоено наград"
+    ],
+    "description": "Кики — тринадцатилетняя девочка, живущая в деревне вместе с матерью-ведьмой, которая варит целебные зелья для местных жителей. У ведьм есть традиция: по достижении 13 лет ведьма должна улететь в город и прожить там один год. Таким образом Кики покидает дом матери и отправляется в путь со своим лучшим другом Дзи-Дзи , весьма говорливым чёрным котом. Кики прилетает в Корико, красивый город на берегу",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Kiki's Delivery Service",
+        "Kiki is an enterprising young girl who must follow tradition to become a full-fledged witch. Venturing out with only her chatty black cat, Jiji, Kiki flies off for the adventure of a lifetime. Landing in a far-off city, she sets up a high-flying delivery service and begins a wonderful experience of independence and responsibility as she finds her place in the world.\n\n\n(Source: Disney)"
+      ],
+      "ja": [
+        "魔女の宅急便",
+        ""
+      ]
+    },
+    "airedAt": "1989-07-29",
+    "catalogUpdatedAt": 1709884120000,
+    "popularity": 188979,
+    "audienceRating": 8.24,
+    "rating": 8.24,
+    "malId": 512,
+    "image": "https://shikimori.io/uploads/poster/animes/512/6fafe37b1edc66874050a3f8940f35ab.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/512-Ssp3EE2NdeoA.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/512-Ssp3EE2NdeoA.jpg",
+    "episodes": 1,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo/512-wide.webp",
+    "heroMobile": "assets/promo/512-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://www.ghibli.jp/gallery/majo010.jpg"
+  },
+  {
+    "id": "mal-585",
+    "ids": {
+      "shikimori": 585,
+      "mal": 585,
+      "anilist": 585,
+      "kodik": "movie-100792"
+    },
+    "title": "Шёпот сердца",
+    "originalTitle": "Mimi wo sumaseba",
+    "alt": "Mimi o Sumaseba Whisper of the Heart 耳をすませば",
+    "year": 1995,
+    "type": "MOVIE",
+    "genres": [
+      "седзе",
+      "Драма",
+      "Романтика"
+    ],
+    "description": "Во время летних каникул Сидзуку Цукисима , ученица средних классов, случайно замечает кота, в одиночку едущего на поезде. Заинтересованная, она решает проследить за ним. Эта неожиданная встреча приводит её к загадочному Сэйдзи , юноше, которому предначертано следовать за своими мечтами, и к Барону , магической статуэтке кота, помогающей Сидзуку слышать шёпот собственного сердца. И вскоре захватыва",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Whisper of the Heart",
+        "During summer vacation, a schoolgirl named Shizuku, who longs to discover her true talents, observes an ordinary-looking cat riding by himself on the train. Intrigued, she decides to follow him. This chance encounter leads her to the mysterious Seiji, a boy who is determined to follow his dreams, and The Baron, a magical cat figurine who helps her listen to the whispers in her heart. Soon, Shizuku"
+      ],
+      "ja": [
+        "耳をすませば",
+        ""
+      ]
+    },
+    "airedAt": "1995-07-15",
+    "catalogUpdatedAt": 1712505399000,
+    "popularity": 110897,
+    "audienceRating": 8.23,
+    "rating": 8.23,
+    "malId": 585,
+    "image": "https://shikimori.io/uploads/poster/animes/585/96ac7db27f11ab1220bef7bf075b1d32.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/585-GowCYxa1c8WR.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/585-GowCYxa1c8WR.jpg",
+    "episodes": 1,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo/585-wide.webp",
+    "heroMobile": "assets/promo/585-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://www.ghibli.jp/gallery/mimi010.jpg"
+  },
+  {
+    "id": "mal-2890",
+    "ids": {
+      "shikimori": 2890,
+      "mal": 2890,
+      "anilist": 2890,
+      "kodik": "movie-101725"
+    },
+    "title": "Рыбка Поньо на утёсе",
+    "originalTitle": "Gake no ue no Ponyo",
+    "alt": "Ponyo on the Cliff by the Sea Ponyo 崖の上のポニョ",
+    "year": 2008,
+    "type": "MOVIE",
+    "genres": [
+      "Приключения",
+      "Фэнтези",
+      "удостоено наград"
+    ],
+    "description": "Однажды маленький мальчик по имени Соскэ (Sousuke) спасает золотую рыбку, назвав её Поньо (ポニョ). Заботясь о ней, он в какой-то момент замечает, что это не простая рыбка: множество странных вещей происходит, когда она рядом. Загадка разрешается, как только за Поньо является её отец — могучий волшебник, живущий под водой, и насильно возвращает её в морские глубины. Поньо, томясь в заточении, страстн",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Ponyo",
+        "A young boy named Sosuke rescues a goldfish named Ponyo, and they embark on a fantastic journey of friendship and discovery before Ponyo's father, a powerful sorcerer, forces her to return to her home in the sea. But Ponyo's desire to be human upsets the delicate balance of nature and triggers a gigantic storm. Only Ponyo's mother, a beautiful sea goddess, can restore nature's balance and make Pon"
+      ],
+      "ja": [
+        "崖の上のポニョ",
+        ""
+      ]
+    },
+    "airedAt": "2008-07-19",
+    "catalogUpdatedAt": 1724904713000,
+    "popularity": 190497,
+    "audienceRating": 7.97,
+    "rating": 7.97,
+    "malId": 2890,
+    "image": "https://shikimori.io/uploads/poster/animes/2890/35f80494746337ee62abe9dd69a95467.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/2890-9ABkcfl2a7xS.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/2890-9ABkcfl2a7xS.jpg",
+    "episodes": 1,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo/2890-wide.webp",
+    "heroMobile": "assets/promo/2890-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://www.ghibli.jp/gallery/ponyo030.jpg"
+  },
+  {
+    "id": "mal-7711",
+    "ids": {
+      "shikimori": 7711,
+      "mal": 7711,
+      "anilist": 7711,
+      "kodik": "movie-51118"
+    },
+    "title": "Ариэтти из страны лилипутов",
+    "originalTitle": "Kari-gurashi no Arietti",
+    "alt": "Karigurashi no Arrietty / The Secret World of Arrietty The Secret World of Arrietty 借りぐらしのアリエッティ",
+    "year": 2010,
+    "type": "MOVIE",
+    "genres": [
+      "Сверхъестественное",
+      "удостоено наград"
+    ],
+    "description": "Сё двенадцать лет, и он только что переехал в дом к своей тётушке. Однако они не единственные обитатели дома — в нём поселились маленькие люди, «добывайки». Однажды, наблюдая за охотой кошки, Сё успел заметить, что добычей была маленькая девушка... Ариэтти всего четырнадцать, но она уже изо всех сил пытается помочь отцу в деле добываек, доставая нужные их семье вещи у людей. Позволив Сё увидеть се",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "The Secret World of Arrietty",
+        "Arrietty, a tiny but tenacious 14-year-old, lives with her parents in the recesses of a suburban garden home, unbeknownst to the homeowner and her housekeeper. Like all little people, Arrietty remains hidden from view, except during occasional covert ventures beyond the floorboards to \"borrow\" scrap supplies like sugar cubes from her human hosts. But when 12-year-old Shou, a human boy who comes to"
+      ],
+      "ja": [
+        "借りぐらしのアリエッティ",
+        ""
+      ]
+    },
+    "airedAt": "2010-07-17",
+    "catalogUpdatedAt": 1669047355000,
+    "popularity": 109582,
+    "audienceRating": 7.9,
+    "rating": 7.9,
+    "malId": 7711,
+    "image": "https://shikimori.io/uploads/poster/animes/7711/a0e9080b61a06b052cc53991df002d17.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n7711-sxtXcjmMKfaF.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n7711-sxtXcjmMKfaF.jpg",
+    "episodes": 1,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo/7711-wide.webp",
+    "heroMobile": "assets/promo/7711-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://www.ghibli.jp/gallery/karigurashi020.jpg"
+  },
+  {
+    "id": "mal-16662",
+    "ids": {
+      "shikimori": 16662,
+      "mal": 16662,
+      "anilist": 16662,
+      "kodik": "movie-90905"
+    },
+    "title": "Ветер крепчает",
+    "originalTitle": "Kaze tachinu",
+    "alt": "The Wind Rises The Wind Rises 風立ちぬ",
+    "year": 2013,
+    "type": "MOVIE",
+    "genres": [
+      "Драма",
+      "Романтика",
+      "удостоено наград",
+      "исторический"
+    ],
+    "description": "Мечта о полётах всегда преследовала человека. Вот и простой японский мальчик по имени Дзиро Хорикоси тоже мечтает стать пилотом и взлететь в небеса. Но он понимает, что из-за слабого здоровья вряд ли станет воздушным асом. Дзиро не отчаивается — он решает стать авиаконструктором и создать самолёт, способный обогнать ветер. Проходит время, и мальчик становится мужчиной. Но мечта о полётах живёт в е",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "The Wind Rises",
+        "Although Jirou Horikoshi's nearsightedness prevents him from ever becoming a pilot, he leaves his hometown to study aeronautical engineering at Tokyo Imperial University for one simple purpose: to design and build planes just like his hero, Italian aircraft pioneer Giovanni Battista Caproni. His arrival in the capital coincides with the Great Kanto Earthquake of 1923, during which he saves a maid "
+      ],
+      "ja": [
+        "風立ちぬ",
+        ""
+      ]
+    },
+    "airedAt": "2013-07-20",
+    "catalogUpdatedAt": 1685193962000,
+    "popularity": 114262,
+    "audienceRating": 8.14,
+    "rating": 8.14,
+    "malId": 16662,
+    "image": "https://shikimori.io/uploads/poster/animes/16662/35f9a5aa51b5a22cc4071f3dc60c6ee4.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/16662-XLmadbKVsRW2.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/16662-XLmadbKVsRW2.jpg",
+    "episodes": 1,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo/16662-wide.webp",
+    "heroMobile": "assets/promo/16662-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://www.ghibli.jp/gallery/kazetachinu020.jpg"
+  },
+  {
+    "id": "mal-21557",
+    "ids": {
+      "mal": 21557,
+      "shikimori": 21557,
+      "anilist": null,
+      "anilibria": 4673,
+      "kodik": "movie-20556"
+    },
+    "title": "Воспоминания о Марни",
+    "originalTitle": "Omoide no Marnie",
+    "alt": "Воспоминания о Марни Omoide no Marnie Omoide no Marnie",
+    "year": 2014,
+    "type": "MOVIE",
+    "genres": [
+      "Драма",
+      "Тайна",
+      "Триллер",
+      "Психологическое"
+    ],
+    "description": "Анна Сасаки — необщительная девочка, у которой нет друзей. Она живёт у приёмных родителей, страдает от астмы и любит рисовать. В конце концов Анна переезжает в небольшой провинциальный городок погостить у Киёмасы [大岩 清正] и Сэцу [大岩 セツ] Оива — родственников Ёрико [佐々木 頼子], приёмной матери девочки. Но всё не так скучно и однообразно, как может показаться на первый взгляд! В городке есть загадочное п",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "When Marnie Was There",
+        "Suffering from frequent asthma attacks, young Anna Sasaki is quiet, unsociable, and isolated from her peers, causing her foster parent endless worry. Upon recommendation by the doctor, Anna is sent to the countryside, in hope the cleaner air and more relaxing lifestyle will improve her health and help clear her mind. Engaging in her passion for sketching, Anna spends her summer days living with he"
+      ],
+      "ja": [
+        "思い出のマーニー",
+        ""
+      ]
+    },
+    "airedAt": "2014-07-19",
+    "catalogUpdatedAt": 1666300367000,
+    "malId": 21557,
+    "image": "https://shikimori.io/uploads/poster/animes/21557/92d8c3c6127e8802ac3b35062e1ff56a.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101922-33MtJGsUSxga.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101922-33MtJGsUSxga.jpg",
+    "episodes": 1,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo/21557-wide.webp",
+    "heroMobile": "assets/promo/21557-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://www.ghibli.jp/gallery/marnie020.jpg"
+  }
+]

@@ -1,8 +1,8 @@
 import {retrySourceRequest} from './source-retry.js';
 import {discoveryOptions} from './catalog-query.js';
-import curatedSpotlight from './spotlight.json';
+import promoSlides from './promo.json';
 import {episodeSeasonOptions,firstMainEpisode,seasonMenu,seasonNavigation} from './catalog-seasons.js';
-import {normalizeGenre,matchesType,searchScore,suggestions,selectSpotlight} from './catalog-query.js';
+import {normalizeGenre,matchesType,searchScore,suggestions} from './catalog-query.js';
 import {approvedSkipTimes} from './approved-skip-times.js';
 import {detailArtwork} from './detail-artwork.js';
 import {soundPreferences,preferredAudio,resumeTime} from './playback-preferences.js';
@@ -219,7 +219,8 @@ function homeHTML() {
  return `<section class="cinematic-hero" id="hero-art">${heroArtHTML()}</section><section class="section"><div class="section-head"><h2>${t('continue')}</h2>${user?'<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button>':''}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
 }
 function bannerFor(a){return a?.catalogApproved?detailArtwork(a):(artwork[a?.malId]?.banner||a?.banner||'');}
-const spotlightItems=selectSpotlight(publishedItems,10,curatedSpotlight);
+const spotlightItems=promoSlides;
+spotlightItems.forEach(registerAnime);
 function heroPool(){return spotlightItems;}
 function heroImage(a){return matchMedia('(max-width:600px)').matches?(a.heroMobile||a.image):(a.hero||bannerFor(a));}
 function heroArtHTML(){

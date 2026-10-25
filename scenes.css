@@ -280,13 +280,18 @@ main.home-container{margin-top:0!important;padding-top:0}
  .home-container .cinematic-hero .hero-picture{mask-image:linear-gradient(#000 48%,#000e 65%,#0007 84%,transparent);-webkit-mask-image:linear-gradient(#000 48%,#000e 65%,#0007 84%,transparent);mask-composite:add;-webkit-mask-composite:source-over}
 }
 
-/* Keep playback at the left edge; volume opens without moving other controls. */
+/* Volume unfolds beside its button, with a continuous hover/focus target. */
 .video-controls [data-video="play"]{order:-2;margin-left:0;margin-right:0}
 .video-sound{position:relative;display:inline-flex;align-items:center;flex:0 0 auto}
-.video-controls .video-sound .video-volume{display:block;position:absolute;bottom:100%;left:0;box-sizing:border-box;width:112px;min-width:112px;height:40px;margin:0;padding:12px;background:rgba(var(--surface-rgb),.94);border-radius:10px;box-shadow:0 4px 18px #0004;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease,visibility .15s}
-.video-sound:focus-within .video-volume{opacity:1!important;visibility:visible!important;pointer-events:auto!important}
-@media(hover:hover){.video-sound:hover .video-volume{opacity:1!important;visibility:visible!important;pointer-events:auto!important}}
-@media(prefers-reduced-motion:reduce){.video-controls .video-sound .video-volume{transition:none}}
+.video-volume-reveal{display:flex;align-items:center;max-width:0;opacity:0;overflow:hidden;transform:translateX(-6px);transition:max-width .28s cubic-bezier(.22,1,.36,1),opacity .2s ease,transform .28s ease;pointer-events:none}
+.video-controls .video-sound .video-volume{display:block;position:static;box-sizing:border-box;width:88px;min-width:88px;height:36px;margin:0;padding:0 10px;flex:none;cursor:pointer;background:transparent;border:0;box-shadow:none}
+.video-sound:focus-within .video-volume-reveal{max-width:88px;opacity:1;transform:none;pointer-events:auto}
+@media(hover:hover){.video-sound:hover .video-volume-reveal{max-width:88px;opacity:1;transform:none;pointer-events:auto}}
+@media(hover:none){
+ .video-volume-reveal{position:absolute;bottom:calc(100% + 8px);left:50%;max-width:112px;transform:translate(-50%,8px) scale(.94);border-radius:14px;background:linear-gradient(135deg,#ffffff18,transparent),rgba(var(--surface-rgb),.94);box-shadow:0 8px 24px #0004;visibility:hidden;padding:5px;transition:opacity .2s,transform .25s,visibility .2s}
+ .video-sound:focus-within .video-volume-reveal{max-width:112px;visibility:visible;transform:translate(-50%,0) scale(1)}
+}
+@media(prefers-reduced-motion:reduce){.video-volume-reveal{transition:none}}
 
 /* Profile artwork also extends behind navigation without covering profile actions. */
 body:has(.profile-banner-stage){--profile-nav-space:94px;--profile-banner-height:440px}
