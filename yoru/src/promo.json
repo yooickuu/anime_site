@@ -1,487 +1,489 @@
 [
   {
-    "id": "mal-199",
+    "id": "mal-59978",
     "ids": {
-      "shikimori": 199,
-      "mal": 199,
-      "anilist": 199,
-      "kodik": "movie-90970"
+      "mal": 59978,
+      "shikimori": 59978,
+      "anilist": 182255,
+      "anilibria": 10085,
+      "kodik": "serial-72988"
     },
-    "title": "Унесённые призраками",
-    "originalTitle": "Sen to Chihiro no kamikakushi",
-    "alt": "Spirited Away Spirited Away 千と千尋の神隠し",
-    "year": 2001,
-    "type": "MOVIE",
+    "title": "Провожающая в последний путь Фрирен 2",
+    "originalTitle": "Sousou no Frieren 2nd Season",
+    "alt": "Провожающая в последний путь Фрирен 2 Sousou no Frieren 2nd Season Sousou no Frieren 2nd Season",
+    "year": 2026,
+    "type": "TV",
     "genres": [
-      "Приключения",
-      "Фэнтези",
-      "удостоено наград",
-      "мифология"
-    ],
-    "description": "Десятилетняя Тихиро Огино вместе с родителями садится в машину, чтобы добраться до нового дома, расположенного где-то в глубинке Японии. Решив срезать путь, они попадают в необычный лес, выбравшись из которого, оказываются на прогалине, откуда можно выйти лишь сквозь мощёный тоннель. Пройдя по нему, они оказываются в пустующем заброшенном городке, в котором нет ни души, зато прилавки ломятся от де",
-    "ongoing": false,
-    "translations": {
-      "en": [
-        "Spirited Away",
-        "On the way to their new home, 10-year-old Chihiro Ogino's family stumbles upon a deserted theme park. Intrigued, the family investigates the park, though unbeknownst to them, it is secretly inhabited by spirits who sleep by day and appear at night. When Chihiro's mother and father eat food from a restaurant in the street, angry spirits turn them into pigs. Furthermore, a wide sea has appeared betw"
-      ],
-      "ja": [
-        "千と千尋の神隠し",
-        ""
-      ]
-    },
-    "airedAt": "2001-07-20",
-    "catalogUpdatedAt": 1717013386000,
-    "popularity": 486528,
-    "audienceRating": 8.77,
-    "rating": 8.77,
-    "malId": 199,
-    "image": "https://shikimori.io/uploads/poster/animes/199/8fffb098b0dfa011cd8431d46425d989.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/199-Sm2RU5PSqw7T.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/199-Sm2RU5PSqw7T.jpg",
-    "episodes": 1,
-    "catalogApproved": true,
-    "catalogOnly": false,
-    "hero": "assets/promo/199-wide.webp",
-    "heroMobile": "assets/promo/199-mobile.webp",
-    "heroWidth": 1920,
-    "heroHeight": 1000,
-    "heroSource": "https://www.ghibli.jp/gallery/chihiro020.jpg"
-  },
-  {
-    "id": "mal-431",
-    "ids": {
-      "shikimori": 431,
-      "mal": 431,
-      "anilist": 431,
-      "kodik": "movie-91091"
-    },
-    "title": "Ходячий замок",
-    "originalTitle": "Hauru no ugoku shiro",
-    "alt": "Блуждающий Замок Хоула Howl‘s Moving Castle ハウルの動く城",
-    "year": 2004,
-    "type": "MOVIE",
-    "genres": [
+      "Сёнен",
       "Приключения",
       "Драма",
-      "Фэнтези",
-      "Романтика",
-      "удостоено наград"
+      "Фэнтези"
     ],
-    "description": "Восемнадцатилетняя шляпница Софи ведёт тихую и ничем не примечательную городскую жизнь. Однако типичный её распорядок рушится, когда в окрестностях города объявляется Ходячий замок Хаула — колдуна, заключившего сделку с демоном огня Кальцифером и носящего дурную славу «похитителя» девичьих сердец. Вечером после работы очаровательный голубоглазый красавец, оказавшийся, как ни странно, самим Хаулом ",
+    "description": "Эльфийская волшебница Фрирен, в прошлом одолевшая Короля демонов вместе со своими героическими товарищами Химмелем , Хайтером и Айзеном, продолжает странствовать по миру. Пытаясь лучше понять чувства людей и исполнить последние желания ушедших друзей, Фрирен отправляется в путешествие со своей ученицей Ферн и воином Штарком. Её путь лежит на север, где леденящая опасность скрывается не только в не",
     "ongoing": false,
     "translations": {
       "en": [
-        "Howl‘s Moving Castle",
-        "Sophie, a quiet girl working in a hat shop, finds her life thrown into turmoil when she is literally swept off her feet by a handsome but mysterious wizard named Howl. The vain and vengeful Witch of the Waste, jealous of their friendship, puts a spell on Sophie. In a life-changing adventure, Sophie climbs aboard Howl's magnificent flying castle and enters a magical world on a quest to break the sp"
+        "Frieren: Beyond Journey’s End Season 2",
+        "Following the First-Class Mage Exam, the trio—elven mage Frieren, warrior Stark, and first-class mage Fern—gains access to the dangerous Northern Plateau. As the party presses onward toward Aureole, formidable adversaries force Stark to confront his insecurities, solidifying his resolve and his role as the party's frontliner. Meanwhile, Fern continues to cherish the gifts she has been blessed with"
       ],
       "ja": [
-        "ハウルの動く城",
+        "葬送のフリーレン 第2期",
         ""
       ]
     },
-    "airedAt": "2004-11-20",
-    "catalogUpdatedAt": 1716662722000,
-    "popularity": 368126,
-    "audienceRating": 8.67,
-    "rating": 8.67,
-    "malId": 431,
-    "image": "https://shikimori.io/uploads/poster/animes/431/bb67bd4bdc737e57c477b36a5e9bfa82.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/431-fLBlvTgdqLCz.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/431-fLBlvTgdqLCz.jpg",
-    "episodes": 1,
+    "airedAt": "2026-01-16",
+    "catalogUpdatedAt": 1791476277000,
+    "audienceRating": 8.84,
+    "rating": 8.84,
+    "malId": 59978,
+    "image": "https://shikimori.io/uploads/poster/animes/59978/ec1e1af737f29073a6ecd9c8e3085e25.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/182255-wyHvp6zJbWsO.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/182255-wyHvp6zJbWsO.jpg",
+    "episodes": 10,
     "catalogApproved": true,
     "catalogOnly": false,
-    "hero": "assets/promo/431-wide.webp",
-    "heroMobile": "assets/promo/431-mobile.webp",
+    "hero": "assets/promo-2026/59978-wide.webp",
+    "heroMobile": "assets/promo-2026/59978-mobile.webp",
     "heroWidth": 1920,
     "heroHeight": 1000,
-    "heroSource": "https://www.ghibli.jp/gallery/howl010.jpg"
+    "heroSource": "https://times-abema.ismcdn.jp/mwimgs/0/6/1920w/img_0681b77e1844e2430f6d95f24f7e77fb381965.jpg"
   },
   {
-    "id": "mal-164",
+    "id": "mal-58567",
     "ids": {
-      "shikimori": 164,
-      "mal": 164,
-      "anilist": 164,
-      "kodik": "movie-38200"
+      "mal": 58567,
+      "shikimori": 58567,
+      "anilist": null,
+      "anilibria": 9839,
+      "kodik": "serial-64832"
     },
-    "title": "Принцесса Мононоке",
-    "originalTitle": "Mononoke-hime",
-    "alt": "Princess Mononoke / Mononoke Hime Princess Mononoke もののけ姫",
-    "year": 1997,
-    "type": "MOVIE",
+    "title": "Поднятие уровня в одиночку 2: Восстаньте из тени",
+    "originalTitle": "Ore dake Level Up na Ken Season 2: Arise from the Shadow",
+    "alt": "Поднятие уровня в одиночку 2: Восстаньте из тени Ore dake Level Up na Ken Season 2: Arise from the Shadow Поднятия, Solo Leveling Ore dake Level Up na Ken Season 2: Arise from the Shadow",
+    "year": 2025,
+    "type": "TV",
     "genres": [
       "Экшен",
       "Приключения",
       "Фэнтези",
-      "удостоено наград"
+      "Взрослые персонажи",
+      "Городское фэнтези"
     ],
-    "description": "Деревня народа эмиси затеряна где-то в горах средневековой Японии. Однажды на эту деревню нападает Наго, гигантский вепрь, одержимый ненавистью, превратившей его в демона. Ради спасения деревни сыну вождя Аситаке приходится убить проклятое животное, но самого его в руку ранит зверь, и вместе с раной ему передаётся проклятие. И теперь, согласно традициям племени, он должен быть изгнан, дабы в изгна",
+    "description": "Благодаря новообретённой профессии — Монарх Теней, дающей власть над теневой армией, Сон Джину становится достаточно сильным, чтобы наконец отправиться в Дьявольский Замок. Его цель — найти три предмета, необходимые для создания Эликсира Жизни, единственного средства, способного излечить болезнь его матери Кёнхе. Тем временем гигантские муравьи, населяющие печально известный остров Чеджу, начинают",
     "ongoing": false,
     "translations": {
       "en": [
-        "Princess Mononoke",
-        "A calm village residing in the mountains comes under attack from a demon-possessed boar one day.\n\n\nAshitaka, a young man and prince of the tribe, engages the creature in an attempt to save his village. During the battle, the boar bites him on the arm, leaving it blackened and cursed. Following his village's traditions, Ashitaka is exiled and becomes a wanderer, looking for a solution to the curse "
+        "Solo Leveling Season 2 -Arise from the Shadow-",
+        "Mastering his new abilities in secret, Jin-U must battle humanity's toughest foes to save his mother.\n\n\n\n(Source: Crunchyroll News)"
       ],
       "ja": [
-        "もののけ姫",
+        "俺だけレベルアップな件 Season 2 -Arise from the Shadow-",
         ""
       ]
     },
-    "airedAt": "1997-07-12",
-    "catalogUpdatedAt": 1669030907000,
-    "popularity": 306003,
-    "audienceRating": 8.67,
-    "rating": 8.67,
-    "malId": 164,
-    "image": "https://shikimori.io/uploads/poster/animes/164/14aa48cc56b55626862a367e174bd845.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/164-Aj6MINy7VTfs.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/164-Aj6MINy7VTfs.jpg",
-    "episodes": 1,
-    "catalogApproved": true,
-    "catalogOnly": false,
-    "hero": "assets/promo/164-wide.webp",
-    "heroMobile": "assets/promo/164-mobile.webp",
-    "heroWidth": 1920,
-    "heroHeight": 1000,
-    "heroSource": "https://www.ghibli.jp/gallery/mononoke010.jpg"
-  },
-  {
-    "id": "mal-523",
-    "ids": {
-      "shikimori": 523,
-      "mal": 523,
-      "anilist": 523,
-      "kodik": "movie-91114"
-    },
-    "title": "Мой сосед Тоторо",
-    "originalTitle": "Tonari no Totoro",
-    "alt": "My Neighbor Totoro My Neighbor Totoro となりのトトロ",
-    "year": 1988,
-    "type": "MOVIE",
-    "genres": [
-      "Приключения",
-      "Сверхъестественное",
-      "удостоено наград"
-    ],
-    "description": "Главными героинями фильма являются две сестрички: 9-летняя Сацуки и 4-летняя Мэй . Когда заболевает их мать, им приходится переехать в деревню, в ветхий и полуразрушенный дом. В дом, рядом с которым испокон веков стоял Лес, и Лес не простой. Там обитают духи, Тоторо , добродушные волшебные существа всевозможных форм и размеров: от миниатюрных пушистых созданий до огромных и могучих Хранителей Леса",
-    "ongoing": false,
-    "translations": {
-      "en": [
-        "My Neighbor Totoro",
-        "Follow the adventures of Satsuki and her four-year-old sister Mei when they move into a new home in the countryside. To their delight they discover that their new neighbor is a mysterious forest spirit called Totoro who can be seen only through the eyes of a child. Totoro introduces them to extraordinary characters, including a cat that doubles as a bus, takes them on a journey through the wonders"
-      ],
-      "ja": [
-        "となりのトトロ",
-        ""
-      ]
-    },
-    "airedAt": "1988-04-16",
-    "catalogUpdatedAt": 1675625025000,
-    "popularity": 283936,
-    "audienceRating": 8.25,
-    "rating": 8.25,
-    "malId": 523,
-    "image": "https://shikimori.io/uploads/poster/animes/523/c866a8a7003240c38d7aeee8ed87e0ca.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/523-rl12Q0av1fCr.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/523-rl12Q0av1fCr.jpg",
-    "episodes": 1,
-    "catalogApproved": true,
-    "catalogOnly": false,
-    "hero": "assets/promo/523-wide.webp",
-    "heroMobile": "assets/promo/523-mobile.webp",
-    "heroWidth": 1920,
-    "heroHeight": 1000,
-    "heroSource": "https://www.ghibli.jp/gallery/totoro020.jpg"
-  },
-  {
-    "id": "mal-512",
-    "ids": {
-      "shikimori": 512,
-      "mal": 512,
-      "anilist": 512,
-      "kodik": "movie-90933"
-    },
-    "title": "Ведьмина служба доставки",
-    "originalTitle": "Majo no takkyûbin",
-    "alt": "Служба доставки Кики / Majo no Takkyuubin Kiki's Delivery Service 魔女の宅急便",
-    "year": 1989,
-    "type": "MOVIE",
-    "genres": [
-      "Приключения",
-      "Комедия",
-      "Драма",
-      "Фэнтези",
-      "удостоено наград"
-    ],
-    "description": "Кики — тринадцатилетняя девочка, живущая в деревне вместе с матерью-ведьмой, которая варит целебные зелья для местных жителей. У ведьм есть традиция: по достижении 13 лет ведьма должна улететь в город и прожить там один год. Таким образом Кики покидает дом матери и отправляется в путь со своим лучшим другом Дзи-Дзи , весьма говорливым чёрным котом. Кики прилетает в Корико, красивый город на берегу",
-    "ongoing": false,
-    "translations": {
-      "en": [
-        "Kiki's Delivery Service",
-        "Kiki is an enterprising young girl who must follow tradition to become a full-fledged witch. Venturing out with only her chatty black cat, Jiji, Kiki flies off for the adventure of a lifetime. Landing in a far-off city, she sets up a high-flying delivery service and begins a wonderful experience of independence and responsibility as she finds her place in the world.\n\n\n(Source: Disney)"
-      ],
-      "ja": [
-        "魔女の宅急便",
-        ""
-      ]
-    },
-    "airedAt": "1989-07-29",
-    "catalogUpdatedAt": 1709884120000,
-    "popularity": 188979,
-    "audienceRating": 8.24,
-    "rating": 8.24,
-    "malId": 512,
-    "image": "https://shikimori.io/uploads/poster/animes/512/6fafe37b1edc66874050a3f8940f35ab.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/512-Ssp3EE2NdeoA.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/512-Ssp3EE2NdeoA.jpg",
-    "episodes": 1,
-    "catalogApproved": true,
-    "catalogOnly": false,
-    "hero": "assets/promo/512-wide.webp",
-    "heroMobile": "assets/promo/512-mobile.webp",
-    "heroWidth": 1920,
-    "heroHeight": 1000,
-    "heroSource": "https://www.ghibli.jp/gallery/majo010.jpg"
-  },
-  {
-    "id": "mal-585",
-    "ids": {
-      "shikimori": 585,
-      "mal": 585,
-      "anilist": 585,
-      "kodik": "movie-100792"
-    },
-    "title": "Шёпот сердца",
-    "originalTitle": "Mimi wo sumaseba",
-    "alt": "Mimi o Sumaseba Whisper of the Heart 耳をすませば",
-    "year": 1995,
-    "type": "MOVIE",
-    "genres": [
-      "седзе",
-      "Драма",
-      "Романтика"
-    ],
-    "description": "Во время летних каникул Сидзуку Цукисима , ученица средних классов, случайно замечает кота, в одиночку едущего на поезде. Заинтересованная, она решает проследить за ним. Эта неожиданная встреча приводит её к загадочному Сэйдзи , юноше, которому предначертано следовать за своими мечтами, и к Барону , магической статуэтке кота, помогающей Сидзуку слышать шёпот собственного сердца. И вскоре захватыва",
-    "ongoing": false,
-    "translations": {
-      "en": [
-        "Whisper of the Heart",
-        "During summer vacation, a schoolgirl named Shizuku, who longs to discover her true talents, observes an ordinary-looking cat riding by himself on the train. Intrigued, she decides to follow him. This chance encounter leads her to the mysterious Seiji, a boy who is determined to follow his dreams, and The Baron, a magical cat figurine who helps her listen to the whispers in her heart. Soon, Shizuku"
-      ],
-      "ja": [
-        "耳をすませば",
-        ""
-      ]
-    },
-    "airedAt": "1995-07-15",
-    "catalogUpdatedAt": 1712505399000,
-    "popularity": 110897,
-    "audienceRating": 8.23,
-    "rating": 8.23,
-    "malId": 585,
-    "image": "https://shikimori.io/uploads/poster/animes/585/96ac7db27f11ab1220bef7bf075b1d32.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/585-GowCYxa1c8WR.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/585-GowCYxa1c8WR.jpg",
-    "episodes": 1,
-    "catalogApproved": true,
-    "catalogOnly": false,
-    "hero": "assets/promo/585-wide.webp",
-    "heroMobile": "assets/promo/585-mobile.webp",
-    "heroWidth": 1920,
-    "heroHeight": 1000,
-    "heroSource": "https://www.ghibli.jp/gallery/mimi010.jpg"
-  },
-  {
-    "id": "mal-2890",
-    "ids": {
-      "shikimori": 2890,
-      "mal": 2890,
-      "anilist": 2890,
-      "kodik": "movie-101725"
-    },
-    "title": "Рыбка Поньо на утёсе",
-    "originalTitle": "Gake no ue no Ponyo",
-    "alt": "Ponyo on the Cliff by the Sea Ponyo 崖の上のポニョ",
-    "year": 2008,
-    "type": "MOVIE",
-    "genres": [
-      "Приключения",
-      "Фэнтези",
-      "удостоено наград"
-    ],
-    "description": "Однажды маленький мальчик по имени Соскэ (Sousuke) спасает золотую рыбку, назвав её Поньо (ポニョ). Заботясь о ней, он в какой-то момент замечает, что это не простая рыбка: множество странных вещей происходит, когда она рядом. Загадка разрешается, как только за Поньо является её отец — могучий волшебник, живущий под водой, и насильно возвращает её в морские глубины. Поньо, томясь в заточении, страстн",
-    "ongoing": false,
-    "translations": {
-      "en": [
-        "Ponyo",
-        "A young boy named Sosuke rescues a goldfish named Ponyo, and they embark on a fantastic journey of friendship and discovery before Ponyo's father, a powerful sorcerer, forces her to return to her home in the sea. But Ponyo's desire to be human upsets the delicate balance of nature and triggers a gigantic storm. Only Ponyo's mother, a beautiful sea goddess, can restore nature's balance and make Pon"
-      ],
-      "ja": [
-        "崖の上のポニョ",
-        ""
-      ]
-    },
-    "airedAt": "2008-07-19",
-    "catalogUpdatedAt": 1724904713000,
-    "popularity": 190497,
-    "audienceRating": 7.97,
-    "rating": 7.97,
-    "malId": 2890,
-    "image": "https://shikimori.io/uploads/poster/animes/2890/35f80494746337ee62abe9dd69a95467.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/2890-9ABkcfl2a7xS.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/2890-9ABkcfl2a7xS.jpg",
-    "episodes": 1,
-    "catalogApproved": true,
-    "catalogOnly": false,
-    "hero": "assets/promo/2890-wide.webp",
-    "heroMobile": "assets/promo/2890-mobile.webp",
-    "heroWidth": 1920,
-    "heroHeight": 1000,
-    "heroSource": "https://www.ghibli.jp/gallery/ponyo030.jpg"
-  },
-  {
-    "id": "mal-7711",
-    "ids": {
-      "shikimori": 7711,
-      "mal": 7711,
-      "anilist": 7711,
-      "kodik": "movie-51118"
-    },
-    "title": "Ариэтти из страны лилипутов",
-    "originalTitle": "Kari-gurashi no Arietti",
-    "alt": "Karigurashi no Arrietty / The Secret World of Arrietty The Secret World of Arrietty 借りぐらしのアリエッティ",
-    "year": 2010,
-    "type": "MOVIE",
-    "genres": [
-      "Сверхъестественное",
-      "удостоено наград"
-    ],
-    "description": "Сё двенадцать лет, и он только что переехал в дом к своей тётушке. Однако они не единственные обитатели дома — в нём поселились маленькие люди, «добывайки». Однажды, наблюдая за охотой кошки, Сё успел заметить, что добычей была маленькая девушка... Ариэтти всего четырнадцать, но она уже изо всех сил пытается помочь отцу в деле добываек, доставая нужные их семье вещи у людей. Позволив Сё увидеть се",
-    "ongoing": false,
-    "translations": {
-      "en": [
-        "The Secret World of Arrietty",
-        "Arrietty, a tiny but tenacious 14-year-old, lives with her parents in the recesses of a suburban garden home, unbeknownst to the homeowner and her housekeeper. Like all little people, Arrietty remains hidden from view, except during occasional covert ventures beyond the floorboards to \"borrow\" scrap supplies like sugar cubes from her human hosts. But when 12-year-old Shou, a human boy who comes to"
-      ],
-      "ja": [
-        "借りぐらしのアリエッティ",
-        ""
-      ]
-    },
-    "airedAt": "2010-07-17",
-    "catalogUpdatedAt": 1669047355000,
-    "popularity": 109582,
-    "audienceRating": 7.9,
-    "rating": 7.9,
-    "malId": 7711,
-    "image": "https://shikimori.io/uploads/poster/animes/7711/a0e9080b61a06b052cc53991df002d17.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n7711-sxtXcjmMKfaF.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n7711-sxtXcjmMKfaF.jpg",
-    "episodes": 1,
-    "catalogApproved": true,
-    "catalogOnly": false,
-    "hero": "assets/promo/7711-wide.webp",
-    "heroMobile": "assets/promo/7711-mobile.webp",
-    "heroWidth": 1920,
-    "heroHeight": 1000,
-    "heroSource": "https://www.ghibli.jp/gallery/karigurashi020.jpg"
-  },
-  {
-    "id": "mal-16662",
-    "ids": {
-      "shikimori": 16662,
-      "mal": 16662,
-      "anilist": 16662,
-      "kodik": "movie-90905"
-    },
-    "title": "Ветер крепчает",
-    "originalTitle": "Kaze tachinu",
-    "alt": "The Wind Rises The Wind Rises 風立ちぬ",
-    "year": 2013,
-    "type": "MOVIE",
-    "genres": [
-      "Драма",
-      "Романтика",
-      "удостоено наград",
-      "исторический"
-    ],
-    "description": "Мечта о полётах всегда преследовала человека. Вот и простой японский мальчик по имени Дзиро Хорикоси тоже мечтает стать пилотом и взлететь в небеса. Но он понимает, что из-за слабого здоровья вряд ли станет воздушным асом. Дзиро не отчаивается — он решает стать авиаконструктором и создать самолёт, способный обогнать ветер. Проходит время, и мальчик становится мужчиной. Но мечта о полётах живёт в е",
-    "ongoing": false,
-    "translations": {
-      "en": [
-        "The Wind Rises",
-        "Although Jirou Horikoshi's nearsightedness prevents him from ever becoming a pilot, he leaves his hometown to study aeronautical engineering at Tokyo Imperial University for one simple purpose: to design and build planes just like his hero, Italian aircraft pioneer Giovanni Battista Caproni. His arrival in the capital coincides with the Great Kanto Earthquake of 1923, during which he saves a maid "
-      ],
-      "ja": [
-        "風立ちぬ",
-        ""
-      ]
-    },
-    "airedAt": "2013-07-20",
-    "catalogUpdatedAt": 1685193962000,
-    "popularity": 114262,
-    "audienceRating": 8.14,
-    "rating": 8.14,
-    "malId": 16662,
-    "image": "https://shikimori.io/uploads/poster/animes/16662/35f9a5aa51b5a22cc4071f3dc60c6ee4.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/16662-XLmadbKVsRW2.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/16662-XLmadbKVsRW2.jpg",
-    "episodes": 1,
-    "catalogApproved": true,
-    "catalogOnly": false,
-    "hero": "assets/promo/16662-wide.webp",
-    "heroMobile": "assets/promo/16662-mobile.webp",
-    "heroWidth": 1920,
-    "heroHeight": 1000,
-    "heroSource": "https://www.ghibli.jp/gallery/kazetachinu020.jpg"
-  },
-  {
-    "id": "mal-21557",
-    "ids": {
-      "mal": 21557,
-      "shikimori": 21557,
-      "anilist": null,
-      "anilibria": 4673,
-      "kodik": "movie-20556"
-    },
-    "title": "Воспоминания о Марни",
-    "originalTitle": "Omoide no Marnie",
-    "alt": "Воспоминания о Марни Omoide no Marnie Omoide no Marnie",
-    "year": 2014,
-    "type": "MOVIE",
-    "genres": [
-      "Драма",
-      "Тайна",
-      "Триллер",
-      "Психологическое"
-    ],
-    "description": "Анна Сасаки — необщительная девочка, у которой нет друзей. Она живёт у приёмных родителей, страдает от астмы и любит рисовать. В конце концов Анна переезжает в небольшой провинциальный городок погостить у Киёмасы [大岩 清正] и Сэцу [大岩 セツ] Оива — родственников Ёрико [佐々木 頼子], приёмной матери девочки. Но всё не так скучно и однообразно, как может показаться на первый взгляд! В городке есть загадочное п",
-    "ongoing": false,
-    "translations": {
-      "en": [
-        "When Marnie Was There",
-        "Suffering from frequent asthma attacks, young Anna Sasaki is quiet, unsociable, and isolated from her peers, causing her foster parent endless worry. Upon recommendation by the doctor, Anna is sent to the countryside, in hope the cleaner air and more relaxing lifestyle will improve her health and help clear her mind. Engaging in her passion for sketching, Anna spends her summer days living with he"
-      ],
-      "ja": [
-        "思い出のマーニー",
-        ""
-      ]
-    },
-    "airedAt": "2014-07-19",
-    "catalogUpdatedAt": 1666300367000,
-    "malId": 21557,
-    "image": "https://shikimori.io/uploads/poster/animes/21557/92d8c3c6127e8802ac3b35062e1ff56a.jpeg",
+    "airedAt": "2025-01-05",
+    "catalogUpdatedAt": 1759407414000,
+    "malId": 58567,
+    "image": "https://shikimori.io/uploads/poster/animes/58567/d10d10241ba31495d7eee0949bbc69e4.jpeg",
     "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101922-33MtJGsUSxga.jpg",
     "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101922-33MtJGsUSxga.jpg",
-    "episodes": 1,
+    "episodes": 13,
     "catalogApproved": true,
     "catalogOnly": false,
-    "hero": "assets/promo/21557-wide.webp",
-    "heroMobile": "assets/promo/21557-mobile.webp",
+    "hero": "assets/promo-2026/58567-wide.webp",
+    "heroMobile": "assets/promo-2026/58567-mobile.webp",
+    "heroWidth": 1200,
+    "heroHeight": 625,
+    "heroSource": "https://sololeveling-anime.net/story/SYS/CONTENTS/story_3762_photo_173495009120815656"
+  },
+  {
+    "id": "mal-60543",
+    "ids": {
+      "shikimori": 60543,
+      "mal": 60543,
+      "anilist": 185660,
+      "kodik": "serial-68796"
+    },
+    "title": "Дандадан 2",
+    "originalTitle": "Dan Da Dan (2025)",
+    "alt": "Дандадан 2 / Dan Da Dan 2 / Dandadan 2 DAN DA DAN Season 2 ダンダダン 第2期",
+    "year": 2025,
+    "type": "TV",
+    "genres": [
+      "Сёнен",
+      "Экшен",
+      "Комедия",
+      "Сверхъестественное"
+    ],
+    "description": "Момо Аясэ и Кэн Такакура продолжают бок о бок сражаться с нечистью и инопланетными существами, которые из раза в раз доставляют им новые проблемы. Более-менее разобравшись с собственными трудностями, Момо и Кэн отправляются на помощь Дзину Эндзёдзи , который утверждает, что видел призрака, а после этого в его семье стали происходить несчастья. Троица отбывает в проклятый дом, находящийся далеко в ",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "DAN DA DAN Season 2",
+        "While the mission to exorcise Jin \"Jiji\" Enjouji's family home is underway, things are not going as expected. Momo Ayase narrowly evades an attempted abduction while Ken \"Okarun\" Takakura and Jiji are ambushed by the Kitou family—the unsettling landlords of the cursed estate. The trio's efforts threaten the foundation of this enigmatic town shrouded in legends and mysteries.\n\n\n\nAs Momo, Okarun, an"
+      ],
+      "ja": [
+        "ダンダダン 第2期",
+        ""
+      ]
+    },
+    "airedAt": "2025-07-04",
+    "catalogUpdatedAt": 1766512457000,
+    "popularity": 232517,
+    "audienceRating": 8.37,
+    "rating": 8.37,
+    "malId": 60543,
+    "image": "https://shikimori.io/uploads/poster/animes/60543/3a43204e424cfba2f1d29df67940cccd.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/185660-NdXFgzcYmcDz.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/185660-NdXFgzcYmcDz.jpg",
+    "episodes": 12,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-2026/60543-wide.webp",
+    "heroMobile": "assets/promo-2026/60543-mobile.webp",
     "heroWidth": 1920,
     "heroHeight": 1000,
-    "heroSource": "https://www.ghibli.jp/gallery/marnie020.jpg"
+    "heroSource": "https://anime-dandadan.com/wp/wp-content/uploads/2025/07/13_1.jpg"
+  },
+  {
+    "id": "mal-57658",
+    "ids": {
+      "mal": 57658,
+      "shikimori": 57658,
+      "anilist": 172463,
+      "anilibria": 10088,
+      "kodik": "serial-73369"
+    },
+    "title": "Магическая битва: Смертельная миграция",
+    "originalTitle": "Jujutsu Kaisen: Shimetsu Kaiyuu - Zenpen",
+    "alt": "Магическая битва: Смертельная миграция Jujutsu Kaisen: Shimetsu Kaiyuu - Zenpen Jujutsu Kaisen: Shimetsu Kaiyuu - Zenpen",
+    "year": 2026,
+    "type": "TV",
+    "genres": [
+      "Сёнен",
+      "Экшен",
+      "Сверхъестественное"
+    ],
+    "description": "После событий в Сибуе, погрузивших город в хаос, казалось, что трагедия останется локальной. Однако теперь тёмный вихрь этой беды накрывает весь мир. Таинственный маг , ранее скрывавшийся под личностью Сугуру Гето , объявляет магам Королевскую битву под названием «Смертельная миграция», в которую будут втянуты не только маги, но и проклятия, и ни в чём не повинные люди. и его товарищи вступают в о",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "JUJUTSU KAISEN Season 3: The Culling Game Part 1",
+        "After the Shibuya Incident, a deadly jujutsu battle known as the Culling Game orchestrated by Noritoshi Kamo erupts across ten colonies in Japan.\n\n\nHaunted by guilt over the mass killings in Shibuya and wary of Sukuna’s interest in Fushiguro, Itadori chooses not to return to Jujutsu High. Instead, he teams up with Choso to exorcise the countless cursed spirits unleashed by Noritoshi Kamo.\nAmid thi"
+      ],
+      "ja": [
+        "呪術廻戦 死滅回游 前編",
+        ""
+      ]
+    },
+    "airedAt": "2026-01-09",
+    "catalogUpdatedAt": 1790626855000,
+    "audienceRating": 8.58,
+    "rating": 8.58,
+    "malId": 57658,
+    "image": "https://shikimori.io/uploads/poster/animes/57658/7fd0d0760734513d62189ff53015546d.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/172463-3J2o3qQZadFJ.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/172463-3J2o3qQZadFJ.jpg",
+    "episodes": 12,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-2026/57658-wide.webp",
+    "heroMobile": "assets/promo-2026/57658-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://times-abema.ismcdn.jp/mwimgs/4/9/1920w/img_493a7540f91a4f2f3f3ce87a5ef77226890368.jpg"
+  },
+  {
+    "id": "mal-59177",
+    "ids": {
+      "mal": 59177,
+      "shikimori": 59177,
+      "anilist": null,
+      "anilibria": 9963,
+      "kodik": "serial-69043"
+    },
+    "title": "Кайдзю номер восемь 2",
+    "originalTitle": "Kaijuu 8-gou 2nd Season",
+    "alt": "Кайдзю номер восемь 2 Kaijuu 8-gou 2nd Season Kaijuu 8-gou 2nd Season",
+    "year": 2025,
+    "type": "TV",
+    "genres": [
+      "Сёнен",
+      "Экшен",
+      "Фэнтези",
+      "Фантастика",
+      "Взрослые персонажи",
+      "Военное",
+      "Городское фэнтези"
+    ],
+    "description": "После масштабной операции Силы обороны столкнулись с новыми трудностями. У Кафки Хибино тоже прибавилось проблем, хотя основные цели не изменились. Он по-прежнему жаждет избавить мир от кайдзю, и ему по-прежнему нужно доказать свою полезность товарищам и командованию. А сделать это всё сложнее, ведь кайдзю, кажется, становятся всё сильнее. Смогут ли грядущие испытания стать катализатором положител",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Kaiju No. 8 Season 2",
+        "Following the massive operation that led to the confinement of recent recruit Kafka Hibino, otherwise known as Kaiju No. 8, the Defense Force has been puzzled by how to deal with him. Kafka is the first kaiju to side with humans, and after careful consideration, he is eventually transferred to the Defense Force's First Division in the hope of adding his power to the strongest division, capable of "
+      ],
+      "ja": [
+        "怪獣８号 第２期",
+        ""
+      ]
+    },
+    "airedAt": "2025-07-19",
+    "catalogUpdatedAt": 1767032580000,
+    "malId": 59177,
+    "image": "https://shikimori.io/uploads/poster/animes/59177/41c689f37372becd2d19cf50b3c9cb31.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101922-33MtJGsUSxga.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101922-33MtJGsUSxga.jpg",
+    "episodes": 11,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-2026/59177-wide.webp",
+    "heroMobile": "assets/promo-2026/59177-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://kaiju-no8.net/episodes/img/13/1.jpg"
+  },
+  {
+    "id": "mal-59062",
+    "ids": {
+      "shikimori": 59062,
+      "mal": 59062,
+      "anilist": 178025,
+      "kodik": "serial-68603"
+    },
+    "title": "Гатиакута",
+    "originalTitle": "Gachiakuta",
+    "alt": "Гатиакута Gachiakuta ガチアクタ",
+    "year": 2025,
+    "type": "TV",
+    "genres": [
+      "Сёнен",
+      "Экшен",
+      "Фэнтези"
+    ],
+    "description": "«Если в любимые вещи мы вкладываем частичку своей души, то что происходит с ненужными вещами, которые отправляются на помойку?» Там, где живёт Рудо , мусор скидывают в бездну, которая начинается сразу за пределами города. Туда же сбрасывают и преступников, а тех, кто был с ними связан, отселяют в трущобы. Именно там обитал Рудо , заклеймённый как сын убийцы, пока его самого не обвинили в том, что ",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Gachiakuta",
+        "A boy lives in a floating town, where the poor scrape by and the rich live a sumptuous life, simply casting their garbage off the side, into the abyss. When he’s falsely accused of murder, though, his wrongful conviction leads to an unimaginable punishment—exile off the edge, with the rest of the trash. Down on the surface, the cast-off waste of humanity has bred vicious monsters, and to travel th"
+      ],
+      "ja": [
+        "ガチアクタ",
+        ""
+      ]
+    },
+    "airedAt": "2025-07-06",
+    "catalogUpdatedAt": 1792071449000,
+    "popularity": 264722,
+    "audienceRating": 8.2,
+    "rating": 8.2,
+    "malId": 59062,
+    "image": "https://shikimori.io/uploads/poster/animes/59062/eef2d14872e5da4d578fc662557bba51.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/178025-WvcXi1J2SGRa.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/178025-WvcXi1J2SGRa.jpg",
+    "episodes": 24,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-2026/59062-wide.webp",
+    "heroMobile": "assets/promo-2026/59062-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://times-abema.ismcdn.jp/mwimgs/4/0/1920w/img_4037094b31779433a949f9c20c14d9c9411835.jpg"
+  },
+  {
+    "id": "mal-52701",
+    "ids": {
+      "mal": 52701,
+      "shikimori": 52701,
+      "anilist": null,
+      "anilibria": 9612,
+      "kodik": "serial-58773"
+    },
+    "title": "Подземелье вкусностей",
+    "originalTitle": "Dungeon Meshi",
+    "alt": "Подземелье вкусностей Dungeon Meshi Dungeon Meshi",
+    "year": 2024,
+    "type": "TV",
+    "genres": [
+      "Сэйнэн",
+      "Приключения",
+      "Комедия",
+      "Фэнтези",
+      "Гурман"
+    ],
+    "description": "«Голод не тётка — пирожка не поднесёт» — эту истину не понаслышке знает любой авантюрист, бывающий в подземелье и вынужденный таскать с собой огромный запас провианта. Это довольно серьёзная проблема, ведь количество еды полностью диктует длительность путешествия. Мало того, в подземелье на каждом шагу встречаются опасности и кровожадные монстры, готовые слопать зазевавшегося искателя приключений ",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Delicious in Dungeon",
+        "When young adventurer Laios and his company are attacked and soundly thrashed by a dragon deep in a dungeon, the party loses all its money and provisions...and a member! They're eager to go back and save her, but there is just one problem: If they set out with no food or coin to speak of, they're sure to starve on the way! But Laios comes up with a brilliant idea: \"Let's eat the monsters!\" Slimes,"
+      ],
+      "ja": [
+        "ダンジョン飯",
+        ""
+      ]
+    },
+    "airedAt": "2024-01-04",
+    "catalogUpdatedAt": 1739285770000,
+    "malId": 52701,
+    "image": "https://shikimori.io/uploads/poster/animes/52701/f1f3c36cc1695a5adba4bf3477266f0d.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101922-33MtJGsUSxga.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101922-33MtJGsUSxga.jpg",
+    "episodes": 24,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-2026/52701-wide.webp",
+    "heroMobile": "assets/promo-2026/52701-mobile.webp",
+    "heroWidth": 1584,
+    "heroHeight": 825,
+    "heroSource": "https://delicious-in-dungeon.com/assets/story/1/2.webp?v1"
+  },
+  {
+    "id": "mal-62001",
+    "ids": {
+      "mal": 62001,
+      "shikimori": 62001,
+      "anilist": 195600,
+      "anilibria": 10171,
+      "kodik": "serial-74546"
+    },
+    "title": "Цугаи загробного мира",
+    "originalTitle": "Yomi no Tsugai",
+    "alt": "Цугаи загробного мира Yomi no Tsugai Yomi no Tsugai Daemons of the Shadow Realm Yomi no Tsugai",
+    "year": 2026,
+    "type": "TV",
+    "genres": [
+      "Сёнен",
+      "Экшен",
+      "Приключения",
+      "Сверхъестественное"
+    ],
+    "description": "В глухой горной деревне, отрезанной от цивилизации, юноша по имени Юру ведёт простую жизнь охотника. Его главная задача — оберегать сестру-близнеца Асу , которую держат вдали от посторонних глаз. Привычный Юру мир рушится, когда в небе над деревней появляются «стальные птицы» и родная земля становится зоной боевых действий. Нападающие используют не только огнестрельное оружие, но и «цугаев» — свер",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Daemons of the Shadow Realm",
+        "In a remote mountain village under the watchful eyes of two stone guardians, the young Yuru contentedly lives off the land while staying close to the only family he has left—Asa, his precious twin sister. Asa, meanwhile, carries out a mysterious “duty” on behalf of the village while locked in a cage. Why is Asa a prisoner? And what other secrets does Yuru’s otherwise idyllic home hide?\n\n\n(Source: "
+      ],
+      "ja": [
+        "黄泉のツガイ",
+        ""
+      ]
+    },
+    "airedAt": "2026-04-04",
+    "catalogUpdatedAt": 1792748889000,
+    "audienceRating": 7.8,
+    "rating": 7.8,
+    "malId": 62001,
+    "image": "https://shikimori.io/uploads/poster/animes/62001/fa3ddb87c89a4a19fc18b9e457767968.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/195600-UxHvDXwzJxlP.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/195600-UxHvDXwzJxlP.jpg",
+    "episodes": 24,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-2026/62001-wide.webp",
+    "heroMobile": "assets/promo-2026/62001-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://times-abema.ismcdn.jp/mwimgs/c/5/1920w/img_c527c019cf1edbaf41c2f5ad5b6d043f132201.jpg"
+  },
+  {
+    "id": "mal-59708",
+    "ids": {
+      "mal": 59708,
+      "shikimori": 59708,
+      "anilist": 180745,
+      "anilibria": 10155,
+      "kodik": "serial-74345"
+    },
+    "title": "Добро пожаловать в класс превосходства 4: Второй год — Первый семестр",
+    "originalTitle": "Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e 4th Season: 2-nensei-hen 1 Gakki",
+    "alt": "Добро пожаловать в класс превосходства 4: Второй год — Первый семестр Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e 4th Season: 2-nensei-hen 1 Gakki Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e 4th Season: 2-nensei-hen 1 Gakki",
+    "year": 2026,
+    "type": "TV",
+    "genres": [
+      "Драма",
+      "Триллер",
+      "Психологическое",
+      "Школа"
+    ],
+    "description": "Второй год обучения в элитной старшей школе «Кодо Икусэй» преподносит Киётаке Аянокоджи новые суровые испытания. Едва перейдя на второй курс, ученики сталкиваются с ужесточёнными правилами выживания. Администрация школы внедряет систему OAA (Over All Ability) — мобильное приложение, которое отныне переводит все академические и физические навыки студентов в публичные числовые рейтинги, не оставляя ",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Classroom of the Elite 4th Season: Second Year, First Semester",
+        "As Ayanokouji and his classmates begin their second year at the Advanced Nurturing High School, they’re greeted by a fresh gauntlet of exams and a fresh batch of rather unique first-year students. They’ll have to get to know each other quickly, because the first special exam pairs the first-years with the second-years on a written test—with only the second-years facing expulsion if their team perf"
+      ],
+      "ja": [
+        "ようこそ実力至上主義の教室へ 4th Season 2年生編1学期",
+        ""
+      ]
+    },
+    "airedAt": "2026-04-01",
+    "catalogUpdatedAt": 1784370798000,
+    "audienceRating": 7.82,
+    "rating": 7.82,
+    "malId": 59708,
+    "image": "https://shikimori.io/uploads/poster/animes/59708/19c5366bcb03946c500ac347027d1896.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/180745-Iicz1F6Kuj4e.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/180745-Iicz1F6Kuj4e.jpg",
+    "episodes": 16,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-2026/59708-wide.webp",
+    "heroMobile": "assets/promo-2026/59708-mobile.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://you-zitsu.com/assets/story/1/3.webp"
+  },
+  {
+    "id": "mal-59983",
+    "ids": {
+      "mal": 59983,
+      "shikimori": 59983,
+      "anilist": 182300,
+      "anilibria": 10156,
+      "kodik": "serial-74853"
+    },
+    "title": "Меч и жезл Вистории 2",
+    "originalTitle": "Tsue to Tsurugi no Wistoria Season 2",
+    "alt": "Меч и жезл Вистории 2 Tsue to Tsurugi no Wistoria Season 2 Tsue to Tsurugi no Wistoria Season 2",
+    "year": 2026,
+    "type": "TV",
+    "genres": [
+      "Сёнен",
+      "Экшен",
+      "Фэнтези",
+      "Школа"
+    ],
+    "description": "Академия «Регардон» готовится встретить пышный праздник Терминалии, но для Уилла Серфорта это время не приносит долгожданного покоя. Жесткая система, воздвигнутая на абсолюте магии, продолжает отторгать «аномалию» в виде меча, заставляя юношу вновь и вновь ощущать холод удушающей изоляции. Путь к Башне остаётся невероятно тернистым, а пропасть между ним и недосягаемой Эльфарией всё ещё кажется неп",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Wistoria: Wand and Sword Season 2",
+        "Will, a washout student at a magical academy who is unable to use magic, is aiming to join the top tier of mages, the Magia Vander, to fulfill a promise to his childhood friend, Elfaria. Wielding a sword instead of a wand, his abilities are slowly recognized within the academy. During the all-student praxis dungeon training he undertakes with Lihanna and the other top students of his year, they ar"
+      ],
+      "ja": [
+        "杖と剣のウィストリア Season2",
+        ""
+      ]
+    },
+    "airedAt": "2026-04-12",
+    "catalogUpdatedAt": 1787140526000,
+    "audienceRating": 8.17,
+    "rating": 8.17,
+    "malId": 59983,
+    "image": "https://shikimori.io/uploads/poster/animes/59983/885fd81b9231c8bacf17959da8aa07fb.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/182300-d1znfWKzn1bT.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/182300-d1znfWKzn1bT.jpg",
+    "episodes": 13,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-2026/59983-wide.webp",
+    "heroMobile": "assets/promo-2026/59983-mobile.webp",
+    "heroWidth": 1248,
+    "heroHeight": 650,
+    "heroSource": "https://wistoria-anime.com/jrepgmrf/wp-content/themes/wistoria-anime/assets/img/episodes/ep13/01.jpg"
   }
 ]

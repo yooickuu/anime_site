@@ -201,24 +201,7 @@ footer .brand .brand-symbol{width:36px;height:36px}footer .brand .brand-name{fon
 .catalog-options{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .catalog-options .select-trigger{min-height:42px;height:42px}
 @media(max-width:600px){.header .header-tools .avatar{--avatar-size:36px}.catalog-options>.site-select{flex:1 1 130px}.catalog-options .select-trigger{width:100%}}
-/* Subtitle selection has its own grid area; it must not overlap playback speed. */
-@media(max-width:600px){
- .watch-page .video-controls{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-areas:"seek seek seek time time" "play mute cinema pip full" "speed speed quality subs subs";gap:4px;padding:6px}
- .watch-page .video-controls .video-seek{grid-area:seek;width:100%;margin:0}
- .watch-page .video-controls .video-time{grid-area:time;justify-self:end;font-size:10px}
- .watch-page .video-controls [data-video=play]{grid-area:play}
- .watch-page .video-controls [data-video=mute]{grid-area:mute}
- .watch-page .video-controls [data-action=cinema]{grid-area:cinema}
- .watch-page .video-controls [data-video=pip]{grid-area:pip}
- .watch-page .video-controls [data-video=fullscreen]{grid-area:full}
- .watch-page .video-controls .video-option{grid-area:speed;min-width:0}
- .watch-page .video-controls #quality-control{grid-area:quality}
- .watch-page .video-controls #subtitle-control{grid-area:subs;min-width:0;max-width:none}
- .watch-page .video-controls .icon-button{width:40px;height:40px;min-height:40px;justify-self:center;padding:0}
- .watch-page .video-controls .site-select{min-width:0;max-width:none;width:100%}
- .watch-page .video-controls .select-trigger{width:100%;height:36px;min-height:36px;padding:0 5px}
- .watch-page .player-pickers>label,.catalog-options>.site-select{min-width:0}
-}
+
 
 /* Keep the complete foreground artwork visible; fade the padded space below it. */
 /* The foreground keeps the complete frame; its softer duplicate fills the edges. */
@@ -307,4 +290,35 @@ main:has(.profile-banner-stage){margin-top:0!important;padding-top:0}
  body:has(.profile-banner-stage){--profile-banner-height:330px}
  .profile-banner-heading{top:calc(var(--profile-nav-space) + 22px)}
  .profile-cover-actions{top:calc(var(--profile-nav-space) + 118px)}
+}
+
+@media(max-width:600px){.watch-page .player-pickers>label,.catalog-options>.site-select{min-width:0}}
+
+/* Compact phone player: the sound wrapper owns its grid cell. */
+@media(max-width:600px){
+ .watch-page .watch-layout{grid-template-columns:minmax(0,1fr)}
+ .watch-page .watch-main{width:100%;min-width:0}
+ .watch-page .watch-main .video-shell,.watch-page.cinema .video-shell{width:100%;max-width:100%;margin:0;border-radius:12px;box-sizing:border-box}
+ .watch-page .video-controls{display:grid;grid-template-columns:40px 40px minmax(44px,1fr) minmax(52px,1fr) 40px 40px;grid-template-areas:"seek seek seek seek time time" "play sound speed quality cinema full";gap:4px;padding:8px;align-items:center}
+ .watch-page .video-controls .video-seek{grid-area:seek;width:100%;min-width:0;margin:0}
+ .watch-page .video-controls .video-time{display:block;grid-area:time;margin:0;justify-self:end;font-size:10px;white-space:nowrap}
+ .watch-page .video-controls [data-video=play]{grid-area:play;order:0}
+ .watch-page .video-controls .video-sound{grid-area:sound;justify-self:center}
+ .watch-page .video-controls [data-video=mute]{grid-area:auto}
+ .watch-page .video-controls .video-option{grid-area:speed;min-width:0}
+ .watch-page .video-controls #quality-control{grid-area:quality}
+ .watch-page .video-controls [data-action=cinema]{grid-area:cinema}
+ .watch-page .video-controls [data-video=fullscreen]{grid-area:full}
+ .watch-page .video-controls [data-video=pip],.watch-page .video-controls [hidden]{display:none}
+ .watch-page .video-controls .icon-button{width:40px;min-width:40px;height:40px;min-height:40px;padding:0;justify-self:center}
+ .watch-page .video-controls .site-select{width:100%;min-width:0;max-width:none}
+ .watch-page .video-controls .select-trigger{width:100%;height:40px;min-height:40px;min-width:0;padding:0 5px!important;font-size:11px;gap:2px}
+ .watch-page .video-controls .select-trigger .ui-icon{width:10px;height:10px}
+ .watch-page .video-controls .video-volume-reveal{position:absolute;bottom:calc(100% + 8px);left:50%;width:98px;max-width:98px;transform:translate(-50%,8px) scale(.94);border-radius:12px;background:rgba(var(--surface-rgb),.96);box-shadow:0 8px 24px #0004;padding:5px;visibility:hidden}
+ .watch-page .video-sound:focus-within .video-volume-reveal,.watch-page .video-sound:hover .video-volume-reveal{visibility:visible;transform:translate(-50%,0) scale(1)}
+}
+@media(max-width:360px){
+ .watch-page .video-controls{grid-template-columns:36px 36px minmax(40px,1fr) minmax(48px,1fr) 36px 36px;padding:6px;gap:3px}
+ .watch-page .video-controls .icon-button{width:36px;min-width:36px}
+ .watch-page .video-controls .select-trigger{font-size:10px;padding:0 3px!important}
 }
