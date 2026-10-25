@@ -28,7 +28,7 @@ import {initSelectMenus, enhanceSelects, closeSelectMenu} from './select-menu.js
 import {createPlayback} from './playback.js';
 import {cropAvatar,cropBanner} from './avatar-crop.js';
 import {authErrorKey} from "./public-config.js";
-import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons, knownSeasons} from "./sources.js";
+import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons, knownSeasons, ensureFullCatalogLoaded} from "./sources.js";
 import {icon} from "./icons.js";
 import {controlsHTML, attachControls} from "./player-controls.js";
 import { chooseQuality } from "./provider.js";
@@ -1644,3 +1644,7 @@ document.addEventListener('keydown',event=>{
 });
 document.addEventListener('click',event=>{if(event.target.closest('.search-suggestions button')||!event.target.closest('.search,.catalog-search'))closeSearchSuggestions();});
 document.addEventListener('focusin',event=>{if(!event.target.closest('.search,.catalog-search'))closeSearchSuggestions();});
+// Фоном загружаем всю остальную базу после запуска сайта
+setTimeout(() => {
+  ensureFullCatalogLoaded().catch(() => {});
+}, 1000);
