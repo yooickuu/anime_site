@@ -1564,7 +1564,7 @@ async function loadCatalogue(more = false, targetPage = 1) {
   }
   renderGrid();
   try {
-    const result = await combinedCatalogue(page==='home'?{scope:'watchable',view:'popular',sort:'latest',query:'',genre:'all',type:'all',page:1}:{
+    const result = await combinedCatalogue(page==='home'?{scope:'watchable',view:'popular',sort:'picked',query:'',genre:'all',type:'all',page:1}:{
       scope: catalogScope,
       view: catalogueView,
       query,
