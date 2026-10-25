@@ -1,7 +1,8 @@
+import {readCatalogueText} from './lib/catalog-storage.mjs';
 // Batch metadata only: never changes episodes, audio or publication admission.
 import {readFile,writeFile,rename} from 'node:fs/promises';
 import {metadataFromAniList} from '../src/catalog-metadata.js';
-const publication=JSON.parse(await readFile('src/published-catalog.json','utf8'));
+const publication=JSON.parse(await readCatalogueText());
 let metadata={};try{metadata=JSON.parse(await readFile('src/catalog-metadata.json','utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
 const ids=[...new Set(publication.items.map(a=>a.ids?.mal).filter(Boolean))].filter(id=>!metadata[id]);
 const query=`query($ids:[Int]){Page(perPage:50){media(idMal_in:$ids,type:ANIME){idMal title{english romaji native} description(asHtml:false) startDate{year month day} relations{edges{relationType node{idMal type}}}}}}`;

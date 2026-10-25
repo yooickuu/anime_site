@@ -1,3 +1,9 @@
 .DS_Store
 yoru/checks/
 yoru/.openai/
+
+# Large catalogue JSON is generated locally; version its lossless archive instead.
+/published-catalog.json
+/yoru/dist/published-catalog.json
+/yoru/src/published-catalog.json
+/yoru/src/published-catalog.json.gz.tmp

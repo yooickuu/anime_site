@@ -1,3 +1,4 @@
+import {readCatalogueText} from './lib/catalog-storage.mjs';
 import {KodikAPI,catalogParams,mergeKodikRelease,completeRelease} from './lib/kodik-api.mjs';
 import {assembleRelease,loadToken,saveJSON} from './seed-catalog.mjs';
 import {createApprovedCatalogue} from '../src/approved-catalog.js';
@@ -30,7 +31,7 @@ export async function updateOngoings() {
   const token=await loadToken(),api=token?new KodikAPI(token):null;
   let catalog;
   try {
-    const raw = await readFile(CATALOG_PATH, 'utf8');
+    const raw = await readCatalogueText(CATALOG_PATH);
     catalog = JSON.parse(raw);
   } catch (e) {
     console.error('Failed to read published-catalog.json:', e.message);

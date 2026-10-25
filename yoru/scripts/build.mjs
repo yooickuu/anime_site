@@ -1,12 +1,14 @@
+import {readCatalogueText,archiveCatalogue} from './lib/catalog-storage.mjs';
 import {auditPlayerCatalogue} from './lib/player-audit.mjs';
 import {build} from 'esbuild';
 import {copyFile,readFile,writeFile,mkdir,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {createApprovedCatalogue} from '../src/approved-catalog.js';
-const rawPublication=await readFile('src/published-catalog.json','utf8');
+const rawPublication=await readCatalogueText();
 const publication=JSON.parse(rawPublication);
 const playerAudit=auditPlayerCatalogue(publication);
 if(playerAudit.errors.length)throw Error('Player catalogue validation failed: '+JSON.stringify(playerAudit.errors.slice(0,10)));
+await archiveCatalogue(rawPublication);
 const runtime=createApprovedCatalogue(publication);
 const revision=createHash('sha256').update(rawPublication).digest('hex').slice(0,12);
 // Episode source URLs load only when a title is opened, not on every homepage visit.

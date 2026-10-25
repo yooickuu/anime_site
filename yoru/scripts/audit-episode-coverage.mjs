@@ -1,6 +1,7 @@
+import {readCatalogueText} from './lib/catalog-storage.mjs';
 // Read-only bulk completeness audit. It never removes existing catalogue entries.
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
-const publication=JSON.parse(await readFile('src/published-catalog.json','utf8'));
+const publication=JSON.parse(await readCatalogueText());
 const items=publication.items.filter(a=>a.ids?.shikimori),incomplete=[],unknown=[];let checked=0;
 for(let i=0;i<items.length;i+=50){
  const batch=items.slice(i,i+50),response=await fetch('https://shikimori.io/api/graphql',{method:'POST',headers:{'Content-Type':'application/json','User-Agent':'yomiku/1.0 (+https://yomiku.site/)'},body:JSON.stringify({query:'query($ids:String){animes(ids:$ids,limit:50){id episodes episodesAired status}}',variables:{ids:batch.map(a=>a.ids.shikimori).join(',')}}),signal:AbortSignal.timeout(15000)});

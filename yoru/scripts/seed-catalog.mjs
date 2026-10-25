@@ -1,3 +1,4 @@
+import {readCatalogueText} from './lib/catalog-storage.mjs';
 import {metadataFromAniList} from '../src/catalog-metadata.js';
 import {mapLimit} from './lib/concurrency.mjs';
 import {readFile,writeFile,rename,mkdir} from 'node:fs/promises';
@@ -10,7 +11,7 @@ import {createApprovedCatalogue} from '../src/approved-catalog.js';
 import {normalizeType,normalizeGenre} from '../src/catalog-query.js';
 const catalogPath='src/published-catalog.json',cursorPath='src/kodik-progress.json';
 export async function saveJSON(path,data){await writeFile(path+'.tmp',JSON.stringify(data,path===catalogPath?null:undefined,path===catalogPath?0:2));await rename(path+'.tmp',path);}
-export async function loadJSON(path,fallback){try{return JSON.parse(await readFile(path,'utf8'));}catch(e){if(e.code==='ENOENT')return fallback;throw e;}}
+export async function loadJSON(path,fallback){try{return JSON.parse(path===catalogPath?await readCatalogueText(path):await readFile(path,'utf8'));}catch(e){if(e.code==='ENOENT')return fallback;throw e;}}
 export async function loadToken(){
  const configured=process.env.KODIK_API_TOKEN||process.env.KODIK_TOKEN;
  if(configured)return configured;

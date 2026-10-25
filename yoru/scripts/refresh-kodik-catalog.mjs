@@ -1,9 +1,10 @@
+import {readCatalogueText} from './lib/catalog-storage.mjs';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {KodikAPI,catalogParams,allEpisodes,translationIdentity,linkedEpisodes,mergeKodikRelease,completeRelease} from './lib/kodik-api.mjs';
 import {loadToken,saveJSON} from './seed-catalog.mjs';
 import {auditPlayerCatalogue} from './lib/player-audit.mjs';
 const path='src/published-catalog.json';
-const original=await readFile(path,'utf8'),catalog=JSON.parse(original),api=new KodikAPI(await loadToken());
+const original=await readCatalogueText(path),catalog=JSON.parse(original),api=new KodikAPI(await loadToken());
 const byId=new Map(catalog.items.filter(a=>a.ids?.shikimori).map(a=>[String(a.ids.shikimori),a]));
 const candidates=new Map(),report={pages:0,records:0,matched:0,updated:0,addedEpisodes:0,errors:[]};
 await mkdir('checks',{recursive:true});
@@ -41,6 +42,6 @@ for(const [id,variants]of candidates){
 report.matched=candidates.size;report.audit=auditPlayerCatalogue(catalog);
 if(report.audit.errors.length)throw Error('Refusing invalid catalogue: '+JSON.stringify(report.audit.errors.slice(0,3)));
 // Never overwrite changes from another running importer.
-if(await readFile(path,'utf8')!==original)throw Error('Catalogue changed during refresh; restart after stopping the other importer.');
+if(await readCatalogueText(path)!==original)throw Error('Catalogue changed during refresh; restart after stopping the other importer.');
 catalog.updatedAt=new Date().toISOString();await saveJSON(path,catalog);await saveJSON('checks/kodik-refresh-report.json',report);
 console.log(JSON.stringify({...report,errors:report.errors.length}));

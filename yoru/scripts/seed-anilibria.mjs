@@ -1,3 +1,4 @@
+import {readCatalogueText} from './lib/catalog-storage.mjs';
 /**
  * seed-catalog.mjs
  * Backend seeder for Yoru anime catalogue.
@@ -95,7 +96,7 @@ export async function fetchAniListMetadata(malId) {
 
 async function loadExistingCatalog() {
   try {
-    const raw = await readFile(CATALOG_PATH, 'utf8');
+    const raw = await readCatalogueText(CATALOG_PATH);
     return JSON.parse(raw);
   } catch (error) {
     if(error.code !== 'ENOENT') throw error;
