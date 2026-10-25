@@ -1,5 +1,7 @@
+import {networkRetry} from './network-retry.js';
 import {transportOptions} from './animego.js';
 // Signed, read-only Kodik CDN proxy. Never accepts an unsigned destination.
+const manifestCache=new Map();
 const encoder=new TextEncoder(),decoder=new TextDecoder();
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'GET, HEAD, OPTIONS','Access-Control-Allow-Headers':'Range','Access-Control-Expose-Headers':'Content-Range, Accept-Ranges, Content-Length','X-Content-Type-Options':'nosniff'};
 const encode=bytes=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -10,7 +12,7 @@ export function mediaURL(value,base){
  if(u.href.length>6000)throw Error('media_url_too_long');
  return u;
 }
-export function createMediaProxy({secret,endpoint,fetcher=fetch,now=Date.now,cryptoAPI=crypto}){
+export function createMediaProxy({secret,endpoint,fetcher=fetch,now=Date.now,cryptoAPI=crypto,cache=manifestCache,wait}){
  if(!secret)throw Error('proxy_not_configured');
  const key=cryptoAPI.subtle.importKey('raw',encoder.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign','verify']);
  async function sign(url,expires=Math.floor(now()/1000)+7200){
@@ -40,7 +42,7 @@ export function createMediaProxy({secret,endpoint,fetcher=fetch,now=Date.now,cry
   let target=mediaURL(url);const range=request.headers.get('range');
   if(range&&!/^bytes=(?:\d+-\d*|-\d+)$/.test(range))throw Error('invalid_media_range');
   for(let i=0;i<4;i++){
-   const response=await fetcher(target.href,{...transportOptions(),method:request.method==='HEAD'?'HEAD':'GET',redirect:'manual',signal:AbortSignal.any([request.signal,AbortSignal.timeout(25000)]),headers:{Referer:'https://kodik.cc/',Origin:'https://kodik.cc/','Accept-Encoding':'identity',...(range?{Range:range}:{})}});
+   const response=await networkRetry(()=>fetcher(target.href,{...transportOptions(),method:request.method==='HEAD'?'HEAD':'GET',redirect:'manual',signal:AbortSignal.any([request.signal,AbortSignal.timeout(25000)]),headers:{Referer:'https://kodik.cc/',Origin:'https://kodik.cc/','Accept-Encoding':'identity',...(range?{Range:range}:{})}}),{signal:request.signal,wait});
    if([301,302,303,307,308].includes(response.status)){const location=response.headers.get('location');await response.body?.cancel();if(!location)throw Error('invalid_media_redirect');target=mediaURL(location,target);continue;}
    return {response,url:target.href};
   }
@@ -51,6 +53,14 @@ export function createMediaProxy({secret,endpoint,fetcher=fetch,now=Date.now,cry
   if(!['GET','HEAD'].includes(request.method))return new Response(null,{status:405,headers:cors});
   let token;try{token=await verify(new URL(request.url));}catch{return new Response('Invalid or expired media link',{status:403,headers:{...cors,'Cache-Control':'no-store'}});}
   try{
+   const cacheKey=token.url;
+   const cached=cache.get(cacheKey);
+   if(cached&&cached.until<=now())cache.delete(cacheKey);
+   const ttl=Math.max(0,Math.min(600,Math.floor(token.expires-now()/1000)));
+   if(cached&&cached.until>now()&&!request.headers.has('range')){
+    const body=request.method==='HEAD'?null:await playlist(cached.text,cached.url,token.expires);
+    return new Response(body,{headers:{...cors,'Content-Type':'application/x-mpegURL','Cache-Control':`private, max-age=${Math.min(ttl,Math.floor((cached.until-now())/1000))}`}});
+   }
    const {response:r,url}=await upstream(token.url,request);
    if(!r.ok){await r.body?.cancel();return new Response(null,{status:[403,404,410,416].includes(r.status)?r.status:502,headers:{...cors,'Cache-Control':'no-store'}});}
    const isPlaylist=/\.m3u8(?:$|\?)/i.test(url)||/mpegurl/i.test(r.headers.get('content-type')||'');
@@ -60,7 +70,15 @@ export function createMediaProxy({secret,endpoint,fetcher=fetch,now=Date.now,cry
     const reader=r.body.getReader();let size=0,parts=[];
     try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>2000000)throw Error('media_playlist_too_large');parts.push(value);}}finally{await reader.cancel().catch(()=>{});}
     const bytes=new Uint8Array(size);let offset=0;for(const part of parts){bytes.set(part,offset);offset+=part.length;}
-    return new Response(await playlist(decoder.decode(bytes),url,token.expires),{headers});
+    const text=decoder.decode(bytes),rewritten=await playlist(text,url,token.expires);
+    // Cache only immutable VOD/master playlists; ongoing/live manifests must refresh.
+    const cacheable=/#EXT-X-ENDLIST|#EXT-X-STREAM-INF:/.test(text)&&!request.headers.has('range');
+    headers['Cache-Control']=cacheable?`private, max-age=${ttl}`:'no-store';
+    if(cacheable&&size<=262144){
+     cache.set(cacheKey,{text,url,until:now()+600000});
+     while(cache.size>64)cache.delete(cache.keys().next().value);
+    }
+    return new Response(rewritten,{headers});
    }
    for(const name of ['content-range','accept-ranges'])if(r.headers.has(name))headers[name]=r.headers.get(name);
    return new Response(r.body,{status:r.status,headers});

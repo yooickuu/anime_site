@@ -1,3 +1,4 @@
+import {networkRetry} from './network-retry.js';
 // Public AnimeGO player metadata. Never accepts user-supplied upstream URLs.
 export const GO_ORIGIN='https://animego.me';
 export function decodeHTML(s=''){return s.replace(/&#(x[0-9a-f]+|\d+);|&(amp|quot|apos|lt|gt|nbsp);/gi,(_,n,k)=>{if(n){const c=n[0].toLowerCase()==='x'?parseInt(n.slice(1),16):Number(n);return c<=0x10ffff?String.fromCodePoint(c):'';}return {amp:'&',quot:'"',apos:"'",lt:'<',gt:'>',nbsp:' '}[k.toLowerCase()];});}
@@ -21,17 +22,14 @@ export function transportOptions(){
  return {client:upstreamClient};
 }
 export async function textFetch(url,options={}){
- for(let attempt=0;attempt<2;attempt++){
-  try{return await readUpstream(url,options);}
-  catch(error){if(attempt||!/unexpected EOF|connection (?:reset|closed)|http2/i.test(error.message))throw error;}
- }
+ return networkRetry(()=>readUpstream(url,options),{signal:options.signal});
 }
 async function readUpstream(url,options={}){
  const {onHeaders,...requestOptions}=options;
  const allowed=new Set([new URL(url).hostname,'kodikplayer.com','kodik.info','kodik.biz','kodik.cc','yomiku.site','www.yomiku.site']);
  let current=new URL(url),method=options.method||'GET',body=options.body;
  for(let hop=0;hop<4;hop++){
-  const r=await fetch(current,{...requestOptions,...transportOptions(),method,body,headers:{'Accept-Encoding':'identity','User-Agent':'yomiku/1.0 (+https://yomiku.site/)',...options.headers},redirect:'manual',signal:AbortSignal.timeout(15000)});
+  const r=await fetch(current,{...requestOptions,...transportOptions(),method,body,headers:{'Accept-Encoding':'identity','User-Agent':'yomiku/1.0 (+https://yomiku.site/)',...options.headers},redirect:'manual',signal:options.signal?AbortSignal.any([options.signal,AbortSignal.timeout(25000)]):AbortSignal.timeout(25000)});
   if([301,302,303,307,308].includes(r.status)){
    const location=r.headers.get('location');await r.body?.cancel();
    if(!location)throw Error('upstream_redirect_missing');const next=new URL(location,current);

@@ -33,3 +33,21 @@ test('browser only accepts exact-audio signed proxy sources, never old direct UR
  await assert.rejects(refreshKodikMedia(media,config,'mal-1',1,{fetcher:async()=>Response.json(media)}),/proxyUnavailable/);
  await assert.rejects(refreshKodikMedia(media,config,'mal-1',1,{fetcher:async()=>new Response('',{status:502})}),/providerError/);
 });
+test('VOD cache survives proxy instances, expires after ten minutes and never caches live playlists',async()=>{
+ let time=Date.now(),calls=0;const cache=new Map();
+ const options={cache,now:()=>time,fetcher:async()=>{calls++;return new Response('#EXTM3U\n#EXTINF:6,\npart.ts\n#EXT-X-ENDLIST');}};
+ let proxy=make(options),signed=await proxy.sign(base);
+ assert.equal((await proxy.handle(new Request(signed))).headers.get('cache-control'),'private, max-age=600');
+ proxy=make(options);await proxy.handle(new Request(signed));assert.equal(calls,1);
+ time+=600001;await proxy.handle(new Request(signed));assert.equal(calls,2);
+ const live=make({...options,cache:new Map(),fetcher:async()=>{calls++;return new Response('#EXTM3U\n#EXTINF:6,\npart.ts');}});
+ assert.equal((await live.handle(new Request(signed))).headers.get('cache-control'),'no-store');await live.handle(new Request(signed));assert.equal(calls,4);
+});
+test('network retries use three attempts and 1500ms pauses, not retries for HTTP or caller cancellation',async()=>{
+ const {networkRetry}=await import('../server/network-retry.js');let attempts=0;const pauses=[];
+ const result=await networkRetry(async()=>{if(++attempts<3)throw new DOMException('timeout','TimeoutError');return 'ok';},{wait:async ms=>pauses.push(ms)});
+ assert.equal(result,'ok');assert.equal(attempts,3);assert.deepEqual(pauses,[1500,1500]);
+ attempts=0;await assert.rejects(networkRetry(async()=>{attempts++;throw Error('upstream_403');},{wait:async()=>{}}),/403/);assert.equal(attempts,1);
+ attempts=0;await assert.rejects(networkRetry(async()=>{attempts++;throw TypeError('fetch failed');},{wait:async()=>{}}));assert.equal(attempts,3);
+ const signal=AbortSignal.abort();await assert.rejects(networkRetry(async()=>{attempts++;},{signal}));assert.equal(attempts,3);
+});

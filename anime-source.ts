@@ -1,3 +1,20 @@
+// server/network-retry.js
+var pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+function retryableNetworkError(error) {
+  return ["TimeoutError", "TypeError"].includes(error?.name) || /network|fetch failed|unexpected EOF|connection (?:reset|closed)|http2|timed? ?out|ECONNRESET|ETIMEDOUT|ENOTFOUND/i.test(error?.message || "");
+}
+async function networkRetry(operation, { wait = pause, signal } = {}) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    signal?.throwIfAborted();
+    try {
+      return await operation();
+    } catch (error) {
+      if (signal?.aborted || attempt === 2 || !retryableNetworkError(error)) throw error;
+      await wait(1500);
+    }
+  }
+}
+
 // server/animego.js
 function positiveID(n) {
   return Number.isSafeInteger(Number(n)) && Number(n) > 0 && Number(n) < 1e8;
@@ -49,20 +66,14 @@ function transportOptions() {
   return { client: upstreamClient };
 }
 async function textFetch(url, options = {}) {
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      return await readUpstream(url, options);
-    } catch (error) {
-      if (attempt || !/unexpected EOF|connection (?:reset|closed)|http2/i.test(error.message)) throw error;
-    }
-  }
+  return networkRetry(() => readUpstream(url, options), { signal: options.signal });
 }
 async function readUpstream(url, options = {}) {
   const { onHeaders, ...requestOptions } = options;
   const allowed = /* @__PURE__ */ new Set([new URL(url).hostname, "kodikplayer.com", "kodik.info", "kodik.biz", "kodik.cc", "yomiku.site", "www.yomiku.site"]);
   let current = new URL(url), method = options.method || "GET", body = options.body;
   for (let hop = 0; hop < 4; hop++) {
-    const r = await fetch(current, { ...requestOptions, ...transportOptions(), method, body, headers: { "Accept-Encoding": "identity", "User-Agent": "yomiku/1.0 (+https://yomiku.site/)", ...options.headers }, redirect: "manual", signal: AbortSignal.timeout(15e3) });
+    const r = await fetch(current, { ...requestOptions, ...transportOptions(), method, body, headers: { "Accept-Encoding": "identity", "User-Agent": "yomiku/1.0 (+https://yomiku.site/)", ...options.headers }, redirect: "manual", signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(25e3)]) : AbortSignal.timeout(25e3) });
     if ([301, 302, 303, 307, 308].includes(r.status)) {
       const location = r.headers.get("location");
       await r.body?.cancel();
@@ -221,6 +232,7 @@ async function snapshotHealth() {
 }
 
 // server/media-proxy.js
+var manifestCache = /* @__PURE__ */ new Map();
 var encoder = new TextEncoder();
 var decoder = new TextDecoder();
 var cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS", "Access-Control-Allow-Headers": "Range", "Access-Control-Expose-Headers": "Content-Range, Accept-Ranges, Content-Length", "X-Content-Type-Options": "nosniff" };
@@ -232,7 +244,7 @@ function mediaURL(value, base) {
   if (u.href.length > 6e3) throw Error("media_url_too_long");
   return u;
 }
-function createMediaProxy({ secret, endpoint, fetcher = fetch, now = Date.now, cryptoAPI = crypto }) {
+function createMediaProxy({ secret, endpoint, fetcher = fetch, now = Date.now, cryptoAPI = crypto, cache: cache2 = manifestCache, wait }) {
   if (!secret) throw Error("proxy_not_configured");
   const key = cryptoAPI.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
   async function sign(url, expires = Math.floor(now() / 1e3) + 7200) {
@@ -273,7 +285,7 @@ function createMediaProxy({ secret, endpoint, fetcher = fetch, now = Date.now, c
     const range = request.headers.get("range");
     if (range && !/^bytes=(?:\d+-\d*|-\d+)$/.test(range)) throw Error("invalid_media_range");
     for (let i = 0; i < 4; i++) {
-      const response = await fetcher(target.href, { ...transportOptions(), method: request.method === "HEAD" ? "HEAD" : "GET", redirect: "manual", signal: AbortSignal.any([request.signal, AbortSignal.timeout(25e3)]), headers: { Referer: "https://kodik.cc/", Origin: "https://kodik.cc/", "Accept-Encoding": "identity", ...range ? { Range: range } : {} } });
+      const response = await networkRetry(() => fetcher(target.href, { ...transportOptions(), method: request.method === "HEAD" ? "HEAD" : "GET", redirect: "manual", signal: AbortSignal.any([request.signal, AbortSignal.timeout(25e3)]), headers: { Referer: "https://kodik.cc/", Origin: "https://kodik.cc/", "Accept-Encoding": "identity", ...range ? { Range: range } : {} } }), { signal: request.signal, wait });
       if ([301, 302, 303, 307, 308].includes(response.status)) {
         const location = response.headers.get("location");
         await response.body?.cancel();
@@ -295,6 +307,14 @@ function createMediaProxy({ secret, endpoint, fetcher = fetch, now = Date.now, c
       return new Response("Invalid or expired media link", { status: 403, headers: { ...cors, "Cache-Control": "no-store" } });
     }
     try {
+      const cacheKey = token.url;
+      const cached2 = cache2.get(cacheKey);
+      if (cached2 && cached2.until <= now()) cache2.delete(cacheKey);
+      const ttl = Math.max(0, Math.min(600, Math.floor(token.expires - now() / 1e3)));
+      if (cached2 && cached2.until > now() && !request.headers.has("range")) {
+        const body = request.method === "HEAD" ? null : await playlist(cached2.text, cached2.url, token.expires);
+        return new Response(body, { headers: { ...cors, "Content-Type": "application/x-mpegURL", "Cache-Control": `private, max-age=${Math.min(ttl, Math.floor((cached2.until - now()) / 1e3))}` } });
+      }
       const { response: r, url } = await upstream(token.url, request);
       if (!r.ok) {
         await r.body?.cancel();
@@ -327,7 +347,14 @@ function createMediaProxy({ secret, endpoint, fetcher = fetch, now = Date.now, c
           bytes.set(part, offset);
           offset += part.length;
         }
-        return new Response(await playlist(decoder.decode(bytes), url, token.expires), { headers });
+        const text = decoder.decode(bytes), rewritten = await playlist(text, url, token.expires);
+        const cacheable = /#EXT-X-ENDLIST|#EXT-X-STREAM-INF:/.test(text) && !request.headers.has("range");
+        headers["Cache-Control"] = cacheable ? `private, max-age=${ttl}` : "no-store";
+        if (cacheable && size <= 262144) {
+          cache2.set(cacheKey, { text, url, until: now() + 6e5 });
+          while (cache2.size > 64) cache2.delete(cache2.keys().next().value);
+        }
+        return new Response(rewritten, { headers });
       }
       for (const name of ["content-range", "accept-ranges"]) if (r.headers.has(name)) headers[name] = r.headers.get(name);
       return new Response(r.body, { status: r.status, headers });
@@ -343,7 +370,7 @@ function createMediaProxy({ secret, endpoint, fetcher = fetch, now = Date.now, c
 }
 
 // server/published-kodik.js
-var manifestCache = /* @__PURE__ */ new Map();
+var manifestCache2 = /* @__PURE__ */ new Map();
 async function fetchManifest(url) {
   try {
     const data = await jsonFetch(url);
@@ -354,15 +381,15 @@ async function fetchManifest(url) {
 }
 async function publishedKodikVideo(id, index, audio, { fetcher = fetchManifest, resolve = kodikVideo, season, ordinal } = {}) {
   if (!/^(mal|shikimori|lib)-\d+$/.test(id) || !Number.isSafeInteger(index) || index < 1 || !/^kodik-\d+$/.test(audio)) throw Error("invalid_request");
-  let cached2 = manifestCache.get(id);
+  let cached2 = manifestCache2.get(id);
   if (!cached2 || Date.now() > cached2.until) {
     const response = await fetcher(`https://raw.githubusercontent.com/yooickuu/anime_site/main/data/kodik/${id}.json`, { signal: AbortSignal.timeout(1e4) });
     if (!response.ok) throw Error("episode_missing");
     const data = await response.json();
     if (data.id !== id || !Array.isArray(data.episodes)) throw Error("invalid_manifest");
     cached2 = { data, until: Date.now() + 6e4 };
-    manifestCache.set(id, cached2);
-    if (manifestCache.size > 100) manifestCache.delete(manifestCache.keys().next().value);
+    manifestCache2.set(id, cached2);
+    if (manifestCache2.size > 100) manifestCache2.delete(manifestCache2.keys().next().value);
   }
   const exact = Number.isFinite(ordinal) && Number.isInteger(season);
   const track = exact ? cached2.data.episodes.flatMap((e) => e.tracks || []).find((t) => t.audioId === audio && t.ordinal === ordinal && t.season === season) : cached2.data.episodes[index - 1]?.tracks?.find((t) => t.audioId === audio);
@@ -400,10 +427,10 @@ Deno.serve(async (req) => {
   if (req.method === "GET" && new URL(req.url).searchParams.get("source") === "kodik") {
     try {
       const video = await publishedKodikVideo("mal-28285", 1, "kodik-4243");
-      return reply({ ready: true, version: 16, qualities: video.sources.map((s) => s.quality) });
+      return reply({ ready: true, version: 17, qualities: video.sources.map((s) => s.quality) });
     } catch (error) {
       const message = error instanceof Error ? error.message : "unknown";
-      return reply({ ready: false, version: 16, detail: message.replace(/https?:\/\/[^\s)]+/g, "[upstream]").replace(/[a-zA-Z0-9]{24,}/g, "[redacted]").slice(0, 220) }, 502);
+      return reply({ ready: false, version: 17, detail: message.replace(/https?:\/\/[^\s)]+/g, "[upstream]").replace(/[a-zA-Z0-9]{24,}/g, "[redacted]").slice(0, 220) }, 502);
     }
   }
   if (req.method === "GET") {
@@ -416,7 +443,7 @@ Deno.serve(async (req) => {
         healthCache = { at: Date.now(), ready: false, status: /^[a-z_0-9]+$/.test(m) ? m : "source_unavailable", detail: m.replace(/https?:\/\/[^\s)]+/g, "[upstream]").slice(0, 180) };
       }
     }
-    return reply({ ready: healthCache.ready, version: 16, kodikPlayback: true, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
+    return reply({ ready: healthCache.ready, version: 17, kodikPlayback: true, guestPlayback: true, sourceStatus: healthCache.status, ...healthCache.detail ? { detail: healthCache.detail } : {} });
   }
   if (req.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   try {

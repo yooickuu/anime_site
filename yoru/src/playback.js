@@ -1,11 +1,11 @@
 import Hls from 'hls.js';
 
 // One transport for the application and the browser playback checks.
-export function createPlayback(video, onState = () => {}, {schedule=setTimeout,cancel=clearTimeout,startupTimeout=20000} = {}) {
-  let hls = null, generation = 0, events = null, startupTimer;
+export function createPlayback(video, onState = () => {}, {schedule=setTimeout,cancel=clearTimeout,startupTimeout=95000,HlsClass=Hls} = {}) {
+  let hls = null, generation = 0, events = null, startupTimer,retryTimer;
   function suspend() {
     generation++;
-    cancel(startupTimer);startupTimer=null;
+    cancel(startupTimer);startupTimer=null;cancel(retryTimer);retryTimer=null;
     events?.abort();
     events = null;
     hls?.stopLoad();
@@ -48,15 +48,16 @@ export function createPlayback(video, onState = () => {}, {schedule=setTimeout,c
     listen('playing', () => emit('playing'));
     listen('waiting', () => emit('buffering'));
     listen('error', () => { if (video.getAttribute('src')) emit('error'); });
-    if (stream && !video.canPlayType?.('application/vnd.apple.mpegurl') && Hls.isSupported()) {
-      hls = new Hls({ startPosition: startAt > 0 ? startAt : -1, maxBufferLength: 30, maxMaxBufferLength: 60 });
+    if (stream && !video.canPlayType?.('application/vnd.apple.mpegurl') && HlsClass.isSupported()) {
+      hls = new HlsClass({ startPosition: startAt > 0 ? startAt : -1, maxBufferLength: 30, maxMaxBufferLength: 60, manifestLoadPolicy:{default:{...HlsClass.DefaultConfig.manifestLoadPolicy.default,maxTimeToFirstByteMs:85000,maxLoadTimeMs:90000}},fragLoadPolicy:{default:{...HlsClass.DefaultConfig.fragLoadPolicy.default,maxTimeToFirstByteMs:85000,maxLoadTimeMs:90000}},playlistLoadPolicy:{default:{...HlsClass.DefaultConfig.playlistLoadPolicy.default,maxTimeToFirstByteMs:85000,maxLoadTimeMs:90000}} });
       const transport = hls;
-      hls.on(Hls.Events.ERROR, (_, data) => {
+      hls.on(HlsClass.Events.ERROR, (_, data) => {
         if (!data.fatal || own !== generation) return;
-        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && mediaRetries++ < 1) {
+        if (data.type === HlsClass.ErrorTypes.MEDIA_ERROR && mediaRetries++ < 1) {
           transport.recoverMediaError();
-        } else if (data.type === Hls.ErrorTypes.NETWORK_ERROR && networkRetries++ < 1 && ![401,403,404,410].includes(data.response?.code)) {
-          transport.startLoad();
+        } else if (data.type === HlsClass.ErrorTypes.NETWORK_ERROR && networkRetries++ < 3 && ![401,403,404,410].includes(data.response?.code)) {
+          emit('buffering');cancel(startupTimer);cancel(retryTimer);
+          retryTimer=schedule(()=>{if(own!==generation)return;transport.startLoad();startupTimer=schedule(()=>{if(own===generation&&video.readyState<2)emit('error');},startupTimeout);},1500);
         } else { transport.stopLoad(); emit('error'); }
       });
       hls.loadSource(url);

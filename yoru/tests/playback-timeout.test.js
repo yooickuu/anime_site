@@ -54,3 +54,22 @@ test('Safari native HLS loads the signed proxy URL and preserves its position',(
  h.video.dispatchEvent(new Event('loadedmetadata'));assert.equal(h.video.currentTime,42);
  h.player.destroy();
 });
+test('HLS transient network errors restart loading; switching videos cancels pending retries',()=>{
+ class FakeHls {
+  static isSupported=()=>true;
+  static Events={ERROR:'error'};
+  static ErrorTypes={NETWORK_ERROR:'network',MEDIA_ERROR:'media'};
+  static DefaultConfig={manifestLoadPolicy:{default:{}},fragLoadPolicy:{default:{}},playlistLoadPolicy:{default:{}}};
+  static instances=[];
+  constructor(){FakeHls.instances.push(this);this.starts=0;}
+  on(_,callback){this.callback=callback;}loadSource(){}attachMedia(){}stopLoad(){}destroy(){}startLoad(){this.starts++;}
+ }
+ const video=new Video();video.canPlayType=()=>'';let serial=0;const timers=new Map(),states=[];
+ const player=createPlayback(video,s=>states.push(s),{HlsClass:FakeHls,schedule:(fn,ms)=>{timers.set(++serial,{fn,ms});return serial;},cancel:id=>timers.delete(id)});
+ player.load({url:'https://example.test/a.m3u8',stream:true});const first=FakeHls.instances[0];
+ first.callback(null,{fatal:true,type:'network',response:{code:502}});
+ assert.equal(states.at(-1),'buffering');assert.ok(!states.includes('unsupported'));
+ const retry=[...timers.values()].find(t=>t.ms===1500);retry.fn();assert.equal(first.starts,1);
+ first.callback(null,{fatal:true,type:'network'});const stale=[...timers.values()].filter(t=>t.ms===1500).at(-1);
+ player.load({url:'https://example.test/b.m3u8',stream:true});stale.fn();assert.equal(first.starts,1);player.destroy();
+});

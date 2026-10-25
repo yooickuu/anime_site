@@ -543,3 +543,9 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - Current live blocker: saved Kodik player page times out from both local Node/curl and Supabase, including browser-like headers. Live health reports player_Signal timed out; cannot yet verify end-to-end cloud video playback. Mock proxy integration works; do NOT claim all videos work or promise no source outages.
 - 205 tests passed, syntax and full build passed (2179/2179). Tests cover signed URL tampering/expiry, redirects, HLS URI rewriting, segment Range206, exact audio/proxy validation and native HLS resume. CUA native pipe unavailable, visual/mobile playback verification not completed.
 - Publishing these files now; check git/main and Pages result for final deployment status. No import run and no catalog changes.
+
+## 2026-10-25 — bounded network retry and HLS cache (v17)
+- Targeted change only; no seed/import or catalogue rescan. textFetch timeout25s, network failures/timeouts retry3 total with1500ms pauses; proxy header fetch uses same policy. No retries for HTTP403 etc or caller abort.
+- Shared bounded raw manifest cache (64x<=256KB) lasts600s; validates signature before cache hits and re-signs child URLs for current request expiry. VOD/master only; changing live media playlists no-store.
+- HLS network fatal recovery retries startLoad3 times with1500ms delay; cancels old episode retry callbacks. HLS response/startup budgets increased to allow server retries; resolver browser timeout180s. Native video only, no iframe.
+- 208 tests, syntax and npm build passed. Supabase v17 prepared in setup; user asked for manual Deploy because CUA native pipe unavailable. GitHub push alone does not deploy Supabase. No live source recovery claimed.
