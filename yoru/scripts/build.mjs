@@ -40,7 +40,16 @@ await copyFile('supabase/functions/login-nickname/index.ts','dist/login-nickname
 await copyFile('supabase/unique-nicknames.sql','dist/unique-nicknames.sql');
 await copyFile('supabase/account-deletion.sql', 'dist/account-deletion.sql');
 await copyFile('supabase/functions/delete-account/index.ts', 'dist/delete-account.ts');
-const browserBuild=await build({metafile:true,entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',charset:'utf8',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
+// Optional English transport and watch markup do not enter the startup bundle.
+const lazyAssets={};
+for(const name of ['consumet-provider','watch-view']){
+ await build({entryPoints:[`src/${name}.js`],bundle:true,outfile:`dist/providers/${name}.js`,format:'esm',target:['es2022'],minify:true});
+ const hash=createHash('sha256').update(await readFile(`dist/providers/${name}.js`)).digest('hex').slice(0,12);
+ lazyAssets[name]=`providers/${name}.js?v=${hash}`;
+ await mkdir('../providers',{recursive:true});await copyFile(`dist/providers/${name}.js`,`../providers/${name}.js`);
+}
+const browserBuild=await build({define:{__CONSUMET_ASSET__:JSON.stringify(lazyAssets['consumet-provider']),__WATCH_VIEW_ASSET__:JSON.stringify(lazyAssets['watch-view'])},metafile:true,entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',charset:'utf8',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
+if(Object.keys(browserBuild.metafile.inputs).some(p=>p.endsWith('consumet-provider.js')))throw Error('Consumet must stay on demand');
 if(Object.keys(browserBuild.metafile.inputs).some(p=>/(?:runtime-catalog|published-catalog|catalog-metadata)\.json$/.test(p)))throw Error('Heavy catalogue was bundled into the browser');
 if((await readFile('dist/app.js')).length>3*1024*1024)throw Error('Browser bundle exceeds memory safety budget');
 console.log('yooickuu built → dist/');

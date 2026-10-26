@@ -20,7 +20,14 @@ import {signInIdentifier} from './login.js';
 import {checkNickname,nicknameErrorKey,nicknameChecker} from './nicknames.js';
 import {savedEpisodeNumber,savedEpisodeIndex} from './episode-manifest.js';
 import {createProfileDraft, createAvatarLoader} from './profile.js';
-import {watchView} from './watch-view.js';
+let watchView;
+let consumetModule, englishSubtitlesCleanup;
+const externalAudio=id=>id==='consumet:dub'||id==='consumet:sub';
+const loadConsumet=async()=>consumetModule ||= await import(new URL(__CONSUMET_ASSET__,document.baseURI).href);
+function playerAudioChoices(a,episode){
+ const stored=audioChoices(a,episode);
+ return a.catalogApproved&&(a.ids?.mal||a.malId)?[...stored,{id:'consumet:dub',label:'English Dub',language:'en',onDemand:true},{id:'consumet:sub',label:'English Sub',language:'ja',onDemand:true}]:stored;
+}
 import {attachPlaybackAutomation} from './playback-automation.js';
 import {automaticSkipTimes} from './autoskip.js';
 import {discoveryChoice,watchRoute,audioChoices} from './discovery.js';
@@ -814,7 +821,7 @@ async function openPlayer(id, requested, pushRoute=true) {
   playerOpening = true;
   const openingHash=location.hash, openingAccount=authGeneration;
   let a;
-  try{a=await findWatchRelease(id);}catch{toast(t("providerError"));}
+  try{[a]=await Promise.all([findWatchRelease(id),(async()=>{watchView ||= (await import(new URL(__WATCH_VIEW_ASSET__,document.baseURI).href)).watchView;})()]);}catch{toast(t("providerError"));}
   if(!a){playerOpening=false;toast(t('releaseAwaitingReview'));if(page==='watch'&&!current)navigate('catalog');return;}
   if(!requested){const first=(await releaseSeasons(a)).find(x=>['TV','ONA'].includes(x.type)&&x.episodeManifest?.some(e=>e.season>0));if(first){a=first;id=a.id;}}
   if (a.providerId || a.animeVostId || a.animeGoId || a.kitsuId || a.malId) {
@@ -852,7 +859,7 @@ async function openPlayer(id, requested, pushRoute=true) {
       Math.max(1, requested ? (resumeIndex || requested) : firstMainEpisode(a)),
     );
     seasonGroup=seasonMenu(a,playerSeasons,episode).find(x=>x.selected)?.extra?'extras':'main';
-    selectedAudio=preferredAudio(audioChoices(a,episode),state.preferences,a.id);
+    selectedAudio=preferredAudio(playerAudioChoices(a,episode),state.preferences,a.id);
     const hash=`#watch/${a.id}/${episode}`;
     if(pushRoute && location.hash!==hash)history.pushState(null,'',hash);else history.replaceState(null,'',hash);
     render(true);window.scrollTo({top:0,behavior:'instant'});
@@ -877,10 +884,10 @@ function renderEpisodes() {
   $$('[data-season-group]').forEach(button=>{button.setAttribute('aria-selected',String(button.dataset.seasonGroup===seasonGroup));button.hidden=!allSeasons.some(item=>!!item.extra===(button.dataset.seasonGroup==='extras'));});
   $("#season-picker").innerHTML=visibleSeasons.map(item=>`<option value="${esc(item.value)}" ${item.selected?'selected':''}>${item.season===0?t('additionalEpisodes')+' · '+esc(title(item.title)):!item.displaySeason?(item.kind==='MOVIE'?t('movie'):esc(item.kind))+' · '+esc(title(item.title)):(lang==='ru'?item.displaySeason+' '+t('season'):t('season')+' '+item.displaySeason)+(item.part?' · '+t('seasonPart')+' '+item.part:'')}</option>`).join('');
   $('#watch-episode-label').textContent=current.episodes===1&&current.type==='MOVIE'?t('movie'):t('episode')+' '+(current.episodeManifest?.[episode-1]?.ordinal??current.episodeNumbers?.[episode-1]??episode);
-  const audio=audioChoices(current,episode);
+  const audio=playerAudioChoices(current,episode);
   if(!selectedAudio)selectedAudio=preferredAudio(audio,state.preferences,current.id);
   $('#audio-control').hidden=!audio.length;
-  $('#audio-picker').innerHTML=(selectedAudio&&!audio.some(x=>x.id===selectedAudio)?`<option value="${esc(selectedAudio)}" selected disabled>${t('audioUnavailable')}</option>`:'')+audio.map(x=>`<option value="${esc(x.id)}" ${x.id===selectedAudio?'selected':''}>${esc(x.label)} · ${t(x.language==='ja'?'audioJapanese':x.language==='en'?'audioEnglish':x.language==='ru'?'audioRussian':'audioOther')}</option>`).join('');
+  $('#audio-picker').innerHTML=(selectedAudio&&!audio.some(x=>x.id===selectedAudio)?`<option value="${esc(selectedAudio)}" selected disabled>${t('audioUnavailable')}</option>`:'')+audio.map(x=>`<option value="${esc(x.id)}" ${x.id===selectedAudio?'selected':''}>${esc(x.label)}${x.onDemand?'':' · '+t(x.language==='ja'?'audioJapanese':x.language==='en'?'audioEnglish':x.language==='ru'?'audioRussian':'audioOther')}</option>`).join('');
   const navigation=seasonNavigation(current,episode);
   $("#previous-episode").hidden=!navigation.previous;
   $("#next-episode").hidden=!navigation.next;
@@ -895,7 +902,17 @@ async function updateSource(play = false, refresh = false, position, triedAudio 
   const video = $("#video");
   if (!video || !current) return;
   playback?.suspend();
+  englishSubtitlesCleanup?.();englishSubtitlesCleanup=null;
+  $('#source-empty [data-consumet-return]')?.remove();
+  $('#source-empty h3').textContent=t('videoError');
   playback ||= createPlayback(video);
+  const english=externalAudio(selectedAudio);
+  if(english)video.pause();
+  const englishFailure=()=>{
+    const russian=audioChoices(current,episode).find(track=>track.language==='ru');
+    const show=module=>{if(generation!==sourceGeneration)return;module.showFailure({container:$('#source-empty'),status:$('#source-status'),lang,onRussian:russian?()=>{selectedAudio=russian.id;renderEpisodes();mutate({type:'preferences',patch:{audio:russian.id,audioByAnime:{...state.preferences.audioByAnime,[current.id]:russian.id}}});void updateSource(true);}:null});};
+    loadConsumet().then(show).catch(()=>{});
+  };
   const onMetadata=()=>{
     if(generation!==sourceGeneration)return;
     if(current?.catalogApproved)providerTiming={...providerTiming,...approvedSkipTimes(providerTiming,video.duration)};
@@ -904,6 +921,7 @@ async function updateSource(play = false, refresh = false, position, triedAudio 
   };
   triedAudio.add(selectedAudio);
   const tryOtherAudio=()=>{
+    if(english)return false;
     const next=audioChoices(current,episode).find(t=>!triedAudio.has(t.id));
     if(!next)return false;
     selectedAudio=next.id;renderEpisodes();
@@ -940,6 +958,7 @@ async function updateSource(play = false, refresh = false, position, triedAudio 
       if(tryOtherAudio())return;
       $("#source-empty").hidden=false;
       $("#source-status").textContent=t(status==='unsupported'?'videoUnsupported':'videoError');
+      if(english)englishFailure();
     }else if(status==='autoplayBlocked'){
       if(loading)loading.hidden=true;
     }else if(['ready','playing'].includes(status)){
@@ -957,20 +976,23 @@ async function updateSource(play = false, refresh = false, position, triedAudio 
   renderEpisodes();
   let url=null,stream=false;
   try {
-    if(current.animeGoId){const loadingAnime=current;await prepareEpisodeAudio(loadingAnime,episode).catch(()=>{loadingAnime.currentGoVoices=[];loadingAnime.goVoiceOrdinal=null;});if(generation!==sourceGeneration)return;selectedAudio=preferredAudio(audioChoices(current,episode),state.preferences,current.id);renderEpisodes();}
+    if(!english&&current.animeGoId){const loadingAnime=current;await prepareEpisodeAudio(loadingAnime,episode).catch(()=>{loadingAnime.currentGoVoices=[];loadingAnime.goVoiceOrdinal=null;});if(generation!==sourceGeneration)return;selectedAudio=preferredAudio(audioChoices(current,episode),state.preferences,current.id);renderEpisodes();}
     if(!isPublished(current.id))throw Error('noSource');
     else if(current.catalogApproved){
       const loadingAnime=current,loadingEpisode=episode,loadingAudio=selectedAudio;
-      const info=await retrySourceRequest(()=>videoEpisode(loadingAnime,loadingEpisode,refresh,loadingAudio),{current:()=>generation===sourceGeneration});
+      const info=english
+        ? await (await loadConsumet()).videoEpisode(loadingAnime,loadingEpisode,loadingAudio,{refresh,current:()=>generation===sourceGeneration})
+        : await retrySourceRequest(()=>videoEpisode(loadingAnime,loadingEpisode,refresh,loadingAudio),{current:()=>generation===sourceGeneration});
       if(generation!==sourceGeneration)return;
       providerTiming=info;
+      if(english)englishSubtitlesCleanup=consumetModule.attachSubtitles(video,info.subtitleText);
       availableSources=info?.sources||[];
       const selected=chooseQuality(info?.sources||[],state.preferences.quality);
       url=selected?.url;stream=selected?.stream??(info?.stream??url?.includes('.m3u8'));
       enhanceSelects($('#watch-page'));
       if(info?.sources?.length){
         $("#quality-control").hidden=false;
-        $("#quality").innerHTML=info.sources.map(q=>`<option value="${q.quality}" ${q.quality===selected?.quality?'selected':''}>${q.quality}p</option>`).join('');
+        $("#quality").innerHTML=info.sources.map(q=>`<option value="${q.quality}" ${q.quality===selected?.quality?'selected':''}>${q.quality?`${q.quality}p`:'Auto'}</option>`).join('');
         enhanceSelects($("#watch-page"));
       }
     }else throw Error('notAdmitted');
@@ -981,6 +1003,7 @@ async function updateSource(play = false, refresh = false, position, triedAudio 
     playback.load({url,stream:stream||url.includes('.m3u8'),autoplay:play,startAt:resumeTime(saved,!!user,position),speed:Number(state.preferences.speed)||1,onState:onStatus,onMetadata});
   }catch(error){
     if(generation!==sourceGeneration)return;
+    if(english)englishFailure();
     // Do not repeat a server outage for every dub; only a missing track warrants that.
     if(error.message==='audioUnavailable'&&tryOtherAudio())return;
     $(".video-loading").hidden=true;
@@ -1053,6 +1076,7 @@ function attachVideo() {
 }
 function stopWatching(){
   recordProgress();controlsCleanup?.();controlsCleanup=null;automationCleanup?.();automationCleanup=null;sourceKey=null;recordReady=false;++sourceGeneration;
+  englishSubtitlesCleanup?.();englishSubtitlesCleanup=null;
   playback?.destroy();playback=null;current=null;closeSelectMenu();
 }
 async function loadAutomaticSkips(){
