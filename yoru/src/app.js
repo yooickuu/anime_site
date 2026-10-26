@@ -20,6 +20,22 @@ import {signInIdentifier} from './login.js';
 import {checkNickname,nicknameErrorKey,nicknameChecker} from './nicknames.js';
 import {savedEpisodeNumber,savedEpisodeIndex} from './episode-manifest.js';
 import {createProfileDraft, createAvatarLoader} from './profile.js';
+let socialModule,socialPageCleanup,socialCommentCleanup,socialPageVersion=0,socialCommentVersion=0,socialCommentKey='';
+const socialLabel=()=>({ru:'Сообщество',en:'Community',ja:'コミュニティ'}[lang]);
+const commentsLabel=()=>({ru:'Комментарии к серии',en:'Episode comments',ja:'エピソードのコメント'}[lang]);
+const loadSocial=async()=>socialModule ||= await import(new URL(__SOCIAL_ASSET__,document.baseURI).href);
+function socialContext(active){return {client,user:()=>user,lang:()=>lang,active,login:()=>authDialog(),confirm:async text=>window.confirm(text),preferences:()=>state.preferences,title,cover,details:openDetails,card:id=>resolveRelease({id}),searchAnime:async query=>(await combinedCatalogue({query,page:1})).items.slice(0,8)};}
+function resetSocialComments(){
+ const key=current?`${current.id}:${current.episodeManifest?.[episode-1]?.season??1}:${current.episodeManifest?.[episode-1]?.ordinal??episode}:${user?.id||''}:${lang}`:'';
+ if(key===socialCommentKey)return;socialCommentKey=key;++socialCommentVersion;socialCommentCleanup?.();socialCommentCleanup=null;
+ const root=$('#episode-comments');if(root)root.innerHTML=`<button class="button soft" data-action="social-comments">${commentsLabel()}</button>`;
+}
+async function openSocialComments(){
+ const root=$('#episode-comments');if(!root||!current)return;
+ const own=++socialCommentVersion,a=current,row=a.episodeManifest?.[episode-1],key={anime:a.id,season:row?.season??1,episode:row?.ordinal??episode};
+ root.textContent=t('loading');const ctx=socialContext(()=>own===socialCommentVersion);
+ try{const module=await loadSocial();if(!ctx.active())return;const cleanup=await module.mountComments(root,ctx,key);if(ctx.active())socialCommentCleanup=cleanup;else cleanup();}catch{if(ctx.active())root.textContent=t('providerError');}
+}
 let watchView;
 let consumetModule, englishSubtitlesCleanup;
 const externalAudio=id=>id==='consumet:dub'||id==='consumet:sub';
@@ -174,10 +190,11 @@ function navigate(next, selected = "all") {
       ? `library/${encodeURIComponent(selected)}`
       : next;
   render();
-  if (next !== "library" && next !== "profile") loadCatalogue();
+  if (['home','catalog'].includes(next)) loadCatalogue();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 async function fromHash() {
+  if(/^#(?:social(?:\/|$)|user\/|chat\/)/.test(location.hash)){if(current)stopWatching();page='social';render();return;}
   const route=watchRoute(location.hash);
   if(route){
     page='watch';
@@ -196,6 +213,7 @@ function savedCount() {
   return Object.keys(state.entries).length;
 }
 function render(newWatch=false) {
+  ++socialPageVersion;socialPageCleanup?.();socialPageCleanup=null;
   const preservedWatch=page==='watch'&&!newWatch?$('#watch-page'):null;
   clearInterval(heroTimer);
   applyAppearance();
@@ -211,14 +229,15 @@ function render(newWatch=false) {
       )
       .join(
         "",
-      )}</select>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='watch' ? (current ? playerHTML() : `<p class="watch-loading">${t('loading')}</p>`) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
+      )}</select>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='social'?`<div id="social-root">${t('loading')}</div>`:page==='watch' ? (current ? playerHTML() : `<p class="watch-loading">${t('loading')}</p>`) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<a class="text-button" href="#social">${socialLabel()}</a><button data-action="about">${t("about")}</button></footer>`;
   if(preservedWatch){
     // Replacing the app root detaches the fullscreen element, even if reinserted.
     const template=document.createElement('template');template.innerHTML=markup;
     for(const tag of ['header','footer'])$('#app > '+tag)?.replaceWith(template.content.querySelector(tag));
   }else $("#app").innerHTML=markup;
   if(page==='home')startHero();
-  if (page !== 'watch' && page !== "profile" && !(page === "library" && !user)) renderGrid();
+  if (page !== 'social' && page !== 'watch' && page !== "profile" && !(page === "library" && !user)) renderGrid();
+  if(page==='social'){const own=socialPageVersion,root=$('#social-root'),ctx=socialContext(()=>own===socialPageVersion);loadSocial().then(async module=>{if(ctx.active()){const cleanup=await module.mountPage(root,ctx,location.hash.slice(1));if(ctx.active())socialPageCleanup=cleanup;else cleanup();}}).catch(()=>{if(ctx.active())root.textContent=t('providerError');});}
   updateSync();
   revealSurfaces(document.querySelector('main'));
 }
@@ -395,7 +414,7 @@ function profileHTML() {
   if (!ready && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
   const p = state.preferences, stats = profileStats(state);
   const draft = {...p, name:p.name || user.user_metadata?.name || "", language:lang, theme, ...profileDraft.get(user.id)};
-  return `<section class="profile-page"><div class="profile-banner-stage"><div class="section-head profile-banner-heading"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error profile-banner-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img class="profile-banner-fill" ${bannerUrl?`src="${esc(bannerUrl)}"`:"hidden"} alt="" aria-hidden="true"><img id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div></div><div class="profile-grid"><div class="profile-sidebar"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yomiku")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div>${appearanceHTML()}<div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div><div class="profile-main"><div class="profile-fields"><h2>${t("personalDetails")}</h2><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div>${historyHTML()}${eveningHTML()}</div></div></section>`;
+  return `<section class="profile-page"><div class="profile-banner-stage"><div class="section-head profile-banner-heading"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><a class="button soft" href="#user/${user.id}">${({ru:"Публичный профиль",en:"Public profile",ja:"公開プロフィール"})[lang]}</a><a class="button soft" href="#social">${socialLabel()}</a><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error profile-banner-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img class="profile-banner-fill" ${bannerUrl?`src="${esc(bannerUrl)}"`:"hidden"} alt="" aria-hidden="true"><img id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div></div><div class="profile-grid"><div class="profile-sidebar"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yomiku")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div>${appearanceHTML()}<div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div><div class="profile-main"><div class="profile-fields"><h2>${t("personalDetails")}</h2><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div>${historyHTML()}${eveningHTML()}</div></div></section>`;
 }
 function appearanceHTML() {
  return `<section class="profile-appearance glass-panel"><div class="panel-heading"><span class="overline">${t('yourAtmosphere')}</span><h2>${t('siteStyle')}</h2></div><div class="style-options" role="group" aria-label="${t('siteStyle')}">${styles.map(id=>`<button class="style-option" data-style-choice="${id}" aria-pressed="${appearance===id}"><span class="style-swatch" data-style="${id}" aria-hidden="true"><i></i><i></i><i></i></span><span>${t('style_'+id)}</span><span class="style-selected" aria-hidden="true">${icon('check')}</span></button>`).join('')}</div></section>`;
@@ -814,7 +833,7 @@ function latestProgress(id) {
 }
 function playerHTML() {
   const related=[...new Map([...playerSeasons,...onlineItems].filter(a=>a.id!==current.id&&!a.catalogOnly).map(a=>[a.id,a])).values()].slice(0,5);
-  return watchView({a:current,t,title,cover,speed:state.preferences.speed,preferencesHTML:preferencesHTML(),related});
+  return watchView({a:current,t,title,cover,lang,speed:state.preferences.speed,preferencesHTML:preferencesHTML(),related});
 }
 async function openPlayer(id, requested, pushRoute=true) {
   if (playerOpening || (user && !ready)) return;
@@ -873,6 +892,7 @@ async function openPlayer(id, requested, pushRoute=true) {
   }
 }
 function renderEpisodes() {
+  resetSocialComments();
   if (!current || !$("#episode-picker")) return;
   $("#episode-control").hidden = false;
   const seasonView=episodeSeasonOptions(current,episode);
@@ -1075,6 +1095,7 @@ function attachVideo() {
   video.addEventListener("pause", recordProgress);
 }
 function stopWatching(){
+  ++socialCommentVersion;socialCommentKey='';socialCommentCleanup?.();socialCommentCleanup=null;
   recordProgress();controlsCleanup?.();controlsCleanup=null;automationCleanup?.();automationCleanup=null;sourceKey=null;recordReady=false;++sourceGeneration;
   englishSubtitlesCleanup?.();englishSubtitlesCleanup=null;
   playback?.destroy();playback=null;current=null;closeSelectMenu();
@@ -1246,6 +1267,7 @@ document.addEventListener("click", async (event) => {
       collectionDialog("delete-status", b.dataset.deleteStatus);
     }
     switch (b.dataset.action) {
+      case "social-comments": await openSocialComments(); break;
       case "login":
         authDialog();
         break;

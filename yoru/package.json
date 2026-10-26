@@ -25,7 +25,9 @@
     "hls.js": "1.7.3"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.12",
     "esbuild": "0.25.12",
+    "jsdom": "^30.1.3",
     "sharp": "^0.34.5"
   }
 }

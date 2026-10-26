@@ -29,6 +29,18 @@ Deno.serve(async request=>{
       if(removeError)throw removeError;
       if(batch===99)throw Error('cleanup_incomplete');
     }
+    // Clean social uploads through Storage API; old projects remain compatible.
+    for(let batch=0;batch<100;batch++) {
+      const {data:files,error:filesError}=await admin.rpc('yoru_social_owned_media',{p_user:user.id});
+      if(filesError){if(['PGRST202','42883'].includes(filesError.code))break;throw filesError;}
+      if(!files?.length)break;
+      for(const bucket of ['social-profile-media','social-chat-media']) {
+        const paths=files.filter((f:{bucket_id:string,name:string})=>f.bucket_id===bucket).map((f:{name:string})=>f.name);
+        if(paths.some((path:string)=>(bucket==='social-profile-media'?path.split('/')[0]:path.split('/')[1])!==user.id))throw Error('unexpected_storage_path');
+        if(paths.length){const {error:removeError}=await admin.storage.from(bucket).remove(paths);if(removeError)throw removeError;}
+      }
+      if(batch===99)throw Error('cleanup_incomplete');
+    }
     // Hard delete; yoru_state and auth sessions cascade. The DB trigger records
     // only a keyed email fingerprint and applies the cooldown atomically.
     const {error:deleteError}=await admin.auth.admin.deleteUser(user.id,false);
