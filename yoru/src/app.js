@@ -20,21 +20,31 @@ import {signInIdentifier} from './login.js';
 import {checkNickname,nicknameErrorKey,nicknameChecker} from './nicknames.js';
 import {savedEpisodeNumber,savedEpisodeIndex} from './episode-manifest.js';
 import {createProfileDraft, createAvatarLoader} from './profile.js';
-let socialModule,socialPageCleanup,socialCommentCleanup,socialPageVersion=0,socialCommentVersion=0,socialCommentKey='';
+let socialModule,socialPageCleanup,socialCommentCleanup,socialPageVersion=0,socialCommentVersion=0,socialCommentKey='',socialCommentObserver;
 const socialLabel=()=>({ru:'Сообщество',en:'Community',ja:'コミュニティ'}[lang]);
+const chatsLabel=()=>({ru:'Чаты',en:'Chats',ja:'チャット'}[lang]);
 const commentsLabel=()=>({ru:'Комментарии к серии',en:'Episode comments',ja:'エピソードのコメント'}[lang]);
 const loadSocial=async()=>socialModule ||= await import(new URL(__SOCIAL_ASSET__,document.baseURI).href);
-function socialContext(active){return {client,user:()=>user,lang:()=>lang,active,login:()=>authDialog(),confirm:async text=>window.confirm(text),preferences:()=>state.preferences,title,cover,details:openDetails,card:id=>resolveRelease({id}),searchAnime:async query=>(await combinedCatalogue({query,page:1})).items.slice(0,8)};}
+function socialContext(active){return {client,user:()=>user,lang:()=>lang,active,login:()=>authDialog(),confirm:async text=>window.confirm(text),preferences:()=>state.preferences,profileReady:()=>ready,title,cover,details:openDetails,card:id=>resolveRelease({id}),searchAnime:async query=>(await combinedCatalogue({query,page:1})).items.slice(0,8)};}
 function resetSocialComments(){
  const key=current?`${current.id}:${current.episodeManifest?.[episode-1]?.season??1}:${current.episodeManifest?.[episode-1]?.ordinal??episode}:${user?.id||''}:${lang}`:'';
  if(key===socialCommentKey)return;socialCommentKey=key;++socialCommentVersion;socialCommentCleanup?.();socialCommentCleanup=null;
- const root=$('#episode-comments');if(root)root.innerHTML=`<button class="button soft" data-action="social-comments">${commentsLabel()}</button>`;
+ socialCommentObserver?.disconnect();
+ const root=$('#episode-comments');if(!root)return;root.innerHTML=`<p class="notice">${commentsLabel()}…</p>`;
+ if('IntersectionObserver' in window){socialCommentObserver=new IntersectionObserver(entries=>{if(key!==socialCommentKey)return;if(entries.some(e=>e.isIntersecting)){socialCommentObserver.disconnect();void openSocialComments();}},{rootMargin:'160px'});socialCommentObserver.observe(root);}else void openSocialComments();
 }
 async function openSocialComments(){
  const root=$('#episode-comments');if(!root||!current)return;
  const own=++socialCommentVersion,a=current,row=a.episodeManifest?.[episode-1],key={anime:a.id,season:row?.season??1,episode:row?.ordinal??episode};
  root.textContent=t('loading');const ctx=socialContext(()=>own===socialCommentVersion);
  try{const module=await loadSocial();if(!ctx.active())return;const cleanup=await module.mountComments(root,ctx,key);if(ctx.active())socialCommentCleanup=cleanup;else cleanup();}catch{if(ctx.active())root.textContent=t('providerError');}
+}
+let unifiedProfileKey='',unifiedProfilePending;
+async function syncMainProfile(){
+ if(!user||!ready)return;const uid=user.id,key=JSON.stringify([uid,state.preferences.avatar,state.preferences.banner,state.preferences.bio,state.preferences.historyPublic]);
+ if(unifiedProfileKey===key)return;if(unifiedProfilePending){await unifiedProfilePending;if(user?.id===uid)return syncMainProfile();return;}
+ unifiedProfilePending=(async()=>{await flush();if(user?.id!==uid||operations.length)return;const module=await loadSocial();await module.syncProfile(socialContext(()=>user?.id===uid));if(user?.id===uid)unifiedProfileKey=key;})();
+ try{await unifiedProfilePending;}finally{unifiedProfilePending=null;}
 }
 let watchView;
 let consumetModule, englishSubtitlesCleanup;
@@ -218,7 +228,7 @@ function render(newWatch=false) {
   clearInterval(heroTimer);
   applyAppearance();
   const markup =
-    `<header class="header">${brand()}<nav aria-label="${t("catalog")}">${["home", "catalog", "library"].map((v) => `<button class="nav-link ${page === v ? "active" : ""}" data-nav="${v}">${icon({home:"screen",catalog:"search",library:"bookmark"}[v])}<span>${t(v)}</span>${v === "library" && user ? ` <span id="list-count">${savedCount()}</span>` : ""}</button>`).join("")}</nav><div class="header-tools"><label class="search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"><kbd>⌘ K</kbd></label><select id="language" aria-label="${t("language")}">${[
+    `<header class="header">${brand()}<nav aria-label="${t("catalog")}">${["home", "catalog", "library"].map((v) => `<button class="nav-link ${page === v ? "active" : ""}" data-nav="${v}">${icon({home:"screen",catalog:"search",library:"bookmark"}[v])}<span>${t(v)}</span>${v === "library" && user ? ` <span id="list-count">${savedCount()}</span>` : ""}</button>`).join("")}<a class="nav-link ${page==='social'&&location.hash.includes('chat')?'active':''}" href="#social/chats">${chatsLabel()}</a></nav><div class="header-tools"><label class="search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"><kbd>⌘ K</kbd></label><select id="language" aria-label="${t("language")}">${[
       ["ru", "RU"],
       ["en", "EN"],
       ["ja", "日本語"],
@@ -238,6 +248,7 @@ function render(newWatch=false) {
   if(page==='home')startHero();
   if (page !== 'social' && page !== 'watch' && page !== "profile" && !(page === "library" && !user)) renderGrid();
   if(page==='social'){const own=socialPageVersion,root=$('#social-root'),ctx=socialContext(()=>own===socialPageVersion);loadSocial().then(async module=>{if(ctx.active()){const cleanup=await module.mountPage(root,ctx,location.hash.slice(1));if(ctx.active())socialPageCleanup=cleanup;else cleanup();}}).catch(()=>{if(ctx.active())root.textContent=t('providerError');});}
+  if(page==='profile'&&user&&ready)void syncMainProfile().catch(()=>{});
   updateSync();
   revealSurfaces(document.querySelector('main'));
 }
@@ -414,7 +425,7 @@ function profileHTML() {
   if (!ready && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
   const p = state.preferences, stats = profileStats(state);
   const draft = {...p, name:p.name || user.user_metadata?.name || "", language:lang, theme, ...profileDraft.get(user.id)};
-  return `<section class="profile-page"><div class="profile-banner-stage"><div class="section-head profile-banner-heading"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><a class="button soft" href="#user/${user.id}">${({ru:"Публичный профиль",en:"Public profile",ja:"公開プロフィール"})[lang]}</a><a class="button soft" href="#social">${socialLabel()}</a><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error profile-banner-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img class="profile-banner-fill" ${bannerUrl?`src="${esc(bannerUrl)}"`:"hidden"} alt="" aria-hidden="true"><img id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div></div><div class="profile-grid"><div class="profile-sidebar"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yomiku")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div>${appearanceHTML()}<div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div><div class="profile-main"><div class="profile-fields"><h2>${t("personalDetails")}</h2><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div>${historyHTML()}${eveningHTML()}</div></div></section>`;
+  return `<section class="profile-page"><div class="profile-banner-stage"><div class="section-head profile-banner-heading"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error profile-banner-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img class="profile-banner-fill" ${bannerUrl?`src="${esc(bannerUrl)}"`:"hidden"} alt="" aria-hidden="true"><img id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div></div><div class="profile-grid"><div class="profile-sidebar"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yomiku")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><div class="profile-social-actions"><a class="button soft" href="#social/people">${({ru:"Найти пользователя",en:"Find people",ja:"ユーザー検索"})[lang]}</a><a class="button soft" href="#social/friends">${({ru:"Друзья",en:"Friends",ja:"友達"})[lang]}</a></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div>${appearanceHTML()}<div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div><div class="profile-main"><div class="profile-fields"><h2>${t("personalDetails")}</h2><p class="notice">${({ru:"Фото, имя и описание видны другим. Почта видна только вам.",en:"Your photos, name and bio are public. Only you can see your email.",ja:"写真、名前、自己紹介は公開されます。メールアドレスは自分にのみ表示されます。"})[lang]}</p><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div>${historyHTML()}${eveningHTML()}</div></div></section>`;
 }
 function appearanceHTML() {
  return `<section class="profile-appearance glass-panel"><div class="panel-heading"><span class="overline">${t('yourAtmosphere')}</span><h2>${t('siteStyle')}</h2></div><div class="style-options" role="group" aria-label="${t('siteStyle')}">${styles.map(id=>`<button class="style-option" data-style-choice="${id}" aria-pressed="${appearance===id}"><span class="style-swatch" data-style="${id}" aria-hidden="true"><i></i><i></i><i></i></span><span>${t('style_'+id)}</span><span class="style-selected" aria-hidden="true">${icon('check')}</span></button>`).join('')}</div></section>`;
@@ -425,7 +436,7 @@ function eveningHTML() {
 }
 function historyHTML() {
   const history=Object.values(state.progress).filter(p=>p.id!=='sintel'&&byId(p.id)).sort((a,b)=>(b.updated||0)-(a.updated||0)).slice(0,8);
-  return `<section class="profile-history"><h3>${t('history')}</h3>${history.length?history.map(p=>{const a=byId(p.id);return `<button class="history-item" data-watch="${esc(a.id)}" data-episode="${Number(p.episode)||1}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t('episode')} ${esc(savedEpisodeNumber(p))} · ${timeLabel(p.time)}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('historyEmpty')}</p>`}</section>`;
+  return `<section class="profile-history"><div class="profile-history-heading"><h3>${t('history')}</h3><button class="text-button" data-action="history-visibility" aria-pressed="${!!state.preferences.historyPublic}" title="${({ru:"Видимость истории для других пользователей",en:"History visibility for other users",ja:"他のユーザーへの履歴公開"})[lang]}">${state.preferences.historyPublic?({ru:"Скрыть",en:"Hide",ja:"非公開"})[lang]:({ru:"Показать",en:"Show",ja:"公開"})[lang]}</button></div>${history.length?history.map(p=>{const a=byId(p.id);return `<button class="history-item" data-watch="${esc(a.id)}" data-episode="${Number(p.episode)||1}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t('episode')} ${esc(savedEpisodeNumber(p))} · ${timeLabel(p.time)}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('historyEmpty')}</p>`}</section>`;
 }
 function discoveryHTML(){
   return `<section class="discovery-panel"><h1>${t('discover')}</h1><p>${t('discoveryCopy')}</p><div class="discovery-grid">${[['popular','play'],['topRated','star'],['airingNow','screen'],['films','moon']].map(([key,i])=>`<button class="discovery-tile ${catalogueView===key?'selected':''}" data-discover="${key}">${icon(i)}<span>${t(key)}</span>${icon('arrow')}</button>`).join('')}</div></section>`;
@@ -769,6 +780,7 @@ async function handleSession(session, event) {
   if(current)stopWatching();
   ++sourceGeneration;
 
+  unifiedProfileKey='';
   profileDraft.clear();
   avatarLoader.reset();bannerLoader.reset();
   user = next;
@@ -1095,7 +1107,7 @@ function attachVideo() {
   video.addEventListener("pause", recordProgress);
 }
 function stopWatching(){
-  ++socialCommentVersion;socialCommentKey='';socialCommentCleanup?.();socialCommentCleanup=null;
+  ++socialCommentVersion;socialCommentKey='';socialCommentObserver?.disconnect();socialCommentCleanup?.();socialCommentCleanup=null;
   recordProgress();controlsCleanup?.();controlsCleanup=null;automationCleanup?.();automationCleanup=null;sourceKey=null;recordReady=false;++sourceGeneration;
   englishSubtitlesCleanup?.();englishSubtitlesCleanup=null;
   playback?.destroy();playback=null;current=null;closeSelectMenu();
@@ -1268,6 +1280,8 @@ document.addEventListener("click", async (event) => {
     }
     switch (b.dataset.action) {
       case "social-comments": await openSocialComments(); break;
+      case "history-visibility":
+        if(requireUser()){b.disabled=true;try{const previous=!!state.preferences.historyPublic;if(mutate({type:'preferences',patch:{historyPublic:!previous}})){await flush();if(operations.length)throw Error('syncError');render();}}catch{toast(t('requestError'));}finally{b.disabled=false;}}break;
       case "login":
         authDialog();
         break;

@@ -93,3 +93,19 @@ test('comments reject empty text and enforce a database rate limit',async()=>{
  for(let i=0;i<5;i++)await as(E,"select yoru_social_comment('mal-2',1,1,'valid',null)");
  await assert.rejects(as(E,"select yoru_social_comment('mal-2',1,1,'sixth',null)"),/rate_limited/);
 });
+
+test('unified profile migration preserves privacy and exposes only viewing dates',async()=>{
+ for(let i=0;i<2;i++)await db.exec(await readFile('supabase/social-03.sql','utf8'));
+ const data={entries:{a:{rating:8}},statuses:[1,2],preferences:{bio:'Main profile',avatar:A+'/main.png',historyPublic:true},progress:{a:{id:'mal-1',ordinal:19,season:3,completed:true,updated:1770000000000}}};
+ await as(A,"insert into storage.objects(bucket_id,name) values('social-profile-media',$1)",[A+'/main.png']);
+ await as(A,'update yoru_state set data=$2 where user_id=$1',[A,data]);
+ const p=(await as(null,'select bio,avatar_path,stats from yoru_public_profiles where user_id=$1',[A]))[0];
+ assert.equal(p.bio,'Main profile');assert.equal(p.avatar_path,A+'/main.png');assert.equal(p.stats.completed,1);
+ await assert.rejects(as(null,'select * from yoru_public_history'),/permission/);
+ assert.equal((await as(B,'select * from yoru_public_history where user_id=$1',[A])).length,0);
+ const history=await as(null,'select * from yoru_social_history($1)',[A]);assert.equal(history.length,1);assert.deepEqual(Object.keys(history[0]).sort(),['anime_id','watched_date']);
+ await assert.rejects(as(A,"select yoru_social_save_profile('Second copy',true,null,null)"),/permission/);
+ await as(A,"update yoru_state set data=jsonb_set(data,'{preferences,historyPublic}','false') where user_id=$1",[A]);
+ assert.equal((await as(null,'select * from yoru_social_history($1)',[A])).length,0);
+ await as(A,'select yoru_social_sync_profile()');
+});

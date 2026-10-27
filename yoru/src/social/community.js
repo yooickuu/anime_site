@@ -1,10 +1,10 @@
-import {h,tr,scope,member,person,status} from './common.js';
+import {h,tr,scope,member,person,status,imageURL} from './common.js';
 import {api} from './api.js';
-export function mount(root,ctx){
+export function mount(root,ctx,initial='people'){
  const life=scope(root,ctx),db=api(ctx,life);let searchTimer,version=0,friends=[];
  root.innerHTML=`<section class="social-panel"><div class="social-heading"><h1>${tr(ctx,'title')}</h1>${ctx.user()?`<a class="button soft" href="#user/${ctx.user().id}">${tr(ctx,'profile')}</a>`:`<button class="button primary" data-login>${tr(ctx,'login')}</button>`}</div><nav class="social-actions"><button class="button soft" data-tab="people">${tr(ctx,'people')}</button><button class="button soft" data-tab="friends">${tr(ctx,'friends')}</button><button class="button soft" data-tab="chats">${tr(ctx,'chats')}</button></nav><div data-content></div><p data-status role="status"></p></section>`;
  const box=root.querySelector('[data-content]');
- async function tab(name){const own=++version;clearTimeout(searchTimer);if(name!=='people'&&!member(ctx))return;
+ async function tab(name){const own=++version;root.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===name)));clearTimeout(searchTimer);if(name!=='people'&&!member(ctx))return;
   box.innerHTML=`<p>${tr(ctx,'loading')}</p>`;
   try{
    if(name==='people'){
@@ -16,7 +16,7 @@ export function mount(root,ctx){
     box.innerHTML=['accepted','incoming','outgoing'].map(group=>`<h2>${tr(ctx,group==='accepted'?'friends':group)}</h2>`+friends.filter(f=>group==='accepted'?f.status==='accepted':f.status==='pending'&&(group==='incoming'?f.recipient===uid:f.requester===uid)).map(f=>{const p=f.requester===uid?f.to:f.from;return `<div class="social-friend">${person(ctx,p)}<div class="social-actions">${group==='accepted'?`<button class="button soft" data-dm="${p.user_id}">${tr(ctx,'message')}</button><button class="text-button" data-friend="${p.user_id}" data-do="remove">${tr(ctx,'remove')}</button>`:group==='incoming'?`<button class="button primary" data-friend="${p.user_id}" data-do="accept">${tr(ctx,'accept')}</button><button class="text-button" data-friend="${p.user_id}" data-do="reject">${tr(ctx,'reject')}</button>`:`<button class="text-button" data-friend="${p.user_id}" data-do="cancel">${tr(ctx,'cancel')}</button>`}</div></div>`;}).join('')).join('');
    }else{
     const rooms=await db.rooms();if(!life.live()||own!==version)return;
-    box.innerHTML=`<button class="button primary" data-group>${tr(ctx,'group')}</button><div data-group-form></div><div class="social-room-list">${rooms.map(r=>`<a class="social-room" href="#chat/${r.room_id}">${h(r.room?.title||r.label||tr(ctx,'chats'))}</a>`).join('')||tr(ctx,'empty')}</div>`;
+    box.innerHTML=`<button class="button primary" data-group>${tr(ctx,'group')}</button><div data-group-form></div><div class="social-room-list">${rooms.map(r=>`<a class="social-room" href="#chat/${r.room_id}"><span class="social-room-avatars">${(r.peers||[]).slice(0,2).map(p=>`<span class="social-avatar">${p.avatar_path?`<img src="${h(imageURL(ctx,p.avatar_path))}" alt="" loading="lazy">`:h(p.nickname?.slice(0,1)||'?')}</span>`).join('')}</span><strong>${h(r.room?.title||r.label||tr(ctx,'chats'))}</strong></a>`).join('')||tr(ctx,'empty')}</div>`;
    }
   }catch(e){if(life.live()&&own===version){box.innerHTML='';status(root,ctx,e);}}
  }
@@ -31,5 +31,5 @@ export function mount(root,ctx){
    target.querySelector('form').addEventListener('submit',async e=>{e.preventDefault();const submit=e.target.querySelector('button');submit.disabled=true;try{const users=[...e.target.querySelectorAll('input[name=members]:checked')].map(x=>x.value);const room=await db.room(users,e.target.elements.title.value);if(life.live())location.hash='chat/'+room;}catch(err){if(life.live())status(root,ctx,err);}finally{submit.disabled=false;}},{signal:life.signal});
   }
  }catch(e){if(life.live())status(root,ctx,e);}finally{b.disabled=false;}},{signal:life.signal});
- tab('people');return ()=>{clearTimeout(searchTimer);++version;life.dispose();};
+ tab(['people','friends','chats'].includes(initial)?initial:'people');return ()=>{clearTimeout(searchTimer);++version;life.dispose();};
 }

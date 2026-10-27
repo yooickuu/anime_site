@@ -7,10 +7,16 @@ projection tables contain only nickname, bio, public image paths, four aggregate
 statistics and opt-in viewing history. Never expose `auth.users`, `yoru_state`,
 private avatar storage, email, preferences or auth metadata to visitors.
 
-Existing names are mirrored from the unique nickname registry. Existing private
-history/photos are not automatically published. The owner publishes profile art
-explicitly and chooses whether viewing history is public. Statistics and history
-are computed from private state on the server, not accepted from the client.
+Existing names are mirrored from the unique nickname registry. Stage 3 (`social-03.sql`) makes the main account preferences the sole profile
+source. The separate editor is retired. On an owner profile visit/update, the lazy
+sync module copies only that owner's selected avatar/banner from private storage
+to the public media bucket under the same immutable paths. Bio, privacy and stats
+are projected from server-side private state. Main profile displays the visibility
+notice; email is never copied. Old account images remain in the private bucket.
+History remains opt-in; Hide/Show lives beside the main profile history heading.
+The public history RPC returns only anime ID and calendar date. Direct history
+reads are owner-only, even for signed-in nonowners; the UI resolves art/title
+from bounded catalogue cards and never shows episode or exact time to visitors.
 
 Comments use `(anime_id, season, episode)` from the actual episode manifest (not
 array index). Responses belong to the same episode via a composite foreign key.
@@ -57,3 +63,15 @@ state schema are outside this change. No migration drops existing account data.
 Security follows Supabase's RLS and private Storage model:
 https://supabase.com/docs/guides/database/postgres/row-level-security
 https://supabase.com/docs/guides/storage/serving/downloads
+
+## UI refresh — 27 October
+- Header Chats route: `#social/chats`; main profile contains Find people/Friends.
+- Text entry fields have a 16px minimum without disabling pinch zoom. Desktop
+  Enter sends; Shift+Enter, composing text and touch keyboards retain newlines.
+- Comments mount automatically below playback settings when near the viewport.
+- Chat rows reuse DOM nodes and image URLs; only new bubbles animate. No polling
+  on home; reduced-motion preference disables the new animations.
+- Mobile PiP uses the Safari system presentation API and replaces the cinema
+  toolbar slot when supported; media resolution/proxy/HLS code is unchanged.
+- User applied stage 3; real REST denies guest detailed history (401), date-only
+  RPC returns200. Manual real-iPhone PiP/keyboard QA still required.

@@ -51,7 +51,7 @@ for(const name of ['consumet-provider','watch-view']){
 await build({entryPoints:['src/social/entry.js'],bundle:true,splitting:true,outdir:'dist/social',format:'esm',target:['es2022'],minify:true});
 const socialHash=createHash('sha256').update(await readFile('dist/social/entry.js')).update(await readFile('dist/social/entry.css')).digest('hex').slice(0,12);
 await cp('dist/social','../social',{recursive:true});
-for(const file of ['social-01.sql','social-02.sql']){await copyFile('supabase/'+file,'dist/'+file);await copyFile('supabase/'+file,'../'+file);}
+for(const file of ['social-01.sql','social-02.sql','social-03.sql']){await copyFile('supabase/'+file,'dist/'+file);await copyFile('supabase/'+file,'../'+file);}
 const browserBuild=await build({define:{__SOCIAL_ASSET__:JSON.stringify('social/entry.js?v='+socialHash),__CONSUMET_ASSET__:JSON.stringify(lazyAssets['consumet-provider']),__WATCH_VIEW_ASSET__:JSON.stringify(lazyAssets['watch-view'])},metafile:true,entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',charset:'utf8',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
 if(Object.keys(browserBuild.metafile.inputs).some(p=>p.includes('/social/')||p.includes('pglite')))throw Error('Social code must stay lazy');
 if(Object.keys(browserBuild.metafile.inputs).some(p=>p.endsWith('consumet-provider.js')))throw Error('Consumet must stay on demand');

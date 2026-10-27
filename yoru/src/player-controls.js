@@ -1,3 +1,4 @@
+import {supportsPiP,togglePiP} from './player-pip.js';
 import {idleControls} from './idle-controls.js';
 import {icon} from './icons.js';
 import {timeLabel} from './state.js';
@@ -34,14 +35,10 @@ export function attachControls(root, video, t, onError, {sound, onSoundChange = 
   const fullscreen=async()=>{
     try {if(document.fullscreenElement)await document.exitFullscreen();else if(root.requestFullscreen)await root.requestFullscreen();else video.webkitEnterFullscreen?.();}catch(error){onError(error);}
   };
-  const pictureInPicture=async()=>{
-    try {
-      if(document.pictureInPictureElement)await document.exitPictureInPicture();
-      else if(document.pictureInPictureEnabled && video.requestPictureInPicture)await video.requestPictureInPicture();
-      else if(video.webkitSetPresentationMode)video.webkitSetPresentationMode(video.webkitPresentationMode==='picture-in-picture'?'inline':'picture-in-picture');
-    }catch(error){onError(error);}
-  };
-  pip.disabled=!(document.pictureInPictureEnabled && video.requestPictureInPicture || video.webkitSetPresentationMode);
+  const pictureInPicture=async()=>{try{await togglePiP(video);}catch(error){onError(error);}};
+  const updatePiP=()=>{const supported=supportsPiP(video);pip.disabled=!supported;pip.hidden=!supported;root.dataset.nativePip=String(supported);pip.setAttribute('aria-pressed',String(video.webkitPresentationMode==='picture-in-picture'||document.pictureInPictureElement===video));};
+  for(const event of ['loadedmetadata','webkitpresentationmodechanged','enterpictureinpicture','leavepictureinpicture'])video.addEventListener(event,updatePiP);
+  updatePiP();
   function update(){
     const duration=Number.isFinite(video.duration)?video.duration:0;
     seek.disabled=!duration;
@@ -71,5 +68,5 @@ export function attachControls(root, video, t, onError, {sound, onSoundChange = 
   for(const e of ['waiting','seeking','loadstart'])video.addEventListener(e,()=>{loading.hidden=false;});
   for(const e of ['canplay','playing','seeked','pause','error','ended'])video.addEventListener(e,()=>{loading.hidden=true;});
   update();
-  return ()=>{if(soundTimer)saveSound();video.removeEventListener('volumechange',soundChanged);idle.dispose();};
+  return ()=>{for(const event of ['loadedmetadata','webkitpresentationmodechanged','enterpictureinpicture','leavepictureinpicture'])video.removeEventListener(event,updatePiP);if(soundTimer)saveSound();video.removeEventListener('volumechange',soundChanged);idle.dispose();};
 }

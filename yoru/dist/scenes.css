@@ -322,3 +322,31 @@ main:has(.profile-banner-stage){margin-top:0!important;padding-top:0}
  .watch-page .video-controls .icon-button{width:36px;min-width:36px}
  .watch-page .video-controls .select-trigger{font-size:10px;padding:0 3px!important}
 }
+
+/* Social navigation and readable touch inputs; pinch zoom remains available. */
+body input,body textarea{font-size:max(16px,1em)!important}
+.header nav a.nav-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:inherit;font-weight:700}
+.profile-social-actions{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 12px}.profile-social-actions .button{flex:1;min-height:44px;text-align:center;justify-content:center}
+.profile-history-heading{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}.profile-history-heading h3{margin:0}.profile-history-heading .text-button{flex:none;min-height:44px}
+.watch-main>.player-settings{width:min(100%,680px);box-sizing:border-box}.watch-main>.player-settings .toggle-row{padding-block:10px}
+#episode-comments{min-height:80px;margin-top:24px;scroll-margin-top:110px}
+@media(min-width:801px){.header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}.header nav{gap:4px}.header .nav-link{padding-inline:10px}}
+@media(max-width:800px){
+ .header{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;gap:8px 10px;padding-inline:12px}
+ .header>.brand{grid-column:1;grid-row:1;justify-self:start;min-width:0;margin:0}
+ .header>.header-tools{display:contents!important}
+ .header .header-tools .avatar,.header .header-tools .login-button{grid-column:2;grid-row:1;justify-self:end}
+ .header .header-tools .avatar{--avatar-size:42px}
+ .header>.header-tools>.site-select,.header>.header-tools>#language{grid-column:2;grid-row:2;justify-self:end;width:auto;min-width:56px;max-width:76px}
+ .header .header-tools .search{display:none}
+ .header>nav{grid-column:1;grid-row:2;display:flex;width:100%;min-width:0;gap:2px;justify-content:space-between;overflow:visible}
+ .header nav .nav-link{flex:0 1 auto;min-height:42px;font-size:12px;padding:8px 6px;gap:3px;white-space:nowrap}
+ .header nav .nav-link .ui-icon{display:none}.header nav #list-count{font-size:9px;padding:2px 4px}
+ .header .header-tools .select-trigger{min-height:42px;max-width:76px;padding-inline:8px!important;font-size:12px}
+ .profile-account-actions{flex-wrap:wrap;gap:8px}.profile-social-actions .button{font-size:14px}
+}
+@media(max-width:380px){.header{column-gap:6px;padding-inline:10px}.header nav .nav-link{font-size:11px;padding-inline:4px}.header nav #list-count{display:none}.header .brand .brand-name{font-size:28px}.header .brand .brand-symbol{width:46px;height:46px}}
+@media(max-width:600px){
+ .watch-page .video-shell[data-native-pip=true] .video-controls [data-video=pip]:not([hidden]){display:inline-flex;grid-area:cinema}
+ .watch-page .video-shell[data-native-pip=true] .video-controls [data-action=cinema]{display:none}
+}

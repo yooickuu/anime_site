@@ -8,3 +8,5 @@ export async function mountPage(root,ctx,route){css();if(!ctx.client){root.textC
  if(!root.isConnected||!ctx.active())return ()=>{};return module.mount(root,ctx,id);
 }
 export async function mountComments(root,ctx,key){css();if(!ctx.client){root.textContent=tr(ctx,'unavailable');return ()=>{};}const module=await import('./comments.js');if(!root.isConnected||!ctx.active())return ()=>{};return module.mount(root,ctx,key);}
+
+export async function syncProfile(ctx){return (await import('./unified-profile.js')).syncProfile(ctx);}
