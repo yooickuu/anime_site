@@ -1,10 +1,11 @@
 import {h,tr,scope,member,person,status,imageURL} from './common.js';
 import {api} from './api.js';
-export function mount(root,ctx,initial='people'){
+export function mount(root,ctx,initial='chats'){
  const life=scope(root,ctx),db=api(ctx,life);let searchTimer,version=0,friends=[];
- root.innerHTML=`<section class="social-panel"><div class="social-heading"><h1>${tr(ctx,'title')}</h1>${ctx.user()?`<a class="button soft" href="#user/${ctx.user().id}">${tr(ctx,'profile')}</a>`:`<button class="button primary" data-login>${tr(ctx,'login')}</button>`}</div><nav class="social-actions"><button class="button soft" data-tab="people">${tr(ctx,'people')}</button><button class="button soft" data-tab="friends">${tr(ctx,'friends')}</button><button class="button soft" data-tab="chats">${tr(ctx,'chats')}</button></nav><div data-content></div><p data-status role="status"></p></section>`;
+ const section=['people','friends','chats'].includes(initial)?initial:'chats';
+ root.innerHTML=`<section class="social-panel social-directory"><div class="social-heading"><h1>${tr(ctx,section)}</h1><a class="text-button" href="#profile">${tr(ctx,'back')}</a></div><div data-content></div><p data-status role="status"></p></section>`;
  const box=root.querySelector('[data-content]');
- async function tab(name){const own=++version;root.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===name)));clearTimeout(searchTimer);if(name!=='people'&&!member(ctx))return;
+ async function tab(name){const own=++version;clearTimeout(searchTimer);if(name!=='people'&&!member(ctx)){box.innerHTML=`<button class="button primary" data-login>${tr(ctx,'login')}</button>`;return;}
   box.innerHTML=`<p>${tr(ctx,'loading')}</p>`;
   try{
    if(name==='people'){
@@ -15,8 +16,10 @@ export function mount(root,ctx,initial='people'){
     const uid=ctx.user().id;
     box.innerHTML=['accepted','incoming','outgoing'].map(group=>`<h2>${tr(ctx,group==='accepted'?'friends':group)}</h2>`+friends.filter(f=>group==='accepted'?f.status==='accepted':f.status==='pending'&&(group==='incoming'?f.recipient===uid:f.requester===uid)).map(f=>{const p=f.requester===uid?f.to:f.from;return `<div class="social-friend">${person(ctx,p)}<div class="social-actions">${group==='accepted'?`<button class="button soft" data-dm="${p.user_id}">${tr(ctx,'message')}</button><button class="text-button" data-friend="${p.user_id}" data-do="remove">${tr(ctx,'remove')}</button>`:group==='incoming'?`<button class="button primary" data-friend="${p.user_id}" data-do="accept">${tr(ctx,'accept')}</button><button class="text-button" data-friend="${p.user_id}" data-do="reject">${tr(ctx,'reject')}</button>`:`<button class="text-button" data-friend="${p.user_id}" data-do="cancel">${tr(ctx,'cancel')}</button>`}</div></div>`;}).join('')).join('');
    }else{
-    const rooms=await db.rooms();if(!life.live()||own!==version)return;
-    box.innerHTML=`<button class="button primary" data-group>${tr(ctx,'group')}</button><div data-group-form></div><div class="social-room-list">${rooms.map(r=>`<a class="social-room" href="#chat/${r.room_id}"><span class="social-room-avatars">${(r.peers||[]).slice(0,2).map(p=>`<span class="social-avatar">${p.avatar_path?`<img src="${h(imageURL(ctx,p.avatar_path))}" alt="" loading="lazy">`:h(p.nickname?.slice(0,1)||'?')}</span>`).join('')}</span><strong>${h(r.room?.title||r.label||tr(ctx,'chats'))}</strong></a>`).join('')||tr(ctx,'empty')}</div>`;
+    const [rooms,friendships]=await Promise.all([db.rooms(),db.friends()]);if(!life.live()||own!==version)return;
+    const chatting=new Set(rooms.filter(r=>r.room?.kind==='dm').flatMap(r=>(r.peers||[]).map(p=>p.user_id)));
+    const contacts=friendships.filter(f=>f.status==='accepted').map(f=>f.requester===ctx.user().id?f.to:f.from).filter(p=>p&&!chatting.has(p.user_id));
+    box.innerHTML=`<button class="button primary" data-group>${tr(ctx,'group')}</button><div data-group-form></div><div class="social-room-list">${rooms.map(r=>`<a class="social-room" href="#chat/${r.room_id}"><span class="social-room-avatars">${(r.peers||[]).slice(0,2).map(p=>`<span class="social-avatar">${p.avatar_path?`<img src="${h(imageURL(ctx,p.avatar_path))}" alt="" loading="lazy">`:h(p.nickname?.slice(0,1)||'?')}</span>`).join('')}</span><strong>${h(r.room?.title||r.label||tr(ctx,'chats'))}</strong></a>`).join('')||(!contacts.length?tr(ctx,'empty'):'')}</div>${contacts.map(p=>`<div class="social-friend">${person(ctx,p)}<button class="button soft" data-dm="${p.user_id}">${tr(ctx,'message')}</button></div>`).join('')}`;
    }
   }catch(e){if(life.live()&&own===version){box.innerHTML='';status(root,ctx,e);}}
  }
@@ -27,9 +30,9 @@ export function mount(root,ctx,initial='people'){
   if(b.dataset.dm&&member(ctx)){const room=await db.room([b.dataset.dm]);if(life.live())location.hash='chat/'+room;}
   if(b.hasAttribute('data-group')&&member(ctx)){
    const rows=(await db.friends()).filter(f=>f.status==='accepted');if(!life.live())return;
-   const target=box.querySelector('[data-group-form]');target.innerHTML=`<form class="social-form"><label>${tr(ctx,'groupName')}<input name="title" maxlength="80" required></label><fieldset><legend>${tr(ctx,'friends')}</legend>${rows.map(f=>{const p=f.requester===ctx.user().id?f.to:f.from;return `<label class="social-check"><input name="members" type="checkbox" value="${p.user_id}">${h(p.nickname)}</label>`;}).join('')||tr(ctx,'empty')}</fieldset><button class="button primary">${tr(ctx,'group')}</button></form>`;
-   target.querySelector('form').addEventListener('submit',async e=>{e.preventDefault();const submit=e.target.querySelector('button');submit.disabled=true;try{const users=[...e.target.querySelectorAll('input[name=members]:checked')].map(x=>x.value);const room=await db.room(users,e.target.elements.title.value);if(life.live())location.hash='chat/'+room;}catch(err){if(life.live())status(root,ctx,err);}finally{submit.disabled=false;}},{signal:life.signal});
+   const target=box.querySelector('[data-group-form]');target.innerHTML=`<form class="social-form"><label>${tr(ctx,'groupName')}<input name="title" maxlength="80" required></label><fieldset><legend>${tr(ctx,'friends')}</legend>${rows.map(f=>{const p=f.requester===ctx.user().id?f.to:f.from;return `<label class="social-check"><input name="members" type="checkbox" value="${p.user_id}">${h(p.nickname)}</label>`;}).join('')||tr(ctx,'empty')}</fieldset><p class="notice">${tr(ctx,'chooseFriends')}</p><button class="button primary" ${rows.length?'':'disabled'}>${tr(ctx,'group')}</button></form>`;
+   target.querySelector('form').addEventListener('submit',async e=>{e.preventDefault();const submit=e.target.querySelector('button');submit.disabled=true;try{const users=[...e.target.querySelectorAll('input[name=members]:checked')].map(x=>x.value);if(!users.length){status(root,ctx,new Error('choose_friends'));return;}const room=await db.room(users,e.target.elements.title.value);if(life.live())location.hash='chat/'+room;}catch(err){if(life.live())status(root,ctx,err);}finally{submit.disabled=false;}},{signal:life.signal});
   }
  }catch(e){if(life.live())status(root,ctx,e);}finally{b.disabled=false;}},{signal:life.signal});
- tab(['people','friends','chats'].includes(initial)?initial:'people');return ()=>{clearTimeout(searchTimer);++version;life.dispose();};
+ tab(section);return ()=>{clearTimeout(searchTimer);++version;life.dispose();};
 }

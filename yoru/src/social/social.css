@@ -27,3 +27,30 @@
 @media(max-width:600px){.social-panel .social-input-row{gap:4px;padding:4px}.social-panel .social-input-row textarea{padding:10px 8px}.social-message{max-width:96%;gap:6px}.social-bubble{padding:8px 10px}.social-message>.social-person .social-avatar{width:28px;height:28px}.social-chat{padding:12px}.social-messages{height:50dvh;min-height:240px;padding:4px}.social-heading h1{font-size:25px}.social-room-list{gap:10px}.social-actions>.button{max-width:100%}.social-compose{padding-bottom:env(safe-area-inset-bottom,0px)}}
 @media(prefers-reduced-motion:no-preference){.social-message.is-new,.social-comment,.social-room,.social-people>.social-person,[data-group-form]>form,[data-members-panel]:not([hidden]),[data-search]:not([hidden]){animation:social-enter .22s ease-out}.social-send{transition:transform .18s,background .18s}.social-send:active:not(:disabled){transform:scale(.92)}}
 @media(prefers-reduced-motion:reduce){.social-panel *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Comments use the site scene, not a separate opaque card. */
+.social-panel.social-comments{background:none!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:0;color:var(--text,#f4f2fa)}
+.social-comments .social-comment{border:0}.social-comments .social-text,.social-comments h2,.social-comments .social-person,.social-comments time{text-shadow:0 1px 4px #000b}
+.social-comments .social-input-row{background:rgba(var(--surface-rgb,30,28,37),.7)}
+.social-directory .social-heading{margin-bottom:20px}.social-directory [data-group-form]:empty{display:none}
+@media(max-width:800px){
+ body.chat-open{overflow:hidden!important}
+ body.chat-open #app>.header,body.chat-open #app>footer{display:none!important}
+ body.chat-open #app,body.chat-open .page-social,body.chat-open #social-root{transform:none!important;filter:none!important;perspective:none!important;animation:none!important}
+ body.chat-open .page-social{margin:0!important;padding:0!important}
+ body.chat-open #social-root{position:fixed;inset:0;max-width:none;margin:0;padding:0;z-index:100}
+ .social-chat{position:absolute;top:var(--chat-top,0px);left:0;width:100%;height:var(--chat-height,100dvh);max-height:var(--chat-height,100dvh);margin:0;border-radius:0;padding: max(10px,env(safe-area-inset-top)) 12px max(8px,env(safe-area-inset-bottom));box-sizing:border-box;overflow:hidden;animation:none!important;display:flex;flex-direction:column;background:rgba(var(--surface-rgb,24,22,31),.96)}
+ .social-chat .social-heading{flex:none;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;padding-bottom:6px}
+ .social-chat .social-heading h1{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+ .social-chat .social-heading .button{font-size:12px;min-height:40px;padding:8px}
+ .social-chat .social-messages{flex:1;min-height:0;height:auto;padding:4px;overflow-y:auto}
+ .social-chat .social-compose{flex:none;margin:6px 0 0;padding:0}
+ .social-chat .social-input-row textarea{min-height:42px;max-height:80px;resize:none}
+ .social-chat>.social-compose>.social-actions{margin-top:4px;gap:6px}
+ .social-chat>.social-compose>.social-actions .button{min-height:32px;font-size:12px;padding:5px 9px}
+ .social-chat>[data-members-panel],.social-chat>[data-search]{flex:none;max-height:30%;overflow:auto}
+ .social-chat>[data-status]{flex:none;min-height:0;margin:2px 0;font-size:12px}
+ .social-chat>[data-status]:empty{display:none}
+ .social-chat>[data-older],.social-chat>[data-latest]{flex:none;min-height:26px;font-size:12px;padding:2px}
+ .social-directory .social-friend{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.social-directory .social-friend .social-actions{grid-column:1/-1;margin:0}
+}

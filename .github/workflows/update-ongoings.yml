@@ -25,7 +25,7 @@ jobs:
           ref: main
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '26.10.0'
           cache: npm
           cache-dependency-path: yoru/package-lock.json
       - run: npm ci

@@ -10,3 +10,4 @@ export async function mountPage(root,ctx,route){css();if(!ctx.client){root.textC
 export async function mountComments(root,ctx,key){css();if(!ctx.client){root.textContent=tr(ctx,'unavailable');return ()=>{};}const module=await import('./comments.js');if(!root.isConnected||!ctx.active())return ()=>{};return module.mount(root,ctx,key);}
 
 export async function syncProfile(ctx){return (await import('./unified-profile.js')).syncProfile(ctx);}
+export async function notifications(ctx,update){const {start}=await import('./notifications.js');if(!ctx.active())return ()=>{};return start(ctx,update);}

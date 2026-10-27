@@ -65,3 +65,21 @@ test('own public profile opens the main editor instead of a second settings form
 test('a temporary profile sync failure keeps the existing profile readable',async()=>{
  const e=environment();e.ctx.profileReady=()=>true;e.ctx.client.rpc=async()=>({error:new Error('Failed to fetch')});cleanup=profile(e.root,e.ctx,uid);await pause();await pause();assert.equal(e.root.querySelectorAll('.social-stats>div').length,4);assert.ok(e.root.querySelector('a[href="#profile"]'));assert.ok(e.root.querySelector('[data-status]').textContent);
 });
+
+test('chats show conversations and friends without community tabs or public-profile settings',async()=>{
+ const {mount}=await import('../src/social/community.js');const e=environment(),peer={user_id:'00000000-0000-4000-8000-000000000002',nickname:'Bob'};
+ e.tables.yoru_chat_members=[];e.tables.yoru_friendships=[{status:'accepted',requester:uid,recipient:peer.user_id,to:peer,from:author}];
+ cleanup=mount(e.root,e.ctx,'chats');await pause();assert.match(e.root.querySelector('h1').textContent,/Чаты/);assert.equal(e.root.querySelector('[data-tab]'),null);assert.equal(e.root.querySelector('a[href^="#user/"]')?.textContent,'BBob');assert.ok(e.root.querySelector('[data-dm]'));assert.doesNotMatch(e.root.textContent,/Сообщество|Публичный профиль|Найти пользователя/);
+ e.root.querySelector('[data-group]').click();await pause();const form=e.root.querySelector('[data-group-form] form');form.elements.title.value='Night';form.querySelector('input[name=members]').checked=true;form.querySelector('button').click();await pause();
+ const request=e.calls.find(x=>x.rpc==='yoru_social_room');assert.deepEqual(request.args,{p_users:[peer.user_id],p_title:'Night'});assert.equal(location.hash,'#chat/created');
+});
+test('comment heading is generic but queries still isolate the episode',async()=>{
+ const e=environment(null);cleanup=comments(e.root,e.ctx,{anime:'mal-3',season:2,episode:13});await pause();assert.equal(e.root.querySelector('h2').textContent,'Комментарии');assert.ok(e.calls[0].filters.some(f=>f[0]==='eq'&&f[1]==='episode'&&f[2]===13));
+});
+test('phone chat viewport follows keyboard height and cleans up on navigation',async()=>{
+ const {chatViewport}=await import('../src/social/chat-viewport.js');const e=environment();const viewport=new dom.window.EventTarget();viewport.height=400;viewport.offsetTop=50;Object.defineProperty(dom.window,'visualViewport',{value:viewport});cleanup=chatViewport(e.root,dom.window);
+ assert.equal(e.root.style.getPropertyValue('--chat-height'),'400px');assert.ok(document.body.classList.contains('chat-open'));viewport.height=700;viewport.dispatchEvent(new dom.window.Event('resize'));await new Promise(r=>setTimeout(r,30));assert.equal(e.root.style.getPropertyValue('--chat-height'),'700px');cleanup();cleanup=null;assert.ok(!document.body.classList.contains('chat-open'));
+});
+test('notification badge counts rooms rather than messages and stops after account switch',async()=>{
+ const {start}=await import('../src/social/notifications.js');const e=environment();Object.defineProperty(document,'hidden',{value:false,configurable:true});let calls=0;const counts=[];e.ctx.client.rpc=()=>{calls++;const q=Promise.resolve({data:[{room_id:'a'},{room_id:'a'},{room_id:'b'}]});q.abortSignal=()=>q;return q;};cleanup=start(e.ctx,n=>counts.push(n));await pause();assert.deepEqual(counts,[2]);e.setUser({id:'another'});document.dispatchEvent(new dom.window.Event('yomiku:chat-read'));await pause();assert.equal(calls,1);
+});

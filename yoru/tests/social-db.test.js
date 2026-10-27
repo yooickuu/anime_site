@@ -109,3 +109,18 @@ test('unified profile migration preserves privacy and exposes only viewing dates
  assert.equal((await as(null,'select * from yoru_social_history($1)',[A])).length,0);
  await as(A,'select yoru_social_sync_profile()');
 });
+
+test('unread counts rooms, excludes own messages, and read cursors cannot swallow newer messages',async()=>{
+ for(let i=0;i<2;i++)await db.exec(await readFile('supabase/social-04.sql','utf8'));
+ const first=(await as(A,"select yoru_social_message($1,'Unread one') id",[room]))[0].id;
+ assert.equal((await as(B,'select * from yoru_social_unread()')).filter(x=>x.room_id===room).length,1);
+ const second=(await as(A,"select yoru_social_message($1,'Unread two') id",[room]))[0].id;
+ await as(B,'select yoru_social_mark_read($1,$2)',[room,first]);
+ assert.equal((await as(B,'select * from yoru_social_unread()')).filter(x=>x.room_id===room).length,1);
+ await as(B,'select yoru_social_mark_read($1,$2)',[room,second]);
+ assert.equal((await as(B,'select * from yoru_social_unread()')).length,0);
+ await as(B,'select yoru_social_mark_read($1,$2)',[room,first]);assert.equal((await as(B,'select * from yoru_social_unread()')).length,0);
+ await assert.rejects(as(E,'select yoru_social_mark_read($1,$2)',[room,second]),/members_only/);
+ await assert.rejects(as(null,'select * from yoru_social_unread()'),/permission/);
+ assert.equal((await as(E,'select * from yoru_social_unread()')).length,0);
+});

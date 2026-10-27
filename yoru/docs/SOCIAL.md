@@ -75,3 +75,9 @@ https://supabase.com/docs/guides/storage/serving/downloads
   toolbar slot when supported; media resolution/proxy/HLS code is unchanged.
 - User applied stage 3; real REST denies guest detailed history (401), date-only
   RPC returns200. Manual real-iPhone PiP/keyboard QA still required.
+
+### Chat navigation and unread state
+- `#social/chats` (and legacy `#social`) shows conversations and accepted contacts. `#social/people` and `#social/friends` are independent profile destinations.
+- Apply `social-04.sql` after stages1–3. Unread RPC returns only room IDs to the authenticated member. Read cursor uses the last rendered message timestamp+ID, never client wall-clock time. Header polls the small aggregate every20s only in visible signed-in sessions. Viewing the bottom of a visible chat marks that room read; older history browsing does not.
+- Phone dialogs use VisualViewport dimensions and remove listeners/class on navigation. Catalogue/HLS/proxy logic remains independent.
+- CI uses Node26.10.0 to avoid the Node22 Unicode test-runner IPC fault: https://github.com/nodejs/node/issues/65934 (upstream fix https://github.com/nodejs/node/pull/64706). Tests are not skipped.

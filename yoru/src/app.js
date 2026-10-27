@@ -21,9 +21,8 @@ import {checkNickname,nicknameErrorKey,nicknameChecker} from './nicknames.js';
 import {savedEpisodeNumber,savedEpisodeIndex} from './episode-manifest.js';
 import {createProfileDraft, createAvatarLoader} from './profile.js';
 let socialModule,socialPageCleanup,socialCommentCleanup,socialPageVersion=0,socialCommentVersion=0,socialCommentKey='',socialCommentObserver;
-const socialLabel=()=>({ru:'Сообщество',en:'Community',ja:'コミュニティ'}[lang]);
 const chatsLabel=()=>({ru:'Чаты',en:'Chats',ja:'チャット'}[lang]);
-const commentsLabel=()=>({ru:'Комментарии к серии',en:'Episode comments',ja:'エピソードのコメント'}[lang]);
+const commentsLabel=()=>({ru:'Комментарии',en:'Comments',ja:'コメント'}[lang]);
 const loadSocial=async()=>socialModule ||= await import(new URL(__SOCIAL_ASSET__,document.baseURI).href);
 function socialContext(active){return {client,user:()=>user,lang:()=>lang,active,login:()=>authDialog(),confirm:async text=>window.confirm(text),preferences:()=>state.preferences,profileReady:()=>ready,title,cover,details:openDetails,card:id=>resolveRelease({id}),searchAnime:async query=>(await combinedCatalogue({query,page:1})).items.slice(0,8)};}
 function resetSocialComments(){
@@ -39,6 +38,9 @@ async function openSocialComments(){
  root.textContent=t('loading');const ctx=socialContext(()=>own===socialCommentVersion);
  try{const module=await loadSocial();if(!ctx.active())return;const cleanup=await module.mountComments(root,ctx,key);if(ctx.active())socialCommentCleanup=cleanup;else cleanup();}catch{if(ctx.active())root.textContent=t('providerError');}
 }
+let unreadCount=0,notificationCleanup;
+function updateUnread(count){unreadCount=count;const badge=$('#chat-unread');if(badge){badge.textContent=String(count||'');badge.hidden=!count;}}
+async function startNotifications(){notificationCleanup?.();notificationCleanup=null;updateUnread(0);const uid=user?.id;if(!uid||user.is_anonymous)return;try{const module=await loadSocial();if(user?.id!==uid)return;notificationCleanup=await module.notifications(socialContext(()=>user?.id===uid),updateUnread);}catch{}}
 let unifiedProfileKey='',unifiedProfilePending;
 async function syncMainProfile(){
  if(!user||!ready)return;const uid=user.id,key=JSON.stringify([uid,state.preferences.avatar,state.preferences.banner,state.preferences.bio,state.preferences.historyPublic]);
@@ -228,7 +230,7 @@ function render(newWatch=false) {
   clearInterval(heroTimer);
   applyAppearance();
   const markup =
-    `<header class="header">${brand()}<nav aria-label="${t("catalog")}">${["home", "catalog", "library"].map((v) => `<button class="nav-link ${page === v ? "active" : ""}" data-nav="${v}">${icon({home:"screen",catalog:"search",library:"bookmark"}[v])}<span>${t(v)}</span>${v === "library" && user ? ` <span id="list-count">${savedCount()}</span>` : ""}</button>`).join("")}<a class="nav-link ${page==='social'&&location.hash.includes('chat')?'active':''}" href="#social/chats">${chatsLabel()}</a></nav><div class="header-tools"><label class="search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"><kbd>⌘ K</kbd></label><select id="language" aria-label="${t("language")}">${[
+    `<header class="header">${brand()}<nav aria-label="${t("catalog")}">${["home", "catalog", "library"].map((v) => `<button class="nav-link ${page === v ? "active" : ""}" data-nav="${v}">${icon({home:"screen",catalog:"search",library:"bookmark"}[v])}<span>${t(v)}</span></button>`).join("")}<a class="nav-link ${page==='social'&&location.hash.includes('chat')?'active':''}" href="#social/chats">${chatsLabel()}<span id="chat-unread" class="chat-unread" ${unreadCount?'':'hidden'}>${unreadCount||''}</span></a></nav><div class="header-tools"><label class="search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"><kbd>⌘ K</kbd></label><select id="language" aria-label="${t("language")}">${[
       ["ru", "RU"],
       ["en", "EN"],
       ["ja", "日本語"],
@@ -239,7 +241,7 @@ function render(newWatch=false) {
       )
       .join(
         "",
-      )}</select>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='social'?`<div id="social-root">${t('loading')}</div>`:page==='watch' ? (current ? playerHTML() : `<p class="watch-loading">${t('loading')}</p>`) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<a class="text-button" href="#social">${socialLabel()}</a><button data-action="about">${t("about")}</button></footer>`;
+      )}</select>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='social'?`<div id="social-root">${t('loading')}</div>`:page==='watch' ? (current ? playerHTML() : `<p class="watch-loading">${t('loading')}</p>`) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
   if(preservedWatch){
     // Replacing the app root detaches the fullscreen element, even if reinserted.
     const template=document.createElement('template');template.innerHTML=markup;
@@ -784,6 +786,7 @@ async function handleSession(session, event) {
   profileDraft.clear();
   avatarLoader.reset();bannerLoader.reset();
   user = next;
+  void startNotifications();
   state = next ? defaults() : normalize({preferences:read("yooickuu.guest-player", {})});
   operations = [];
   ready = false;

@@ -350,3 +350,19 @@ body input,body textarea{font-size:max(16px,1em)!important}
  .watch-page .video-shell[data-native-pip=true] .video-controls [data-video=pip]:not([hidden]){display:inline-flex;grid-area:cinema}
  .watch-page .video-shell[data-native-pip=true] .video-controls [data-action=cinema]{display:none}
 }
+
+/* Stable two-row phone navigation: brand/account, then four links and language. */
+.chat-unread{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-size:10px;line-height:1;font-weight:800}.chat-unread[hidden]{display:none!important}
+@media(max-width:800px){
+ .header{display:grid!important;grid-template-columns:minmax(0,1fr) 64px!important;grid-template-rows:56px 44px!important;gap:6px 6px!important;padding:10px 10px!important;height:auto!important;min-height:0!important}
+ .header>.brand{position:static!important;transform:none!important;grid-column:1!important;grid-row:1!important;justify-self:start!important;width:auto!important;max-width:100%;gap:8px!important}
+ .header>.brand .brand-symbol{width:46px!important;height:46px!important;flex:0 0 46px!important}.header>.brand .brand-name{font-size:30px!important}.header>.brand .brand-kana{font-size:8px!important}
+ .header>.header-tools{display:contents!important}
+ .header .header-tools .avatar,.header .header-tools .login-button{position:static!important;grid-column:2!important;grid-row:1!important;justify-self:end;min-width:0;max-width:64px}
+ .header .header-tools .login-button{font-size:12px!important;padding:8px!important;min-height:40px!important}
+ .header>nav{position:static!important;transform:none!important;grid-column:1!important;grid-row:2!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));width:100%!important;gap:0!important;margin:0!important;padding:0!important;min-width:0}
+ .header nav .nav-link{position:relative;min-width:0!important;padding:4px 2px!important;font-size:clamp(10px,2.8vw,12px)!important;gap:2px!important;min-height:40px!important;white-space:nowrap!important;justify-content:center}
+ .header nav .chat-unread{position:absolute;right:0;top:0;font-size:9px;min-width:14px;height:14px;padding:0 3px}
+ .header>.header-tools>.site-select,.header>.header-tools>#language{grid-column:2!important;grid-row:2!important;width:64px!important;min-width:0!important;max-width:64px!important}
+ .header .header-tools .select-trigger{width:64px!important;min-width:0!important;height:40px!important;min-height:40px!important;padding:5px!important;font-size:11px!important;gap:2px!important}
+}
