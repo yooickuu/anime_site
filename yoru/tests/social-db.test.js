@@ -124,3 +124,30 @@ test('unread counts rooms, excludes own messages, and read cursors cannot swallo
  await assert.rejects(as(null,'select * from yoru_social_unread()'),/permission/);
  assert.equal((await as(E,'select * from yoru_social_unread()')).length,0);
 });
+
+test('permanent comment deletion cascades replies, preserves siblings and enforces ownership',async()=>{
+ for(let i=0;i<2;i++)await db.exec(await readFile('supabase/social-05.sql','utf8'));
+ assert.equal((await as(null,"select * from yoru_comments where anime_id='mal-100'")).length,0);
+ const parent=(await as(A,"select yoru_social_comment('mal-999',1,1,'parent',null) id"))[0].id;
+ const reply=(await as(B,"select yoru_social_comment('mal-999',1,1,'reply',$1) id",[parent]))[0].id;
+ const sibling=(await as(A,"select yoru_social_comment('mal-999',1,1,'sibling',null) id"))[0].id;
+ await assert.rejects(as(B,'select yoru_social_edit_comment($1,null)',[parent]),/comment_not_owned/);
+ await assert.rejects(as(null,'select yoru_social_edit_comment($1,null)',[parent]),/permission/);
+ await as(A,'select yoru_social_edit_comment($1,null)',[parent]);
+ assert.equal((await as(null,'select * from yoru_comments where id in ($1,$2)',[parent,reply])).length,0);
+ assert.equal((await as(null,'select * from yoru_comments where id=$1',[sibling])).length,1);
+});
+
+test('removing a chat affects only the current member; leaving a group revokes access',async()=>{
+ await db.exec(await readFile('supabase/social-05.sql','utf8'));
+ await assert.rejects(as(E,'select yoru_social_remove_chat($1)',[room]),/members_only/);
+ await as(B,'select yoru_social_remove_chat($1)',[room]);
+ assert.equal((await as(B,'select * from yoru_conversations where id=$1',[room])).length,0);
+ assert.equal((await as(A,'select * from yoru_conversations where id=$1',[room])).length,1);
+ await as(A,"select yoru_social_message($1,'new after removal')",[room]);
+ assert.equal((await as(B,'select * from yoru_conversations where id=$1',[room])).length,1);
+ const group=(await as(A,"select yoru_social_room(array[$1::uuid],'Leave test') id",[B]))[0].id;
+ await as(A,'select yoru_social_remove_chat($1)',[group]);
+ assert.equal((await as(A,'select * from yoru_conversations where id=$1',[group])).length,0);
+ assert.equal((await as(B,'select owner_id from yoru_conversations where id=$1',[group]))[0].owner_id,B);
+});

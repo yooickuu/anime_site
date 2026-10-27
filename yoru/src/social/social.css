@@ -54,3 +54,6 @@
  .social-chat>[data-older],.social-chat>[data-latest]{flex:none;min-height:26px;font-size:12px;padding:2px}
  .social-directory .social-friend{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.social-directory .social-friend .social-actions{grid-column:1/-1;margin:0}
 }
+
+.social-room-row{display:flex;align-items:center;gap:8px;min-width:0}.social-room-row>.social-room{flex:1;min-width:0}.social-room-row>.text-button{flex:none;font-size:12px;padding:8px}.social-room-list>.social-room-row{min-width:0}
+@media(max-width:800px){.social-chat .social-heading{grid-template-columns:auto minmax(0,1fr) auto auto}.social-chat .social-heading>[data-remove-chat]{font-size:11px;padding:4px;min-height:40px}.social-chat .social-heading>[data-members]{font-size:11px;padding:5px}}

@@ -11,3 +11,6 @@ export async function mountComments(root,ctx,key){css();if(!ctx.client){root.tex
 
 export async function syncProfile(ctx){return (await import('./unified-profile.js')).syncProfile(ctx);}
 export async function notifications(ctx,update){const {start}=await import('./notifications.js');if(!ctx.active())return ()=>{};return start(ctx,update);}
+
+export {clearCache} from './cache.js';
+export async function prefetch(kind){css();return kind==='profile'?import('./profile.js'):import('./community.js');}

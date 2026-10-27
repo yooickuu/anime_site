@@ -1,3 +1,4 @@
+import {clearCache} from './cache.js';
 // Main account state is the only source; publish copies of the owner's chosen art.
 export async function syncProfile(ctx){
  const uid=ctx.user()?.id;if(!uid||ctx.user().is_anonymous)throw Error('login_required');
@@ -13,5 +14,5 @@ export async function syncProfile(ctx){
   if(uploadError&&String(uploadError.statusCode)!=='409'&&uploadError.error!=='Duplicate'&&!/already exists/i.test(uploadError.message||''))throw uploadError;
  }
  if(!current())throw Error('account_changed');
- const {error:syncError}=await ctx.client.rpc('yoru_social_sync_profile');if(syncError)throw syncError;
+ const {error:syncError}=await ctx.client.rpc('yoru_social_sync_profile');if(syncError)throw syncError;clearCache(ctx.client);
 }

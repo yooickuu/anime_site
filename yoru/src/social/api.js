@@ -1,14 +1,15 @@
 import {result} from './common.js';
+import {cacheFor,cacheKey,clearCache} from './cache.js';
 export const PUBLIC_FIELDS='user_id,nickname,bio,avatar_path,banner_path,history_public,stats,updated_at';
 const AUTHOR='user_id,nickname,avatar_path';
 export function api(ctx,life){
  const c=ctx.client,read=q=>result(q.abortSignal(life.signal));
- const rpc=(name,args)=>result(c.rpc('yoru_social_'+name,args));
- return {
+ const rpc=async(name,args)=>{const value=await result(c.rpc('yoru_social_'+name,args));if(['friend','room','manage_room','remove_chat'].includes(name))clearCache(c);return value;};
+ const methods={
   profile:id=>read(c.from('yoru_public_profiles').select(PUBLIC_FIELDS).eq('user_id',id).maybeSingle()),
   people:q=>read(c.from('yoru_public_profiles').select(AUTHOR).ilike('nickname_key','%'+q.normalize('NFKC').trim().toLowerCase().replace(/[\\%_]/g,'')+'%').order('nickname_key').limit(20)),
   history:id=>read(c.rpc('yoru_social_history',{p_user:id})),
-  comments:({anime,season,episode},parent=null,offset=0)=>{let q=c.from('yoru_comments').select(`id,author_id,parent_id,body,created_at,edited_at,deleted_at,author:yoru_public_profiles!yoru_comments_author_id_fkey(${AUTHOR})`).eq('anime_id',anime).eq('season',season).eq('episode',episode);q=parent?q.eq('parent_id',parent):q.is('parent_id',null);return read(q.order('created_at').order('id').range(offset,offset+19));},
+  comments:({anime,season,episode},parent=null,cursor=null)=>{let q=c.from('yoru_comments').select(`id,author_id,parent_id,body,created_at,edited_at,deleted_at,author:yoru_public_profiles!yoru_comments_author_id_fkey(${AUTHOR})`).eq('anime_id',anime).eq('season',season).eq('episode',episode);q=q.is('deleted_at',null);q=parent?q.eq('parent_id',parent):q.is('parent_id',null);if(cursor)q=q.or(`created_at.gt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.gt.${cursor.id})`);return read(q.order('created_at').order('id').limit(10));},
   comment:(key,body,parent)=>rpc('comment',{p_anime:key.anime,p_season:key.season,p_episode:key.episode,p_body:body,p_parent:parent}),
   edit:(id,body)=>rpc('edit_comment',{p_id:id,p_body:body}),
   unread:()=>read(c.rpc('yoru_social_unread')),
@@ -19,8 +20,13 @@ export function api(ctx,life){
   roomInfo:id=>read(c.from('yoru_conversations').select('id,kind,title,owner_id').eq('id',id).maybeSingle()),
   members:room=>read(c.from('yoru_chat_members').select(`user_id,profile:yoru_public_profiles!yoru_chat_members_user_id_fkey(${AUTHOR})`).eq('room_id',room).limit(20)),
   room:(users,title='')=>rpc('room',{p_users:users,p_title:title}),
+  removeChat:room=>rpc('remove_chat',{p_room:room}),
   manage:(room,action,user=null,title=null)=>rpc('manage_room',{p_room:room,p_action:action,p_user:user,p_title:title}),
   messages:(room,before=null)=>{let q=c.from('yoru_messages').select(`id,room_id,author_id,body,image_path,anime_id,created_at,author:yoru_public_profiles!yoru_messages_author_id_fkey(${AUTHOR})`).eq('room_id',room);if(before)q=q.or(`created_at.lt.${before.created_at},and(created_at.eq.${before.created_at},id.lt.${before.id})`);return read(q.order('created_at',{ascending:false}).order('id',{ascending:false}).limit(40));},
   message:(room,body,image,anime,id)=>rpc('message',{p_room:room,p_body:body,p_image:image,p_anime:anime,p_id:id}),
  };
+ const cache=cacheFor(c);
+ methods.cachedProfile=(id,paint)=>cache.swr(cacheKey(ctx,'profile:'+id),()=>methods.profile(id),paint,life.live);
+ methods.cachedChats=paint=>cache.swr(cacheKey(ctx,'chats'),async()=>{const [rooms,friendships]=await Promise.all([methods.rooms(),methods.friends()]);return {rooms,friendships};},paint,life.live);
+ return methods;
 }

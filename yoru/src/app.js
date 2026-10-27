@@ -24,7 +24,7 @@ let socialModule,socialPageCleanup,socialCommentCleanup,socialPageVersion=0,soci
 const chatsLabel=()=>({ru:'Чаты',en:'Chats',ja:'チャット'}[lang]);
 const commentsLabel=()=>({ru:'Комментарии',en:'Comments',ja:'コメント'}[lang]);
 const loadSocial=async()=>socialModule ||= await import(new URL(__SOCIAL_ASSET__,document.baseURI).href);
-function socialContext(active){return {client,user:()=>user,lang:()=>lang,active,login:()=>authDialog(),confirm:async text=>window.confirm(text),preferences:()=>state.preferences,profileReady:()=>ready,title,cover,details:openDetails,card:id=>resolveRelease({id}),searchAnime:async query=>(await combinedCatalogue({query,page:1})).items.slice(0,8)};}
+function socialContext(active){return {client,user:()=>user,lang:()=>lang,active,canPoll:()=>page!=='watch',login:()=>authDialog(),confirm:async text=>window.confirm(text),preferences:()=>state.preferences,profileReady:()=>ready,title,cover,details:openDetails,card:id=>resolveRelease({id}),searchAnime:async query=>(await combinedCatalogue({query,page:1})).items.slice(0,8)};}
 function resetSocialComments(){
  const key=current?`${current.id}:${current.episodeManifest?.[episode-1]?.season??1}:${current.episodeManifest?.[episode-1]?.ordinal??episode}:${user?.id||''}:${lang}`:'';
  if(key===socialCommentKey)return;socialCommentKey=key;++socialCommentVersion;socialCommentCleanup?.();socialCommentCleanup=null;
@@ -253,6 +253,7 @@ function render(newWatch=false) {
   if(page==='profile'&&user&&ready)void syncMainProfile().catch(()=>{});
   updateSync();
   revealSurfaces(document.querySelector('main'));
+  document.dispatchEvent(new Event('yomiku:navigation'));
 }
 function homeHTML() {
  return `<section class="cinematic-hero" id="hero-art">${heroArtHTML()}</section><section class="section"><div class="section-head"><h2>${t('continue')}</h2>${user?'<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button>':''}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
@@ -785,6 +786,7 @@ async function handleSession(session, event) {
   unifiedProfileKey='';
   profileDraft.clear();
   avatarLoader.reset();bannerLoader.reset();
+  socialModule?.clearCache?.(client);
   user = next;
   void startNotifications();
   state = next ? defaults() : normalize({preferences:read("yooickuu.guest-player", {})});
@@ -1234,9 +1236,9 @@ document.addEventListener("click", async (event) => {
     if (b.dataset.details) {b.disabled=true;try{await openDetails(b.dataset.details);}finally{b.disabled=false;}}
     if (b.dataset.catalogPage) {await loadCatalogue(false,Number(b.dataset.catalogPage));$("#catalog")?.scrollIntoView({behavior:"smooth"});}
     if (b.dataset.watch)
-      await openPlayer(b.dataset.watch, Number(b.dataset.episode) || undefined);
+      await interfacePending(b,()=>openPlayer(b.dataset.watch, Number(b.dataset.episode) || undefined));
     if (b.dataset.selectEpisode)
-      await switchEpisode(Number(b.dataset.selectEpisode));
+      await interfacePending(b,()=>switchEpisode(Number(b.dataset.selectEpisode)));
     if (b.dataset.genre) {
       genre = b.dataset.genre;
       $$("[data-genre]").forEach((x) => {
@@ -1709,3 +1711,9 @@ document.addEventListener('keydown',event=>{
 });
 document.addEventListener('click',event=>{if(event.target.closest('.search-suggestions button')||!event.target.closest('.search,.catalog-search'))closeSearchSuggestions();});
 document.addEventListener('focusin',event=>{if(!event.target.closest('.search,.catalog-search'))closeSearchSuggestions();});
+
+// Warm only optional social code on user intent, without fetching account data.
+const socialWarm=new Set();
+function warmSocial(event){const element=event.target.closest?.('[data-nav="profile"],a[href^="#user/"],a[href^="#social/chats"]');if(!element||navigator.connection?.saveData)return;const kind=element.matches('[data-nav="profile"],a[href^="#user/"]')?'profile':'chats';if(socialWarm.has(kind))return;socialWarm.add(kind);loadSocial().then(m=>m.prefetch(kind)).catch(()=>socialWarm.delete(kind));}
+document.addEventListener('pointerover',warmSocial,{passive:true});document.addEventListener('focusin',warmSocial);document.addEventListener('touchstart',warmSocial,{passive:true});
+async function interfacePending(element,action){const notice=document.createElement('span');notice.className='ui-pending';notice.role='status';notice.textContent=t('loading');element.setAttribute('aria-busy','true');element.classList.add('ui-busy');element.append(notice);try{await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));return await action();}finally{notice.remove();element.removeAttribute('aria-busy');element.classList.remove('ui-busy');}}
