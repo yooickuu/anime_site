@@ -1,3 +1,4 @@
+import {repairDisplayMetadata} from './lib/catalog-display.mjs';
 import {prepareChunks} from './lib/catalog-chunks.mjs';
 import {readCatalogueText,archiveCatalogue} from './lib/catalog-storage.mjs';
 import {auditPlayerCatalogue} from './lib/player-audit.mjs';
@@ -5,8 +6,10 @@ import {build} from 'esbuild';
 import {copyFile,readFile,writeFile,mkdir,readdir,cp} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {createApprovedCatalogue} from '../src/approved-catalog.js';
-const rawPublication=await readCatalogueText();
+let rawPublication=await readCatalogueText();
 const publication=JSON.parse(rawPublication);
+const displayRepair=repairDisplayMetadata(publication);
+if(displayRepair.counts||displayRepair.types)rawPublication=JSON.stringify(publication);
 const playerAudit=auditPlayerCatalogue(publication);
 if(playerAudit.errors.length)throw Error('Player catalogue validation failed: '+JSON.stringify(playerAudit.errors.slice(0,10)));
 await archiveCatalogue(rawPublication);

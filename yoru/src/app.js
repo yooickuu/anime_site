@@ -1,3 +1,4 @@
+import {savedIds,savedCards,libraryPage,loadSavedCards} from './library-view.js';
 import {retrySourceRequest} from './source-retry.js';
 import {discoveryOptions} from './catalog-query.js';
 import promoSlides from './promo.json';
@@ -192,6 +193,7 @@ function applyAppearance() {
   } catch {}
 }
 function navigate(next, selected = "all") {
+  if(next==='library'){typeFilter='all';ongoingOnly=false;}
   if(page==='watch')stopWatching();
   page = next;
   list = selected;
@@ -355,16 +357,25 @@ function catalogShell() {
 function genreText(g) {
   return genreLabels[normalizeGenre(g)]?.[langIndex(lang)] || g || "";
 }
+let libraryKey='',libraryCards=new Map(),libraryBusy=false,libraryFailed=[],libraryPageNumber=1,libraryFilterKey='';
+function ensureLibraryCards(){
+ const ids=[...new Set([...savedIds(state),...state.collections.flatMap(c=>c.items)])];
+ const key=JSON.stringify([user?.id,ids]);
+ if(key===libraryKey)return;
+ libraryKey=key;libraryCards=new Map();libraryBusy=true;libraryFailed=[];
+ void loadSavedCards(ids,resolveRelease,{current:()=>libraryKey===key&&page==='library',onCard:a=>libraryCards.set(a.id,a)}).then(failed=>{
+  if(libraryKey!==key)return;
+  libraryBusy=false;libraryFailed=failed;
+  if(page==='library')renderGrid();else libraryKey='';
+ });
+}
 function renderGrid() {
   const grid = $("#anime-grid");
   if (!grid) return;
+  if(page==='library')ensureLibraryCards();
   let items = (
     page === "library"
-      ? [
-          ...new Map(
-            [...anime, ...remoteAnime.values()].map((a) => [a.id, a]),
-          ).values(),
-        ]
+      ? savedCards(state,list,id=>libraryCards.get(id)||byId(id))
       : onlineItems.length
         ? onlineItems
         : []
@@ -392,16 +403,16 @@ function renderGrid() {
   if (page!=="home" && sort === "alphabetical")
     items.sort((a, b) => title(a).localeCompare(title(b), lang));
 
-  // --- Защита от краша Safari на телефонах ---
-  // На главной и в библиотеке показываем максимум 60 карточек за раз,
-  // чтобы мобильник не перегружал оперативную память
-  const displayLimit = (page === 'home' || page === 'library') ? 60 : items.length;
-  const renderItems = items.slice(0, displayLimit);
+  const filterKey=JSON.stringify([user?.id,list,query,genre,typeFilter,ongoingOnly,sort]);
+  if(filterKey!==libraryFilterKey){libraryFilterKey=filterKey;libraryPageNumber=1;}
+  const libraryResult=libraryPage(items,libraryPageNumber);
+  libraryPageNumber=libraryResult.page;
+  const renderItems = page==='library'?libraryResult.items:page==='home'?items.slice(0,60):items;
 
   grid.innerHTML = renderItems
     .map((a) => {
       const e = state.entries[a.id];
-      return `<article class="anime-card"><button class="poster-button" data-details="${a.id}" aria-label="${t("details")}: ${esc(title(a))}"><img src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}" loading="lazy">${a.ongoing ? `<span class="ongoing-badge" title="${t("ongoingTooltip")}" aria-label="${t("ongoingTooltip")}"><i></i>${t("airing")}</span>` : ""}${a.catalogOnly ? `<span class="catalog-only-badge">${t("catalogOnly")}</span>` : ""}<span class="poster-play">${icon("play")}</span><span class="poster-label">${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span></button><button class="save-button ${e ? "saved" : ""}" data-details="${a.id}" aria-label="${t("status")}: ${esc(title(a))}">${bookmark}</button><button class="anime-title" data-details="${a.id}">${esc(title(a))}</button>${audienceHTML(a)}<p class="anime-meta">${a.year} · ${esc(genreText(a.genres[0]))}${e?.rating ? " · " + e.rating + "/10" : ""}</p></article>`;
+      return `<article class="anime-card"><button class="poster-button" data-details="${a.id}" aria-label="${t("details")}: ${esc(title(a))}"><img src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}" loading="lazy">${a.ongoing ? `<span class="ongoing-badge" title="${t("ongoingTooltip")}" aria-label="${t("ongoingTooltip")}"><i></i>${t("airing")}</span>` : ""}${a.catalogOnly ? `<span class="catalog-only-badge">${t("catalogOnly")}</span>` : ""}<span class="poster-play">${icon("play")}</span><span class="poster-label">${matchesType(a,"MOVIE") ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span></button><button class="save-button ${e ? "saved" : ""}" data-details="${a.id}" aria-label="${t("status")}: ${esc(title(a))}">${bookmark}</button><button class="anime-title" data-details="${a.id}">${esc(title(a))}</button>${audienceHTML(a)}<p class="anime-meta">${a.year} · ${esc(genreText(a.genres[0]))}${e?.rating ? " · " + e.rating + "/10" : ""}</p></article>`;
     })
     .join("");
   revealSurfaces(grid);
@@ -409,8 +420,9 @@ function renderGrid() {
   const status = $("#catalog-status");
   if (status)
     status.innerHTML =
-      ["library","home"].includes(page)
-        ? ""
+      page==='library'
+        ? `${libraryBusy?`<p>${t('loading')}</p>`:''}${libraryFailed.length?`<button class="text-button" data-action="reload-library">${t('retry')}</button>`:''}${libraryResult.pages>1?`<div class="catalog-pagination"><button class="button soft" data-library-page="${libraryPageNumber-1}" ${libraryPageNumber<=1?'disabled':''}>${t('previous')}</button><span>${libraryPageNumber} / ${libraryResult.pages}</span><button class="button soft" data-library-page="${libraryPageNumber+1}" ${libraryPageNumber>=libraryResult.pages?'disabled':''}>${t('nextPage')}</button></div>`:''}`
+        : page==='home'?""
         : catalogBusy
           ? `<p>${t("loading")}</p>`
           : catalogError
@@ -461,7 +473,7 @@ async function openDetails(id) {
   $("#details").className = "details-dialog";
   $("#details").innerHTML =
     `<div class="details-toolbar">${closeButton("details")}</div>` +
-    `<div class="details-artwork ${bannerFor(a)?'':'portrait-art'}" aria-hidden="true"><img class="details-manga" data-details-art="${esc(a.id)}" src="${esc(detailArtwork(a,artwork))}" alt=""><div class="details-art-shade"></div></div><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${a.type === "MOVIE" || (!a.providerId && a.episodes === 1) ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
+    `<div class="details-artwork ${bannerFor(a)?'':'portrait-art'}" aria-hidden="true"><img class="details-manga" data-details-art="${esc(a.id)}" src="${esc(detailArtwork(a,artwork))}" alt=""><div class="details-art-shade"></div></div><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${matchesType(a,"MOVIE") ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
       user && ready
         ? `<div class="detail-library"><label>${t("status")}<select id="detail-status"><option value="">${t("none")}</option>${state.statuses
             .filter((s) => s.id !== "favorites")
@@ -482,6 +494,7 @@ async function openDetails(id) {
       const button=document.createElement('button');button.className='button primary full-width';button.dataset.watch=updated.id;button.textContent=t('watch');$('#details .details-visual').append(button);
       $('#details .availability-note')?.remove();
     }
+    const overline=$('#details .details-copy > .overline');if(overline)overline.textContent=`${updated.year} · ${matchesType(updated,'MOVIE')?t('movie'):updated.episodes?updated.episodes+' '+t('episodes'):t('announced')}`;
     const story=$('#details .details-description');if(story&&descriptionFor(updated,lang))story.textContent=descriptionFor(updated,lang);
   }).catch(()=>{});
 
@@ -1234,6 +1247,7 @@ document.addEventListener("click", async (event) => {
     if (b.dataset.nav) navigate(b.dataset.nav);
     if (b.dataset.list) navigate("library", b.dataset.list);
     if (b.dataset.details) {b.disabled=true;try{await openDetails(b.dataset.details);}finally{b.disabled=false;}}
+    if(b.dataset.libraryPage){libraryPageNumber=Number(b.dataset.libraryPage);renderGrid();$("#catalog")?.scrollIntoView({behavior:"smooth"});return;}
     if (b.dataset.catalogPage) {await loadCatalogue(false,Number(b.dataset.catalogPage));$("#catalog")?.scrollIntoView({behavior:"smooth"});}
     if (b.dataset.watch)
       await interfacePending(b,()=>openPlayer(b.dataset.watch, Number(b.dataset.episode) || undefined));
@@ -1342,6 +1356,7 @@ document.addEventListener("click", async (event) => {
       case "about":
         showAbout();
         break;
+      case "reload-library": libraryKey="";renderGrid();break;
       case "load-more":
         loadCatalogue(true);
         break;

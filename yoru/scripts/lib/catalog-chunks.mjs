@@ -3,7 +3,7 @@ import {withMetadata} from '../../src/catalog-metadata.js';
 // Display/search records never carry episode manifests or video source URLs.
 export function catalogueCard(a){
  const keys=['id','ids','title','originalTitle','alt','year','type','genres','description','ongoing','translations','relatedMalIds','franchiseId','airedAt','relations','catalogUpdatedAt','popularity','views','members','audienceRating','rating','score','malId','image','banner','detailsBanner','episodes'];
- return {...Object.fromEntries(keys.filter(k=>a[k]!==undefined).map(k=>[k,a[k]])),catalogApproved:true,catalogOnly:false};
+ return {...Object.fromEntries(keys.filter(k=>a[k]!==undefined).map(k=>[k,a[k]])),catalogApproved:true,catalogOnly:false,...(Number.isInteger(a.availableEpisodeCount)?{episodes:a.availableEpisodeCount}:{} )};
 }
 export function summaryCard(a){
  const {description,relations,relatedMalIds,relatedCatalogIds,...rest}=catalogueCard(a);
