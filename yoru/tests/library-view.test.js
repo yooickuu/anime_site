@@ -29,3 +29,27 @@ test('library grid exposes all pages and exact count even when no saved title is
  assert.equal(context.$('#anime-grid').children.length,60);assert.equal(context.$('#results-caption').textContent,'found: 125');assert.ok(context.$('[data-library-page="2"]'));
  runInNewContext('libraryPageNumber=3;renderGrid();',context);assert.equal(context.$('#anime-grid').children.length,5);assert.match(context.$('#anime-grid').textContent,/Saved 124/);assert.equal(JSON.stringify(state),before);dom.window.close();
 });
+
+test('list search and its suggestions stay inside the active list; catalogue search remains global',async()=>{
+ const {readFile}=await import('node:fs/promises'),{runInNewContext}=await import('node:vm');
+ const source=await readFile(new URL('../src/app.js',import.meta.url),'utf8');
+ const code=source.slice(source.indexOf('document.addEventListener("input",'),source.indexOf('document.addEventListener("change",'));
+ const state=freeze({entries:{a:{favorite:true,status:'planned'},b:{status:'ongoing'},c:{status:'watching',legacyLists:['custom']}},collections:[]});
+ for(const [list,ids]of [['favorites',['a']],['ongoing',['b']],['custom',['c']],['all',['a','b','c']]]){
+  let callback,renders=0,globalCalls=0,pool;
+  const context={page:'library',list,state,query:'',libraryCards:new Map(),byId:id=>({id,title:'Title '+id}),savedCards,searchTimer:null,clearTimeout(){},renderGrid(){renders++;},showSearchSuggestions:(id,items)=>pool=items,loadCatalogue(){globalCalls++;},document:{addEventListener:(_,fn)=>callback=fn}};
+  runInNewContext(code,context);callback({target:{id:'catalog-search',value:'title'},isComposing:false});
+  assert.equal(renders,1);assert.equal(globalCalls,0);assert.deepEqual(pool.map(a=>a.id),ids);
+ }
+ let callback,loads=0,suggestions=0;
+ const context={page:'catalog',query:'',searchTimer:null,$$:()=>[],clearTimeout(){},setTimeout:fn=>fn(),loadCatalogue(){loads++;},showSearchSuggestions(){suggestions++;},document:{addEventListener:(_,fn)=>callback=fn}};
+ runInNewContext(code,context);callback({target:{id:'catalog-search',value:'Naruto'},isComposing:false});assert.equal(loads,1);assert.equal(suggestions,1);
+});
+test('late catalogue suggestions cannot leak into an open saved list',async()=>{
+ const {readFile}=await import('node:fs/promises'),{JSDOM}=await import('jsdom'),{runInNewContext}=await import('node:vm');
+ const source=await readFile(new URL('../src/app.js',import.meta.url),'utf8'),start=source.indexOf('function showSearchSuggestions('),end=source.indexOf("document.addEventListener('keydown',",start);
+ const dom=new JSDOM('<label><input id="catalog-search"></label>'),state={entries:{a:{favorite:true,anime:{title:'Saved'}}},collections:[]};
+ const context={page:'library',list:'favorites',state,savedCards,libraryCards:new Map(),byId:()=>null,query:'',publishedItems:[],document:dom.window.document,closeSearchSuggestions(){},suggestions:items=>items,esc:String,cover:()=>'',title:a=>a.title};
+ runInNewContext(source.slice(start,end)+"showSearchSuggestions('catalog-search',[{id:'unrelated',title:'Other'}]);",context);
+ assert.equal(dom.window.document.querySelector('[data-details]').dataset.details,'a');assert.equal(dom.window.document.querySelector('[data-details="unrelated"]'),null);dom.window.close();
+});

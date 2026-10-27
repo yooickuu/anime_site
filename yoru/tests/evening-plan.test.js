@@ -47,3 +47,14 @@ test('ongoing plan does not invent unreleased episodes from an announced total',
  const [p]=eveningPlan(state,()=>({...title,ongoing:true,episodeNumbers:[1]}),60);
  assert.equal(p.count,1);
 });
+test('finish mode fits the entire remaining title, excludes ongoing and leaves saved data intact',()=>{
+ const state={preferences:{speed:1},entries:{a:{status:'watching'},b:{status:'planned'},c:{status:'planned'}},progress:{a:{id:'a',episode:2,time:600,duration:1440,updated:1}}};
+ const before=JSON.stringify(state),lookup=id=>({...title,id,episodes:id==='b'?12:3,catalogApproved:true,ongoing:id==='c'});
+ assert.deepEqual(eveningPlan(state,lookup,40,'finish').map(p=>p.id),['a']);
+ const p=eveningPlan(state,lookup,40,'finish')[0];assert.equal(p.minutes,38);assert.equal(p.finishes,true);assert.equal(p.resumeSeconds,600);
+ assert.deepEqual(eveningPlan(state,lookup,30,'finish'),[]);assert.equal(JSON.stringify(state),before);
+});
+test('published ongoing counts are usable without loading video manifests; favorites and custom lists can start',()=>{
+ const state={entries:{a:{favorite:true},b:{status:'custom'}},preferences:{speed:1}};
+ const plans=eveningPlan(state,id=>({...title,id,ongoing:true,catalogApproved:true,episodes:1}),90,'new');assert.equal(plans.length,2);assert.ok(plans.every(p=>p.count===1&&!p.finishes));
+});

@@ -252,7 +252,7 @@ function render(newWatch=false) {
   if(page==='home')startHero();
   if (page !== 'social' && page !== 'watch' && page !== "profile" && !(page === "library" && !user)) renderGrid();
   if(page==='social'){const own=socialPageVersion,root=$('#social-root'),ctx=socialContext(()=>own===socialPageVersion);loadSocial().then(async module=>{if(ctx.active()){const cleanup=await module.mountPage(root,ctx,location.hash.slice(1));if(ctx.active())socialPageCleanup=cleanup;else cleanup();}}).catch(()=>{if(ctx.active())root.textContent=t('providerError');});}
-  if(page==='profile'&&user&&ready)void syncMainProfile().catch(()=>{});
+  if(page==='profile'&&user&&ready){void syncMainProfile().catch(()=>{});ensurePlanCards();}
   updateSync();
   revealSurfaces(document.querySelector('main'));
   document.dispatchEvent(new Event('yomiku:navigation'));
@@ -338,7 +338,7 @@ function catalogShell() {
     page === "library"
       ? collection?.name || (status ? statusName(status) : t("library"))
       : t("catalog");
-  return `${page==='catalog'?discoveryHTML():''}<div class="library-layout ${page === "library" ? "with-sidebar" : ""}">${page === "library" ? `<aside class="library-sidebar"><h3>${t("library")}</h3><button class="list-nav ${list === "all" ? "active" : ""}" data-list="all">${t("allStories")} <span>${savedCount()}</span></button>${state.statuses.map((s) => `<button class="list-nav ${list === s.id ? "active" : ""}" data-list="${esc(s.id)}">${esc(statusName(s))}<span>${Object.values(state.entries).filter((e) => (s.id === "favorites" ? e.favorite : (e.status === s.id || e.legacyLists?.includes(s.id)))).length}</span></button>`).join("")}<button class="text-button" data-action="manage-statuses">${icon("settings")} ${t("manageStatuses")}</button><button class="text-button" data-action="create-status">${icon("plus")} ${t("createCollection")}</button></aside>` : ""}<section class="section catalog-section" id="catalog"><div class="section-head"><div><h2>${esc(heading)}</h2></div>${collection ? `<div><button class="text-button" data-edit-collection="${esc(collection.id)}">${t("rename")}</button><button class="text-button danger" data-delete-collection="${esc(collection.id)}">${t("remove")}</button></div>` : `<label class="sort-label">${t("order")} <select id="sort" aria-label="${t("order")}">${(page === "library" ? ["picked", "newest", "alphabetical"] : ["picked", "hiddenGems", "latest", "topRated", "newest", "oldest"]).map((v) => `<option value="${v}" ${sort === v ? "selected" : ""}>${t(v)}</option>`).join("")}</select></label>`}</div>${list === "ongoing" ? `<p class="notice">${t("ongoingHint")}</p>` : ""}<label class="catalog-search"><input id="catalog-search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"></label><div class="catalog-options"><select id="type-filter" aria-label="${t("allTypes")}">${[
+  return `${page==='catalog'?discoveryHTML():''}<div class="library-layout ${page === "library" ? "with-sidebar" : ""}">${page === "library" ? `<aside class="library-sidebar"><h3>${t("library")}</h3><button class="list-nav ${list === "all" ? "active" : ""}" data-list="all">${t("allStories")} <span>${savedCount()}</span></button>${state.statuses.map((s) => `<button class="list-nav ${list === s.id ? "active" : ""}" data-list="${esc(s.id)}">${esc(statusName(s))}<span>${Object.values(state.entries).filter((e) => (s.id === "favorites" ? e.favorite : (e.status === s.id || e.legacyLists?.includes(s.id)))).length}</span></button>`).join("")}<button class="text-button" data-action="manage-statuses">${icon("settings")} ${t("manageStatuses")}</button><button class="text-button" data-action="create-status">${icon("plus")} ${t("createCollection")}</button></aside>` : ""}<section class="section catalog-section" id="catalog"><div class="section-head"><div><h2>${esc(heading)}</h2></div>${collection ? `<div><button class="text-button" data-edit-collection="${esc(collection.id)}">${t("rename")}</button><button class="text-button danger" data-delete-collection="${esc(collection.id)}">${t("remove")}</button></div>` : `<label class="sort-label">${t("order")} <select id="sort" aria-label="${t("order")}">${(page === "library" ? ["picked", "newest", "alphabetical"] : ["picked", "hiddenGems", "latest", "topRated", "newest", "oldest"]).map((v) => `<option value="${v}" ${sort === v ? "selected" : ""}>${t(v)}</option>`).join("")}</select></label>`}</div>${list === "ongoing" ? `<p class="notice">${t("ongoingHint")}</p>` : ""}<label class="catalog-search"><input id="catalog-search" type="search" placeholder="${t(page==='library'?'searchThisList':'search')}" aria-label="${t(page==='library'?'searchThisList':'search')}" value="${esc(query)}"></label><div class="catalog-options"><select id="type-filter" aria-label="${t("allTypes")}">${[
     ["all", "allTypes"],
     ["series", "series"],
     ["MOVIE", "movies"],
@@ -445,9 +445,20 @@ function profileHTML() {
 function appearanceHTML() {
  return `<section class="profile-appearance glass-panel"><div class="panel-heading"><span class="overline">${t('yourAtmosphere')}</span><h2>${t('siteStyle')}</h2></div><div class="style-options" role="group" aria-label="${t('siteStyle')}">${styles.map(id=>`<button class="style-option" data-style-choice="${id}" aria-pressed="${appearance===id}"><span class="style-swatch" data-style="${id}" aria-hidden="true"><i></i><i></i><i></i></span><span>${t('style_'+id)}</span><span class="style-selected" aria-hidden="true">${icon('check')}</span></button>`).join('')}</div></section>`;
 }
+let planKey='',planCards=new Map(),planBusy=false,planFailed=false;
+function ensurePlanCards(){
+ const ids=[...new Set([...Object.keys(state.entries),...Object.values(state.progress).map(p=>p.id).filter(Boolean)])];
+ const key=JSON.stringify([user?.id,ids]);if(key===planKey)return;
+ planKey=key;planCards=new Map();planBusy=true;planFailed=false;
+ const paint=()=>{if(page==='profile'&&$('#evening-plan'))$('#evening-plan').outerHTML=eveningHTML();};paint();
+ void loadSavedCards(ids,resolveRelease,{current:()=>planKey===key&&page==='profile',onCard:a=>planCards.set(a.id,a)}).then(failed=>{
+  if(planKey!==key)return;planBusy=false;planFailed=failed.length>0;
+  if(page==='profile')paint();else planKey='';
+ });
+}
 function eveningHTML() {
- const choices=eveningPlan(state,byId,eveningMinutes,eveningMode).filter(p=>isPublished(p.id));
- return `<section class="profile-evening glass-panel" id="evening-plan"><div class="panel-heading"><span class="overline">${t('aLittleTime')}</span><h2>${t('eveningPlan')}</h2></div><p class="panel-description">${t('eveningHint')}</p><div class="plan-modes" role="group" aria-label="${t('planMode')}">${['all','continue','new'].map(id=>`<button class="chip" data-plan-mode="${id}" aria-pressed="${eveningMode===id}">${t('plan_'+id)}</button>`).join('')}</div><div class="time-options" role="group" aria-label="${t('availableTime')}">${[15,30,60,90,120].map(n=>`<button class="chip" data-plan-minutes="${n}" aria-pressed="${n===eveningMinutes}">${n} ${t('minutesShort')}</button>`).join('')}</div><div class="evening-results" aria-live="polite">${choices.length?choices.map(plan=>{const a=byId(plan.id)||state.entries[plan.id]?.anime||Object.values(state.progress).find(p=>p.id===plan.id)?.anime;return `<button class="evening-option" data-watch="${esc(plan.id)}" data-episode="${plan.start}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t(plan.count>1?'episodes':'episode')} ${plan.ordinal}${plan.count>1?'–'+plan.lastOrdinal:''}</small><small>${plan.estimated?'≈ ':''}${plan.minutes} ${t('minutesShort')}${plan.speed!==1?' · '+plan.speed+'×':''}</small><small class="plan-spare">${t('planSpare')} ${plan.spareMinutes} ${t('minutesShort')}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('eveningEmpty')}</p>`}</div>${choices.some(c=>c.estimated)?`<p class="plan-estimate">${t('eveningEstimate')}</p>`:''}</section>`;
+ const choices=eveningPlan(state,id=>planCards.get(id)||byId(id),eveningMinutes,eveningMode).filter(p=>isPublished(p.id));
+ return `<section class="profile-evening glass-panel" id="evening-plan"><div class="panel-heading"><span class="overline">${t('aLittleTime')}</span><h2>${t('eveningPlan')}</h2></div><p class="panel-description">${t('eveningHint')}</p><div class="plan-modes" role="group" aria-label="${t('planMode')}">${['all','continue','new','finish'].map(id=>`<button class="chip" data-plan-mode="${id}" aria-pressed="${eveningMode===id}">${t('plan_'+id)}</button>`).join('')}</div><div class="time-options" role="group" aria-label="${t('availableTime')}">${[15,30,60,90,120].map(n=>`<button class="chip" data-plan-minutes="${n}" aria-pressed="${n===eveningMinutes}">${n} ${t('minutesShort')}</button>`).join('')}</div><label class="plan-custom-time">${t('planCustomTime')} <input id="plan-time" type="number" inputmode="numeric" min="1" max="240" value="${eveningMinutes}"> ${t('minutesShort')}</label><div class="evening-results" aria-live="polite" aria-busy="${planBusy}">${choices.length?choices.map(plan=>{const a=planCards.get(plan.id)||byId(plan.id)||state.entries[plan.id]?.anime||Object.values(state.progress).find(p=>p.id===plan.id)?.anime;return `<button class="evening-option" data-watch="${esc(plan.id)}" data-episode="${plan.start}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t(plan.count>1?'episodes':'episode')} ${plan.ordinal}${plan.count>1?'–'+plan.lastOrdinal:''}</small><small>${plan.estimated?'≈ ':''}${plan.minutes} ${t('minutesShort')}${plan.speed!==1?' · '+plan.speed+'×':''}</small><small class="plan-reason">${t(plan.finishes?'planFinishes':plan.resume?'planResume':plan.started?'plan_continue':'plan_new')}${plan.resume?' · '+timeLabel(plan.resumeSeconds):''}</small><small class="plan-spare">${t('planSpare')} ${plan.spareMinutes} ${t('minutesShort')}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t(planBusy?'loading':eveningMode==='finish'?'planFinishEmpty':'eveningEmpty')}</p>`}</div>${planFailed?`<button class="text-button" data-action="reload-plan">${t('retry')}</button>`:''}<p class="plan-estimate">${t('planNoTimer')}</p>${choices.some(c=>c.estimated)?`<p class="plan-estimate">${t('eveningEstimate')}</p>`:''}</section>`;
 }
 function historyHTML() {
   const history=Object.values(state.progress).filter(p=>p.id!=='sintel'&&byId(p.id)).sort((a,b)=>(b.updated||0)-(a.updated||0)).slice(0,8);
@@ -1239,7 +1250,7 @@ document.addEventListener("click", async (event) => {
       $$('[data-style-choice]').forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.styleChoice===next)));
       return;
     }
-    if(b.dataset.planMode){eveningMode=['all','continue','new'].includes(b.dataset.planMode)?b.dataset.planMode:'all';$('#evening-plan').outerHTML=eveningHTML();$('#evening-plan [data-plan-mode="'+eveningMode+'"]').focus({preventScroll:true});return;}
+    if(b.dataset.planMode){eveningMode=['all','continue','new','finish'].includes(b.dataset.planMode)?b.dataset.planMode:'all';$('#evening-plan').outerHTML=eveningHTML();$('#evening-plan [data-plan-mode="'+eveningMode+'"]').focus({preventScroll:true});return;}
     if(b.dataset.planMinutes){eveningMinutes=Number(b.dataset.planMinutes);$('#evening-plan').outerHTML=eveningHTML();$('#evening-plan [data-plan-minutes="'+eveningMinutes+'"]').focus({preventScroll:true});return;}
     if(b.dataset.account){b.disabled=true;try{await switchAccount(b.dataset.account);}finally{b.disabled=false;}return;}
     if (b.dataset.close) $("#" + b.dataset.close).close();
@@ -1356,6 +1367,7 @@ document.addEventListener("click", async (event) => {
       case "about":
         showAbout();
         break;
+      case "reload-plan": planKey="";ensurePlanCards();break;
       case "reload-library": libraryKey="";renderGrid();break;
       case "load-more":
         loadCatalogue(true);
@@ -1446,6 +1458,11 @@ document.addEventListener("input", (event) => {
   if (["search", "catalog-search"].includes(event.target.id)) {
     query = event.target.value;
     if(event.isComposing)return;
+    if(page==='library'&&event.target.id==='catalog-search'){
+      clearTimeout(searchTimer);renderGrid();
+      showSearchSuggestions('catalog-search',savedCards(state,list,id=>libraryCards.get(id)||byId(id)));
+      return;
+    }
     const caret=[event.target.selectionStart,event.target.selectionEnd];
     if (event.target.id === "search" && page !== "catalog") {
       if(current)stopWatching();
@@ -1464,6 +1481,10 @@ document.addEventListener("input", (event) => {
 });
 document.addEventListener("change", (event) => {
   const input = event.target;
+  if(input.id==='plan-time'){
+    if(!input.value||!input.checkValidity())return;
+    eveningMinutes=Number(input.value);$('#evening-plan').outerHTML=eveningHTML();$('#plan-time').focus({preventScroll:true});return;
+  }
   if(input.id==='genre-filter'){genre=input.value;if(page==='library')renderGrid();else loadCatalogue();}
   if(input.id==='catalog-view'){catalogueView=input.value;loadCatalogue();}
   if(input.id==='year-filter'){yearFilter=input.value;loadCatalogue();}
@@ -1709,6 +1730,7 @@ function closeSearchSuggestions(){
  document.querySelectorAll('#search,#catalog-search').forEach(n=>{n.setAttribute('aria-expanded','false');n.removeAttribute('aria-activedescendant');});
 }
 function showSearchSuggestions(id, pool=publishedItems){
+ if(page==='library'&&id==='catalog-search')pool=savedCards(state,list,id=>libraryCards.get(id)||byId(id));
  closeSearchSuggestions();const input=document.getElementById(id);if(!input)return;
  const items=suggestions(pool,query);if(!items.length)return;
  const panel=document.createElement('div');panel.id='search-suggestions';panel.className='search-suggestions';panel.setAttribute('role','listbox');

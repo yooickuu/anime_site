@@ -14,10 +14,10 @@ export function eveningPlan(state, lookup, minutes=30, mode='all') {
   if(!a||a.catalogOnly||a.blocked||['completed','dropped'].includes(entry?.status))continue;
   const started=history.length>0||entry?.status==='watching';
   if(mode==='continue'&&!started||mode==='new'&&started)continue;
-  if(!latest&&!['watching','planned','ongoing'].includes(entry?.status))continue;
+  if(!latest&&!entry)continue;
   const numbers=Array.isArray(a.episodeNumbers)?a.episodeNumbers:null;
   // An announced total is not a released episode count for an ongoing title.
-  const total=numbers?numbers.length:a.ongoing?Math.max(0,...history.map(p=>p.episode)):Number(a.episodes);
+  const total=numbers?numbers.length:a.ongoing&&!a.catalogApproved?Math.max(0,...history.map(p=>p.episode)):Number(a.episodes);
   if(!Number.isInteger(total)||total<1)continue;
   const progress=new Map();
   for(const p of history){
@@ -46,7 +46,9 @@ export function eveningPlan(state, lookup, minutes=30, mode='all') {
    seconds+=remaining;count++;last=n;estimated ||= !known;
   }
   if(!count)continue;
-  result.push({id,start,ordinal:numbers?.[start-1]??start,lastOrdinal:numbers?.[last-1]??last,count,minutes:Math.ceil(seconds/60),spareMinutes:Math.max(0,Math.floor((budget-seconds)/60)),estimated,speed,updated:latest?.updated||0,resume:Number(progress.get(start)?.time)>0,started});
+  const finishes=!a.ongoing&&last===total;
+  if(mode==='finish'&&!finishes)continue;
+  result.push({id,start,finishes,resumeSeconds:Math.max(0,Number(progress.get(start)?.time)||0),ordinal:numbers?.[start-1]??start,lastOrdinal:numbers?.[last-1]??last,count,minutes:Math.ceil(seconds/60),spareMinutes:Math.max(0,Math.floor((budget-seconds)/60)),estimated,speed,updated:latest?.updated||0,resume:Number(progress.get(start)?.time)>0,started});
  }
  return result.sort((a,b)=>Number(b.resume)-Number(a.resume)||Number(b.started)-Number(a.started)||b.updated-a.updated||b.minutes-a.minutes).slice(0,3);
 }
