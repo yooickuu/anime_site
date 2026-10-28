@@ -9,5 +9,8 @@ yoru/.openai/
 /yoru/src/published-catalog.json.gz.tmp
 
 # Accidental Finder copies of generated social modules.
-/social/* 2.js
-/social/* 2.css
+/social/* [0-9]*.js
+/social/* [0-9]*.css
+
+/yoru/dist/social/* [0-9]*.js
+/yoru/dist/social/* [0-9]*.css
