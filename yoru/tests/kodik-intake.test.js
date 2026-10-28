@@ -24,6 +24,23 @@ test('Japanese translations require Japanese metadata and preserve their own tra
  assert.throws(()=>translationIdentity({...jp,material_data:{}}),/language_unknown/);
 });
 const dependencies={deepProbe:true,getMetadata:async()=>[{russian:'Название',malId:9,description:'Описание',poster:{originalUrl:'https://example.test/poster'}},null],imageProbe:async url=>({url,width:800,height:1200}),resolve:async url=>({sources:[{quality:720,url}]}),streamProbe:async s=>[{...s,duration:1400,checkedAt:'2026-10-22'}]};
+test('subtitle imports resolve missing country from metadata without changing the selected track',async()=>{
+ const r={...release,material_data:{anime_kind:'tv'},translation:{id:1291,title:'Crunchyroll.Subtitles',type:'subtitles'}};
+ const a=await assembleRelease(r,{...dependencies,deepProbe:false,getMetadata:async()=>[null,{idMal:9,countryOfOrigin:'JP',coverImage:{extraLarge:'https://example.test/poster'}}]});
+ assert.equal(a.episodes[0].audio[0].language,'ja');
+ assert.equal(a.episodes[0].audio[0].providerRef.translationId,'1291');
+ assert.equal(a.episodes[0].audio[0].providerRef.url,link(1));
+ assert.throws(()=>translationIdentity(r),/language_unknown/);
+ assert.equal(translationIdentity({...r,material_data:{countries:['Китай']}},{countryOfOrigin:'JP'}).language,'zh');
+});
+test('Kodik retries an interrupted JSON body and reports DNS failures without leaking credentials',async()=>{
+ let calls=0;const waits=[];
+ const api=new KodikAPI('private-test-token',{wait:async ms=>waits.push(ms),fetcher:async()=>({ok:true,json:async()=>{if(++calls===1)throw Error('socket closed');return {results:[]};}})});
+ assert.deepEqual((await api.request()).results,[]);assert.equal(calls,2);assert.deepEqual(waits,[1000]);
+ calls=0;api.fetcher=async()=>{calls++;throw Object.assign(Error('secret URL'),{cause:{code:'ENOTFOUND'}});};
+ await assert.rejects(api.request(),e=>e.message.includes('(dns)')&&!e.message.includes('private-test-token')&&!e.message.includes('secret URL'));
+ assert.equal(calls,3);
+});
 test('assembly keeps exact stream per episode and rejects a release with any missing episode stream',async()=>{
  const a=await assembleRelease(release,dependencies);assert.equal(a.episodes.length,2);assert.equal(a.episodes[1].audio[0].providerRef.url,link(2));
  await assert.rejects(assembleRelease(release,{...dependencies,resolve:async url=>({sources:url===link(1)?[{quality:720,url}]:[]})}),/no_working_stream/);
@@ -136,6 +153,22 @@ test('failed releases are not retried repeatedly within the same batch',async()=
   assert.equal(checks,1);assert.equal(report.added,0);assert.equal(report.pending.length,1);assert.equal(report.skipped,1);
  }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
 });
+test('rejected revisions wait across commands, but a changed release is checked immediately',async()=>{
+ const cwd=process.cwd(),dir=await mkdtemp(join(tmpdir(),'kodik-defer-'));let checks=0;
+ try{
+  process.chdir(dir);await mkdir('src');let row={...release,updated_at:'2026-10-01'};
+  const api={async *pages(){yield {results:[row],page:'/list',next_page:null};}};
+  const assemble=async()=>{checks++;throw Error('shikimori_identity_missing');};
+  await seedCatalog({targetCount:1,api,assemble});
+  await seedCatalog({targetCount:1,api,assemble});assert.equal(checks,1);
+  row={...row,updated_at:'2026-10-02'};
+  await seedCatalog({targetCount:1,api,assemble});assert.equal(checks,2);
+  const p=JSON.parse(await readFile('src/kodik-progress.json'));
+  p.deferred[row.id].retryAfter='2000-01-01';
+  await import('node:fs/promises').then(fs=>fs.writeFile('src/kodik-progress.json',JSON.stringify(p)));
+  await seedCatalog({targetCount:1,api,assemble});assert.equal(checks,3);
+ }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
+});
 
 import {firstMainEpisode,seasonMenu,franchiseSeasons} from '../src/catalog-seasons.js';
 test('opening a title chooses main episodes while keeping extras and other seasons accessible',()=>{
@@ -212,6 +245,29 @@ test('first main episode does not navigate backwards into extras, resume keeps i
  assert.equal(rebaseProgress({'a:2':saved},'a',[1,2,3],a.episodeManifest)['a:2'].time,42);
 });
 import {requireEpisodeCoverage} from '../scripts/seed-catalog.mjs';
+import {allocateCatalogueId} from '../scripts/seed-catalog.mjs';
+import {auditPlayerCatalogue} from '../scripts/lib/player-audit.mjs';
+test('public ID collisions keep the published card stable and merge later dubs into the new card',async()=>{
+ const cwd=process.cwd(),dir=await mkdtemp(join(tmpdir(),'kodik-public-id-'));
+ try{
+  process.chdir(dir);await mkdir('src');
+  const old=await assembleRelease(release,dependencies);old.id='mal-10';
+  const snapshot=JSON.stringify(old);
+  await import('node:fs/promises').then(fs=>fs.writeFile('src/published-catalog.json',JSON.stringify({policyVersion:3,items:[old]})));
+  const variants=[1,2].map(n=>({...release,id:'serial-new-'+n,shikimori_id:10,translation:{id:10+n,type:'voice',title:'Studio '+n}}));
+  const api={async *pages(path){yield {results:path==='/list'?[variants[0]]:variants,page:'/list',next_page:null};}};
+  const report=await seedCatalog({targetCount:1,api,assemble:r=>assembleRelease(r,{...dependencies,getMetadata:async()=>[{malId:10,poster:{originalUrl:'https://example.test/poster'}},null]})});
+  const p=JSON.parse(await readFile('src/published-catalog.json'));
+  assert.equal(report.added,1);assert.equal(p.items.length,2);
+  assert.equal(JSON.stringify(p.items[0]),snapshot);
+  assert.equal(p.items[1].id,'shikimori-10');assert.equal(p.items[1].episodes[0].audio.length,2);
+  assert.deepEqual(auditPlayerCatalogue(p).errors,[]);
+  const byId=new Map(p.items.map(a=>[a.id,a]));
+  assert.throws(()=>allocateCatalogueId({id:'mal-10',ids:{mal:10,shikimori:10}},byId),/catalogue_id_conflict/);
+  p.items[1].id='mal-10';
+  assert.ok(auditPlayerCatalogue(p).errors.some(e=>e.code==='duplicate_catalogue_id'&&e.id==='mal-10'));
+ }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
+});
 test('future imports cannot pass a truncated release just because provider pagination is complete',()=>{
  const rows=Array.from({length:24},(_,i)=>({season:1,ordinal:i+1}));
  assert.throws(()=>requireEpisodeCoverage(rows,{status:'released',episodes:366}),/incomplete_catalogue_24_of_366/);

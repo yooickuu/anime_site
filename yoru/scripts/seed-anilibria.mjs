@@ -71,6 +71,7 @@ export async function fetchAniListMetadata(malId) {
       Media(idMal: $idMal, type: ANIME) {
         id
         idMal
+        countryOfOrigin
         popularity
         averageScore
         duration

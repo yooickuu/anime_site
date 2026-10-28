@@ -2,6 +2,11 @@ import {createApprovedCatalogue} from '../../src/approved-catalog.js';
 import {firstMainEpisode,episodeSeasonOptions} from '../../src/catalog-seasons.js';
 export function auditPlayerCatalogue(publication){
  const approved=createApprovedCatalogue(publication),errors=[];let additionalGroups=0;
+ const seenIds=new Set();
+ for(const item of publication.items){
+  if(seenIds.has(item.id))errors.push({code:'duplicate_catalogue_id',id:item.id});
+  seenIds.add(item.id);
+ }
  if(approved.items.length!==publication.items.length)errors.push({code:'rejected_catalogue_entries',count:publication.items.length-approved.items.length});
  for(const a of approved.items){
   const initial=firstMainEpisode(a),view=episodeSeasonOptions(a,initial),reachable=new Set();

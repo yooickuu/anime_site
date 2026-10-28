@@ -5,23 +5,31 @@ export function apiPage(value='/list'){
  u.searchParams.delete('token');return u.pathname+u.search;
 }
 export class KodikAPI{
- constructor(token,{fetcher=fetch}={}){if(!token)throw Error('KODIK_API_TOKEN (или KODIK_TOKEN) не задан. Добавьте свой ключ в .env (см. KODIK_SETUP.md).');this.token=token;this.fetcher=fetcher;}
+ constructor(token,{fetcher=fetch,wait=ms=>new Promise(resolve=>setTimeout(resolve,ms))}={}){if(!token)throw Error('KODIK_API_TOKEN (или KODIK_TOKEN) не задан. Добавьте свой ключ в .env (см. KODIK_SETUP.md).');this.token=token;this.fetcher=fetcher;this.wait=wait;}
  async request(page='/list',params={}){
   const u=new URL(apiPage(page),API);for(const [k,v]of Object.entries(params))u.searchParams.set(k,String(v));
   u.searchParams.set('token',this.token);
-  let r;
   for(let attempt=0;attempt<3;attempt++){
+   let r,d;
    try{
     r=await this.fetcher(u,{signal:AbortSignal.timeout(20000)});
-    if(r.ok||(r.status!==429&&r.status<500))break;
-    if(attempt===2)break;
-    await r.body?.cancel();
-   }catch(error){if(attempt===2)throw Error('kodik_network_unavailable');}
-   await new Promise(resolve=>setTimeout(resolve,1000*(attempt+1)));
+    if(r.ok)d=await r.json();
+    else await r.body?.cancel();
+   }catch(error){
+    if(attempt===2){
+     const code=error.cause?.code||error.code||error.name;
+     const reason=['ENOTFOUND','EAI_AGAIN'].includes(code)?'dns':['TimeoutError','AbortError','ETIMEDOUT','UND_ERR_CONNECT_TIMEOUT'].includes(code)?'timeout':'connection';
+     throw Error(`kodik_network_unavailable (${reason}): проверьте интернет/VPN/DNS и повторите команду; сохранённый прогресс не удалён.`);
+    }
+    await this.wait(1000*(attempt+1));continue;
+   }
+   if(r.ok){
+    if(d?.error||!Array.isArray(d?.results))throw Error('kodik_access_or_response_error');
+    return {...d,next_page:d.next_page?apiPage(d.next_page):null};
+   }
+   if(attempt===2||(r.status!==429&&r.status<500))throw Error(`kodik_http_${r.status}`);
+   await this.wait(1000*(attempt+1));
   }
-  if(!r.ok)throw Error(`kodik_http_${r.status}`);
-  const d=await r.json();if(d.error||!Array.isArray(d.results))throw Error('kodik_access_or_response_error');
-  return {...d,next_page:d.next_page?apiPage(d.next_page):null};
  }
  async *pages(page='/list',params={}){
   const visited=new Set();while(page){if(visited.has(page))throw Error('kodik_pagination_loop');visited.add(page);const d=await this.request(page,params);yield {...d,page};page=d.next_page;}
@@ -33,7 +41,7 @@ export function playerURL(value){
  if(!['kodik.info','kodik.biz','kodik.cc','kodikplayer.com'].includes(u.hostname)||!['https:','http:'].includes(u.protocol)||u.port||u.username||u.password||!/^\/(seria|video|serial)\/\d+\/[a-z0-9]+\//i.test(u.pathname))throw Error('invalid_player_url');
  u.protocol='https:';u.hostname='kodikplayer.com';return u.href;
 }
-export function translationIdentity(release){
+export function translationIdentity(release,{countryOfOrigin}={}){
  const tr=release.translation||{},label=String(tr.title||'').trim(),type=tr.type;
  if(!tr.id||!label)throw Error('translation_missing');
  const declared=String(tr.language||'').toLowerCase();
@@ -43,6 +51,7 @@ export function translationIdentity(release){
   else if(/японск|japanese/i.test(label))language='ja';
   else if(type==='subtitles'&&(release.material_data?.countries||[]).some(c=>/япония|japan/i.test(c)))language='ja';
   else if(type==='subtitles'&&(release.material_data?.countries||[]).some(c=>/китай|china/i.test(c)))language='zh';
+  else if(type==='subtitles'&&!(release.material_data?.countries||[]).length)language=({JP:'ja',CN:'zh',KR:'ko',US:'en',GB:'en'})[countryOfOrigin]||null;
   else if(type==='voice')language='ru';
  }
  if(!language)throw Error('translation_language_unknown');
@@ -70,8 +79,8 @@ export async function completeRelease(api,release){
  }
  allEpisodes(merged);return merged;
 }
-export function linkedEpisodes(release){
- const rows=allEpisodes(release),translation=translationIdentity(release),multi=new Set(rows.map(e=>e.season)).size>1;
+export function linkedEpisodes(release,metadata){
+ const rows=allEpisodes(release),translation=translationIdentity(release,metadata),multi=new Set(rows.map(e=>e.season)).size>1;
  return rows.map((row,i)=>({number:multi?i+1:row.ordinal,ordinal:row.ordinal,season:row.season,audio:[{...translation,duration:null,sources:[],subtitles:[],opening:null,ending:null,validation:'provider-link',providerRef:{provider:'kodik',releaseId:String(release.id),translationId:String(release.translation.id),url:row.url,season:row.season,ordinal:row.ordinal}}]}));
 }
 export function mergeKodikRelease(existing,incoming){
