@@ -32,10 +32,11 @@ test('automatic skips reject other cuts and malformed intervals',()=>{
 });
 test('skip API caches metadata but revalidates each audio cut duration',async()=>{
  const original=globalThis.fetch;let calls=0;
- globalThis.fetch=async()=>{calls++;return {ok:true,json:async()=>({results:[{skipType:'op',episodeLength:1440,interval:{startTime:10,endTime:100}}]})};};
+ globalThis.fetch=async url=>{calls++;const u=new URL(url);assert.deepEqual(u.searchParams.getAll('types'),['op','ed']);assert.ok(Number(u.searchParams.get('episodeLength'))>0);return {ok:true,json:async()=>({results:[{skipType:'op',episodeLength:1440,interval:{startTime:10,endTime:100}}]})};};
  try{
   assert.deepEqual((await automaticSkipTimes(999901,1,1440)).opening,{start:10,end:100});
   assert.equal((await automaticSkipTimes(999901,1,1500)).opening,null);
-  assert.equal(calls,1);
+  await automaticSkipTimes(999901,1,1440);
+  assert.equal(calls,2);
  }finally{globalThis.fetch=original;}
 });

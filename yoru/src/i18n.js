@@ -653,6 +653,8 @@ additionalEpisodes:['Дополнительные серии','Additional episod
  backToCatalogue:['К каталогу','Back to catalogue','作品一覧へ'],moreStories:['Ещё истории','More to discover','ほかの作品もチェック'],synopsis:['О сюжете','The story','あらすじ'],
  previousPoster:['Предыдущий постер','Previous poster','前のポスター'],nextPoster:['Следующий постер','Next poster','次のポスター'],
  skipLoading:['Ищем отметки заставок…','Finding opening and ending timestamps…','OP・EDの区間を確認中…'],
+ skipOpening:['Пропустить опенинг','Skip opening','オープニングをスキップ'],
+ skipEnding:['Пропустить эндинг','Skip ending','エンディングをスキップ'],
  skipUnavailable:['Для этой версии серии отметки заставок пока не найдены.','Opening and ending timestamps aren’t available for this cut yet.','このバージョンのOP・ED区間はまだ登録されていません。'],
  randomUnavailable:['Сейчас не удалось подобрать доступное видео. Попробуй ещё раз.','Couldn’t find an available video right now. Try again.','再生できる作品が見つかりませんでした。もう一度お試しください。'],
  sourceNotice:['Каталог и обложки: AniLiberty, AnimeVost и Kitsu. Видео: AniLiberty и AnimeVost. Таймкоды: источник видео и AniSkip.','Catalogue and posters: AniLiberty, AnimeVost and Kitsu. Video: AniLiberty and AnimeVost. Skip times: the video provider and AniSkip.','作品情報・画像：AniLiberty、AnimeVost、Kitsu。動画：AniLiberty、AnimeVost。スキップ区間：配信元、AniSkip。'],

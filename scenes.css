@@ -374,3 +374,12 @@ body input,body textarea{font-size:max(16px,1em)!important}
 .plan-custom-time{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:12px 0;font-size:14px}
 .plan-custom-time input{width:88px;min-height:44px;font-size:16px;padding:8px 12px;border-radius:12px}
 .evening-option .plan-reason{color:var(--accent);line-height:1.4}
+
+/* Exact AniSkip interval action, outside the fading playback toolbar. */
+.video-wrap .skip-segment{position:absolute;z-index:6;right:16px;bottom:18px;width:auto;max-width:calc(100% - 32px);min-height:44px;padding:10px 16px;border:1px solid #ffffff40;border-radius:12px;background:#15151cdb;color:#fff;font-size:14px;font-weight:600;line-height:1.35;cursor:pointer;box-shadow:0 3px 16px #0004;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:skip-arrive .18s ease-out}
+.video-wrap .skip-segment[hidden]{display:none!important}
+.video-wrap .skip-segment:hover{background:#30303def}.video-wrap .skip-segment:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.video-shell:fullscreen .skip-segment{bottom:calc(88px + env(safe-area-inset-bottom))}
+@media(max-width:600px){.video-wrap .skip-segment{right:10px;bottom:10px;font-size:13px;padding:9px 12px}.video-shell:fullscreen .skip-segment{bottom:calc(104px + env(safe-area-inset-bottom))}}
+@keyframes skip-arrive{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.video-wrap .skip-segment{animation:none}}

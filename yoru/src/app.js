@@ -59,6 +59,7 @@ function playerAudioChoices(a,episode){
 }
 import {attachPlaybackAutomation} from './playback-automation.js';
 import {automaticSkipTimes} from './autoskip.js';
+import {attachSkipOverlay} from './skip-overlay.js';
 import {discoveryChoice,watchRoute,audioChoices} from './discovery.js';
 import {initSelectMenus, enhanceSelects, closeSelectMenu} from './select-menu.js';
 import {createPlayback} from './playback.js';
@@ -122,6 +123,7 @@ let onlineItems = [],
   playerSeasons = [],
   seasonGroup = 'main',
   providerTiming = null;
+let skipTiming={},skipOverlay=null,skipRequest=0;
 const bookmark = icon("bookmark");
 const read = (key, fallback) => {
   try {
@@ -960,6 +962,7 @@ async function updateSource(play = false, refresh = false, position, triedAudio 
   sourceKey = null;
   recordReady = false;
   providerTiming = null;
+  skipTiming={};++skipRequest;skipOverlay?.update();
   const video = $("#video");
   if (!video || !current) return;
   playback?.suspend();
@@ -976,6 +979,7 @@ async function updateSource(play = false, refresh = false, position, triedAudio 
   };
   const onMetadata=()=>{
     if(generation!==sourceGeneration)return;
+    skipTiming={};skipOverlay?.update();
     if(current?.catalogApproved)providerTiming={...providerTiming,...approvedSkipTimes(providerTiming,video.duration)};
     recordReady=true;
     loadAutomaticSkips();
@@ -1118,12 +1122,15 @@ async function switchEpisode(n, play = false) {
 }
 function attachVideo() {
   const video = $("#video");
+  skipTiming={};
   controlsCleanup?.();
   controlsCleanup=attachControls($(".video-shell"), video, t, () => toast(t("playerActionError")), {sound:soundPreferences(state.preferences),onSoundChange:saveSoundPreferences});
   automationCleanup?.();
+  skipOverlay?.destroy();
+  skipOverlay=attachSkipOverlay($('#skip-segment'),video,{t,context:()=>({ready:recordReady&&!!current&&page==='watch',timing:skipTiming,preferences:state.preferences})});
   automationCleanup=attachPlaybackAutomation(video,{
     context:()=>({ready:recordReady&&!!current&&page==='watch',token:sourceGeneration,
-      timing:providerTiming,preferences:state.preferences,episode,total:current?.episodes,
+      timing:skipTiming,preferences:state.preferences,episode,total:current?.episodes,
       hasNext:!!current&&isPublished(current.id)&&!!seasonNavigation(current,episode).next}),
     onSkip:kind=>{if(kind==='opening')toast(t('introSkipped'));},
     onTick:()=>{if(Date.now()-lastProgress>5000){recordProgress();lastProgress=Date.now();}},
@@ -1136,21 +1143,23 @@ function attachVideo() {
   video.addEventListener("pause", recordProgress);
 }
 function stopWatching(){
+  skipOverlay?.destroy();skipOverlay=null;skipTiming={};++skipRequest;
   ++socialCommentVersion;socialCommentKey='';socialCommentObserver?.disconnect();socialCommentCleanup?.();socialCommentCleanup=null;
   recordProgress();controlsCleanup?.();controlsCleanup=null;automationCleanup?.();automationCleanup=null;sourceKey=null;recordReady=false;++sourceGeneration;
   englishSubtitlesCleanup?.();englishSubtitlesCleanup=null;
   playback?.destroy();playback=null;current=null;closeSelectMenu();
 }
 async function loadAutomaticSkips(){
-  const video=$('#video'),own=sourceGeneration,key=sourceKey;
-  if(!video||!current)return;
+  const video=$('#video'),own=sourceGeneration,key=sourceKey,request=++skipRequest;
+  skipOverlay?.update();
+  if(!video||!current||!recordReady)return;
   const notice=$('#skip-availability');
-  if(!state.preferences.autoSkip){if(notice)notice.textContent='';return;}
   if(notice)notice.textContent=t('skipLoading');
-  const fallback=!current.catalogApproved&&(!providerTiming?.opening||!providerTiming?.ending)?await automaticSkipTimes(current.malId,Number(current.episodeManifest?.[episode-1]?.ordinal??current.episodeNumbers?.[episode-1]??episode),video.duration):{};
-  if(own!==sourceGeneration||key!==sourceKey)return;
-  providerTiming={...providerTiming,opening:providerTiming?.opening||fallback.opening,ending:providerTiming?.ending||fallback.ending};
-  if(notice)notice.textContent=providerTiming.opening||providerTiming.ending?'':t('skipUnavailable');
+  const row=current.episodeManifest?.[episode-1];
+  const timing=row?.season===0?{}:await automaticSkipTimes(current.ids?.mal||current.malId,Number(row?.ordinal??current.episodeNumbers?.[episode-1]??episode),video.duration);
+  if(own!==sourceGeneration||key!==sourceKey||request!==skipRequest||video!==$('#video'))return;
+  skipTiming=timing;skipOverlay?.update();
+  if(notice)notice.textContent=timing.opening||timing.ending?'':t('skipUnavailable');
 }
 async function uploadAvatar(file) {
   if (!requireUser() || !file) return;
