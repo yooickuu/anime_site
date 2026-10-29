@@ -7,7 +7,7 @@ import {normalizeGenre,matchesType,searchScore,suggestions} from './catalog-quer
 import {approvedSkipTimes} from './approved-skip-times.js';
 import {detailArtwork} from './detail-artwork.js';
 import {soundPreferences,preferredAudio,resumeTime} from './playback-preferences.js';
-import {within,nextHero,fadeHero} from './hero-rotation.js';
+import {within,nextHero,fadeHero,scheduledHeroes} from './hero-rotation.js';
 import {revealSurfaces} from './motion.js';
 import {applyGuestPlaybackOperation} from './guest-playback.js';
 import {styles,normalizeStyle,styleColors} from './appearance.js';
@@ -265,7 +265,7 @@ function homeHTML() {
 function bannerFor(a){return a?.catalogApproved?detailArtwork(a):(artwork[a?.malId]?.banner||a?.banner||'');}
 const spotlightItems=promoSlides;
 spotlightItems.forEach(registerAnime);
-function heroPool(){return spotlightItems;}
+function heroPool(){return scheduledHeroes(spotlightItems);}
 function heroImage(a){return matchMedia('(max-width:600px)').matches?(a.heroMobile||a.image):(a.hero||bannerFor(a));}
 function heroArtHTML(){
  const pool=heroPool(),front=pool[heroIndex%pool.length];if(!front)return `<div class="hero-content"><span class="hero-eyebrow">yomiku</span><h1>${t('catalogRebuilding')}</h1><p>${t('catalogRebuildingHint')}</p><button class="button glass-button" data-nav="library">${t('library')}</button></div>`;
@@ -281,6 +281,8 @@ function prepareHeroImage(url){
 }
 function preloadNextHero(){
  const pool=heroPool(),next=pool[(heroIndex+1)%pool.length];
+ // A long-lived tab must not retain decoded images from both collections.
+ const urls=new Set(pool.map(heroImage));for(const key of heroImages.keys())if(!urls.has(key))heroImages.delete(key);
  if(next)void prepareHeroImage(heroImage(next)).catch(()=>{});
 }
 async function rotateHero(direction=1){

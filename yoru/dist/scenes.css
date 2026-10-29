@@ -1,4 +1,5 @@
 /* Shared artwork surfaces. Images fade to transparency, never to a guessed page colour. */
+.header{width:100%;max-width:none;margin-inline:0;box-sizing:border-box}
 [data-style="graphite"]{--scene-image:url('assets/scenes/graphite.webp')}
 [data-style="iris"]{--scene-image:url('assets/scenes/iris.webp')}
 [data-style="lagoon"]{--scene-image:url('assets/scenes/lagoon.webp')}

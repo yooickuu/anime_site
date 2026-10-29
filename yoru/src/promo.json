@@ -90,11 +90,11 @@
     "episodes": 13,
     "catalogApproved": true,
     "catalogOnly": false,
-    "hero": "assets/promo-2026/58567-wide.webp",
+    "hero": "assets/promo-cycle/58567-wide.webp",
     "heroMobile": "assets/promo-2026/58567-mobile.webp",
-    "heroWidth": 1200,
-    "heroHeight": 625,
-    "heroSource": "https://sololeveling-anime.net/story/SYS/CONTENTS/story_3762_photo_173495009120815656"
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/a2432d21dd67a17b603053fae2aed9331711d142.jpg?1736006610"
   },
   {
     "id": "mal-60543",
@@ -244,54 +244,6 @@
     "heroSource": "https://kaiju-no8.net/episodes/img/13/1.jpg"
   },
   {
-    "id": "mal-59062",
-    "ids": {
-      "shikimori": 59062,
-      "mal": 59062,
-      "anilist": 178025,
-      "kodik": "serial-68603"
-    },
-    "title": "Гатиакута",
-    "originalTitle": "Gachiakuta",
-    "alt": "Гатиакута Gachiakuta ガチアクタ",
-    "year": 2025,
-    "type": "TV",
-    "genres": [
-      "Сёнен",
-      "Экшен",
-      "Фэнтези"
-    ],
-    "description": "«Если в любимые вещи мы вкладываем частичку своей души, то что происходит с ненужными вещами, которые отправляются на помойку?» Там, где живёт Рудо , мусор скидывают в бездну, которая начинается сразу за пределами города. Туда же сбрасывают и преступников, а тех, кто был с ними связан, отселяют в трущобы. Именно там обитал Рудо , заклеймённый как сын убийцы, пока его самого не обвинили в том, что ",
-    "ongoing": false,
-    "translations": {
-      "en": [
-        "Gachiakuta",
-        "A boy lives in a floating town, where the poor scrape by and the rich live a sumptuous life, simply casting their garbage off the side, into the abyss. When he’s falsely accused of murder, though, his wrongful conviction leads to an unimaginable punishment—exile off the edge, with the rest of the trash. Down on the surface, the cast-off waste of humanity has bred vicious monsters, and to travel th"
-      ],
-      "ja": [
-        "ガチアクタ",
-        ""
-      ]
-    },
-    "airedAt": "2025-07-06",
-    "catalogUpdatedAt": 1792071449000,
-    "popularity": 264722,
-    "audienceRating": 8.2,
-    "rating": 8.2,
-    "malId": 59062,
-    "image": "https://shikimori.io/uploads/poster/animes/59062/eef2d14872e5da4d578fc662557bba51.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/178025-WvcXi1J2SGRa.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/178025-WvcXi1J2SGRa.jpg",
-    "episodes": 24,
-    "catalogApproved": true,
-    "catalogOnly": false,
-    "hero": "assets/promo-2026/59062-wide.webp",
-    "heroMobile": "assets/promo-2026/59062-mobile.webp",
-    "heroWidth": 1920,
-    "heroHeight": 1000,
-    "heroSource": "https://times-abema.ismcdn.jp/mwimgs/4/0/1920w/img_4037094b31779433a949f9c20c14d9c9411835.jpg"
-  },
-  {
     "id": "mal-52701",
     "ids": {
       "mal": 52701,
@@ -333,157 +285,668 @@
     "episodes": 24,
     "catalogApproved": true,
     "catalogOnly": false,
-    "hero": "assets/promo-2026/52701-wide.webp",
+    "hero": "assets/promo-cycle/52701-wide.webp",
     "heroMobile": "assets/promo-2026/52701-mobile.webp",
-    "heroWidth": 1584,
-    "heroHeight": 825,
-    "heroSource": "https://delicious-in-dungeon.com/assets/story/1/2.webp?v1"
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/edbb03468cfd96822d0d6aa988ca2f536065b340.jpg?1704376478"
   },
   {
-    "id": "mal-62001",
+    "id": "mal-16498",
     "ids": {
-      "mal": 62001,
-      "shikimori": 62001,
-      "anilist": 195600,
-      "anilibria": 10171,
-      "kodik": "serial-74546"
+      "shikimori": 16498,
+      "mal": 16498,
+      "anilist": 16498,
+      "kodik": "serial-3540"
     },
-    "title": "Цугаи загробного мира",
-    "originalTitle": "Yomi no Tsugai",
-    "alt": "Цугаи загробного мира Yomi no Tsugai Yomi no Tsugai Daemons of the Shadow Realm Yomi no Tsugai",
-    "year": 2026,
+    "title": "Атака титанов",
+    "originalTitle": "Shingeki no Kyojin",
+    "alt": "Атакующий титан / Вторжение гигантов / Вторжение титанов / Атака титанов (первый сезон) / Attack on Titan Attack on Titan 進撃の巨人",
+    "year": 2013,
     "type": "TV",
     "genres": [
       "Сёнен",
       "Экшен",
-      "Приключения",
-      "Сверхъестественное"
-    ],
-    "description": "В глухой горной деревне, отрезанной от цивилизации, юноша по имени Юру ведёт простую жизнь охотника. Его главная задача — оберегать сестру-близнеца Асу , которую держат вдали от посторонних глаз. Привычный Юру мир рушится, когда в небе над деревней появляются «стальные птицы» и родная земля становится зоной боевых действий. Нападающие используют не только огнестрельное оружие, но и «цугаев» — свер",
-    "ongoing": false,
-    "translations": {
-      "en": [
-        "Daemons of the Shadow Realm",
-        "In a remote mountain village under the watchful eyes of two stone guardians, the young Yuru contentedly lives off the land while staying close to the only family he has left—Asa, his precious twin sister. Asa, meanwhile, carries out a mysterious “duty” on behalf of the village while locked in a cage. Why is Asa a prisoner? And what other secrets does Yuru’s otherwise idyllic home hide?\n\n\n(Source: "
-      ],
-      "ja": [
-        "黄泉のツガイ",
-        ""
-      ]
-    },
-    "airedAt": "2026-04-04",
-    "catalogUpdatedAt": 1792748889000,
-    "audienceRating": 7.8,
-    "rating": 7.8,
-    "malId": 62001,
-    "image": "https://shikimori.io/uploads/poster/animes/62001/fa3ddb87c89a4a19fc18b9e457767968.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/195600-UxHvDXwzJxlP.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/195600-UxHvDXwzJxlP.jpg",
-    "episodes": 24,
-    "catalogApproved": true,
-    "catalogOnly": false,
-    "hero": "assets/promo-2026/62001-wide.webp",
-    "heroMobile": "assets/promo-2026/62001-mobile.webp",
-    "heroWidth": 1920,
-    "heroHeight": 1000,
-    "heroSource": "https://times-abema.ismcdn.jp/mwimgs/c/5/1920w/img_c527c019cf1edbaf41c2f5ad5b6d043f132201.jpg"
-  },
-  {
-    "id": "mal-59708",
-    "ids": {
-      "mal": 59708,
-      "shikimori": 59708,
-      "anilist": 180745,
-      "anilibria": 10155,
-      "kodik": "serial-74345"
-    },
-    "title": "Добро пожаловать в класс превосходства 4: Второй год — Первый семестр",
-    "originalTitle": "Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e 4th Season: 2-nensei-hen 1 Gakki",
-    "alt": "Добро пожаловать в класс превосходства 4: Второй год — Первый семестр Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e 4th Season: 2-nensei-hen 1 Gakki Youkoso Jitsuryoku Shijou Shugi no Kyoushitsu e 4th Season: 2-nensei-hen 1 Gakki",
-    "year": 2026,
-    "type": "TV",
-    "genres": [
       "Драма",
       "Триллер",
-      "Психологическое",
-      "Школа"
+      "удостоено наград",
+      "жестокост",
+      "военное",
+      "выживание"
     ],
-    "description": "Второй год обучения в элитной старшей школе «Кодо Икусэй» преподносит Киётаке Аянокоджи новые суровые испытания. Едва перейдя на второй курс, ученики сталкиваются с ужесточёнными правилами выживания. Администрация школы внедряет систему OAA (Over All Ability) — мобильное приложение, которое отныне переводит все академические и физические навыки студентов в публичные числовые рейтинги, не оставляя ",
+    "description": "С давних времён человечество ведёт свою борьбу с титанами. Титаны — это огромные существа, ростом с многоэтажный дом, которые не обладают большим интеллектом, но сила их просто ужасна. Они едят людей и получают от этого удовольствие. После продолжительной борьбы остатки человечества создали стену, окружившую мир людей, через которую не пройдут даже титаны. С тех пор прошло сто лет. Человечество мирно живёт под защитой стены. Но в один день мальчик Эрен и его приёмная сестра М",
     "ongoing": false,
     "translations": {
       "en": [
-        "Classroom of the Elite 4th Season: Second Year, First Semester",
-        "As Ayanokouji and his classmates begin their second year at the Advanced Nurturing High School, they’re greeted by a fresh gauntlet of exams and a fresh batch of rather unique first-year students. They’ll have to get to know each other quickly, because the first special exam pairs the first-years with the second-years on a written test—with only the second-years facing expulsion if their team perf"
+        "Attack on Titan",
+        "Several hundred years ago, humans were nearly exterminated by titans. Titans are typically several stories tall, seem to have no intelligence, devour human beings and, worst of all, seem to do it for the pleasure rather than as a food source. A small percentage of humanity survived by walling themselves in a city protected by extremely high walls, even taller than the biggest of titans.\n\n\r\nFlash forward to the present and the city has not seen a titan in over 100 years. Teena"
       ],
       "ja": [
-        "ようこそ実力至上主義の教室へ 4th Season 2年生編1学期",
+        "進撃の巨人",
         ""
       ]
     },
-    "airedAt": "2026-04-01",
-    "catalogUpdatedAt": 1784370798000,
-    "audienceRating": 7.82,
-    "rating": 7.82,
-    "malId": 59708,
-    "image": "https://shikimori.io/uploads/poster/animes/59708/19c5366bcb03946c500ac347027d1896.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/180745-Iicz1F6Kuj4e.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/180745-Iicz1F6Kuj4e.jpg",
-    "episodes": 16,
+    "rating": 8.58,
+    "popularity": 1069717,
+    "malId": 16498,
+    "audienceRating": 8.58,
+    "image": "https://shikimori.io/uploads/poster/animes/16498/7a452aa20f27318bd8d87e3d70c2ccca.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/16498-8jpFCOcDmneX.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/16498-8jpFCOcDmneX.jpg",
+    "episodes": 34,
     "catalogApproved": true,
     "catalogOnly": false,
-    "hero": "assets/promo-2026/59708-wide.webp",
-    "heroMobile": "assets/promo-2026/59708-mobile.webp",
+    "hero": "assets/promo-cycle/16498-wide.webp",
     "heroWidth": 1920,
     "heroHeight": 1000,
-    "heroSource": "https://you-zitsu.com/assets/story/1/3.webp"
+    "heroSource": "https://shikimori.io/system/screenshots/original/fb63e2b49e78a980fa9fb8896cf3ed42965e8b23.jpg?1656089347",
+    "heroMobile": "assets/promo-cycle/16498-mobile.webp"
   },
   {
-    "id": "mal-59983",
+    "id": "mal-44511",
     "ids": {
-      "mal": 59983,
-      "shikimori": 59983,
-      "anilist": 182300,
-      "anilibria": 10156,
-      "kodik": "serial-74853"
+      "shikimori": 44511,
+      "mal": 44511,
+      "anilist": 127230,
+      "kodik": "serial-69142"
     },
-    "title": "Меч и жезл Вистории 2",
-    "originalTitle": "Tsue to Tsurugi no Wistoria Season 2",
-    "alt": "Меч и жезл Вистории 2 Tsue to Tsurugi no Wistoria Season 2 Tsue to Tsurugi no Wistoria Season 2",
-    "year": 2026,
+    "title": "Человек-бензопила",
+    "originalTitle": "Chainsaw Man",
+    "alt": "チェンソーマン Chainsaw Man チェンソーマン",
+    "year": 2022,
     "type": "TV",
     "genres": [
       "Сёнен",
       "Экшен",
       "Фэнтези",
-      "Школа"
+      "жестокост",
+      "городское фэнтези"
     ],
-    "description": "Академия «Регардон» готовится встретить пышный праздник Терминалии, но для Уилла Серфорта это время не приносит долгожданного покоя. Жесткая система, воздвигнутая на абсолюте магии, продолжает отторгать «аномалию» в виде меча, заставляя юношу вновь и вновь ощущать холод удушающей изоляции. Путь к Башне остаётся невероятно тернистым, а пропасть между ним и недосягаемой Эльфарией всё ещё кажется неп",
+    "description": "У Дэндзи есть мечта — жить мирной и счастливой жизнью, проводя время с любимой девушкой. Однако суровая реальность в лице некоего якудзы заставляет парня вернуться с небес на землю, ведь он вынужден убивать демонов, чтобы расплатиться с необъятными долгами покойного отца. Вместе со своим дьявольским питомцем Почитой , которого использует в качестве оружия, Дэндзи готов сделать что угодно, даже за небольшую плату. Вскоре парень изжил свою полезность и был убит демоном, заключи",
     "ongoing": false,
     "translations": {
       "en": [
-        "Wistoria: Wand and Sword Season 2",
-        "Will, a washout student at a magical academy who is unable to use magic, is aiming to join the top tier of mages, the Magia Vander, to fulfill a promise to his childhood friend, Elfaria. Wielding a sword instead of a wand, his abilities are slowly recognized within the academy. During the all-student praxis dungeon training he undertakes with Lihanna and the other top students of his year, they ar"
+        "Chainsaw Man",
+        "Denji is a teenage boy living with a Chainsaw Devil named Pochita. Due to the debt his father left behind, he has been living a rock-bottom life while repaying his debt by harvesting devil corpses with Pochita.\n\n\nOne day, Denji is betrayed and killed. As his consciousness fades, he makes a contract with Pochita and gets revived as \"Chainsaw Man\" — a man with a devil's heart.\n\n\n\n(Source: Crunchyroll)"
       ],
       "ja": [
-        "杖と剣のウィストリア Season2",
+        "チェンソーマン",
         ""
       ]
     },
-    "airedAt": "2026-04-12",
-    "catalogUpdatedAt": 1787140526000,
-    "audienceRating": 8.17,
-    "rating": 8.17,
-    "malId": 59983,
-    "image": "https://shikimori.io/uploads/poster/animes/59983/885fd81b9231c8bacf17959da8aa07fb.jpeg",
-    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/182300-d1znfWKzn1bT.jpg",
-    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/182300-d1znfWKzn1bT.jpg",
+    "rating": 8.42,
+    "popularity": 645443,
+    "malId": 44511,
+    "audienceRating": 8.42,
+    "image": "https://shikimori.io/uploads/poster/animes/44511/db3ef8443dc7c7d489ed3659e7a94d85.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/127230-o8IRwCGVr9KW.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/127230-o8IRwCGVr9KW.jpg",
+    "episodes": 12,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/44511-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/671b95a264f37f6f0d3e34d32966f013d2e4b4fa.jpg?1665505144",
+    "heroMobile": "assets/promo-cycle/44511-mobile.webp"
+  },
+  {
+    "id": "mal-50265",
+    "ids": {
+      "shikimori": 50265,
+      "mal": 50265,
+      "anilist": 140960,
+      "kodik": "serial-42333"
+    },
+    "title": "Семья шпиона",
+    "originalTitle": "Spy x Family",
+    "alt": "SPY×FAMILY SPY x FAMILY SPY×FAMILY",
+    "year": 2022,
+    "type": "TV",
+    "genres": [
+      "Сёнен",
+      "Экшен",
+      "Комедия",
+      "удостоено наград",
+      "забота о детях",
+      "супер сила"
+    ],
+    "description": "Кто приходит на ум, когда речь заходит о тайных агентах? Конечно же, невероятный Джеймс Бонд, который постоянно подвергает жизнь опасности, выполняя секретные миссии. О таком харизматичном и смелом мужчине мечтают многие дамы, так что Агент 007 купается в лучах женского внимания. Герой этой истории, Лойд Форджер , является «Джеймсом Бондом» своего времени. Погони, шпионаж, перестрелки, тайные миссии — всё это является неотъемлемой частью его жизни. Закончив одно задание, он т",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "SPY x FAMILY",
+        "Everyone has a part of themselves they cannot show to anyone else.\n\n\n\nAt a time when all nations of the world were involved in a fierce war of information happening behind closed doors, Ostania and Westalis had been in a state of cold war against one another for decades. The Westalis Intelligence Services' Eastern-Focused Division (WISE) sends their most talented spy, \"Twilight,\" on a top-secret mission to investigate the movements of Donovan Desmond, the chairman of Ostania'"
+      ],
+      "ja": [
+        "SPY×FAMILY",
+        ""
+      ]
+    },
+    "rating": 8.41,
+    "popularity": 578904,
+    "malId": 50265,
+    "audienceRating": 8.41,
+    "image": "https://shikimori.io/uploads/poster/animes/50265/5a9984238661e260312fd6e60b2cf17f.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/140960-Z7xSvkRxHKfj.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/140960-Z7xSvkRxHKfj.jpg",
+    "episodes": 12,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/50265-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/cb05cd3cb7d5187da86a5e088eed878990f9f00f.jpg?1649518776",
+    "heroMobile": "assets/promo-cycle/50265-mobile.webp"
+  },
+  {
+    "id": "mal-54492",
+    "ids": {
+      "shikimori": 54492,
+      "mal": 54492,
+      "anilist": 161645,
+      "kodik": "serial-78372"
+    },
+    "title": "Монолог фармацевта",
+    "originalTitle": "Kusuriya no Hitorigoto",
+    "alt": "Монолог фармацевта / Drugstore Soliloquy / The Apothecary Diaries The Apothecary Diaries 薬屋のひとりごと",
+    "year": 2023,
+    "type": "TV",
+    "genres": [
+      "Драма",
+      "тайна",
+      "исторический",
+      "медицина"
+    ],
+    "description": "Уже полгода прошло с того момента, как 17-летнюю Маомао похитили и заставили трудиться в императорском дворце обычной служанкой. Работа тяжёлая, но девушка решила не сдаваться, не унывать и честно вкалывать, пока её не отпустят на покой. Планы изменились, когда до Маомао дошли вести о том, что детей императора одолел серьёзный недуг. Девушка решила тайком попробовать разобраться и помочь, рассчитывая на свой опыт в фармацевтике, которой она занималась раньше, когда проживала ",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "The Apothecary Diaries",
+        "Maomao lived a peaceful life with her apothecary father. Until one day, she’s sold as a lowly servant to the emperor’s palace. But she wasn’t meant for a compliant life among royalty. So when imperial heirs fall ill, she decides to step in and find a cure! This catches the eye of Jinshi, a handsome palace official who promotes her. Now, she’s making a name for herself solving medical mysteries!\n\n\n\n(Source: Crunchyroll)"
+      ],
+      "ja": [
+        "薬屋のひとりごと",
+        ""
+      ]
+    },
+    "rating": 8.84,
+    "popularity": 338085,
+    "malId": 54492,
+    "audienceRating": 8.84,
+    "image": "https://shikimori.io/uploads/poster/animes/54492/283fbef180e72bacfadc5a3d64ca4c2e.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/161645-oqzTZYIvviWI.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/161645-oqzTZYIvviWI.jpg",
+    "episodes": 24,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/54492-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/b4cb4370140e1e032c703ec363f90d5b4c643e76.jpg?1697914450",
+    "heroMobile": "assets/promo-cycle/54492-mobile.webp"
+  },
+  {
+    "id": "mal-5114",
+    "ids": {
+      "mal": 5114,
+      "shikimori": 5114,
+      "anilist": 5114,
+      "anilibria": 9528,
+      "kodik": "serial-15433"
+    },
+    "title": "Стальной алхимик: Братство",
+    "originalTitle": "Fullmetal Alchemist: Brotherhood",
+    "alt": "Стальной алхимик: Братство Fullmetal Alchemist: Brotherhood Fullmetal Alchemist: Brotherhood",
+    "year": 2009,
+    "type": "TV",
+    "genres": [
+      "Сёнен",
+      "Экшен",
+      "Приключения",
+      "Драма",
+      "Фэнтези",
+      "Военное"
+    ],
+    "description": "Ремейк одноимённого аниме-сериала « Стальной алхимик » 2003 года, более строго следующий событиям, описанным в манге. В этом мире существуют алхимики — люди, владеющие искусством алхимии, способностью манипулировать материей и преобразовывать вещество. Все они ограничены основным Законом алхимии: нельзя алхимическим путём получить что-то, не пожертвовав чем-то равноценным полученному. Лишь с помощью легендарного философского камня, способ создания которого утерян, можно обойт",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Fullmetal Alchemist: Brotherhood",
+        "\"In order for something to be obtained, something of equal value must be lost.\"\n\n\n\nAlchemy is bound by this Law of Equivalent Exchange—something the young brothers Edward and Alphonse Elric only realize after attempting human transmutation: the one forbidden act of alchemy. They pay a terrible price for their transgression—Edward loses his left leg, Alphonse his physical body. It is only by the desperate sacrifice of Edward's right arm that he is able to affix Alphonse's soul"
+      ],
+      "ja": [
+        "鋼の錬金術師 FULLMETAL ALCHEMIST",
+        ""
+      ]
+    },
+    "rating": 9.11,
+    "malId": 5114,
+    "audienceRating": 9.11,
+    "image": "https://shikimori.io/uploads/poster/animes/5114/40c4cba552dc60ebf02f8fc373b9a503.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/5114-q0V5URebphSG.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/5114-q0V5URebphSG.jpg",
+    "episodes": 72,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/5114-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/44f1247bdaae6691b255d4f9f45914ea04713458.jpg?1578674896",
+    "heroMobile": "assets/promo-cycle/5114-mobile.webp"
+  },
+  {
+    "id": "mal-11061",
+    "ids": {
+      "shikimori": 11061,
+      "mal": 11061,
+      "anilist": 11061,
+      "kodik": "serial-10486"
+    },
+    "title": "Охотник х Охотник (2011)",
+    "originalTitle": "Hunter x Hunter",
+    "alt": "Охотник х Охотник / Охотник х Охотник (2011) / Hunter x Hunter (2011) Hunter x Hunter (2011) HUNTER×HUNTER (2011)",
+    "year": 2011,
+    "type": "TV",
+    "genres": [
+      "Сёнен",
+      "Экшен",
+      "Приключения",
+      "Фэнтези"
+    ],
+    "description": "Охотник — это тот, кто путешествует по миру, выполняя различные опасные миссии: от поимки преступников до поиска сокровищ в неизведанных землях. Главный герой — мальчик по имени Гон . Его отец Джин был охотником, но исчез много лет назад. Гон считает, что если пойдёт по стопам отца и станет охотником, то рано или поздно вновь встретится с ним. Мальчик надеется, что, повстречав отца, наконец сможет задать ему один-единственный вопрос: почему он предпочёл жизнь охотника своему ",
+    "ongoing": false,
+    "translations": {},
+    "rating": 9.03,
+    "popularity": 851565,
+    "malId": 11061,
+    "audienceRating": 9.03,
+    "image": "https://shikimori.io/uploads/poster/animes/11061/09a4196c062532ec7a6a0a74ca201fda.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/11061-8WkkTZ6duKpq.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/11061-8WkkTZ6duKpq.jpg",
+    "episodes": 148,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/11061-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/28bd6398ac98f00279ce183c82e820daf3ec0d17.jpg?1702972748",
+    "heroMobile": "assets/promo-cycle/11061-mobile.webp"
+  },
+  {
+    "id": "mal-32281",
+    "ids": {
+      "mal": 32281,
+      "shikimori": 32281,
+      "anilist": 21519,
+      "anilibria": 6826,
+      "kodik": "movie-103120"
+    },
+    "title": "Твоё имя",
+    "originalTitle": "Kimi no Na wa.",
+    "alt": "Твоё имя Kimi no Na wa Kimi no Na wa.",
+    "year": 2016,
+    "type": "MOVIE",
+    "genres": [
+      "Драма",
+      "Удостоено наград"
+    ],
+    "description": "Мицуха Миямидзу — обычная девушка, уставшая от жизни в провинции. Её отец, мэр города, ведёт избирательную кампанию, а в семейном синтоистском храме ей приходится прилюдно исполнять древние ритуалы. И она мечтает перебраться из тесного провинциального мирка в большой город. Таки Татибана — увлекающийся архитектурой старшеклассник, вынужденный работать на полставки, чтобы обеспечивать свою жизнь в Токио. Изнурённый темпом большого города, Татибана мечтает о беззаботной жизни г",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Your Name.",
+        "Mitsuha Miyamizu, a high school girl, yearns to live the life of a boy in the bustling city of Tokyo—a dream that stands in stark contrast to her present life in the countryside. Meanwhile in the city, Taki Tachibana lives a busy life as a high school student while juggling his part-time job and hopes for a future in architecture.\n\n\n\nOne day, Mitsuha awakens in a room that is not her own and suddenly finds herself living the dream life in Tokyo—but in Taki's body! Elsewhere, "
+      ],
+      "ja": [
+        "君の名は。",
+        ""
+      ]
+    },
+    "rating": 8.82,
+    "malId": 32281,
+    "audienceRating": 8.82,
+    "image": "https://shikimori.io/uploads/poster/animes/32281/279580fb7589fe16df042f043f4bc6f3.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21519-1ayMXgNlmByb.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21519-1ayMXgNlmByb.jpg",
+    "episodes": 1,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/32281-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/35b9e42bd685a0c2e68137a3e9fa102fd1540e7f.jpg?1501185527",
+    "heroMobile": "assets/promo-cycle/32281-mobile.webp"
+  },
+  {
+    "id": "mal-33352",
+    "ids": {
+      "mal": 33352,
+      "shikimori": 33352,
+      "anilist": 21827,
+      "anilibria": 5620,
+      "kodik": "serial-30417"
+    },
+    "title": "Вайолет Эвергарден",
+    "originalTitle": "Violet Evergarden",
+    "alt": "Вайолет Эвергарден Violet Evergarden Вайолет Эвергарден Violet Evergarden",
+    "year": 2018,
+    "type": "TV",
+    "genres": [
+      "Драма"
+    ],
+    "description": "Вайолет Эвергарден, молодая девушка, чья жизнь — не что иное, как война, послушно служит под командованием майора Гилберта Бугенвиллеи из армии Ляйденшафтлиха. После серьёзных увечий, оставивших её без рук и разделивших с Гилбертом, она покинула поле боя и была взята под опеку бывшим командующим армии Клаудией Ходжинсом , который после окончания войны основал почтовую службу «C-H» в крупном портовом городе Ляйден. Эта компания осуществляет регулярные почтовые пересылки и пред",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Violet Evergarden",
+        "A certain point in time, in the continent of Telesis. The great war which divided the continent into North and South has ended after four years, and the people are welcoming a new generation. Violet Evergarden, a young girl formerly known as “the weapon”, has left the battlefield to start a new life at CH Postal Service. There, she is deeply moved by the work of “Auto Memories Dolls”, who carry people's thoughts and convert them into words. Violet begins her journey as an Aut"
+      ],
+      "ja": [
+        "ヴァイオレット・エヴァーガーデン",
+        ""
+      ]
+    },
+    "rating": 8.69,
+    "malId": 33352,
+    "audienceRating": 8.69,
+    "image": "https://shikimori.io/uploads/poster/animes/33352/ca7dab80729f41d67712d5a1f0f95a43.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21827-ROucgYiiiSpR.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21827-ROucgYiiiSpR.jpg",
+    "episodes": 14,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/33352-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/ab7f8bd4a066287b67236c00d2de21481b580a1d.jpg?1633466854",
+    "heroMobile": "assets/promo-cycle/33352-mobile.webp"
+  },
+  {
+    "id": "mal-31240",
+    "ids": {
+      "shikimori": 31240,
+      "mal": 31240,
+      "anilist": 21355,
+      "kodik": "serial-20618"
+    },
+    "title": "Re:Zero. Жизнь с нуля в альтернативном мире",
+    "originalTitle": "Re: Zero kara Hajimeru Isekai Seikatsu",
+    "alt": "Re: Жизнь в другом мире с нуля / Re:Zero — жизнь с нуля в другом мире / Re:Zero - Starting Life in Another World Re:ZERO -Starting Life in Another World- Re:ゼロから始める異世界生活",
+    "year": 2016,
+    "type": "TV",
+    "genres": [
+      "Драма",
+      "Фэнтези",
+      "Триллер",
+      "исэкай",
+      "психологическое",
+      "путешествие во времени"
+    ],
+    "description": "На обратном пути из магазина Субару Нацуки неожиданно призывают в другой мир. Стоит чёрт знает где, самого призывающего ни следа, а на него ещё и нападают! Дело было бы совсем дрянь, если бы не прекрасная сереброволосая дева с пушистым котиком наперевес, которая спасает Субару, после чего тот в благодарность присоединяется к ней. Стоит им найти подсказку — и обоих тут же убивают. Субару приходит в себя в том же месте, что в первый раз, и обнаруживает у себя неплохую способнос",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Re:ZERO -Starting Life in Another World-",
+        "In the story, Subaru Natsuki is an ordinary high school student who is lost in an alternate world, where he is rescued by a beautiful, silver-haired girl. He stays near her to return the favor, but the destiny she is burdened with is more than Subaru can imagine. Enemies attack one by one, and both of them are killed. He then finds out he has the power to rewind death, back to the time he first came to this world. But only he remembers what has happened since.\n\n\n\n(Source: Ani"
+      ],
+      "ja": [
+        "Re:ゼロから始める異世界生活",
+        ""
+      ]
+    },
+    "rating": 8.25,
+    "popularity": 632899,
+    "malId": 31240,
+    "audienceRating": 8.25,
+    "image": "https://shikimori.io/uploads/poster/animes/31240/3cbbe275541f9328c26781f49a323d1d.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21355-f9SjOfEJMk5P.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21355-f9SjOfEJMk5P.jpg",
+    "episodes": 50,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/31240-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/8025c6c8c02da6161ab9fc085323d083ea04ccf8.jpg?1656782488",
+    "heroMobile": "assets/promo-cycle/31240-mobile.webp"
+  },
+  {
+    "id": "mal-30276",
+    "ids": {
+      "mal": 30276,
+      "shikimori": 30276,
+      "anilist": 21087,
+      "anilibria": 1210,
+      "kodik": "serial-66904"
+    },
+    "title": "Ванпанчмен",
+    "originalTitle": "One Punch Man",
+    "alt": "Ванпанчмен One Punch Man One Punch Man",
+    "year": 2015,
+    "type": "TV",
+    "genres": [
+      "Сэйнэн",
+      "Экшен",
+      "Комедия",
+      "Взрослые персонажи",
+      "Пародия",
+      "Супер сила"
+    ],
+    "description": "Вы устали от запоминания суператак и бесконечных доспехов, но душа просит адреналина и драк? Тогда эта новая экшен-комедия от студии Madhouse для вас! Главный герой не размахивает мечом, не выкрикивает боевой клич и вообще не отличается ничем, особенно героическим. Всё в этом молодом человеке по имени Сайтама так и вопит: «заурядный» — и его лысая голова, и его хилое телосложение. Однако у этого среднестатистического по всем параметрам парня совсем не среднестатистические про",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "One-Punch Man",
+        "Saitama has a rather peculiar hobby, being a superhero, but despite his heroic deeds and superhuman abilities, a shadow looms over his life. He's become much too powerful, to the point that every opponent ends up defeated with a single punch.\n\n\n\nThe lack of challenge has driven him into a state of apathy, as he watches his life pass by having lost all enthusiasm, at least until he's unwillingly thrust in the role of being a mentor to the young and revenge-driven Genos."
+      ],
+      "ja": [
+        "ワンパンマン",
+        ""
+      ]
+    },
+    "rating": 8.47,
+    "malId": 30276,
+    "audienceRating": 8.47,
+    "image": "https://shikimori.io/uploads/poster/animes/30276/0b08b0f6f69d32a3062d227ad77e2d83.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21087-sHb9zUZFsHe1.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/21087-sHb9zUZFsHe1.jpg",
+    "episodes": 18,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/30276-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/5631b995027f10396e642b0182c2e6d9cadd67a2.jpg?1702600688",
+    "heroMobile": "assets/promo-cycle/30276-mobile.webp"
+  },
+  {
+    "id": "mal-9253",
+    "ids": {
+      "mal": 9253,
+      "shikimori": 9253,
+      "anilist": 9253,
+      "anilibria": 8674,
+      "kodik": "serial-10491"
+    },
+    "title": "Врата Штейна",
+    "originalTitle": "Steins;Gate",
+    "alt": "Врата Штейна Steins;Gate Steins;Gate",
+    "year": 2011,
+    "type": "TV",
+    "genres": [
+      "Драма",
+      "Фантастика",
+      "Триллер",
+      "Психологическое",
+      "Путешествие во времени"
+    ],
+    "description": "Сняв в Акихабаре квартиру, самопровозглашённый сумасшедший учёный Окабэ Ринтаро устроил там «лабораторию» и в компании своей подруги детства Сины Маюри и хакера-отаку Хасиды Итару изобретает «гаджеты будущего». Троица отлично проводит время вместе, работая над совместным проектом — «мобиловолновкой», которой можно управлять с помощью текстовых сообщений. Вскоре «сотрудники лаборатории» сталкиваются с чередой загадочных инцидентов, которые приводят к открытию, изменившему прав",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Steins;Gate",
+        "Self-proclaimed mad scientist Okabe Rintarou lives in a small room in Akihabara, where he invents \"future gadgets\" with fellow lab members Shiina Mayuri, his air-headed childhood friend, and Hashida Itaru, an otaku hacker. The three pass the time by tinkering with their latest creation, a \"Phone Microwave\" that can be controlled through text messages. \n\n\n\nThe lab members soon face a string of mysterious incidents that lead to a game-changing discovery: the Phone Microwave can"
+      ],
+      "ja": [
+        "シュタインズ・ゲート",
+        ""
+      ]
+    },
+    "rating": 9.07,
+    "malId": 9253,
+    "audienceRating": 9.07,
+    "image": "https://shikimori.io/uploads/poster/animes/9253/475db7c6df0f11d567138322aebf411b.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n9253-JIhmKgBKsWUN.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/n9253-JIhmKgBKsWUN.jpg",
+    "episodes": 27,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/9253-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/85a22fa7048ea5d61e298dd6d029d83322d503b5.jpg?1656764255",
+    "heroMobile": "assets/promo-cycle/9253-mobile.webp"
+  },
+  {
+    "id": "mal-43608",
+    "ids": {
+      "mal": 43608,
+      "shikimori": 43608,
+      "anilist": 125367,
+      "anilibria": 9159,
+      "kodik": "serial-42100"
+    },
+    "title": "Госпожа Кагуя: в любви как на войне 3",
+    "originalTitle": "Kaguya-sama wa Kokurasetai: Ultra Romantic",
+    "alt": "Госпожа Кагуя: в любви как на войне 3 Kaguya-sama wa Kokurasetai: Ultra Romantic Kaguya-sama wa Kokurasetai: Ultra Romantic",
+    "year": 2022,
+    "type": "TV",
+    "genres": [
+      "Сэйнэн",
+      "Комедия",
+      "Романтика",
+      "Школа"
+    ],
+    "description": "«Любовь — это война!» Миюки Сироганэ и Кагуя Синомия знают об этом не понаслышке. И пусть за время, проведённое вместе в студенческом совете академии Сютин, они стали ближе, уступать никто не желает, ведь признание равносильно поражению! Выборы главы совета позади, и весь прошлый состав вернулся к своим привычным должностям, обзаведясь новым членом — десятиклассницей Мико Иино . Однако время неумолимо, и школьная пора рано или поздно закончится, а что будет дальше — неизвестн",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "Kaguya-sama: Love is War -Ultra Romantic-",
+        "The elite members of Shuchiin Academy's student council continue their competitive day-to-day antics. Council president Miyuki Shirogane clashes daily against vice-president Kaguya Shinomiya, each fighting tooth and nail to trick the other into confessing their romantic love. Kaguya struggles within the strict confines of her wealthy, uptight family, rebelling against her cold default demeanor as she warms to Shirogane and the rest of her friends.\n\n\n\nMeanwhile, council treasu"
+      ],
+      "ja": [
+        "かぐや様は告らせたい-ウルトラロマンティック-",
+        ""
+      ]
+    },
+    "rating": 8.95,
+    "malId": 43608,
+    "audienceRating": 8.95,
+    "image": "https://shikimori.io/uploads/poster/animes/43608/1a267ded89ab0ec3e0d88652c5498016.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/125367-hGPJLSNfprO3.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/125367-hGPJLSNfprO3.jpg",
     "episodes": 13,
     "catalogApproved": true,
     "catalogOnly": false,
-    "hero": "assets/promo-2026/59983-wide.webp",
-    "heroMobile": "assets/promo-2026/59983-mobile.webp",
-    "heroWidth": 1248,
-    "heroHeight": 650,
-    "heroSource": "https://wistoria-anime.com/jrepgmrf/wp-content/themes/wistoria-anime/assets/img/episodes/ep13/01.jpg"
+    "hero": "assets/promo-cycle/43608-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/0218e63e39761d2f262d0c2157784f15c2789d16.jpg?1649439767",
+    "heroMobile": "assets/promo-cycle/43608-mobile.webp"
+  },
+  {
+    "id": "mal-47917",
+    "ids": {
+      "mal": 47917,
+      "shikimori": 47917,
+      "anilist": 130003,
+      "anilibria": 9293,
+      "kodik": "serial-46199"
+    },
+    "title": "Одинокий рокер!",
+    "originalTitle": "Bocchi the Rock!",
+    "alt": "Одинокий рокер! BOCCHI THE ROCK! Bocchi the Rock!",
+    "year": 2022,
+    "type": "TV",
+    "genres": [
+      "Комедия",
+      "CGDCT",
+      "Музыка"
+    ],
+    "description": "Мечтающая в будущем играть в музыкальной группе, старшеклассница Хитори Гото взялась за уроки игры на гитаре. Ничего не мешает исполнению её мечты, кроме самой Хитори, которая настолько застенчива и зажата, что не смогла завести ни одного друга, чего уж говорить о создании собственного музыкального коллектива. Сама судьба решает помочь Хитори, и та, на своё счастье, встречает Нидзику Идзити , которая играет на ударных в собственной группе и как раз подыскивает гитаристку!",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "BOCCHI THE ROCK!",
+        "Hitori Gotou, “Bocchi-chan,” is a girl who’s so introverted and shy around people that she’d always start her conversations with “Ah...”\n\n\n\nDuring her middle school years, she started playing the guitar, wanting to join a band because she thought it could be an opportunity for even someone shy like her to also shine. But because she had no friends, she ended up practicing guitar for six hours every day all by herself. After becoming a skilled guitar player, she uploaded video"
+      ],
+      "ja": [
+        "ぼっち・ざ・ろっく！",
+        ""
+      ]
+    },
+    "rating": 8.72,
+    "malId": 47917,
+    "audienceRating": 8.72,
+    "image": "https://shikimori.io/uploads/poster/animes/47917/35b343a77242f2ab85e5fe10905c7e4b.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/130003-5F90a7BtsPQN.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/130003-5F90a7BtsPQN.jpg",
+    "episodes": 12,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/47917-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/7e9710f3458e541d7045c61cc5452eb8b8e01ba0.jpg?1665251376",
+    "heroMobile": "assets/promo-cycle/47917-mobile.webp"
+  },
+  {
+    "id": "mal-52034",
+    "ids": {
+      "shikimori": 52034,
+      "mal": 52034,
+      "anilist": 150672,
+      "kodik": "serial-50478"
+    },
+    "title": "Ребёнок идола",
+    "originalTitle": "Oshi no Ko",
+    "alt": "Звёздное дитя / Ребёнок идола / Ребёнок айдола / \"Oshi no Ko\" OSHI NO KO 【推しの子】",
+    "year": 2023,
+    "type": "TV",
+    "genres": [
+      "сэйнэн",
+      "Драма",
+      "удостоено наград",
+      "реинкарнация",
+      "шоу бизнес"
+    ],
+    "description": "Красная ковровая дорожка, яркие вспышки фотоаппаратов, восторженные вскрики поклонников! Наверняка каждый хоть раз в жизни мечтал прославиться: стать знаменитым музыкантом, востребованным актёром или популярным певцом. Только вот путь становления звездой тернист, и лишь немногим удаётся осуществить мечту. Но что, если двери в шоу-бизнес были бы открыты с самого начала? Аквамарин и Руби ] — дети популярной певицы Ай Хосино . Им не составило труда начать карьеру и влиться в раз",
+    "ongoing": false,
+    "translations": {
+      "en": [
+        "OSHI NO KO",
+        "When a pregnant young starlet appears in Gorou Amemiya’s countryside medical clinic, the doctor takes it upon himself to safely (and secretly) deliver Ai Hoshino’s child so she can make a scandal-free return to the stage. But no good deed goes unpunished, and on the eve of her delivery, he finds himself slain at the hands of Ai’s deluded stalker — and subsequently reborn as Ai’s child, Aquamarine Hoshino! The glitz and glamor of showbiz hide the dark underbelly of the enterta"
+      ],
+      "ja": [
+        "【推しの子】",
+        ""
+      ]
+    },
+    "rating": 8.53,
+    "popularity": 335004,
+    "malId": 52034,
+    "audienceRating": 8.53,
+    "image": "https://shikimori.io/uploads/poster/animes/52034/6fe706b9a72df0c81da4c769d0e4ec1d.jpeg",
+    "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/150672-ISwoA0eS722H.jpg",
+    "detailsBanner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/150672-ISwoA0eS722H.jpg",
+    "episodes": 12,
+    "catalogApproved": true,
+    "catalogOnly": false,
+    "hero": "assets/promo-cycle/52034-wide.webp",
+    "heroWidth": 1920,
+    "heroHeight": 1000,
+    "heroSource": "https://shikimori.io/system/screenshots/original/067525b842f392c72c6cb7208bd4ad957d8dc6ba.jpg?1681320326",
+    "heroMobile": "assets/promo-cycle/52034-mobile.webp"
   }
 ]

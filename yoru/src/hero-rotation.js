@@ -1,4 +1,13 @@
 // Browser image decoding and animation promises must never lock the carousel forever.
+export const PROMO_PERIOD=2*24*60*60*1000;
+export const PROMO_EPOCH=Date.parse('2026-10-29T00:00:00+05:00');
+// A shared calendar, not localStorage: every visitor sees the same ten titles.
+export function scheduledHeroes(items,now=Date.now()){
+ const unique=[...new Map(items.map(a=>[a.id,a])).values()].slice(0,20);
+ if(unique.length<=10)return unique;
+ const period=Math.max(0,Math.floor((now-PROMO_EPOCH)/PROMO_PERIOD));
+ return unique.slice(period%2*10,period%2*10+10);
+}
 export function within(promise, milliseconds) {
  let timer;
  const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Hero operation timed out')),milliseconds);});
