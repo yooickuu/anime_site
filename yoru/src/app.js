@@ -1,3 +1,5 @@
+import {createUiCache} from './ui-cache.js';
+import {requestCache} from './request-cache.js';
 import {savedIds,savedCards,libraryPage,loadSavedCards} from './library-view.js';
 import {retrySourceRequest} from './source-retry.js';
 import {discoveryOptions} from './catalog-query.js';
@@ -132,6 +134,13 @@ const read = (key, fallback) => {
     return fallback;
   }
 };
+const uiCache=createUiCache(localStorage);
+let cachedProfileVisible=false,displayCards=new Map(),cardCacheTimer;
+const resolveDisplayCard=requestCache(resolveRelease,{key:a=>a.id,max:600,ttl:60000});
+function rememberDisplayCard(a){
+ if(!user||!a)return;displayCards.set(a.id,a);clearTimeout(cardCacheTimer);
+ const uid=user.id;cardCacheTimer=setTimeout(()=>{if(user?.id===uid)uiCache.saveCards(uid,[...displayCards.values()]);},250);
+}
 let lang = read("yooickuu.language", "ru");
 if (!dictionaries[lang]) lang = "ru";
 let appearance = normalizeStyle(read("yooickuu.appearance", "graphite"));
@@ -245,7 +254,7 @@ function render(newWatch=false) {
       )
       .join(
         "",
-      )}</select>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='social'?`<div id="social-root">${t('loading')}</div>`:page==='watch' ? (current ? playerHTML() : `<p class="watch-loading">${t('loading')}</p>`) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
+      )}</select>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img fetchpriority="high" decoding="async" src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='social'?`<div id="social-root">${t('loading')}</div>`:page==='watch' ? (current ? playerHTML() : `<p class="watch-loading">${t('loading')}</p>`) : page === "profile" ? profileHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
   if(preservedWatch){
     // Replacing the app root detaches the fullscreen element, even if reinserted.
     const template=document.createElement('template');template.innerHTML=markup;
@@ -324,7 +333,7 @@ function continueHTML() {
     ? entries
         .map((p) => {
           const a = byId(p.id);
-          return `<button class="continue-card" data-watch="${a.id}" data-episode="${p.episode}"><img class="continue-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt=""><div class="continue-info"><h3>${esc(title(a))}</h3><p>${t("episode")} ${esc(savedEpisodeNumber(p))} · ${p.completed ? t("viewed") : timeLabel(p.time) + " / " + timeLabel(p.duration)}</p><div class="progress-track"><span style="width:${Math.min(100, Math.max(0, (p.time / p.duration) * 100))}%"></span></div></div><span class="resume-play">${icon("play")}</span></button>`;
+          return `<button class="continue-card" data-watch="${a.id}" data-episode="${p.episode}"><img decoding="async" loading="lazy" class="continue-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt=""><div class="continue-info"><h3>${esc(title(a))}</h3><p>${t("episode")} ${esc(savedEpisodeNumber(p))} · ${p.completed ? t("viewed") : timeLabel(p.time) + " / " + timeLabel(p.duration)}</p><div class="progress-track"><span style="width:${Math.min(100, Math.max(0, (p.time / p.duration) * 100))}%"></span></div></div><span class="resume-play">${icon("play")}</span></button>`;
         })
         .join("")
     : `<div class="welcome-card"><div class="welcome-icon">${icon("play")}</div><div><h3>${t("continueEmpty")}</h3><p>${t("continueHint")}</p></div></div><div class="welcome-card tip"><div class="welcome-icon">${icon("bookmark")}</div><div><h3>${t("libraryGuest")}</h3><p>${t("privateLists")}</p><button class="text-button" data-nav="library">${t("library")} ${icon("arrow")}</button></div></div>`;
@@ -367,7 +376,7 @@ function ensureLibraryCards(){
  const key=JSON.stringify([user?.id,ids]);
  if(key===libraryKey)return;
  libraryKey=key;libraryCards=new Map();libraryBusy=true;libraryFailed=[];
- void loadSavedCards(ids,resolveRelease,{current:()=>libraryKey===key&&page==='library',onCard:a=>libraryCards.set(a.id,a)}).then(failed=>{
+ void loadSavedCards(ids,resolveDisplayCard,{current:()=>libraryKey===key&&page==='library',onCard:a=>{libraryCards.set(a.id,a);rememberDisplayCard(a);}}).then(failed=>{
   if(libraryKey!==key)return;
   libraryBusy=false;libraryFailed=failed;
   if(page==='library')renderGrid();else libraryKey='';
@@ -413,13 +422,13 @@ function renderGrid() {
   libraryPageNumber=libraryResult.page;
   const renderItems = page==='library'?libraryResult.items:page==='home'?items.slice(0,60):items;
 
-  grid.innerHTML = renderItems
-    .map((a) => {
+  const cardMarkup = renderItems
+    .map((a,index) => {
       const e = state.entries[a.id];
-      return `<article class="anime-card"><button class="poster-button" data-details="${a.id}" aria-label="${t("details")}: ${esc(title(a))}"><img src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}" loading="lazy">${a.ongoing ? `<span class="ongoing-badge" title="${t("ongoingTooltip")}" aria-label="${t("ongoingTooltip")}"><i></i>${t("airing")}</span>` : ""}${a.catalogOnly ? `<span class="catalog-only-badge">${t("catalogOnly")}</span>` : ""}<span class="poster-play">${icon("play")}</span><span class="poster-label">${matchesType(a,"MOVIE") ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span></button><button class="save-button ${e ? "saved" : ""}" data-details="${a.id}" aria-label="${t("status")}: ${esc(title(a))}">${bookmark}</button><button class="anime-title" data-details="${a.id}">${esc(title(a))}</button>${audienceHTML(a)}<p class="anime-meta">${a.year} · ${esc(genreText(a.genres[0]))}${e?.rating ? " · " + e.rating + "/10" : ""}</p></article>`;
+      return `<article class="anime-card"><button class="poster-button" data-details="${a.id}" aria-label="${t("details")}: ${esc(title(a))}"><img src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}" decoding="async" loading="${page!=='home'&&index<(matchMedia('(max-width: 600px)').matches?2:6)?'eager':'lazy'}" fetchpriority="${page!=='home'&&index<(matchMedia('(max-width: 600px)').matches?2:6)?'high':'auto'}">${a.ongoing ? `<span class="ongoing-badge" title="${t("ongoingTooltip")}" aria-label="${t("ongoingTooltip")}"><i></i>${t("airing")}</span>` : ""}${a.catalogOnly ? `<span class="catalog-only-badge">${t("catalogOnly")}</span>` : ""}<span class="poster-play">${icon("play")}</span><span class="poster-label">${matchesType(a,"MOVIE") ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span></button><button class="save-button ${e ? "saved" : ""}" data-details="${a.id}" aria-label="${t("status")}: ${esc(title(a))}">${bookmark}</button><button class="anime-title" data-details="${a.id}">${esc(title(a))}</button>${audienceHTML(a)}<p class="anime-meta">${a.year} · ${esc(genreText(a.genres[0]))}${e?.rating ? " · " + e.rating + "/10" : ""}</p></article>`;
     })
     .join("");
-  revealSurfaces(grid);
+  if(grid._cardsMarkup!==cardMarkup){grid.innerHTML=cardMarkup;grid._cardsMarkup=cardMarkup;revealSurfaces(grid);}
   $("#empty").hidden = items.length > 0 || catalogBusy;
   const status = $("#catalog-status");
   if (status)
@@ -441,10 +450,10 @@ const profileDraft = createProfileDraft();
 const accounts=accountVault(localStorage);
 function profileHTML() {
   if (!user) return guestHTML();
-  if (!ready && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
+  if (!ready && !cachedProfileVisible && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
   const p = state.preferences, stats = profileStats(state);
   const draft = {...p, name:p.name || user.user_metadata?.name || "", language:lang, theme, ...profileDraft.get(user.id)};
-  return `<section class="profile-page"><div class="profile-banner-stage"><div class="section-head profile-banner-heading"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error profile-banner-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img class="profile-banner-fill" ${bannerUrl?`src="${esc(bannerUrl)}"`:"hidden"} alt="" aria-hidden="true"><img id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div></div><div class="profile-grid"><div class="profile-sidebar"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yomiku")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><div class="profile-social-actions"><a class="button soft" href="#social/people">${({ru:"Найти пользователя",en:"Find people",ja:"ユーザー検索"})[lang]}</a><a class="button soft" href="#social/friends">${({ru:"Друзья",en:"Friends",ja:"友達"})[lang]}</a></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div>${appearanceHTML()}<div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div><div class="profile-main"><div class="profile-fields"><h2>${t("personalDetails")}</h2><p class="notice">${({ru:"Фото, имя и описание видны другим. Почта видна только вам.",en:"Your photos, name and bio are public. Only you can see your email.",ja:"写真、名前、自己紹介は公開されます。メールアドレスは自分にのみ表示されます。"})[lang]}</p><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div>${historyHTML()}${eveningHTML()}</div></div></section>`;
+  return `<section class="profile-page"><div class="profile-banner-stage"><div class="section-head profile-banner-heading"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error profile-banner-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img class="profile-banner-fill" ${bannerUrl?`src="${esc(bannerUrl)}"`:"hidden"} alt="" aria-hidden="true"><img decoding="async" fetchpriority="high" id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div></div><div class="profile-grid"><div class="profile-sidebar"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img fetchpriority="high" decoding="async" src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yomiku")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span></div><div class="profile-social-actions"><a class="button soft" href="#social/people">${({ru:"Найти пользователя",en:"Find people",ja:"ユーザー検索"})[lang]}</a><a class="button soft" href="#social/friends">${({ru:"Друзья",en:"Friends",ja:"友達"})[lang]}</a></div><button class="text-button" data-action="export">${icon("download")} ${t("export")}</button></div>${appearanceHTML()}<div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div><div class="profile-main"><div class="profile-fields"><h2>${t("personalDetails")}</h2><p class="notice">${({ru:"Фото, имя и описание видны другим. Почта видна только вам.",en:"Your photos, name and bio are public. Only you can see your email.",ja:"写真、名前、自己紹介は公開されます。メールアドレスは自分にのみ表示されます。"})[lang]}</p><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div>${historyHTML()}${eveningHTML()}</div></div></section>`;
 }
 function appearanceHTML() {
  return `<section class="profile-appearance glass-panel"><div class="panel-heading"><span class="overline">${t('yourAtmosphere')}</span><h2>${t('siteStyle')}</h2></div><div class="style-options" role="group" aria-label="${t('siteStyle')}">${styles.map(id=>`<button class="style-option" data-style-choice="${id}" aria-pressed="${appearance===id}"><span class="style-swatch" data-style="${id}" aria-hidden="true"><i></i><i></i><i></i></span><span>${t('style_'+id)}</span><span class="style-selected" aria-hidden="true">${icon('check')}</span></button>`).join('')}</div></section>`;
@@ -455,18 +464,18 @@ function ensurePlanCards(){
  const key=JSON.stringify([user?.id,ids]);if(key===planKey)return;
  planKey=key;planCards=new Map();planBusy=true;planFailed=false;
  const paint=()=>{if(page==='profile'&&$('#evening-plan'))$('#evening-plan').outerHTML=eveningHTML();};paint();
- void loadSavedCards(ids,resolveRelease,{current:()=>planKey===key&&page==='profile',onCard:a=>planCards.set(a.id,a)}).then(failed=>{
+ void loadSavedCards(ids,resolveDisplayCard,{current:()=>planKey===key&&page==='profile',onCard:a=>{planCards.set(a.id,a);rememberDisplayCard(a);}}).then(failed=>{
   if(planKey!==key)return;planBusy=false;planFailed=failed.length>0;
   if(page==='profile')paint();else planKey='';
  });
 }
 function eveningHTML() {
  const choices=eveningPlan(state,id=>planCards.get(id)||byId(id),eveningMinutes,eveningMode).filter(p=>isPublished(p.id));
- return `<section class="profile-evening glass-panel" id="evening-plan"><div class="panel-heading"><span class="overline">${t('aLittleTime')}</span><h2>${t('eveningPlan')}</h2></div><p class="panel-description">${t('eveningHint')}</p><div class="plan-modes" role="group" aria-label="${t('planMode')}">${['all','continue','new','finish'].map(id=>`<button class="chip" data-plan-mode="${id}" aria-pressed="${eveningMode===id}">${t('plan_'+id)}</button>`).join('')}</div><div class="time-options" role="group" aria-label="${t('availableTime')}">${[15,30,60,90,120].map(n=>`<button class="chip" data-plan-minutes="${n}" aria-pressed="${n===eveningMinutes}">${n} ${t('minutesShort')}</button>`).join('')}</div><label class="plan-custom-time">${t('planCustomTime')} <input id="plan-time" type="number" inputmode="numeric" min="1" max="240" value="${eveningMinutes}"> ${t('minutesShort')}</label><div class="evening-results" aria-live="polite" aria-busy="${planBusy}">${choices.length?choices.map(plan=>{const a=planCards.get(plan.id)||byId(plan.id)||state.entries[plan.id]?.anime||Object.values(state.progress).find(p=>p.id===plan.id)?.anime;return `<button class="evening-option" data-watch="${esc(plan.id)}" data-episode="${plan.start}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t(plan.count>1?'episodes':'episode')} ${plan.ordinal}${plan.count>1?'–'+plan.lastOrdinal:''}</small><small>${plan.estimated?'≈ ':''}${plan.minutes} ${t('minutesShort')}${plan.speed!==1?' · '+plan.speed+'×':''}</small><small class="plan-reason">${t(plan.finishes?'planFinishes':plan.resume?'planResume':plan.started?'plan_continue':'plan_new')}${plan.resume?' · '+timeLabel(plan.resumeSeconds):''}</small><small class="plan-spare">${t('planSpare')} ${plan.spareMinutes} ${t('minutesShort')}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t(planBusy?'loading':eveningMode==='finish'?'planFinishEmpty':'eveningEmpty')}</p>`}</div>${planFailed?`<button class="text-button" data-action="reload-plan">${t('retry')}</button>`:''}<p class="plan-estimate">${t('planNoTimer')}</p>${choices.some(c=>c.estimated)?`<p class="plan-estimate">${t('eveningEstimate')}</p>`:''}</section>`;
+ return `<section class="profile-evening glass-panel" id="evening-plan"><div class="panel-heading"><span class="overline">${t('aLittleTime')}</span><h2>${t('eveningPlan')}</h2></div><p class="panel-description">${t('eveningHint')}</p><div class="plan-modes" role="group" aria-label="${t('planMode')}">${['all','continue','new','finish'].map(id=>`<button class="chip" data-plan-mode="${id}" aria-pressed="${eveningMode===id}">${t('plan_'+id)}</button>`).join('')}</div><div class="time-options" role="group" aria-label="${t('availableTime')}">${[15,30,60,90,120].map(n=>`<button class="chip" data-plan-minutes="${n}" aria-pressed="${n===eveningMinutes}">${n} ${t('minutesShort')}</button>`).join('')}</div><label class="plan-custom-time">${t('planCustomTime')} <input id="plan-time" type="number" inputmode="numeric" min="1" max="240" value="${eveningMinutes}"> ${t('minutesShort')}</label><div class="evening-results" aria-live="polite" aria-busy="${planBusy}">${choices.length?choices.map(plan=>{const a=planCards.get(plan.id)||byId(plan.id)||state.entries[plan.id]?.anime||Object.values(state.progress).find(p=>p.id===plan.id)?.anime;return `<button class="evening-option" data-watch="${esc(plan.id)}" data-episode="${plan.start}"><img src="${esc(cover(a))}" alt="" loading="lazy" decoding="async"><span><strong>${esc(title(a))}</strong><small>${t(plan.count>1?'episodes':'episode')} ${plan.ordinal}${plan.count>1?'–'+plan.lastOrdinal:''}</small><small>${plan.estimated?'≈ ':''}${plan.minutes} ${t('minutesShort')}${plan.speed!==1?' · '+plan.speed+'×':''}</small><small class="plan-reason">${t(plan.finishes?'planFinishes':plan.resume?'planResume':plan.started?'plan_continue':'plan_new')}${plan.resume?' · '+timeLabel(plan.resumeSeconds):''}</small><small class="plan-spare">${t('planSpare')} ${plan.spareMinutes} ${t('minutesShort')}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t(planBusy?'loading':eveningMode==='finish'?'planFinishEmpty':'eveningEmpty')}</p>`}</div>${planFailed?`<button class="text-button" data-action="reload-plan">${t('retry')}</button>`:''}<p class="plan-estimate">${t('planNoTimer')}</p>${choices.some(c=>c.estimated)?`<p class="plan-estimate">${t('eveningEstimate')}</p>`:''}</section>`;
 }
 function historyHTML() {
   const history=Object.values(state.progress).filter(p=>p.id!=='sintel'&&byId(p.id)).sort((a,b)=>(b.updated||0)-(a.updated||0)).slice(0,8);
-  return `<section class="profile-history"><div class="profile-history-heading"><h3>${t('history')}</h3><button class="text-button" data-action="history-visibility" aria-pressed="${!!state.preferences.historyPublic}" title="${({ru:"Видимость истории для других пользователей",en:"History visibility for other users",ja:"他のユーザーへの履歴公開"})[lang]}">${state.preferences.historyPublic?({ru:"Скрыть",en:"Hide",ja:"非公開"})[lang]:({ru:"Показать",en:"Show",ja:"公開"})[lang]}</button></div>${history.length?history.map(p=>{const a=byId(p.id);return `<button class="history-item" data-watch="${esc(a.id)}" data-episode="${Number(p.episode)||1}"><img src="${esc(cover(a))}" alt="" loading="lazy"><span><strong>${esc(title(a))}</strong><small>${t('episode')} ${esc(savedEpisodeNumber(p))} · ${timeLabel(p.time)}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('historyEmpty')}</p>`}</section>`;
+  return `<section class="profile-history"><div class="profile-history-heading"><h3>${t('history')}</h3><button class="text-button" data-action="history-visibility" aria-pressed="${!!state.preferences.historyPublic}" title="${({ru:"Видимость истории для других пользователей",en:"History visibility for other users",ja:"他のユーザーへの履歴公開"})[lang]}">${state.preferences.historyPublic?({ru:"Скрыть",en:"Hide",ja:"非公開"})[lang]:({ru:"Показать",en:"Show",ja:"公開"})[lang]}</button></div>${history.length?history.map(p=>{const a=byId(p.id);return `<button class="history-item" data-watch="${esc(a.id)}" data-episode="${Number(p.episode)||1}"><img src="${esc(cover(a))}" alt="" loading="lazy" decoding="async"><span><strong>${esc(title(a))}</strong><small>${t('episode')} ${esc(savedEpisodeNumber(p))} · ${timeLabel(p.time)}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('historyEmpty')}</p>`}</section>`;
 }
 function discoveryHTML(){
   return `<section class="discovery-panel"><h1>${t('discover')}</h1><p>${t('discoveryCopy')}</p><div class="discovery-grid">${[['popular','play'],['topRated','star'],['airingNow','screen'],['films','moon']].map(([key,i])=>`<button class="discovery-tile ${catalogueView===key?'selected':''}" data-discover="${key}">${icon(i)}<span>${t(key)}</span>${icon('arrow')}</button>`).join('')}</div></section>`;
@@ -488,7 +497,7 @@ async function openDetails(id) {
   $("#details").className = "details-dialog";
   $("#details").innerHTML =
     `<div class="details-toolbar">${closeButton("details")}</div>` +
-    `<div class="details-artwork ${bannerFor(a)?'':'portrait-art'}" aria-hidden="true"><img class="details-manga" data-details-art="${esc(a.id)}" src="${esc(detailArtwork(a,artwork))}" alt=""><div class="details-art-shade"></div></div><div class="details-layout"><aside class="details-visual"><img class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${matchesType(a,"MOVIE") ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
+    `<div class="details-artwork ${bannerFor(a)?'':'portrait-art'}" aria-hidden="true"><img decoding="async" class="details-manga" data-details-art="${esc(a.id)}" src="${esc(detailArtwork(a,artwork))}" alt=""><div class="details-art-shade"></div></div><div class="details-layout"><aside class="details-visual"><img decoding="async" fetchpriority="high" class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${matchesType(a,"MOVIE") ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
       user && ready
         ? `<div class="detail-library"><label>${t("status")}<select id="detail-status"><option value="">${t("none")}</option>${state.statuses
             .filter((s) => s.id !== "favorites")
@@ -718,6 +727,7 @@ function flush() {
         const op = operations[0];
         const next = await saveOperation(uid, op);
         if (user?.id !== uid) return;
+        uiCache.saveState(uid,next);
         operations.shift();
         state = operations.reduce((s, o) => applyOperation(s, o), next);
         persistDraft();
@@ -734,6 +744,7 @@ function flush() {
   return flushing;
 }
 const avatarLoader = createAvatarLoader({
+  cache:uiCache,
   identity: () => ({uid:user?.id, path:state.preferences.avatar}),
   sign: async path => {
     const {data,error} = await client.storage.from('avatars').createSignedUrl(path,3600);
@@ -744,12 +755,13 @@ const avatarLoader = createAvatarLoader({
     avatarUrl = url;
     for(const node of $$('.avatar, .profile-avatar')) {
       if(url&&node.querySelector('img')?.getAttribute('src')===url)continue;
-      node.innerHTML = url ? `<img src="${esc(url)}" alt="">` : esc((state.preferences.name || user?.email || 'u').slice(0,1).toUpperCase());
+      node.innerHTML = url ? `<img fetchpriority="high" decoding="async" src="${esc(url)}" alt="">` : esc((state.preferences.name || user?.email || 'u').slice(0,1).toUpperCase());
     }
   },
 });
 let bannerUrl='';
 const bannerLoader=createAvatarLoader({
+ cache:uiCache,
  identity:()=>({uid:user?.id,path:state.preferences.banner}),
  sign:async path=>{const {data,error}=await client.storage.from('avatars').createSignedUrl(path,3600);if(error)throw error;return data?.signedUrl;},
  display:url=>{bannerUrl=url;const img=$('#profile-banner-image');if(img){img.hidden=!url;if(url)img.src=url;else img.removeAttribute('src');}}
@@ -760,6 +772,8 @@ async function loadProfile() {
   try {
     const result = await loadData(user.id);
     if (generation !== authGeneration) return;
+    uiCache.saveState(user.id,result.data);
+    cachedProfileVisible=false;
     state = normalize(result.data);
     for (const e of [
       ...Object.values(state.entries),
@@ -824,6 +838,20 @@ async function handleSession(session, event) {
   avatarUrl = "";
   syncFailure = false;
   ++authGeneration;
+  cachedProfileVisible=false;displayCards=new Map();clearTimeout(cardCacheTimer);
+  libraryKey='';libraryCards=new Map();planKey='';planCards=new Map();
+  if(user){
+    const snapshot=uiCache.state(user.id);
+    if(snapshot){
+      state=normalize(snapshot);cachedProfileVisible=true;
+      // Read pending operations for display only; loadProfile still merges against fresh server state.
+      const pending=read(draftKey(),[]);
+      for(const op of Array.isArray(pending)?pending:[])try{state=applyOperation(state,op);}catch{}
+      for(const e of [...Object.values(state.entries),...Object.values(state.progress)])if(e.anime&&!byId(e.anime.id))registerAnime(e.anime);
+      for(const a of uiCache.cards(user.id)){displayCards.set(a.id,a);if(!byId(a.id))registerAnime(a);}
+      void avatarLoad().catch(()=>{});
+    }
+  }
   render();
   if (user) await loadProfile();
   if(page==='watch')await fromHash();
@@ -1223,6 +1251,7 @@ async function submitAccountDeletion(form){
       throw Error([404,503].includes(status)?'deleteAccountUnavailable':'deleteAccountFailed');
     }
     try{sessionStorage.removeItem('yooickuu.pending.'+uid);localStorage.removeItem('yooickuu.pending.'+uid);}catch{}
+    uiCache.remove(uid);
     operations=[];profileDraft.clear();avatarLoader.reset();bannerLoader.reset();
     accounts.forget(uid);
     await client.auth.signOut({scope:'local'});
@@ -1650,6 +1679,7 @@ window.addEventListener("hashchange", fromHash);
 window.addEventListener("pagehide", () => {
   recordProgress();
   persistDraft();
+  if(user)uiCache.saveCards(user.id,[...displayCards.values()]);
 });
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {

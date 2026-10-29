@@ -1,3 +1,4 @@
+import {createReadCache} from './read-cache.js';
 import {configureAnimeGo} from './animego.js';
 import {validPublicConfig} from "./public-config.js";
 import { createClient } from "@supabase/supabase-js";
@@ -13,7 +14,7 @@ export const client = configured
       },
     })
   : null;
-export async function loadData(userId) {
+async function readData(userId) {
   let { data, error } = await client
     .from("yoru_state")
     .select("data,revision")
@@ -38,9 +39,13 @@ export async function loadData(userId) {
   }
   return { data: normalize(data.data), revision: data.revision };
 }
+const stateReads=createReadCache(readData);
+export const loadData=userId=>stateReads.get(userId);
 export async function saveOperation(userId, op) {
+  stateReads.invalidate(userId);
+  try {
   for (let attempt = 0; attempt < 5; attempt++) {
-    const latest = await loadData(userId);
+    const latest = await readData(userId);
     const next = applyOperation(latest.data, op);
     const { data, error } = await client
       .from("yoru_state")
@@ -56,6 +61,7 @@ export async function saveOperation(userId, op) {
     if (data?.length) return next;
   }
   throw Error("writeConflict");
+  } finally { stateReads.invalidate(userId); }
 }
 export function hasRemoteSource(id, episode) {
   return typeof config.media?.[id]?.[episode] === "string";
