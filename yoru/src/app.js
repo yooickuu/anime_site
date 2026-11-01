@@ -67,7 +67,7 @@ import {initSelectMenus, enhanceSelects, closeSelectMenu} from './select-menu.js
 import {createPlayback} from './playback.js';
 import {cropAvatar,cropBanner} from './avatar-crop.js';
 import {authErrorKey} from "./public-config.js";
-import {combinedCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons, knownSeasons, catalogueYears} from "./sources.js";
+import {combinedCatalogue, searchCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons, knownSeasons, catalogueYears} from "./sources.js";
 import {icon} from "./icons.js";
 import {controlsHTML, attachControls} from "./player-controls.js";
 import { chooseQuality } from "./provider.js";
@@ -116,7 +116,8 @@ let onlineItems = [],
   catalogBusy = false,
   catalogError = false,
   catalogGeneration = 0,
-  searchTimer,
+  searchTimer, headerSearchTimer,
+  headerQuery = "", searchSuggestionsVersion = 0,
   typeFilter = "all", yearFilter = "all", ratingFilter = "0",
   ongoingOnly = false,
   playback = null,
@@ -243,7 +244,7 @@ function render(newWatch=false) {
   clearInterval(heroTimer);
   applyAppearance();
   const markup =
-    `<header class="header">${brand()}<nav aria-label="${t("catalog")}">${["home", "catalog", "library"].map((v) => `<button class="nav-link ${page === v ? "active" : ""}" data-nav="${v}">${icon({home:"screen",catalog:"search",library:"bookmark"}[v])}<span>${t(v)}</span></button>`).join("")}<a class="nav-link ${page==='social'&&location.hash.includes('chat')?'active':''}" href="#social/chats">${chatsLabel()}<span id="chat-unread" class="chat-unread" ${unreadCount?'':'hidden'}>${unreadCount||''}</span></a></nav><div class="header-tools"><label class="search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(query)}"><kbd>⌘ K</kbd></label><select id="language" aria-label="${t("language")}">${[
+    `<header class="header">${brand()}<nav aria-label="${t("catalog")}">${["home", "catalog", "library"].map((v) => `<button class="nav-link ${page === v ? "active" : ""}" data-nav="${v}">${icon({home:"screen",catalog:"search",library:"bookmark"}[v])}<span>${t(v)}</span></button>`).join("")}<a class="nav-link ${page==='social'&&location.hash.includes('chat')?'active':''}" href="#social/chats">${chatsLabel()}<span id="chat-unread" class="chat-unread" ${unreadCount?'':'hidden'}>${unreadCount||''}</span></a></nav><div class="header-tools"><label class="search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(headerQuery)}"><kbd>⌘ K</kbd></label><select id="language" aria-label="${t("language")}">${[
       ["ru", "RU"],
       ["en", "EN"],
       ["ja", "日本語"],
@@ -1495,26 +1496,22 @@ document.addEventListener("click", async (event) => {
   }
 });
 document.addEventListener("input", (event) => {
-  if (["search", "catalog-search"].includes(event.target.id)) {
+  if(event.target.id==='search'){
+    headerQuery=event.target.value;
+    clearTimeout(headerSearchTimer);
+    if(event.isComposing){closeSearchSuggestions();return;}
+    updateHeaderSearch(event.target);
+    return;
+  }
+  if (event.target.id === "catalog-search") {
     query = event.target.value;
     if(event.isComposing)return;
-    if(page==='library'&&event.target.id==='catalog-search'){
+    if(page==='library'){
       clearTimeout(searchTimer);renderGrid();
       showSearchSuggestions('catalog-search',savedCards(state,list,id=>libraryCards.get(id)||byId(id)));
       return;
     }
-    const caret=[event.target.selectionStart,event.target.selectionEnd];
-    if (event.target.id === "search" && page !== "catalog") {
-      if(current)stopWatching();
-      page = "catalog";
-      history.pushState(null,'','#catalog');
-      render();
-      const input = $("#search");
-      input.focus();
-      input.setSelectionRange(caret[0]??query.length,caret[1]??query.length);
-    }
-    for(const input of $$("#search,#catalog-search"))if(input!==event.target && input.value!==query)input.value=query;
-    showSearchSuggestions(event.target.id);
+    closeSearchSuggestions();
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => loadCatalogue(), 180);
   }
@@ -1737,7 +1734,6 @@ async function loadCatalogue(more = false, targetPage = 1) {
     if (generation === catalogGeneration) {
       catalogBusy = false;
       renderGrid();
-      if(query&&['search','catalog-search'].includes(document.activeElement?.id))showSearchSuggestions(document.activeElement.id,onlineItems);
     }
   }
 }
@@ -1767,16 +1763,26 @@ window.addEventListener('scroll',()=>document.querySelector('.header')?.classLis
 document.addEventListener('load',event=>{const img=event.target;if(!(img instanceof HTMLImageElement))return;if(img.id==='profile-banner-image'){img.parentElement?.classList.toggle('portrait-banner',img.naturalHeight>img.naturalWidth);const fill=img.parentElement?.querySelector('.profile-banner-fill');if(fill){fill.src=img.currentSrc;fill.hidden=false;}}if(img.dataset.detailsArt){const fill=img.closest('.details-artwork')?.querySelector('.details-art-fill');if(fill){fill.hidden=false;if(fill.getAttribute('src')!==img.getAttribute('src'))fill.src=img.getAttribute('src');}}if(img.dataset.detailsArt&&img.naturalWidth<img.naturalHeight){img.closest('.details-artwork')?.classList.add('portrait-art');void improvePoster(img,byId(img.dataset.detailsArt));}else if(img.dataset.poster)void improvePoster(img,byId(img.dataset.poster));},true);
 
 function closeSearchSuggestions(){
+ ++searchSuggestionsVersion;
  document.querySelectorAll('.search-suggestions').forEach(n=>n.remove());
  document.querySelectorAll('#search,#catalog-search').forEach(n=>{n.setAttribute('aria-expanded','false');n.removeAttribute('aria-activedescendant');});
 }
 function showSearchSuggestions(id, pool=publishedItems){
  if(page==='library'&&id==='catalog-search')pool=savedCards(state,list,id=>libraryCards.get(id)||byId(id));
  closeSearchSuggestions();const input=document.getElementById(id);if(!input)return;
- const items=suggestions(pool,query);if(!items.length)return;
+ const items=suggestions(pool,id==='search'?headerQuery:query);if(!items.length)return;
  const panel=document.createElement('div');panel.id='search-suggestions';panel.className='search-suggestions';panel.setAttribute('role','listbox');
  panel.innerHTML=items.map((a,i)=>`<button type="button" role="option" id="suggestion-${i}" aria-selected="false" data-details="${esc(a.id)}"><img src="${esc(cover(a))}" alt=""><span><strong>${esc(title(a))}</strong><small>${a.year||''} · ${esc(a.type||'')}</small></span></button>`).join('');
  input.parentElement.append(panel);input.setAttribute('role','combobox');input.setAttribute('aria-autocomplete','list');input.setAttribute('aria-controls',panel.id);input.setAttribute('aria-expanded','true');
+}
+function updateHeaderSearch(input){
+ showSearchSuggestions('search');
+ const own=searchSuggestionsVersion,text=headerQuery;
+ const active=()=>own===searchSuggestionsVersion&&document.getElementById('search')===input&&document.activeElement===input&&input.value===text;
+ if(!text.trim())return;
+ headerSearchTimer=setTimeout(async()=>{
+  try{const result=await searchCatalogue(text,{current:active});if(active())showSearchSuggestions('search',result.items);}catch{/* Keep matching local suggestions if the network is unavailable. */}
+ },180);
 }
 document.addEventListener('keydown',event=>{
  const panel=document.querySelector('.search-suggestions');if(!panel||!['search','catalog-search'].includes(event.target.id))return;

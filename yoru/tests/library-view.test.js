@@ -42,8 +42,8 @@ test('list search and its suggestions stay inside the active list; catalogue sea
   assert.equal(renders,1);assert.equal(globalCalls,0);assert.deepEqual(pool.map(a=>a.id),ids);
  }
  let callback,loads=0,suggestions=0;
- const context={page:'catalog',query:'',searchTimer:null,$$:()=>[],clearTimeout(){},setTimeout:fn=>fn(),loadCatalogue(){loads++;},showSearchSuggestions(){suggestions++;},document:{addEventListener:(_,fn)=>callback=fn}};
- runInNewContext(code,context);callback({target:{id:'catalog-search',value:'Naruto'},isComposing:false});assert.equal(loads,1);assert.equal(suggestions,1);
+ const context={page:'catalog',query:'',searchTimer:null,$$:()=>[],clearTimeout(){},setTimeout:fn=>fn(),loadCatalogue(){loads++;},closeSearchSuggestions(){},showSearchSuggestions(){suggestions++;},document:{addEventListener:(_,fn)=>callback=fn}};
+ runInNewContext(code,context);callback({target:{id:'catalog-search',value:'Naruto'},isComposing:false});assert.equal(loads,1);assert.equal(suggestions,0);
 });
 test('late catalogue suggestions cannot leak into an open saved list',async()=>{
  const {readFile}=await import('node:fs/promises'),{JSDOM}=await import('jsdom'),{runInNewContext}=await import('node:vm');

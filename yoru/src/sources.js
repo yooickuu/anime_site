@@ -22,6 +22,11 @@ export async function combinedCatalogue(options={}){
  return {...result,items:result.items.map(registerAnime)};
 }
 combinedCatalogue.clear=()=>{queryGeneration++;};
+// Header suggestions have their own lifetime and never cancel the visible catalogue query.
+export async function searchCatalogue(query,{current=()=>true}={}){
+ const result=await store.query({query,page:1,limit:7},{current});
+ return {...result,items:result.items.map(registerAnime)};
+}
 export async function resolveRelease(a){
  const card=await store.card(a.id);if(!card)throw Error('notAdmitted');registerAnime(card);
  // Preserve a playing title's episode manifest, but never load one for a grid card.
