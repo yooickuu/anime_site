@@ -916,7 +916,7 @@ async function openPlayer(id, requested, pushRoute=true) {
   let a;
   try{[a]=await Promise.all([findWatchRelease(id),(async()=>{watchView ||= (await import(new URL(__WATCH_VIEW_ASSET__,document.baseURI).href)).watchView;})()]);}catch{toast(t("providerError"));}
   if(!a){playerOpening=false;toast(t('releaseAwaitingReview'));if(page==='watch'&&!current)navigate('catalog');return;}
-  if(!requested){const first=(await releaseSeasons(a)).find(x=>['TV','ONA'].includes(x.type)&&x.episodeManifest?.some(e=>e.season>0));if(first){a=first;id=a.id;}}
+  // Keep the selected release; related seasons only populate the season menu.
   if (a.providerId || a.animeVostId || a.animeGoId || a.kitsuId || a.malId) {
     try {
       a = await resolveRelease(a);

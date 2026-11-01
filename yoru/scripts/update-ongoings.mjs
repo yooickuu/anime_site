@@ -1,14 +1,14 @@
 import {readCatalogueText} from './lib/catalog-storage.mjs';
-import {KodikAPI,catalogParams,mergeKodikRelease,completeRelease} from './lib/kodik-api.mjs';
-import {assembleRelease,loadToken,saveJSON} from './seed-catalog.mjs';
-import {createApprovedCatalogue} from '../src/approved-catalog.js';
+import {KodikAPI} from './lib/kodik-api.mjs';
+import {refreshOngoingKodik} from './lib/ongoing-kodik.mjs';
+import {loadToken,saveJSON} from './seed-catalog.mjs';
 /**
  * update-ongoings.mjs
  * Cron script to check for newly aired episodes of ongoing anime
  * and append them to src/published-catalog.json.
  */
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 
 const CATALOG_PATH = 'src/published-catalog.json';
 const ANILIBRIA_BASE = 'https://anilibria.top/api/v1/anime/';
@@ -44,24 +44,15 @@ export async function updateOngoings() {
   let updatedCount = 0;
   let newEpisodesCount = 0;
 
-  let failures=0;
+  let failures=0;const failed=[];
+  if(ongoings.some(item=>item.kodikIds?.length)&&!api)throw Error('KODIK_API_TOKEN missing: ongoing updates cannot run');
   for (const item of ongoings) {
     if(item.kodikIds?.length){
       if(!api){console.warn(`Kodik update skipped for ${item.id}: KODIK_TOKEN missing`);continue;}
       try{
-        let updated=item;
-        for await(const batch of api.pages('/search',{...catalogParams,shikimori_id:item.ids.shikimori})){
-          for(const release of batch.results){
-            const revision=release.updated_at||String(release.episodes_count);
-            if(updated.kodikRevisions?.[release.id]===revision)continue;
-            const incoming=await assembleRelease(await completeRelease(api,release));
-            const merged=mergeKodikRelease(updated,incoming);
-            if(!createApprovedCatalogue({policyVersion:3,items:[merged]}).items.length)throw Error('catalogue_validation_failed');
-            merged.kodikRevisions={...updated.kodikRevisions,[release.id]:revision};updated=merged;
-          }
-        }
+        const updated=await refreshOngoingKodik(item,api);
         if(updated!==item){newEpisodesCount+=Math.max(0,updated.episodes.length-item.episodes.length);catalog.items[catalog.items.indexOf(item)]=updated;updatedCount++;}
-      }catch(error){failures++;console.warn(`Kodik update pending for ${item.id}: ${error.message}`);}
+      }catch(error){failures++;failed.push({id:item.id,reason:error.message});console.warn(`Kodik update pending for ${item.id}: ${error.message}`);if(/kodik_http_(401|403)|kodik_access_or_response_error/.test(error.message))throw Error('Kodik authorization failed: check repository KODIK_API_TOKEN; no successful update');}
       continue;
     }
     const anilibriaId = item.ids?.anilibria;
@@ -73,7 +64,7 @@ export async function updateOngoings() {
     try {
       release = await fetchJSON(`${ANILIBRIA_BASE}releases/${anilibriaId}`);
     } catch (e) {
-      failures++;console.warn(`Could not fetch AniLibria release ${anilibriaId}: ${e.message}`);
+      failures++;failed.push({id:item.id,reason:e.message});console.warn(`Could not fetch AniLibria release ${anilibriaId}: ${e.message}`);
       continue;
     }
 
@@ -144,12 +135,17 @@ export async function updateOngoings() {
     await wait(400);
   }
 
+  const report={checked:ongoings.length,updated:updatedCount,newEpisodes:newEpisodesCount,failures:failed};
+  await mkdir('checks',{recursive:true});
+  await saveJSON('checks/ongoing-update.json',report);
+  if(process.env.GITHUB_STEP_SUMMARY)await writeFile(process.env.GITHUB_STEP_SUMMARY,`## Ongoing update\nChecked: ${ongoings.length}; updated: ${updatedCount}; new episodes: ${newEpisodesCount}; errors: ${failures}.\n`+failed.map(e=>`- ${e.id}: ${e.reason}`).join('\n'),{flag:'a'});
   if (updatedCount > 0) {
     catalog.updatedAt = new Date().toISOString();
     await saveJSON(CATALOG_PATH, catalog);
     console.log(`\nUpdated catalogue: added ${newEpisodesCount} new episode(s) across ${updatedCount} title(s).`);
   } else {
     console.log(failures?`Проверка завершилась с ошибками: ${failures}. Существующие серии сохранены.`:'\nNo new episodes found.');
+    if(failures===ongoings.length&&failures)throw Error('All ongoing updates failed');
   }
 }
 

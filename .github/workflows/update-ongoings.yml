@@ -33,6 +33,13 @@ jobs:
         env:
           KODIK_API_TOKEN: ${{ secrets.KODIK_API_TOKEN || secrets.KODIK_TOKEN }}
         run: npm run update:ongoings
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ongoing-update-report
+          path: yoru/checks/ongoing-update.json
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Validate and build
         run: npm test && npm run build
       - name: Commit complete publication
