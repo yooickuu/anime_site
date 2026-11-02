@@ -10,6 +10,7 @@ export function api(ctx,life){
   people:q=>read(c.from('yoru_public_profiles').select(AUTHOR).ilike('nickname_key','%'+q.normalize('NFKC').trim().toLowerCase().replace(/[\\%_]/g,'')+'%').order('nickname_key').limit(20)),
   history:id=>read(c.rpc('yoru_social_history',{p_user:id})),
   comments:({anime,season,episode},parent=null,cursor=null)=>{let q=c.from('yoru_comments').select(`id,author_id,parent_id,body,created_at,edited_at,deleted_at,author:yoru_public_profiles!yoru_comments_author_id_fkey(${AUTHOR})`).eq('anime_id',anime).eq('season',season).eq('episode',episode);q=q.is('deleted_at',null);q=parent?q.eq('parent_id',parent):q.is('parent_id',null);if(cursor)q=q.or(`created_at.gt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.gt.${cursor.id})`);return read(q.order('created_at').order('id').limit(10));},
+  commentRecord:id=>read(c.from('yoru_comments').select(`id,author_id,parent_id,body,created_at,edited_at,deleted_at,author:yoru_public_profiles!yoru_comments_author_id_fkey(${AUTHOR})`).eq('id',id).is('deleted_at',null).maybeSingle()),
   comment:(key,body,parent)=>rpc('comment',{p_anime:key.anime,p_season:key.season,p_episode:key.episode,p_body:body,p_parent:parent}),
   edit:(id,body)=>rpc('edit_comment',{p_id:id,p_body:body}),
   unread:()=>read(c.rpc('yoru_social_unread')),

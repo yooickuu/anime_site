@@ -57,3 +57,23 @@
 
 .social-room-row{display:flex;align-items:center;gap:8px;min-width:0}.social-room-row>.social-room{flex:1;min-width:0}.social-room-row>.text-button{flex:none;font-size:12px;padding:8px}.social-room-list>.social-room-row{min-width:0}
 @media(max-width:800px){.social-chat .social-heading{grid-template-columns:auto minmax(0,1fr) auto auto}.social-chat .social-heading>[data-remove-chat]{font-size:11px;padding:4px;min-height:40px}.social-chat .social-heading>[data-members]{font-size:11px;padding:5px}}
+
+/* Interaction polish keeps the existing glass palette and geometry. */
+.social-chat-search{margin-top:18px}.social-empty{color:var(--muted,#bdb9ca);line-height:1.6;padding:14px 0;font-size:14px}
+.social-day{width:fit-content;max-width:90%;margin:18px auto 12px;padding:5px 12px;border-radius:999px;background:#0002;color:var(--muted,#bdb9ca);font-size:12px;text-align:center}
+.social-chat [data-latest]{align-self:center;border-radius:999px;background:rgba(var(--accent-rgb,180,160,240),.18);padding:7px 14px;min-height:36px}
+.social-comments [data-comment-form]{margin:16px 0 24px}.social-comments [data-reply-target]:empty{display:none}.social-comments [data-reply-target]{font-size:13px;color:var(--accent,#c6b4ff);margin:0 0 8px}
+.social-comments .social-replies{border-left:0;margin-left:20px;padding-left:12px}.social-comments .social-replies .social-avatar{width:32px;height:32px}.social-comments [data-replies]{color:var(--accent,#c6b4ff);border-radius:999px;padding:0 10px}.social-comments [data-replies]:hover{background:#ffffff0c}
+.social-panel .social-input-row:focus-within{border-color:rgba(var(--accent-rgb,180,160,240),.65);box-shadow:0 0 0 3px rgba(var(--accent-rgb,180,160,240),.08)}
+.social-panel .social-input-row textarea{resize:none;overflow-y:auto;font-size:16px}.social-comments [data-send]{align-self:flex-end}
+@media(prefers-reduced-motion:no-preference){
+ .social-panel .social-input-row{transition:border-color .2s ease,box-shadow .2s ease}
+ .social-panel .social-send{transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s,opacity .18s}
+ .social-panel .social-send:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 5px 15px #0002}
+ .social-panel .social-send:active:not(:disabled){transform:scale(.9)}
+ .social-comment.is-new,.social-message.is-new{animation:social-message-in .3s cubic-bezier(.2,.8,.2,1)}
+ .social-replies:not([hidden]),.social-chat [data-latest]:not([hidden]){animation:social-reveal .22s ease-out}
+ @keyframes social-message-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+ @keyframes social-reveal{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+}
+@media(max-width:600px){.social-comments .social-replies{margin-left:12px;padding-left:8px}.social-day{margin-block:14px 10px}}

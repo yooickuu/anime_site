@@ -87,3 +87,49 @@ test('notification badge counts rooms rather than messages and stops after accou
 test('comment pagination requests ten and appends by cursor; deletion leaves no tombstone',async()=>{
  const e=environment();e.tables.yoru_comments=Array.from({length:10},(_,i)=>({id:'c'+i,author_id:uid,author,body:'Comment '+i,created_at:'2026-10-27T10:00:00Z'}));cleanup=comments(e.root,e.ctx,{anime:'mal-1',season:1,episode:1});await pause();assert.equal(e.root.querySelectorAll('[data-comment]').length,10);assert.ok(e.calls[0].filters.some(f=>f[0]==='limit'&&f[1]===10));e.tables.yoru_comments=[{id:'c10',author_id:uid,author,body:'Next',created_at:'2026-10-27T11:00:00Z'}];e.root.querySelector('[data-more]').click();await pause();assert.equal(e.root.querySelectorAll('[data-comment]').length,11);assert.ok(e.calls.some(c=>c.filters?.some(f=>f[0]==='or'&&f[1].includes('id.gt.c9'))));e.root.querySelector('[data-remove="c0"]').click();await pause();assert.equal(e.root.querySelector('[data-comment="c0"]'),null);assert.doesNotMatch(e.root.textContent,/Комментарий удалён/);
 });
+
+test('replies collapse and reopen without another network request',async()=>{
+ const e=environment();cleanup=comments(e.root,e.ctx,{anime:'mal-1',season:1,episode:1});await pause();
+ e.tables.yoru_comments=[{id:'r1',parent_id:'c1',author_id:uid,author,body:'Answer',created_at:'2026-10-27T10:00:00Z'}];
+ const toggle=e.root.querySelector('[data-replies]');toggle.click();await pause();const box=e.root.querySelector('.social-replies');assert.equal(box.hidden,false);assert.match(box.textContent,/Answer/);
+ const requests=e.calls.length;toggle.click();assert.equal(box.hidden,true);assert.equal(toggle.getAttribute('aria-expanded'),'false');toggle.click();assert.equal(box.hidden,false);assert.equal(e.calls.length,requests);
+});
+
+test('confirmed new comment appears immediately without resetting the loaded page',async()=>{
+ const e=environment();cleanup=comments(e.root,e.ctx,{anime:'mal-1',season:1,episode:1});await pause();
+ e.tables.yoru_comments={id:'created',parent_id:null,author_id:uid,author,body:'Newest',created_at:'2026-11-02T10:00:00Z'};
+ const form=e.root.querySelector('form');form.elements.body.value='Newest';form.requestSubmit();form.requestSubmit();await pause();
+ assert.equal(e.root.querySelector('[data-comments]').firstElementChild.dataset.comment,'created');assert.ok(e.root.querySelector('[data-comment="c1"]'));assert.equal(form.elements.body.value,'');assert.equal(e.calls.filter(c=>c.rpc==='yoru_social_comment').length,1);
+ assert.ok(e.calls.at(-1).filters.some(f=>f[0]==='eq'&&f[1]==='id'&&f[2]==='created'));
+});
+
+test('empty comment is not submitted and a failed write retains the draft',async()=>{
+ const e=environment();cleanup=comments(e.root,e.ctx,{anime:'mal-1',season:1,episode:1});await pause();const form=e.root.querySelector('form');
+ form.elements.body.value='   ';form.requestSubmit();await pause();assert.ok(!e.calls.some(c=>c.rpc));
+ e.ctx.client.rpc=()=>{const p=Promise.resolve({error:new Error('network')});p.abortSignal=()=>p;return p;};form.elements.body.value='Keep my text';form.requestSubmit();await pause();assert.equal(form.elements.body.value,'Keep my text');assert.equal(form.elements.body.disabled,false);assert.equal(form.querySelector('[data-send]').disabled,false);
+});
+
+test('chat text drafts survive navigation but are isolated between accounts and rooms',async()=>{
+ const {chatDrafts}=await import('../src/social/compose.js');chatDrafts.set(uid,room,'');const e=environment();cleanup=chat(e.root,e.ctx,room);await pause();
+ const input=e.root.querySelector('textarea');input.value='Unsent';input.dispatchEvent(new window.Event('input',{bubbles:true}));cleanup();cleanup=chat(e.root,e.ctx,'another-room');await pause();assert.equal(e.root.querySelector('textarea').value,'');cleanup();cleanup=chat(e.root,e.ctx,room);await pause();assert.equal(e.root.querySelector('textarea').value,'Unsent');cleanup();e.setUser({id:'another-account'});cleanup=chat(e.root,e.ctx,room);await pause();assert.equal(e.root.querySelector('textarea').value,'');
+});
+
+test('sending from old chat history returns to latest without losing text typed during send',async()=>{
+ const e=environment();const message=(id,time,body)=>({id,created_at:time,body,author,author_id:uid});
+ e.tables.yoru_messages=[message('m2','2026-11-02T10:00:00Z','Recent')];cleanup=chat(e.root,e.ctx,room);await pause();
+ e.tables.yoru_messages=[message('m1','2026-11-01T10:00:00Z','Older')];const older=e.root.querySelector('[data-older]');older.hidden=false;older.click();await pause();assert.equal(e.root.querySelector('[data-latest]').hidden,false);
+ let finish;const rpc=e.ctx.client.rpc;e.ctx.client.rpc=(name,args)=>{if(name!=='yoru_social_message')return rpc(name,args);const p=new Promise(resolve=>finish=()=>resolve({data:'sent'}));p.abortSignal=()=>p;return p;};
+ const form=e.root.querySelector('.social-compose');form.elements.body.value='Sent';form.requestSubmit();await pause();form.elements.body.value='Next draft';form.elements.body.dispatchEvent(new window.Event('input',{bubbles:true}));
+ e.tables.yoru_messages=[message('m3','2026-11-02T11:00:00Z','Sent')];finish();await pause();await pause();assert.match(e.root.querySelector('[data-messages]').textContent,/Sent/);assert.equal(e.root.querySelector('[data-message="m1"]'),null);assert.equal(form.elements.body.value,'Next draft');assert.equal(e.root.querySelector('[data-latest]').hidden,true);assert.ok(e.root.querySelector('.social-day'));
+});
+
+test('chat directory search is local and group creation can be cancelled',async()=>{
+ const {mount}=await import('../src/social/community.js');const e=environment(),peer={user_id:'peer',nickname:'Bob'};e.tables.yoru_chat_members=[];e.tables.yoru_friendships=[{status:'accepted',requester:uid,recipient:'peer',to:peer,from:author}];cleanup=mount(e.root,e.ctx,'chats');await pause();
+ const search=e.root.querySelector('[data-chat-filter]'),count=e.calls.length;search.value='missing';search.dispatchEvent(new window.Event('input',{bubbles:true}));assert.equal(e.root.querySelector('.social-friend').hidden,true);assert.equal(e.root.querySelector('[data-chat-empty]').hidden,false);
+ search.value='BOB';search.dispatchEvent(new window.Event('input',{bubbles:true}));assert.equal(e.root.querySelector('.social-friend').hidden,false);assert.equal(e.calls.length,count);
+ e.root.querySelector('[data-group]').click();await pause();e.root.querySelector('[data-cancel-group]').click();assert.equal(e.root.querySelector('[data-group-form] form'),null);assert.ok(!e.calls.some(c=>c.rpc==='yoru_social_room'));
+});
+
+test('draft store bounds memory and clears text on account switch',async()=>{
+ const {createDrafts}=await import('../src/social/compose.js');const drafts=createDrafts();for(let i=0;i<21;i++)drafts.set('a',String(i),'x'.repeat(5000));assert.equal(drafts.get('a','0'),'');assert.equal(drafts.get('a','20').length,4000);assert.equal(drafts.get('b','20'),'');assert.equal(drafts.get('a','20'),'');
+});
