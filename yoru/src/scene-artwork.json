@@ -1,50 +1,62 @@
 {
   "graphite": {
-    "image": "assets/scenes/graphite.webp",
-    "width": 1920,
-    "height": 1038,
-    "source": "https://www.ghibli.jp/gallery/marnie005.jpg"
+    "image": "assets/scenes-v2/graphite.webp",
+    "width": 1672,
+    "height": 941,
+    "source": "Original anime-inspired environment generated with image_gen"
   },
   "iris": {
-    "image": "assets/scenes/iris.webp",
-    "width": 1920,
-    "height": 1038,
-    "source": "https://www.ghibli.jp/gallery/marnie009.jpg"
+    "image": "assets/scenes-v2/iris.webp",
+    "width": 1672,
+    "height": 941,
+    "source": "Original anime-inspired environment generated with image_gen"
   },
   "lagoon": {
-    "image": "assets/scenes/lagoon.webp",
-    "width": 1920,
-    "height": 1038,
-    "source": "https://www.ghibli.jp/gallery/chihiro043.jpg"
+    "image": "assets/scenes-v2/lagoon.webp",
+    "width": 1672,
+    "height": 941,
+    "source": "Original anime-inspired environment generated with image_gen"
   },
   "ember": {
-    "image": "assets/scenes/ember.webp",
-    "width": 1920,
-    "height": 1038,
-    "source": "https://www.ghibli.jp/gallery/marnie021.jpg"
+    "image": "assets/scenes-v2/ember.webp",
+    "width": 1672,
+    "height": 940,
+    "source": "Original anime-inspired environment generated with image_gen"
   },
   "midnight": {
-    "image": "assets/scenes/midnight.webp",
-    "width": 1920,
-    "height": 1038,
-    "source": "https://www.ghibli.jp/gallery/mononoke024.jpg"
+    "image": "assets/scenes-v2/midnight.webp",
+    "width": 1672,
+    "height": 941,
+    "source": "Original anime-inspired environment generated with image_gen"
   },
   "forest": {
-    "image": "assets/scenes/forest.webp",
-    "width": 1920,
-    "height": 1038,
-    "source": "https://www.ghibli.jp/gallery/marnie037.jpg"
+    "image": "assets/scenes-v2/forest.webp",
+    "width": 1672,
+    "height": 941,
+    "source": "Original anime-inspired environment generated with image_gen"
   },
   "wine": {
-    "image": "assets/scenes/wine.webp",
-    "width": 1920,
-    "height": 1038,
-    "source": "https://www.ghibli.jp/gallery/chihiro008.jpg"
+    "image": "assets/scenes-v2/wine.webp",
+    "width": 1672,
+    "height": 941,
+    "source": "Original anime-inspired environment generated with image_gen"
   },
   "slate": {
-    "image": "assets/scenes/slate.webp",
-    "width": 1920,
-    "height": 1038,
-    "source": "https://www.ghibli.jp/gallery/marnie010.jpg"
+    "image": "assets/scenes-v2/slate.webp",
+    "width": 1672,
+    "height": 941,
+    "source": "Original anime-inspired environment generated with image_gen"
+  },
+  "sakura": {
+    "image": "assets/scenes-v2/sakura.webp",
+    "width": 1672,
+    "height": 941,
+    "source": "Original anime-inspired environment generated with image_gen"
+  },
+  "sand": {
+    "image": "assets/scenes-v2/sand.webp",
+    "width": 1672,
+    "height": 941,
+    "source": "Original anime-inspired environment generated with image_gen"
   }
 }

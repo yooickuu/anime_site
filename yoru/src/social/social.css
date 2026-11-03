@@ -77,3 +77,10 @@
  @keyframes social-reveal{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
 }
 @media(max-width:600px){.social-comments .social-replies{margin-left:12px;padding-left:8px}.social-day{margin-block:14px 10px}}
+
+/* Keep comments legible on illustrated themes without adding an opaque card. */
+body.dark[data-style] .social-comments{position:relative;isolation:isolate}
+body.dark[data-style] .social-comments::before{content:"";position:absolute;inset:-20px -24px;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at center,rgba(var(--surface-rgb),.5) 0%,rgba(var(--surface-rgb),.32) 70%,transparent 100%)}
+body.dark[data-style] .social-comments :is(time,.social-empty){color:#d7d3df}
+body.dark[data-style] .social-comments .text-button{color:var(--accent)}
+body.dark[data-style] .social-panel :is(input,textarea)::placeholder{color:#c5c0cf;opacity:1}

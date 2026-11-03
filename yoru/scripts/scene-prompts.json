@@ -1,0 +1,45 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "id": "graphite",
+      "prompt": "Original neutral anime rainy Japanese rooftop after midnight; charcoal, cool white windows and restrained lavender; quiet center, detailed edges; wide landscape, no people, text, logos or blur."
+    },
+    {
+      "id": "iris",
+      "prompt": "Use case: stylized-concept. Create one original high resolution landscape 16:9 anime environment illustration as a full-page background for yomiku website. A quiet hilltop shrine above a sea of lavender clouds at twilight, delicate violet wisteria at frame edges, tiny stone steps, ink-purple and dusty lilac palette. Airy elegant anime fantasy matte painting, large calm sky. Neutral scenery, no people, no faces, no recognizable franchise, no text, no logo, no UI, no collage. Delicate anime background linework, hand-painted cel-animation quality, beautiful coherent perspective, crisp details, no artificial blur. Large relatively calm center allows glass website cards and text to remain readable; interesting scene details primarily around edges, subdued saturation and luminance. A standalone illustration filling the image. Theme: iris."
+    },
+    {
+      "id": "lagoon",
+      "prompt": "Use case: stylized-concept. Create one original high resolution landscape 16:9 anime environment illustration as a full-page background for yomiku website. A deserted seaside Japanese train platform beside a clear turquoise bay, overhead wires and small distant islands, luminous pale aqua horizon, deep teal shadows. Crisp summer slice-of-life anime scenery, no trains close up. Neutral scenery, no people, no faces, no recognizable franchise, no text, no logo, no UI, no collage. Delicate anime background linework, hand-painted cel-animation quality, beautiful coherent perspective, crisp details, no artificial blur. Large relatively calm center allows glass website cards and text to remain readable; interesting scene details primarily around edges, subdued saturation and luminance. A standalone illustration filling the image. Theme: lagoon."
+    },
+    {
+      "id": "ember",
+      "prompt": "Use case: stylized-concept. Create one original high resolution landscape 16:9 anime environment illustration as a full-page background for yomiku website. An empty narrow traditional Japanese lane at warm sunset, tiled rooftops and a few glowing lanterns, distant orange sky, terracotta and muted amber palette. Intimate hand-painted anime street scene. Neutral scenery, no people, no faces, no recognizable franchise, no text, no logo, no UI, no collage. Delicate anime background linework, hand-painted cel-animation quality, beautiful coherent perspective, crisp details, no artificial blur. Large relatively calm center allows glass website cards and text to remain readable; interesting scene details primarily around edges, subdued saturation and luminance. A standalone illustration filling the image. Theme: ember."
+    },
+    {
+      "id": "midnight",
+      "prompt": "Use case: stylized-concept. Create one original high resolution landscape 16:9 anime environment illustration as a full-page background for yomiku website. A remote observatory on a mountain ridge beneath a vast cobalt starry night sky and thin crescent moon, faraway layered mountains, navy and desaturated starlight blue palette. Expansive anime celestial landscape, no flashy nebula. Neutral scenery, no people, no faces, no recognizable franchise, no text, no logo, no UI, no collage. Delicate anime background linework, hand-painted cel-animation quality, beautiful coherent perspective, crisp details, no artificial blur. Large relatively calm center allows glass website cards and text to remain readable; interesting scene details primarily around edges, subdued saturation and luminance. A standalone illustration filling the image. Theme: midnight."
+    },
+    {
+      "id": "forest",
+      "prompt": "Use case: stylized-concept. Create one original high resolution landscape 16:9 anime environment illustration as a full-page background for yomiku website. A mossy stone path through towering cedar forest, small wooden footbridge crossing a clear stream, dappled green light and ferns at edges. Serene detailed anime woodland, jade and deep moss palette, no buildings. Neutral scenery, no people, no faces, no recognizable franchise, no text, no logo, no UI, no collage. Delicate anime background linework, hand-painted cel-animation quality, beautiful coherent perspective, crisp details, no artificial blur. Large relatively calm center allows glass website cards and text to remain readable; interesting scene details primarily around edges, subdued saturation and luminance. A standalone illustration filling the image. Theme: forest."
+    },
+    {
+      "id": "wine",
+      "prompt": "Use case: stylized-concept. Create one original high resolution landscape 16:9 anime environment illustration as a full-page background for yomiku website. A quiet Japanese-inspired library interior at evening, tall bookshelves along the edges, burgundy cushions and dark rosewood, large arched window looking onto rain. Deep plum and wine-red palette, sparse warm light. Cozy atmospheric anime interior. Neutral scenery, no people, no faces, no recognizable franchise, no text, no logo, no UI, no collage. Delicate anime background linework, hand-painted cel-animation quality, beautiful coherent perspective, crisp details, no artificial blur. Large relatively calm center allows glass website cards and text to remain readable; interesting scene details primarily around edges, subdued saturation and luminance. A standalone illustration filling the image. Theme: wine."
+    },
+    {
+      "id": "slate",
+      "prompt": "Use case: stylized-concept. Create one original high resolution landscape 16:9 anime environment illustration as a full-page background for yomiku website. Snow-covered Japanese mountain hamlet seen from a distance across a frozen lake, a few dark wooden roofs and pine trees, silver-grey mist, powder blue and slate palette. Clear winter anime painting, soft subdued daylight. Neutral scenery, no people, no faces, no recognizable franchise, no text, no logo, no UI, no collage. Delicate anime background linework, hand-painted cel-animation quality, beautiful coherent perspective, crisp details, no artificial blur. Large relatively calm center allows glass website cards and text to remain readable; interesting scene details primarily around edges, subdued saturation and luminance. A standalone illustration filling the image. Theme: slate."
+    },
+    {
+      "id": "sakura",
+      "prompt": "Use case: stylized-concept. Create one original high resolution landscape 16:9 anime environment illustration as a full-page background for yomiku website. A wide riverside walkway beside gently flowering cherry trees at dusk, distant small city silhouettes, a few petals drifting over still water, muted dusty rose and dark mauve palette. Refined anime spring background, no bright pink overload. Neutral scenery, no people, no faces, no recognizable franchise, no text, no logo, no UI, no collage. Delicate anime background linework, hand-painted cel-animation quality, beautiful coherent perspective, crisp details, no artificial blur. Large relatively calm center allows glass website cards and text to remain readable; interesting scene details primarily around edges, subdued saturation and luminance. A standalone illustration filling the image. Theme: sakura."
+    },
+    {
+      "id": "sand",
+      "prompt": "Use case: stylized-concept. Create one original high resolution landscape 16:9 anime environment illustration as a full-page background for yomiku website. Ancient desert ruins and a low stone arch beneath a vast sandy moonlit sky, thin crescent and distant dunes, muted ochre, bronze and dark cocoa palette. Serene anime adventure environment, crisp hand-painted rock forms, no characters. Neutral scenery, no people, no faces, no recognizable franchise, no text, no logo, no UI, no collage. Delicate anime background linework, hand-painted cel-animation quality, beautiful coherent perspective, crisp details, no artificial blur. Large relatively calm center allows glass website cards and text to remain readable; interesting scene details primarily around edges, subdued saturation and luminance. A standalone illustration filling the image. Theme: sand."
+    }
+  ]
+}

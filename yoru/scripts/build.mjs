@@ -45,7 +45,7 @@ await copyFile('supabase/account-deletion.sql', 'dist/account-deletion.sql');
 await copyFile('supabase/functions/delete-account/index.ts', 'dist/delete-account.ts');
 // Optional English transport and watch markup do not enter the startup bundle.
 const lazyAssets={};
-for(const name of ['consumet-provider','watch-view']){
+for(const name of ['consumet-provider','watch-view','detail-image-quality']){
  await build({entryPoints:[`src/${name}.js`],bundle:true,outfile:`dist/providers/${name}.js`,format:'esm',target:['es2022'],minify:true});
  const hash=createHash('sha256').update(await readFile(`dist/providers/${name}.js`)).digest('hex').slice(0,12);
  lazyAssets[name]=`providers/${name}.js?v=${hash}`;
@@ -55,8 +55,9 @@ await build({entryPoints:['src/social/entry.js'],bundle:true,splitting:true,outd
 const socialHash=createHash('sha256').update(await readFile('dist/social/entry.js')).update(await readFile('dist/social/entry.css')).digest('hex').slice(0,12);
 await cp('dist/social','../social',{recursive:true});
 for(const file of ['social-01.sql','social-02.sql','social-03.sql','social-04.sql','social-05.sql']){await copyFile('supabase/'+file,'dist/'+file);await copyFile('supabase/'+file,'../'+file);}
-const browserBuild=await build({define:{__SOCIAL_ASSET__:JSON.stringify('social/entry.js?v='+socialHash),__CONSUMET_ASSET__:JSON.stringify(lazyAssets['consumet-provider']),__WATCH_VIEW_ASSET__:JSON.stringify(lazyAssets['watch-view'])},metafile:true,entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',charset:'utf8',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
+const browserBuild=await build({define:{__DETAIL_ART_ASSET__:JSON.stringify(lazyAssets['detail-image-quality']),__SOCIAL_ASSET__:JSON.stringify('social/entry.js?v='+socialHash),__CONSUMET_ASSET__:JSON.stringify(lazyAssets['consumet-provider']),__WATCH_VIEW_ASSET__:JSON.stringify(lazyAssets['watch-view'])},metafile:true,entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',charset:'utf8',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
 if(Object.keys(browserBuild.metafile.inputs).some(p=>p.includes('/social/')||p.includes('pglite')))throw Error('Social code must stay lazy');
+if(Object.keys(browserBuild.metafile.inputs).some(p=>p.endsWith('detail-image-quality.js')))throw Error('Detail image upgrades must stay on demand');
 if(Object.keys(browserBuild.metafile.inputs).some(p=>p.endsWith('consumet-provider.js')))throw Error('Consumet must stay on demand');
 if(Object.keys(browserBuild.metafile.inputs).some(p=>/(?:runtime-catalog|published-catalog|catalog-metadata)\.json$/.test(p)))throw Error('Heavy catalogue was bundled into the browser');
 if((await readFile('dist/app.js')).length>3*1024*1024)throw Error('Browser bundle exceeds memory safety budget');
