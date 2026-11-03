@@ -137,7 +137,7 @@ test('draft store bounds memory and clears text on account switch',async()=>{
 test('chat displays sending immediately, retries a failed UUID and quotes without duplicate messages',async()=>{
  const e=environment();e.tables.yoru_messages=[{id:'00000000-0000-4000-8000-000000000099',room_id:room,body:'Original <b>text</b>',author,author_id:uid,created_at:'2026-11-03T10:00:00Z'}];cleanup=chat(e.root,e.ctx,room);await pause();
  let finish;const attempts=[],original=e.ctx.client.rpc;e.ctx.client.rpc=(name,args)=>{if(name!=='yoru_social_message_v2')return original(name,args);attempts.push(args);return new Promise(resolve=>finish=resolve);};
- e.root.querySelector('[data-reply-message]').click();const form=e.root.querySelector('.social-compose');form.elements.body.value='My answer';form.requestSubmit();
+ e.root.querySelector('[data-message]').dispatchEvent(new window.KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}));const form=e.root.querySelector('.social-compose');form.elements.body.value='My answer';form.requestSubmit();
  assert.match(e.root.querySelector('[data-messages]').textContent,/My answer/);assert.ok(e.root.querySelector('[data-state="sending"]'));await pause();assert.equal(attempts.length,1);assert.equal(attempts[0].p_reply,e.tables.yoru_messages[0].id);
  assert.equal(e.root.querySelector('.social-quote b'),null);finish({error:new Error('offline')});await pause();assert.ok(e.root.querySelector('[data-retry]'));
  e.root.querySelector('[data-retry]').click();await pause();assert.equal(attempts[1].p_id,attempts[0].p_id);

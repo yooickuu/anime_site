@@ -201,3 +201,26 @@ test('replies use the same room, retry is idempotent and broadcasts contain IDs 
  assert.ok(hints.length>=3);assert.ok(hints.every(h=>h.private&&!JSON.stringify(h.payload).includes('answer')));
  assert.ok(hints.some(h=>h.event==='read'));assert.ok(hints.some(h=>h.payload.id===id));
 });
+
+test('compact upgrade records actual read time once and retains original cursors/security',async()=>{
+ for(let i=0;i<2;i++)await db.exec(await readFile('supabase/social-07.sql','utf8'));
+ const id=(await as(A,"select yoru_social_message_v2($1,'Read timestamp') id",[room]))[0].id;
+ await db.query("update yoru_messages set created_at=now()-interval '3 hours' where id=$1",[id]);
+ // Reset only this disposable fixture's cursor so the old message is unread.
+ await db.query("update yoru_chat_members set last_read_at='-infinity',last_read_id='00000000-0000-0000-0000-000000000000',last_seen_at=null where room_id=$1 and user_id=$2",[room,B]);
+ await as(B,'select yoru_social_mark_read($1,$2)',[room,id]);
+ const first=(await as(B,'select last_seen_at,last_read_at from yoru_chat_members where room_id=$1 and user_id=$2',[room,B]))[0];
+ assert.ok(Date.parse(first.last_seen_at)-Date.parse(first.last_read_at)>2.9*3600000);
+ await as(B,'select yoru_social_mark_read($1,$2)',[room,id]);assert.deepEqual((await as(B,'select last_seen_at,last_read_at from yoru_chat_members where room_id=$1 and user_id=$2',[room,B]))[0],first);
+ await assert.rejects(as(E,'select yoru_social_mark_read($1,$2)',[room,id]),/members_only/);
+});
+test('new achievement milestones unlock while previous awards remain and private progress survives history expiry',async()=>{
+ const now=Date.now(),data={entries:Object.fromEntries(Array.from({length:100},(_,i)=>['mal-'+i,{status:'completed'}])),progress:Object.fromEntries(Array.from({length:2000},(_,i)=>['ep-'+i,{id:'mal-'+i,completed:true,time:500,updated:now-20*86400000}]))};
+ data.preferences={historyPublic:true};data.progress.fresh={id:'mal-9000',completed:false,time:50,updated:now};
+ await as(A,'update yoru_state set data=$1 where user_id=$2',[data,A]);
+ await db.query('update yoru_watch_metrics set seconds=900000 where user_id=$1',[A]);
+ const badges=(await as(A,'select yoru_activity_sync() data'))[0].data.badges;
+ for(const id of ['episode_250','episode_1000','episode_2000','hour_5','hour_25','hour_250','title_5','title_25','title_100','message','friend'])assert.ok(badges[id],id);
+ const history=await as(null,'select * from yoru_social_history($1)',[A]);assert.deepEqual(history.map(h=>h.anime_id),['mal-9000']);
+ const unchanged=(await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data;assert.deepEqual(unchanged,data);
+});

@@ -23,3 +23,13 @@ export function deliveryState(message,members,uid){
  const time=Date.parse(message.created_at);const read=peers.filter(m=>{const seen=Date.parse(m.last_read_at);return seen>time||(seen===time&&(m.last_read_id||'')>=message.id);}).length;
  return peers.length&&read===peers.length?'read':'sent';
 }
+export function receiptText(message,members,uid,lang='ru',{now=Date.now(),unanswered=true}={}){
+ const state=deliveryState(message,members,uid),index=({ru:0,en:1,ja:2})[lang]??0;
+ const labels={sending:['Отправляется…','Sending…','送信中…'],failed:['Не отправлено · повторить','Not sent · retry','未送信・再試行'],sent:['Отправлено','Sent','送信済み'],read:['Просмотрено','Seen','既読']};
+ if(state!=='read'||!unanswered)return labels[state][index];
+ const peers=members.filter(m=>m.user_id!==uid),stamps=peers.map(p=>Date.parse(p.last_seen_at));
+ if(stamps.some(t=>!Number.isFinite(t)))return labels.read[index];
+ const mins=Math.floor(Math.max(0,now-Math.max(...stamps))/60000);if(mins<1)return labels.read[index];
+ const n=mins<60?mins:mins<1440?Math.floor(mins/60):Math.floor(mins/1440),unit=mins<60?['мин','min','分']:mins<1440?['ч','h','時間']:['дн','d','日'];
+ return [`Просмотрено ${n} ${unit[0]} назад`,`Seen ${n} ${unit[1]} ago`,`${n}${unit[2]}前に既読`][index];
+}

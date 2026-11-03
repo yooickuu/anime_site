@@ -25,7 +25,7 @@ export function api(ctx,life){
   friend:(user,action)=>rpc('friend',{p_user:user,p_action:action}),
   rooms:async()=>{const rooms=await read(c.from('yoru_chat_members').select('room_id,room:yoru_conversations(id,kind,title,owner_id,created_at)').eq('user_id',ctx.user().id).order('joined_at',{ascending:false}).limit(50));if(!rooms.length)return rooms;const members=await read(c.from('yoru_chat_members').select(`room_id,user_id,profile:yoru_public_profiles!yoru_chat_members_user_id_fkey(${AUTHOR})`).in('room_id',rooms.map(x=>x.room_id)).limit(1000));return rooms.map(r=>({...r,peers:members.filter(m=>m.room_id===r.room_id&&m.user_id!==ctx.user()?.id).map(m=>m.profile).filter(Boolean),label:members.filter(m=>m.room_id===r.room_id&&m.user_id!==ctx.user()?.id).map(m=>m.profile?.nickname).join(', ')}));},
   roomInfo:id=>read(c.from('yoru_conversations').select('id,kind,title,owner_id').eq('id',id).maybeSingle()),
-  members:room=>read(c.from('yoru_chat_members').select(`user_id,last_read_at,last_read_id,profile:yoru_public_profiles!yoru_chat_members_user_id_fkey(${AUTHOR})`).eq('room_id',room).limit(20)),
+  members:room=>read(c.from('yoru_chat_members').select(`user_id,last_read_at,last_read_id,last_seen_at,profile:yoru_public_profiles!yoru_chat_members_user_id_fkey(${AUTHOR})`).eq('room_id',room).limit(20)),
   room:(users,title='')=>rpc('room',{p_users:users,p_title:title}),
   removeChat:room=>rpc('remove_chat',{p_room:room}),
   manage:(room,action,user=null,title=null)=>rpc('manage_room',{p_room:room,p_action:action,p_user:user,p_title:title}),

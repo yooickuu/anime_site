@@ -620,3 +620,11 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - Chat: optimistic bubbles with stable UUID retries, server-backed sent/read states, quotes, typing Presence, bounded history and autoscroll. Websocket lifetime scoped to visible room; polling remains fallback. Quotes batch-load through existing RLS (no ambiguous recursive PostgREST embed).
 - Build successful: 8921/8921 titles unchanged; startup JS +467 bytes, activity separate ~13KB. Tests include DB privacy/idempotency, actual media events, multi-tab cache and delayed/failed message UI. Browser: Safari desktop and 390px iframe layout checked with local mocks; physical iPhone and two real authenticated clients not tested.
 - New time starts with this release; old completion/list milestones can unlock from saved state. Native iOS fullscreen defers HTML achievement toast until leaving native fullscreen. Delivery latency depends on network; no fixed 100ms guarantee.
+
+## 2026-11-03 — compact profile and chat follow-up
+- Chat bubbles compact, swipe/context-menu/keyboard reply replaces visible arrows; last outgoing message displays sent/seen/relative actual read time, with failed-send retry retained. Smooth scrolling and reduced-motion support.
+- Watch time moved into profile stats. Dedicated lazy achievements page with 30 compact text badges, themed neon unlocked states; export button and redundant privacy hint removed.
+- History preview contains five titles; separate page loads 40 at a time. Rolling 14-day read-only projection expires history without deleting saved lists, resume positions or completion records. Public SQL history projection obeys same cutoff.
+- User applied social-07.sql: actual last_seen_at (not message timestamp), 30 badge conditions and public history cutoff. Anonymous column probe returns permission denied as expected; no real user data changed by QA.
+- 349/349 tests pass; build8921/8921, zero rejected. Canonical catalogue restored byte-identically after JSON equality check. Playback/HLS/proxy/auth/import/uiCache unchanged. Safari 390px mock fixtures visually checked; physical iPhone and two real signed-in chat clients not tested. Temporary QA pages removed.
+- Publication follows this checkpoint.

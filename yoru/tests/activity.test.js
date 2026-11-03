@@ -27,7 +27,7 @@ test('activity cache isolates users, retains offline seconds and merges tabs wit
 });
 test('denied storage never breaks watch tracking and badges are bounded/localized',()=>{
  const disk={getItem(){throw Error();},setItem(){throw Error();}},a=activityStore(disk,'a','s');a.credit(3,false);a.save();assert.equal(a.total(),3);assert.equal(a.dirty().length,1);
- assert.equal(badges.length,18);assert.equal(new Set(badges.map(b=>b[0])).size,18);assert.match(watchLabel(3661,'ru'),/1 ч 1 мин/);
+ assert.equal(badges.length,30);assert.equal(new Set(badges.map(b=>b[0])).size,30);assert.match(watchLabel(3661,'ru'),/1 ч 1 мин/);
 });
 test('read receipts compare actual dates and IDs; group read requires all peers',()=>{
  const m={id:'b',created_at:'2026-11-03T10:00:00Z'};const peer={user_id:'b',last_read_at:'2026-11-03T12:00:00+02:00',last_read_id:'b'};
