@@ -13,7 +13,7 @@ function environment(user={id:uid}){
  dom=new JSDOM('<main id="root"></main>',{url:'https://example.test/',pretendToBeVisual:true});
  globalThis.document=dom.window.document;globalThis.window=dom.window;globalThis.location=dom.window.location;globalThis.AbortController=dom.window.AbortController;globalThis.matchMedia=()=>({matches:false});
  const calls=[],tables={yoru_comments:[{id:'c1',author_id:uid,author,body:'<script>bad()</script>',parent_id:null,created_at:'2026-10-26T10:00:00Z'}],yoru_public_profiles:{...author,bio:'Hello',history_public:false,stats:{saved:1,lists:6,completed:2,rating:10},email:'must-not-render@test'},yoru_conversations:{id:room,kind:'dm',title:'',owner_id:uid},yoru_chat_members:[{user_id:uid,profile:author}],yoru_messages:[]};
- const client={from(table){const filters=[];let query={then(resolve,reject){calls.push({table,filters});return Promise.resolve({data:tables[table]??[],error:null}).then(resolve,reject);}};for(const name of ['select','eq','is','order','range','limit','maybeSingle','abortSignal','in','or','ilike'])query[name]=(...args)=>{filters.push([name,...args]);return query;};return query;},rpc(name,args){calls.push({rpc:name,args});const q=Promise.resolve({data:name==='yoru_social_history'?tables.history||[]:'created',error:null});q.abortSignal=()=>q;return q;},storage:{from(){return {getPublicUrl:path=>({data:{publicUrl:'https://example.test/'+path}})};}}};
+ const client={from(table){const filters=[];let query={then(resolve,reject){calls.push({table,filters});return Promise.resolve({data:filters.some(f=>f[0]==='maybeSingle')&&Array.isArray(tables[table])?tables[table].find(row=>filters.filter(f=>f[0]==='eq').every(f=>row[f[1]]===f[2]))||null:tables[table]??[],error:null}).then(resolve,reject);}};for(const name of ['select','eq','is','order','range','limit','maybeSingle','abortSignal','in','or','ilike'])query[name]=(...args)=>{filters.push([name,...args]);return query;};return query;},rpc(name,args){calls.push({rpc:name,args});const q=Promise.resolve({data:name==='yoru_social_history'?tables.history||[]:'created',error:null});q.abortSignal=()=>q;return q;},storage:{from(){return {getPublicUrl:path=>({data:{publicUrl:'https://example.test/'+path}})};}}};
  let logins=0;const ctx={client,user:()=>user,lang:()=> 'ru',login:()=>logins++,active:()=>true,confirm:async()=>true,preferences:()=>({}),title:a=>a.title,cover:()=>'',details:()=>{},card:async()=>null,searchAnime:async()=>[]};
  return {root:document.getElementById('root'),ctx,calls,tables,get logins(){return logins;},setUser:u=>user=u};
 }
@@ -39,7 +39,7 @@ test('chat is guest-gated with zero message or membership requests',async()=>{
 });
 test('chat sends an idempotency key and only an anime ID, not catalogue data',async()=>{
  const e=environment();cleanup=chat(e.root,e.ctx,room);await pause();
- const form=e.root.querySelector('.social-compose');form.elements.body.value='hello';form.requestSubmit();await pause();const sent=e.calls.find(c=>c.rpc==='yoru_social_message');assert.equal(sent.args.p_room,room);assert.equal(sent.args.p_body,'hello');assert.match(sent.args.p_id,/^[0-9a-f-]{36}$/);assert.equal(sent.args.p_anime,null);
+ const form=e.root.querySelector('.social-compose');form.elements.body.value='hello';form.requestSubmit();await pause();const sent=e.calls.find(c=>c.rpc==='yoru_social_message_v2');assert.equal(sent.args.p_room,room);assert.equal(sent.args.p_body,'hello');assert.match(sent.args.p_id,/^[0-9a-f-]{36}$/);assert.equal(sent.args.p_anime,null);
 });
 test('changing account stops a pending public/profile response from repainting',async()=>{
  const e=environment();let resolve;e.ctx.client.from=()=>{const q={then:r=>new Promise(done=>resolve=()=>done({data:e.tables.yoru_public_profiles})).then(r)};for(const n of ['select','eq','maybeSingle','abortSignal'])q[n]=()=>q;return q;};
@@ -118,9 +118,9 @@ test('sending from old chat history returns to latest without losing text typed 
  const e=environment();const message=(id,time,body)=>({id,created_at:time,body,author,author_id:uid});
  e.tables.yoru_messages=[message('m2','2026-11-02T10:00:00Z','Recent')];cleanup=chat(e.root,e.ctx,room);await pause();
  e.tables.yoru_messages=[message('m1','2026-11-01T10:00:00Z','Older')];const older=e.root.querySelector('[data-older]');older.hidden=false;older.click();await pause();assert.equal(e.root.querySelector('[data-latest]').hidden,false);
- let finish;const rpc=e.ctx.client.rpc;e.ctx.client.rpc=(name,args)=>{if(name!=='yoru_social_message')return rpc(name,args);const p=new Promise(resolve=>finish=()=>resolve({data:'sent'}));p.abortSignal=()=>p;return p;};
+ let finish,sentArgs;const rpc=e.ctx.client.rpc;e.ctx.client.rpc=(name,args)=>{if(name!=='yoru_social_message_v2')return rpc(name,args);sentArgs=args;const p=new Promise(resolve=>finish=()=>resolve({data:args.p_id}));p.abortSignal=()=>p;return p;};
  const form=e.root.querySelector('.social-compose');form.elements.body.value='Sent';form.requestSubmit();await pause();form.elements.body.value='Next draft';form.elements.body.dispatchEvent(new window.Event('input',{bubbles:true}));
- e.tables.yoru_messages=[message('m3','2026-11-02T11:00:00Z','Sent')];finish();await pause();await pause();assert.match(e.root.querySelector('[data-messages]').textContent,/Sent/);assert.equal(e.root.querySelector('[data-message="m1"]'),null);assert.equal(form.elements.body.value,'Next draft');assert.equal(e.root.querySelector('[data-latest]').hidden,true);assert.ok(e.root.querySelector('.social-day'));
+ e.tables.yoru_messages=[{...message(sentArgs.p_id,'2026-11-02T11:00:00Z','Sent'),room_id:room}];finish();await pause();await pause();assert.match(e.root.querySelector('[data-messages]').textContent,/Sent/);assert.equal(e.root.querySelector('[data-message="m1"]'),null);assert.equal(form.elements.body.value,'Next draft');assert.equal(e.root.querySelector('[data-latest]').hidden,true);assert.ok(e.root.querySelector('.social-day'));
 });
 
 test('chat directory search is local and group creation can be cancelled',async()=>{
@@ -132,4 +132,15 @@ test('chat directory search is local and group creation can be cancelled',async(
 
 test('draft store bounds memory and clears text on account switch',async()=>{
  const {createDrafts}=await import('../src/social/compose.js');const drafts=createDrafts();for(let i=0;i<21;i++)drafts.set('a',String(i),'x'.repeat(5000));assert.equal(drafts.get('a','0'),'');assert.equal(drafts.get('a','20').length,4000);assert.equal(drafts.get('b','20'),'');assert.equal(drafts.get('a','20'),'');
+});
+
+test('chat displays sending immediately, retries a failed UUID and quotes without duplicate messages',async()=>{
+ const e=environment();e.tables.yoru_messages=[{id:'00000000-0000-4000-8000-000000000099',room_id:room,body:'Original <b>text</b>',author,author_id:uid,created_at:'2026-11-03T10:00:00Z'}];cleanup=chat(e.root,e.ctx,room);await pause();
+ let finish;const attempts=[],original=e.ctx.client.rpc;e.ctx.client.rpc=(name,args)=>{if(name!=='yoru_social_message_v2')return original(name,args);attempts.push(args);return new Promise(resolve=>finish=resolve);};
+ e.root.querySelector('[data-reply-message]').click();const form=e.root.querySelector('.social-compose');form.elements.body.value='My answer';form.requestSubmit();
+ assert.match(e.root.querySelector('[data-messages]').textContent,/My answer/);assert.ok(e.root.querySelector('[data-state="sending"]'));await pause();assert.equal(attempts.length,1);assert.equal(attempts[0].p_reply,e.tables.yoru_messages[0].id);
+ assert.equal(e.root.querySelector('.social-quote b'),null);finish({error:new Error('offline')});await pause();assert.ok(e.root.querySelector('[data-retry]'));
+ e.root.querySelector('[data-retry]').click();await pause();assert.equal(attempts[1].p_id,attempts[0].p_id);
+ e.tables.yoru_messages.push({id:attempts[0].p_id,room_id:room,author,author_id:uid,body:'My answer',reply_to:attempts[0].p_reply,created_at:new Date().toISOString()});finish({data:attempts[0].p_id});await pause();await pause();
+ assert.equal(e.root.querySelectorAll(`[data-message="${attempts[0].p_id}"]`).length,1);assert.equal(e.root.querySelector('[data-retry]'),null);assert.ok(e.root.querySelector('[data-state="sent"]'));
 });

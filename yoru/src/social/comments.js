@@ -45,6 +45,7 @@ export function mount(root,ctx,key){
   submit.disabled=true;form.elements.body.disabled=true;status(root,ctx);
   try{
    const id=editing?(await db.edit(editing,body),editing):await db.comment(key,body,parent);
+   document.dispatchEvent(new window.Event('yomiku:activity-change'));
    if(!life.live())return;
    // Read only the confirmed record; do not reload page 1 and hide a new comment behind older pages.
    let saved;try{saved=await db.commentRecord(id);}catch{}

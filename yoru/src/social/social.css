@@ -84,3 +84,13 @@ body.dark[data-style] .social-comments::before{content:"";position:absolute;inse
 body.dark[data-style] .social-comments :is(time,.social-empty){color:#d7d3df}
 body.dark[data-style] .social-comments .text-button{color:var(--accent)}
 body.dark[data-style] .social-panel :is(input,textarea)::placeholder{color:#c5c0cf;opacity:1}
+
+/* Compact, readable delivery and reply controls; no extra global/player styles. */
+.social-bubble .social-delivery,.social-bubble .social-quote-action{display:inline-flex;align-items:center;justify-content:center;min-height:28px;min-width:28px;padding:2px 5px;border:0;background:none;box-shadow:none;font-size:12px;vertical-align:middle;color:var(--muted)}
+.social-bubble .social-delivery:disabled{opacity:1;cursor:default}.social-bubble .social-delivery[data-state=read]{color:var(--accent)}
+.social-bubble .social-delivery[data-state=failed]{color:#ffb3ac;cursor:pointer}
+.social-quote,.social-reply-preview{border:0;border-inline-start:3px solid var(--accent);border-radius:8px;background:color-mix(in srgb,var(--accent) 12%,transparent);padding:8px 10px;text-align:start;overflow-wrap:anywhere}
+.social-bubble .social-quote{display:block;width:100%;color:inherit;font-size:13px;margin-bottom:8px;box-shadow:none;min-height:0}.social-quote small{display:block;color:var(--accent);font-size:11px}
+.social-reply-preview{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px}.social-reply-preview[hidden]{display:none}.social-reply-preview span{flex:1;min-width:0}
+.social-typing{min-height:18px;font-size:12px;color:var(--muted);margin:2px 12px;pointer-events:none}
+.social-message:target .social-bubble{outline:1px solid var(--accent)}

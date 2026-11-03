@@ -31,7 +31,7 @@ export function mount(root,ctx,initial='chats'){
   if(b.hasAttribute('data-login'))ctx.login();
   if(b.hasAttribute('data-cancel-group'))box.querySelector('[data-group-form]').innerHTML='';
   if(b.dataset.tab)await tab(b.dataset.tab);
-  if(b.dataset.friend&&member(ctx)){await db.friend(b.dataset.friend,b.dataset.do);if(life.live())await tab('friends');}
+  if(b.dataset.friend&&member(ctx)){await db.friend(b.dataset.friend,b.dataset.do);document.dispatchEvent(new window.Event('yomiku:activity-change'));if(life.live())await tab('friends');}
   if(b.dataset.removeChat&&member(ctx)&&await ctx.confirm(tr(ctx,b.dataset.kind==='group'?'leaveGroupConfirm':'removeChatConfirm'))){await db.removeChat(b.dataset.removeChat);if(life.live()){document.dispatchEvent(new window.Event('yomiku:chat-read'));await tab('chats');}}
   if(b.dataset.dm&&member(ctx)){const room=await db.room([b.dataset.dm]);if(life.live())location.hash='chat/'+room;}
   if(b.hasAttribute('data-group')&&member(ctx)){

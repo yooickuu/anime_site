@@ -151,3 +151,53 @@ test('removing a chat affects only the current member; leaving a group revokes a
  assert.equal((await as(A,'select * from yoru_conversations where id=$1',[group])).length,0);
  assert.equal((await as(B,'select owner_id from yoru_conversations where id=$1',[group]))[0].owner_id,B);
 });
+
+test('activity migration is repeatable and Realtime policies are private room scoped',async()=>{
+ await db.exec(`create schema realtime;create table realtime.messages(extension text);alter table realtime.messages enable row level security;grant usage on schema realtime to authenticated;grant select,insert on realtime.messages to authenticated;
+ create function realtime.topic() returns text language sql stable as $$select current_setting('realtime.topic',true)$$;
+ create table realtime.signals(payload jsonb,event text,topic text,private boolean);
+ create function realtime.send(payload jsonb,event text,topic text,private boolean) returns void language sql as $$insert into realtime.signals values(payload,event,topic,private)$$;`);
+ for(let i=0;i<2;i++)await db.exec(await readFile('supabase/social-06.sql','utf8'));
+ await db.query("select set_config('realtime.topic',$1,false)",['yomiku:room:'+room]);
+ await as(A,"insert into realtime.messages values('presence')");
+ await assert.rejects(as(E,"insert into realtime.messages values('presence')"),/row-level/);
+ await assert.rejects(as(A,"insert into realtime.messages values('broadcast')"),/row-level/);
+ assert.equal((await as(B,'select * from realtime.messages')).length,1);
+ assert.equal((await as(E,'select * from realtime.messages')).length,0);
+ await db.query("select set_config('realtime.topic',$1,false)",['other:'+room]);
+ assert.equal((await as(A,'select * from realtime.messages')).length,0);
+});
+test('watch seconds are owned, cumulative idempotent and limited across concurrent sessions',async()=>{
+ const session='90000000-0000-4000-8000-000000000001';
+ const sync=async(uid,seconds,night=0)=>(await as(uid,'select yoru_activity_sync($1,$2,$3) data',[session,seconds,night]))[0].data;
+ assert.equal((await sync(A,30)).seconds,30);
+ assert.equal((await sync(A,30)).seconds,30);
+ assert.equal((await sync(A,10)).seconds,30);
+ await db.query("update yoru_watch_metrics set credited_at=now()-interval '35 seconds' where user_id=$1",[A]);
+ assert.equal((await sync(A,60,10)).seconds,60);
+ assert.equal((await sync(B,5)).seconds,5);
+ assert.equal((await as(A,'select seconds from yoru_watch_metrics')).length,1);
+ await assert.rejects(as(A,'update yoru_watch_metrics set seconds=9999'),/permission/);
+ await assert.rejects(as(null,'select yoru_activity_sync()'),/permission/);
+ await assert.rejects(as(A,'select yoru_activity_sync()',[],true),/login_required/);
+ await assert.rejects(sync(A,1,2),/invalid_activity/);
+ const huge=await sync(A,1000000);assert.ok(huge.seconds<=61);
+ assert.ok(huge.badges.message&&huge.badges.friend&&huge.badges.comment);
+ await db.query("update yoru_watch_metrics set seconds=36000,night_seconds=600 where user_id=$1",[A]);
+ const badge=(await as(A,'select yoru_activity_sync() data'))[0].data;
+ assert.ok(badge.badges.hour_10&&badge.badges.night);assert.equal(badge.seconds,36000);
+});
+test('replies use the same room, retry is idempotent and broadcasts contain IDs only',async()=>{
+ const parent=(await as(A,"select yoru_social_message_v2($1,'reply parent') id",[room]))[0].id;
+ const id='80000000-0000-4000-8000-000000000001';
+ for(let i=0;i<2;i++)await as(B,"select yoru_social_message_v2($1,'answer',null,null,$2,$3)",[room,id,parent]);
+ assert.equal((await as(A,'select reply_to from yoru_messages where id=$1',[id]))[0].reply_to,parent);
+ assert.equal((await as(A,'select * from yoru_messages where id=$1',[id])).length,1);
+ const group=(await as(A,"select yoru_social_room(array[$1::uuid],'Other') id",[B]))[0].id;
+ await assert.rejects(as(A,"select yoru_social_message_v2($1,'wrong room',null,null,gen_random_uuid(),$2)",[group,parent]),/invalid_reply/);
+ await assert.rejects(as(E,"select yoru_social_message_v2($1,'intruder')",[room]),/members_only/);
+ await as(A,'select yoru_social_mark_read($1,$2)',[room,id]);
+ const hints=(await db.query('select * from realtime.signals')).rows;
+ assert.ok(hints.length>=3);assert.ok(hints.every(h=>h.private&&!JSON.stringify(h.payload).includes('answer')));
+ assert.ok(hints.some(h=>h.event==='read'));assert.ok(hints.some(h=>h.payload.id===id));
+});
