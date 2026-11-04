@@ -282,3 +282,14 @@ test('section visibility defaults open once; later hides persist and private sta
  await db.exec("insert into auth.users values('00000000-0000-4000-8000-000000000099','new@test'); insert into yoru_nicknames values('00000000-0000-4000-8000-000000000099','NewUser')");
  assert.deepEqual((await as(null,"select lists_public,badges_public,history_public from yoru_public_profiles where nickname='NewUser'"))[0],{lists_public:true,badges_public:true,history_public:true});
 });
+test('public saved metadata recovers legacy names without leaking private entry fields or changing state',async()=>{
+ await db.exec(await readFile('supabase/social-10.sql','utf8'));
+ const entry={favorite:true,rating:9,privateNote:'secret',anime:{id:'vost-2937',title:'Saved title',image:'https://example.test/poster.jpg',malId:123,year:2025,type:'TV',token:'secret',email:'secret@test'}};
+ await as(A,"update yoru_state set data=jsonb_set(data,'{entries,vost-2937}',$2) where user_id=$1",[A,entry]);
+ const before=(await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data;
+ await as(A,"select yoru_social_visibility('lists',true)");
+ const d=(await as(null,"select yoru_social_public_lists($1,'favorites') d",[A]))[0].d;
+ const row=d.items.find(x=>x.anime_id==='vost-2937');assert.equal(row.card.title,'Saved title');assert.equal(row.card.malId,'123');assert.ok(!JSON.stringify(d).includes('secret'));assert.deepEqual(Object.keys(row.card).sort(),['image','malId','originalTitle','title','type','year']);
+ assert.deepEqual((await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data,before);
+ await as(A,"select yoru_social_visibility('lists',false)");assert.equal((await as(null,'select yoru_social_public_lists($1) d',[A]))[0].d.visible,false);
+});

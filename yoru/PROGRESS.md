@@ -643,3 +643,9 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - Together chat fills its parent panel, not viewport; own/right and others/left retained. Removed host role label. Playback/sync/HLS/import files untouched.
 - 357 tests passed; build passed, 8921/8921 catalog entries, zero rejected. Compared decompressed catalog JSON to HEAD and restored identical original archive bytes.
 - No physical-device or two-account live playback test in this UI-only change.
+
+## 2026-11-04 — public lists showing legacy lib/vost IDs
+- Root cause: public list RPC returned only IDs; current catalog cannot resolve some old provider IDs, although account snapshots retain title/art.
+- social-10.sql returns a strict display whitelist (title, image, year/type, original title, MAL ID) from saved snapshots. No private state writes, ratings/notes/email/media links exposed. User confirmed Run after local server restart.
+- Social-only resolver uses current card first, exact MAL identity next, unique full title+year+type match last; ambiguity preserves saved display and does not link a wrong title. Stored IDs/memberships remain unchanged. Unavailable records never render raw IDs.
+- 360 tests passed; build passed (8921/8921, zero rejected). Incorporated ongoing update 299fd238 before rebuilding; catalog archive equality checked/restored. Playback/import paths unchanged.
