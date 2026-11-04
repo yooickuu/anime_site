@@ -14,3 +14,5 @@ export async function notifications(ctx,update){const {start}=await import('./no
 
 export {clearCache} from './cache.js';
 export async function prefetch(kind){css();return kind==='profile'?import('./profile.js'):import('./community.js');}
+
+export async function mountVisibility(root,ctx){css();if(!root||!root.isConnected||!ctx.active())return;const m=await import('./profile-sharing.js');if(root.isConnected&&ctx.active())return m.mount(root,ctx);}

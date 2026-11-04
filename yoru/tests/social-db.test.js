@@ -224,3 +224,44 @@ test('new achievement milestones unlock while previous awards remain and private
  const history=await as(null,'select * from yoru_social_history($1)',[A]);assert.deepEqual(history.map(h=>h.anime_id),['mal-9000']);
  const unchanged=(await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data;assert.deepEqual(unchanged,data);
 });
+
+test('watch rooms restrict host broadcasts, snapshots and chat to registered room members',async()=>{
+ for(let i=0;i<2;i++)await db.exec(await readFile('supabase/social-08.sql','utf8'));
+ await assert.rejects(as(null,"select yoru_watch_create('mal-1',1)"),/permission/);
+ await assert.rejects(as(A,"select yoru_watch_create('mal-1',1)",[],true),/login_required/);
+ const r=(await as(A,"select yoru_watch_create('mal-1',1) r"))[0].r;
+ await assert.rejects(as(E,'select yoru_watch_snapshot($1)',[r.id]),/room_unavailable/);
+ await as(B,'select yoru_watch_join($1)',[r.id]);
+ await db.query("select set_config('realtime.topic',$1,false)",['yomiku:watch:'+r.id]);
+ await as(A,"insert into realtime.messages values('broadcast')");
+ await as(B,"insert into realtime.messages values('presence')");
+ await assert.rejects(as(B,"insert into realtime.messages values('broadcast')"),/row-level/);
+ await assert.rejects(as(E,"insert into realtime.messages values('presence')"),/row-level/);
+ await assert.rejects(as(B,"select yoru_watch_state($1,'mal-2',2,300,true,1,2)",[r.id]),/host_only/);
+ await as(A,"select yoru_watch_state($1,'mal-2',2,300,true,1,2)",[r.id]);
+ await as(A,"select yoru_watch_state($1,'mal-1',1,0,false,1,1)",[r.id]);
+ assert.equal((await as(B,'select yoru_watch_snapshot($1) r',[r.id]))[0].r.anime_id,'mal-2');
+ await assert.rejects(as(A,"select yoru_watch_state($1,'mal-2',2,'NaN',true,1,3)",[r.id]),/check constraint/);
+ const mid='91000000-0000-4000-8000-000000000001';
+ for(let i=0;i<2;i++)await as(B,"select yoru_watch_message($1,'Hi',$2)",[r.id,mid]);
+ const messages=(await as(A,'select yoru_watch_messages($1) m',[r.id]))[0].m;assert.equal(messages.length,1);assert.equal(messages[0].nickname,'Bob');assert.ok(!JSON.stringify(messages).includes('@'));
+ await assert.rejects(as(E,'select yoru_watch_messages($1)',[r.id]),/members_only/);
+ await as(B,'select yoru_watch_leave($1)',[r.id]);await assert.rejects(as(B,'select yoru_watch_snapshot($1)',[r.id]),/room_unavailable/);
+ await as(B,'select yoru_watch_join($1)',[r.id]);await as(A,'select yoru_watch_leave($1)',[r.id]);
+ await assert.rejects(as(B,'select yoru_watch_snapshot($1)',[r.id]),/room_unavailable/);
+ await assert.rejects(as(A,'select * from yoru_watch_rooms'),/permission/);
+});
+test('public lists and badges are opt-in, paginated and never return private account state',async()=>{
+ const before=(await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data;
+ assert.equal((await as(null,'select yoru_social_public_lists($1) d',[A]))[0].d.visible,false);
+ assert.equal((await as(null,'select yoru_social_public_badges($1) d',[A]))[0].d.visible,false);
+ await as(A,"select yoru_social_visibility('lists',true)");await as(A,"select yoru_social_visibility('badges',true)");
+ const lists=(await as(null,"select yoru_social_public_lists($1,'all',0) d",[A]))[0].d;
+ assert.equal(lists.total,100);assert.equal(lists.items.length,40);assert.deepEqual(Object.keys(lists.items[0]),['anime_id']);
+ assert.equal((await as(null,"select yoru_social_public_lists($1,'all',80) d",[A]))[0].d.items.length,20);
+ assert.ok((await as(null,'select yoru_social_public_badges($1) d',[A]))[0].d.badges.hour_250);
+ await as(A,"select yoru_social_visibility('lists',false)");await as(A,"select yoru_social_visibility('badges',false)");
+ assert.equal((await as(B,'select yoru_social_public_lists($1) d',[A]))[0].d.visible,false);
+ assert.equal((await as(B,'select yoru_social_public_badges($1) d',[A]))[0].d.visible,false);
+ assert.deepEqual((await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data,before);
+});

@@ -20,7 +20,7 @@ function environment(user={id:uid}){
 test('guest reads escaped comments and a submit opens auth without a write',async()=>{
  const e=environment(null);cleanup=comments(e.root,e.ctx,{anime:'mal-1',season:2,episode:3});await pause();
  assert.equal(e.root.querySelector('script'),null);assert.match(e.root.textContent,/<script>bad/);
- const form=e.root.querySelector('form');form.elements.body.value='hello';form.requestSubmit();await pause();assert.equal(e.logins,1);assert.ok(!e.calls.some(c=>c.rpc));
+ const form=e.root.querySelector('form');form.elements.body.value='hello';form.requestSubmit();await pause();assert.equal(e.logins,1);assert.ok(!e.calls.some(c=>c.rpc&&!['yoru_social_public_lists','yoru_social_public_badges'].includes(c.rpc)));
  assert.ok(e.calls[0].filters.some(f=>f[0]==='eq'&&f[1]==='episode'&&f[2]===3));
 });
 test('registered reply/edit form sends exact current episode and owned ID',async()=>{
@@ -32,7 +32,7 @@ test('registered reply/edit form sends exact current episode and owned ID',async
 test('public profile renders four stats and never renders an email even if supplied',async()=>{
  const e=environment(null);cleanup=profile(e.root,e.ctx,uid);await pause();
  assert.equal(e.root.querySelectorAll('.social-stats>div').length,4);assert.ok(!e.root.textContent.includes('must-not-render'));assert.equal(e.root.querySelector('[data-edit]'),null);
- e.root.querySelector('[data-friend]').click();await pause();assert.equal(e.logins,1);assert.ok(!e.calls.some(c=>c.rpc));
+ e.root.querySelector('[data-friend]').click();await pause();assert.equal(e.logins,1);assert.ok(!e.calls.some(c=>c.rpc&&!['yoru_social_public_lists','yoru_social_public_badges'].includes(c.rpc)));
 });
 test('chat is guest-gated with zero message or membership requests',async()=>{
  const e=environment(null);cleanup=chat(e.root,e.ctx,room);await pause();assert.equal(e.calls.length,0);assert.equal(e.logins,1);assert.ok(!e.root.querySelector('textarea'));
