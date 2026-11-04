@@ -3,12 +3,14 @@ import {clearCache} from './cache.js';
 const labels={lists:['Мои списки','My lists','マイリスト'],badges:['Достижения','Achievements','実績'],title:['В публичном профиле','On your public profile','公開プロフィール'],visible:['Видно всем','Public','公開'],hidden:['Скрыто','Hidden','非公開'],show:['Показать','Show','公開する'],hide:['Скрыть','Hide','非公開にする']};
 const text=(ctx,key)=>labels[key][({ru:0,en:1,ja:2})[ctx.lang()]??0];
 export async function mount(root,ctx){
- const life=scope(root,ctx),uid=ctx.user()?.id;if(!uid||root.dataset.sharingOwner===uid)return;root.dataset.sharingOwner=uid;
- root.innerHTML=`<section class="profile-sharing"><h3>${text(ctx,'title')}</h3><p data-status role="status"></p><div data-sharing-options></div></section>`;
- try{const {data,error}=await ctx.client.from('yoru_public_profiles').select('lists_public,badges_public').eq('user_id',uid).maybeSingle();if(error)throw error;if(!life.live())return;const values={lists:!!data?.lists_public,badges:!!data?.badges_public};
-  function paint(){root.querySelector('[data-sharing-options]').innerHTML=['lists','badges'].map(k=>`<div class="profile-sharing-row"><span>${text(ctx,k)}<small>${text(ctx,values[k]?'visible':'hidden')}</small></span><button class="button soft" type="button" data-sharing="${k}" aria-pressed="${values[k]}">${text(ctx,values[k]?'hide':'show')}</button></div>`).join('');}paint();
-  root.addEventListener('click',async e=>{const b=e.target.closest('[data-sharing]');if(!b||!life.live())return;const key=b.dataset.sharing;b.disabled=true;try{const next=!values[key],{error}=await ctx.client.rpc('yoru_social_visibility',{p_kind:key,p_visible:next});if(error)throw error;if(life.live()){values[key]=next;clearCache(ctx.client);paint();status(root,ctx);}}catch(e){if(life.live())status(root,ctx,e);}finally{if(b.isConnected)b.disabled=false;}},{signal:life.signal});
- }catch(e){if(life.live()){status(root,ctx,e);delete root.dataset.sharingOwner;}}
+ const life=scope(root,ctx),uid=ctx.user()?.id,key=root.dataset.sectionVisibility;
+ if(!uid||!['lists','badges','history'].includes(key)||root.dataset.sharingOwner===uid)return;
+ root.dataset.sharingOwner=uid;root.innerHTML='<button class="text-button section-visibility-toggle" type="button" disabled>…</button><small data-status role="status"></small>';
+ const button=root.querySelector('button');let visible;
+ const paint=()=>{button.textContent=text(ctx,visible?'hide':'show');button.setAttribute('aria-pressed',String(visible));button.disabled=false;};
+ async function read(){try{const {data,error}=await ctx.client.from('yoru_public_profiles').select('lists_public,badges_public,history_public').eq('user_id',uid).maybeSingle();if(error)throw error;if(!life.live())return;visible=data?.[key+'_public']!==false;paint();}catch(e){if(life.live()){button.textContent=({ru:'Повторить',en:'Retry',ja:'再試行'})[ctx.lang()];button.disabled=false;status(root,ctx,e);}}}
+ button.addEventListener('click',async()=>{if(!life.live())return;if(visible===undefined){button.disabled=true;void read();return;}button.disabled=true;try{const next=!visible,{error}=await ctx.client.rpc('yoru_social_visibility',{p_kind:key,p_visible:next});if(error)throw error;if(life.live()){visible=next;clearCache(ctx.client);paint();status(root,ctx);}}catch(e){if(life.live()){status(root,ctx,e);button.disabled=false;}}},{signal:life.signal});
+ await read();
 }
 const listLabels={all:['Все','All','すべて'],favorites:['Любимые','Favorites','お気に入り'],watching:['Смотрю','Watching','視聴中'],planned:['Запланировано','Planned','視聴予定'],dropped:['Брошено','Dropped','中断'],completed:['Просмотрено','Completed','視聴済み'],ongoing:['Онгоинг','Ongoing','放送中']};
 export async function publicSections(root,ctx,id,live){

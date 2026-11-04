@@ -635,3 +635,11 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - Profile adds visibility switches, public lists with40-item pagination and four concurrent metadata loads, public achievements; compact watch-time stat. Existing saved state, activity metrics, auth, HLS/proxy17/Kodik/import and auto-skip implementation files unchanged.
 - Verification:355 tests pass, additional host-send/guest episode/seek/disposal assertions pass. Build8921/8921, canonical catalogue JSON equality and original archive bytes preserved. Latest automatic ongoing commits through e984d7e8 fast-forwarded before rebuild, no episode updates lost.
 - Safari390px mock room visually checked; authenticated two-device and physical iPhone end-to-end test not performed. Mobile browser autoplay may require the provided enable-playback button. Temporary QA pages removed. GitHub publication follows.
+
+## 2026-11-04 — section visibility and compact profile/room UI
+- Removed separate public-profile settings block. Show/Hide controls now sit beside Lists, Achievements and History headings. Controls reload when history cards refresh.
+- User explicitly requested all three sections public for every account. social-09.sql resets visibility once (idempotent migration marker), sets new-account defaults, and preserves future Hide choices. History privacy now uses the profile flag, so stale preferences cannot undo it. Private saved state/lists/progress are unchanged. User confirmed SQL Run.
+- Added public watch-time scalar RPC and fifth public statistic; aligned own watched-time label. No email or private watch-session fields exposed.
+- Together chat fills its parent panel, not viewport; own/right and others/left retained. Removed host role label. Playback/sync/HLS/import files untouched.
+- 357 tests passed; build passed, 8921/8921 catalog entries, zero rejected. Compared decompressed catalog JSON to HEAD and restored identical original archive bytes.
+- No physical-device or two-account live playback test in this UI-only change.

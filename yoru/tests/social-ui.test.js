@@ -1,3 +1,4 @@
+import {mount as visibility} from '../src/social/profile-sharing.js';
 import {test,afterEach} from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
@@ -13,14 +14,14 @@ function environment(user={id:uid}){
  dom=new JSDOM('<main id="root"></main>',{url:'https://example.test/',pretendToBeVisual:true});
  globalThis.document=dom.window.document;globalThis.window=dom.window;globalThis.location=dom.window.location;globalThis.AbortController=dom.window.AbortController;globalThis.matchMedia=()=>({matches:false});
  const calls=[],tables={yoru_comments:[{id:'c1',author_id:uid,author,body:'<script>bad()</script>',parent_id:null,created_at:'2026-10-26T10:00:00Z'}],yoru_public_profiles:{...author,bio:'Hello',history_public:false,stats:{saved:1,lists:6,completed:2,rating:10},email:'must-not-render@test'},yoru_conversations:{id:room,kind:'dm',title:'',owner_id:uid},yoru_chat_members:[{user_id:uid,profile:author}],yoru_messages:[]};
- const client={from(table){const filters=[];let query={then(resolve,reject){calls.push({table,filters});return Promise.resolve({data:filters.some(f=>f[0]==='maybeSingle')&&Array.isArray(tables[table])?tables[table].find(row=>filters.filter(f=>f[0]==='eq').every(f=>row[f[1]]===f[2]))||null:tables[table]??[],error:null}).then(resolve,reject);}};for(const name of ['select','eq','is','order','range','limit','maybeSingle','abortSignal','in','or','ilike'])query[name]=(...args)=>{filters.push([name,...args]);return query;};return query;},rpc(name,args){calls.push({rpc:name,args});const q=Promise.resolve({data:name==='yoru_social_history'?tables.history||[]:'created',error:null});q.abortSignal=()=>q;return q;},storage:{from(){return {getPublicUrl:path=>({data:{publicUrl:'https://example.test/'+path}})};}}};
+ const client={from(table){const filters=[];let query={then(resolve,reject){calls.push({table,filters});return Promise.resolve({data:filters.some(f=>f[0]==='maybeSingle')&&Array.isArray(tables[table])?tables[table].find(row=>filters.filter(f=>f[0]==='eq').every(f=>row[f[1]]===f[2]))||null:tables[table]??[],error:null}).then(resolve,reject);}};for(const name of ['select','eq','is','order','range','limit','maybeSingle','abortSignal','in','or','ilike'])query[name]=(...args)=>{filters.push([name,...args]);return query;};return query;},rpc(name,args){calls.push({rpc:name,args});const q=Promise.resolve({data:name==='yoru_social_public_watch_time'?3660:name==='yoru_social_history'?tables.history||[]:'created',error:null});q.abortSignal=()=>q;return q;},storage:{from(){return {getPublicUrl:path=>({data:{publicUrl:'https://example.test/'+path}})};}}};
  let logins=0;const ctx={client,user:()=>user,lang:()=> 'ru',login:()=>logins++,active:()=>true,confirm:async()=>true,preferences:()=>({}),title:a=>a.title,cover:()=>'',details:()=>{},card:async()=>null,searchAnime:async()=>[]};
  return {root:document.getElementById('root'),ctx,calls,tables,get logins(){return logins;},setUser:u=>user=u};
 }
 test('guest reads escaped comments and a submit opens auth without a write',async()=>{
  const e=environment(null);cleanup=comments(e.root,e.ctx,{anime:'mal-1',season:2,episode:3});await pause();
  assert.equal(e.root.querySelector('script'),null);assert.match(e.root.textContent,/<script>bad/);
- const form=e.root.querySelector('form');form.elements.body.value='hello';form.requestSubmit();await pause();assert.equal(e.logins,1);assert.ok(!e.calls.some(c=>c.rpc&&!['yoru_social_public_lists','yoru_social_public_badges'].includes(c.rpc)));
+ const form=e.root.querySelector('form');form.elements.body.value='hello';form.requestSubmit();await pause();assert.equal(e.logins,1);assert.ok(!e.calls.some(c=>c.rpc&&!['yoru_social_public_lists','yoru_social_public_badges','yoru_social_public_watch_time'].includes(c.rpc)));
  assert.ok(e.calls[0].filters.some(f=>f[0]==='eq'&&f[1]==='episode'&&f[2]===3));
 });
 test('registered reply/edit form sends exact current episode and owned ID',async()=>{
@@ -29,10 +30,10 @@ test('registered reply/edit form sends exact current episode and owned ID',async
  assert.deepEqual(e.calls.find(c=>c.rpc==='yoru_social_comment').args,{p_anime:'mal-5',p_season:3,p_episode:9,p_body:'Reply',p_parent:'c1'});
  e.root.querySelector('[data-edit]').click();form.elements.body.value='Edited';form.requestSubmit();await pause();assert.equal(e.calls.find(c=>c.rpc==='yoru_social_edit_comment').args.p_id,'c1');
 });
-test('public profile renders four stats and never renders an email even if supplied',async()=>{
+test('public profile renders five stats and never renders an email even if supplied',async()=>{
  const e=environment(null);cleanup=profile(e.root,e.ctx,uid);await pause();
- assert.equal(e.root.querySelectorAll('.social-stats>div').length,4);assert.ok(!e.root.textContent.includes('must-not-render'));assert.equal(e.root.querySelector('[data-edit]'),null);
- e.root.querySelector('[data-friend]').click();await pause();assert.equal(e.logins,1);assert.ok(!e.calls.some(c=>c.rpc&&!['yoru_social_public_lists','yoru_social_public_badges'].includes(c.rpc)));
+ assert.equal(e.root.querySelectorAll('.social-stats>div').length,5);assert.ok(!e.root.textContent.includes('must-not-render'));assert.equal(e.root.querySelector('[data-edit]'),null);assert.match(e.root.querySelector('[data-public-watch-time]').textContent,/1.*1/);
+ e.root.querySelector('[data-friend]').click();await pause();assert.equal(e.logins,1);assert.ok(!e.calls.some(c=>c.rpc&&!['yoru_social_public_lists','yoru_social_public_badges','yoru_social_public_watch_time'].includes(c.rpc)));
 });
 test('chat is guest-gated with zero message or membership requests',async()=>{
  const e=environment(null);cleanup=chat(e.root,e.ctx,room);await pause();assert.equal(e.calls.length,0);assert.equal(e.logins,1);assert.ok(!e.root.querySelector('textarea'));
@@ -63,7 +64,7 @@ test('own public profile opens the main editor instead of a second settings form
 });
 
 test('a temporary profile sync failure keeps the existing profile readable',async()=>{
- const e=environment();e.ctx.profileReady=()=>true;e.ctx.client.rpc=async()=>({error:new Error('Failed to fetch')});cleanup=profile(e.root,e.ctx,uid);await pause();await pause();assert.equal(e.root.querySelectorAll('.social-stats>div').length,4);assert.ok(e.root.querySelector('a[href="#profile"]'));assert.ok(e.root.querySelector('[data-status]').textContent);
+ const e=environment();e.ctx.profileReady=()=>true;e.ctx.client.rpc=async()=>({error:new Error('Failed to fetch')});cleanup=profile(e.root,e.ctx,uid);await pause();await pause();assert.equal(e.root.querySelectorAll('.social-stats>div').length,5);assert.ok(e.root.querySelector('a[href="#profile"]'));assert.ok(e.root.querySelector('[data-status]').textContent);
 });
 
 test('chats show conversations and friends without community tabs or public-profile settings',async()=>{
@@ -143,4 +144,14 @@ test('chat displays sending immediately, retries a failed UUID and quotes withou
  e.root.querySelector('[data-retry]').click();await pause();assert.equal(attempts[1].p_id,attempts[0].p_id);
  e.tables.yoru_messages.push({id:attempts[0].p_id,room_id:room,author,author_id:uid,body:'My answer',reply_to:attempts[0].p_reply,created_at:new Date().toISOString()});finish({data:attempts[0].p_id});await pause();await pause();
  assert.equal(e.root.querySelectorAll(`[data-message="${attempts[0].p_id}"]`).length,1);assert.equal(e.root.querySelector('[data-retry]'),null);assert.ok(e.root.querySelector('[data-state="sent"]'));
+});
+
+test('section visibility toggles stay at their heading and write only the selected flag',async()=>{
+ const e=environment();e.tables.yoru_public_profiles={lists_public:true,badges_public:true,history_public:true};
+ for(const key of ['lists','badges','history']){
+  const node=document.createElement('span');node.dataset.sectionVisibility=key;e.root.append(node);await visibility(node,e.ctx);
+  const button=node.querySelector('button');assert.equal(button.textContent,'Скрыть');button.click();await pause();
+  assert.equal(button.textContent,'Показать');assert.deepEqual(e.calls.filter(c=>c.rpc==='yoru_social_visibility').at(-1).args,{p_kind:key,p_visible:false});
+ }
+ assert.equal(e.root.querySelector('.profile-sharing'),null);
 });

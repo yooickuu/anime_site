@@ -305,3 +305,8 @@ body.dark[data-style] :is(.button.soft,.icon-button,.select-trigger,.glass-butto
 @media(prefers-reduced-motion:no-preference){.profile-detail-page{animation:profile-detail-enter .42s cubic-bezier(.22,1,.36,1)}.profile-history-items .history-item{animation:profile-detail-enter .35s both;transition:background .2s,transform .25s}.profile-history-items .history-item:hover{transform:translateX(3px)}.profile-achievements-link{transition:transform .25s,box-shadow .25s}.profile-achievements-link:hover{transform:translateY(-2px)}@keyframes profile-detail-enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}}
 
 .profile-stats>.profile-watch-stat{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:10px 14px}.profile-stats .profile-watch-stat strong{font-size:20px;line-height:1.2;margin:0}.profile-watch-stat{font-size:13px}
+
+/* Heading controls stay local to their sections. */
+.section-visibility-heading{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.section-visibility-heading h3{margin:0}.library-sidebar>.section-visibility-heading{margin-bottom:20px}.section-visibility-heading [data-section-visibility]{flex:none}.section-visibility-toggle{white-space:nowrap;font-size:13px!important;min-height:36px}.profile-stats>.profile-watch-stat>small{display:block;font-size:13px;line-height:1.2;margin:0;padding:0;align-self:center}.profile-stats>.profile-watch-stat>strong{align-self:center;line-height:1.2}
+
+.library-sidebar>.section-visibility-heading{width:100%;flex-wrap:nowrap;justify-content:space-between}.library-sidebar>.section-visibility-heading h3{width:auto;margin:0}.section-visibility-heading [data-status]:empty{display:none}

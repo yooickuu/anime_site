@@ -265,3 +265,20 @@ test('public lists and badges are opt-in, paginated and never return private acc
  assert.equal((await as(B,'select yoru_social_public_badges($1) d',[A]))[0].d.visible,false);
  assert.deepEqual((await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data,before);
 });
+test('section visibility defaults open once; later hides persist and private state stays intact',async()=>{
+ const before=(await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data;
+ const migration=await readFile('supabase/social-09.sql','utf8');await db.exec(migration);
+ const flags=(await as(null,'select lists_public,badges_public,history_public from yoru_public_profiles where user_id=$1',[A]))[0];
+ assert.deepEqual(flags,{lists_public:true,badges_public:true,history_public:true});
+ const seconds=(await as(null,'select yoru_social_public_watch_time($1) seconds',[A]))[0].seconds;
+ assert.ok(Number(seconds)>=0);await assert.rejects(as(null,'select * from yoru_watch_metrics'),/permission/);
+ for(const kind of ['lists','badges','history'])await as(A,'select yoru_social_visibility($1,false)',[kind]);
+ await as(A,'select yoru_social_sync_profile()');await db.exec(migration);
+ assert.deepEqual((await as(null,'select lists_public,badges_public,history_public from yoru_public_profiles where user_id=$1',[A]))[0],{lists_public:false,badges_public:false,history_public:false});
+ assert.deepEqual((await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data,before);
+ await assert.rejects(as(null,"select yoru_social_visibility('history',true)"),/permission/);
+ await as(A,"select yoru_social_visibility('history',true)");
+ assert.equal((await as(null,'select history_public from yoru_public_profiles where user_id=$1',[A]))[0].history_public,true);
+ await db.exec("insert into auth.users values('00000000-0000-4000-8000-000000000099','new@test'); insert into yoru_nicknames values('00000000-0000-4000-8000-000000000099','NewUser')");
+ assert.deepEqual((await as(null,"select lists_public,badges_public,history_public from yoru_public_profiles where nickname='NewUser'"))[0],{lists_public:true,badges_public:true,history_public:true});
+});
