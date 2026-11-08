@@ -293,3 +293,20 @@ test('public saved metadata recovers legacy names without leaking private entry 
  assert.deepEqual((await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data,before);
  await as(A,"select yoru_social_visibility('lists',false)");assert.equal((await as(null,'select yoru_social_public_lists($1) d',[A]))[0].d.visible,false);
 });
+test('stage 3 exposes only public tabs, disables time accrual and preserves private lists/progress and badges',async()=>{
+ const before=(await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data;
+ const met=(await db.query('select seconds,badges from yoru_watch_metrics where user_id=$1',[A])).rows[0];
+ await db.exec(await readFile('supabase/social-11.sql','utf8'));
+ for(const kind of ['lists','badges','history'])await as(A,'select yoru_social_visibility($1,false)',[kind]);
+ assert.deepEqual((await as(null,'select lists_public,badges_public,history_public from yoru_public_profiles where user_id=$1',[A]))[0],{lists_public:true,badges_public:true,history_public:true});
+ assert.equal((await as(null,'select yoru_social_public_lists($1) d',[A]))[0].d.visible,true);
+ assert.equal((await as(null,'select yoru_social_public_badges($1) d',[A]))[0].d.visible,true);
+ await as(A,'select yoru_activity_sync($1,900000,300)',[room]);
+ assert.equal((await db.query('select seconds from yoru_watch_metrics where user_id=$1',[A])).rows[0].seconds,met.seconds);
+ const after=(await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data;assert.deepEqual(after,before);
+ const friends=(await as(null,'select yoru_social_public_friends($1,0) d',[A]))[0].d;
+ for(const row of friends.items)assert.deepEqual(Object.keys(row).sort(),['avatar_path','nickname','user_id']);
+ await assert.rejects(as(null,'select * from yoru_state'),/permission|policy/);await assert.rejects(as(null,'select * from yoru_messages'),/permission/);
+ await db.exec(await readFile('supabase/social-11.sql','utf8'));
+ assert.deepEqual((await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data,before);
+});

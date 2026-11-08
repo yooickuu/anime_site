@@ -31,6 +31,3 @@ export const badges=[
  ['friend_5','',['Своя команда','Your own crew','仲間たち'],['Добавить 5 друзей','Make 5 friends','友達を5人追加']]
 ];
 export const text=(values,lang)=>values[({ru:0,en:1,ja:2})[lang]??0];
-export function watchLabel(seconds,lang){const h=Math.floor(seconds/3600),m=Math.floor(seconds%3600/60);return text([`Высмотрено: ${h} ч ${m} мин`,`Watched: ${h} h ${m} min`,`視聴時間：${h}時間${m}分`],lang);}
-
-export function watchValue(seconds,lang){const h=Math.floor(seconds/3600),m=Math.floor(seconds%3600/60);return text([`${h} ч ${m} мин`,`${h} h ${m} min`,`${h}時間${m}分`],lang);}

@@ -1,3 +1,4 @@
+import {ownProfileView,settingsView,mountOwnLists} from './profile-redesign.js';
 import {catalogView} from './catalog-view.js';
 import {similarTitles} from './recommendations.js';
 import {headerHTML,installShell} from './ui-shell.js';
@@ -18,7 +19,6 @@ import {within,nextHero,fadeHero,scheduledHeroes} from './hero-rotation.js';
 import {revealSurfaces} from './motion.js';
 import {applyGuestPlaybackOperation} from './guest-playback.js';
 import {styles,normalizeStyle,styleColors} from './appearance.js';
-import {eveningPlan} from './evening-plan.js';
 import {improvePoster} from './image-quality.js';
 import artwork from './artwork.json';
 
@@ -38,7 +38,7 @@ function ensureActivity(){
  if(activityOwner!==uid){activityInstance?.dispose();activityInstance=null;activityOwner=uid;}
  if(!uid||!client)return;if(activityInstance){activityInstance.paint();return;}
  if(activityLoad)return;
- activityLoad=(async()=>{activityModule ||= await import(new URL(__ACTIVITY_ASSET__,document.baseURI).href);if(activityOwner===uid&&user?.id===uid&&ready)activityInstance=activityModule.start({client,user:()=>user,lang:()=>lang,visibility:mountSectionVisibility,watch:()=>({ready:page==='watch'&&recordReady,key:sourceGeneration+':'+sourceKey})});})().catch(()=>{}).finally(()=>{activityLoad=null;if(activityOwner&&activityOwner!==uid)ensureActivity();});
+ activityLoad=(async()=>{activityModule ||= await import(new URL(__ACTIVITY_ASSET__,document.baseURI).href);if(activityOwner===uid&&user?.id===uid&&ready)activityInstance=activityModule.start({client,user:()=>user,lang:()=>lang,});})().catch(()=>{}).finally(()=>{activityLoad=null;if(activityOwner&&activityOwner!==uid)ensureActivity();});
 }
 function mountSectionVisibility(root){
  if(!root||!user||!ready)return;const route=page,ctx=socialContext(()=>page===route);
@@ -177,7 +177,7 @@ function rememberDisplayCard(a){
 let lang = read("yooickuu.language", "ru");
 if (!dictionaries[lang]) lang = "ru";
 let appearance = normalizeStyle(read("yooickuu.appearance", "graphite"));
-let eveningMinutes = 30, eveningMode = "all";
+
 let theme = "dark",
   state = normalize({preferences:read("yooickuu.guest-player", {})}),
   user = null,
@@ -285,8 +285,9 @@ function render(newWatch=false) {
   if(page==='home'){startHero();void renderRecent();}
   if (page !== 'social' && page !== 'watch' && !(["profile","achievements","history"].includes(page)) && !(page === "library" && !user)) renderGrid();
   if(page==='social'){const own=socialPageVersion,root=$('#social-root'),ctx=socialContext(()=>own===socialPageVersion);loadSocial().then(async module=>{if(ctx.active()){const cleanup=await module.mountPage(root,ctx,location.hash.slice(1));if(ctx.active())socialPageCleanup=cleanup;else cleanup();}}).catch(()=>{if(ctx.active())root.textContent=t('providerError');});}
-  if(page==='profile'&&user&&ready){void syncMainProfile().catch(()=>{});ensurePlanCards();}
-  if(['profile','history'].includes(page)&&user&&ready)ensureHistoryCards();
+  if(page==='profile'&&user&&ready){void syncMainProfile().catch(()=>{});}
+  ownListsCleanup?.();ownListsCleanup=null;if(page==='profile')mountProfileLists();
+  if(page==='history'&&user&&ready)ensureHistoryCards();
   ensureActivity();
   document.querySelectorAll('[data-section-visibility]').forEach(mountSectionVisibility);
   updateSync();
@@ -385,7 +386,7 @@ function catalogShell() {
     page === "library"
       ? collection?.name || (status ? statusName(status) : t("library"))
       : t("catalog");
-  return `${page==='catalog'?discoveryHTML():''}<div class="library-layout ${page === "library" ? "with-sidebar" : ""}">${page === "library" ? `<aside class="library-sidebar"><div class="section-visibility-heading"><h3>${t("library")}</h3><span data-section-visibility="lists"></span></div><button class="list-nav ${list === "all" ? "active" : ""}" data-list="all">${t("allStories")} <span>${savedCount()}</span></button>${state.statuses.map((s) => `<button class="list-nav ${list === s.id ? "active" : ""}" data-list="${esc(s.id)}">${esc(statusName(s))}<span>${Object.values(state.entries).filter((e) => (s.id === "favorites" ? e.favorite : (e.status === s.id || e.legacyLists?.includes(s.id)))).length}</span></button>`).join("")}<button class="text-button" data-action="manage-statuses">${icon("settings")} ${t("manageStatuses")}</button><button class="text-button" data-action="create-status">${icon("plus")} ${t("createCollection")}</button></aside>` : ""}<section class="section catalog-section" id="catalog"><div class="section-head"><div><h2>${esc(heading)}</h2></div>${collection ? `<div><button class="text-button" data-edit-collection="${esc(collection.id)}">${t("rename")}</button><button class="text-button danger" data-delete-collection="${esc(collection.id)}">${t("remove")}</button></div>` : `<label class="sort-label">${t("order")} <select id="sort" aria-label="${t("order")}">${(page === "library" ? ["picked", "newest", "alphabetical"] : ["picked", "hiddenGems", "latest", "topRated", "newest", "oldest"]).map((v) => `<option value="${v}" ${sort === v ? "selected" : ""}>${t(v)}</option>`).join("")}</select></label>`}</div>${list === "ongoing" ? `<p class="notice">${t("ongoingHint")}</p>` : ""}<label class="catalog-search"><input id="catalog-search" type="search" placeholder="${t(page==='library'?'searchThisList':'search')}" aria-label="${t(page==='library'?'searchThisList':'search')}" value="${esc(query)}"></label><div class="catalog-options"><select id="type-filter" aria-label="${t("allTypes")}">${[
+  return `${page==='catalog'?discoveryHTML():''}<div class="library-layout ${page === "library" ? "with-sidebar" : ""}">${page === "library" ? `<aside class="library-sidebar"><div class="section-visibility-heading"><h3>${t("library")}</h3></div><button class="list-nav ${list === "all" ? "active" : ""}" data-list="all">${t("allStories")} <span>${savedCount()}</span></button>${state.statuses.map((s) => `<button class="list-nav ${list === s.id ? "active" : ""}" data-list="${esc(s.id)}">${esc(statusName(s))}<span>${Object.values(state.entries).filter((e) => (s.id === "favorites" ? e.favorite : (e.status === s.id || e.legacyLists?.includes(s.id)))).length}</span></button>`).join("")}<button class="text-button" data-action="manage-statuses">${icon("settings")} ${t("manageStatuses")}</button><button class="text-button" data-action="create-status">${icon("plus")} ${t("createCollection")}</button></aside>` : ""}<section class="section catalog-section" id="catalog"><div class="section-head"><div><h2>${esc(heading)}</h2></div>${collection ? `<div><button class="text-button" data-edit-collection="${esc(collection.id)}">${t("rename")}</button><button class="text-button danger" data-delete-collection="${esc(collection.id)}">${t("remove")}</button></div>` : `<label class="sort-label">${t("order")} <select id="sort" aria-label="${t("order")}">${(page === "library" ? ["picked", "newest", "alphabetical"] : ["picked", "hiddenGems", "latest", "topRated", "newest", "oldest"]).map((v) => `<option value="${v}" ${sort === v ? "selected" : ""}>${t(v)}</option>`).join("")}</select></label>`}</div>${list === "ongoing" ? `<p class="notice">${t("ongoingHint")}</p>` : ""}<label class="catalog-search"><input id="catalog-search" type="search" placeholder="${t(page==='library'?'searchThisList':'search')}" aria-label="${t(page==='library'?'searchThisList':'search')}" value="${esc(query)}"></label><div class="catalog-options"><select id="type-filter" aria-label="${t("allTypes")}">${[
     ["all", "allTypes"],
     ["series", "series"],
     ["MOVIE", "movies"],
@@ -482,36 +483,32 @@ function renderGrid() {
 }
 const profileDraft = createProfileDraft();
 const accounts=accountVault(localStorage);
-function profileHTML() {
-  if (!user) return guestHTML();
-  if (!ready && !cachedProfileVisible && !dataError) return `<section class="profile-page" aria-busy="true"><h1>${t("profile")}</h1><p role="status">${t("loading")}</p></section>`;
-  const p = state.preferences, stats = profileStats(state);
-  const draft = {...p, name:p.name || user.user_metadata?.name || "", language:lang, theme, ...profileDraft.get(user.id)};
-  return `<section class="profile-page"><div class="profile-banner-stage"><div class="section-head profile-banner-heading"><div><h1>${t("profile")}</h1></div><div class="profile-account-actions"><button class="button soft" data-action="switch-account">${t("switchAccount")}</button><button class="text-button" data-action="logout">${t("logout")}</button></div></div>${dataError ? `<p class="form-error profile-banner-error">${t("readError")}</p><button class="button soft" data-action="reload-profile">${t("retry")}</button>` : ""}<div class="profile-cover"><img class="profile-banner-fill" ${bannerUrl?`src="${esc(bannerUrl)}"`:"hidden"} alt="" aria-hidden="true"><img decoding="async" fetchpriority="high" id="profile-banner-image" ${bannerUrl?`src="${esc(bannerUrl)}"`:'hidden'} alt=""><div class="profile-cover-fade"></div><div class="profile-cover-actions"><button class="icon-button glass-button" data-action="banner" aria-label="${t('profileBanner')}" title="${t('profileBanner')}">${icon('image')}</button>${p.banner?`<button class="icon-button glass-button" data-action="remove-banner" aria-label="${t('removeBanner')}">${icon('close')}</button>`:''}</div><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" hidden></div></div><div class="profile-grid"><div class="profile-sidebar"><div class="profile-card"><div class="profile-avatar">${avatarUrl ? `<img fetchpriority="high" decoding="async" src="${esc(avatarUrl)}" alt="${t("profile")}">` : esc((p.name || user.email || "u").slice(0, 1).toUpperCase())}</div><button class="text-button" data-action="avatar">${t("avatar")}</button><input id="avatar-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><h2>${esc(p.name || user.user_metadata?.name || "yomiku")}</h2><p class="profile-email">${esc(user.email || user.phone || "")}</p><p class="bio-preview">${esc(p.bio)}</p><div class="profile-stats"><span><strong>${savedCount()}</strong>${t("savedAnime")}</span><span><strong>${state.statuses.length}</strong>${t("library")}</span><span><strong>${stats.completedEpisodes}</strong>${t("completedEpisodes")}</span><span><strong>${stats.averageRating}</strong>${t("averageRating")}</span><span class="profile-watch-stat"><strong id="profile-watch-time">—</strong><small>${({ru:"Высмотрено",en:"Watched",ja:"視聴時間"})[lang]}</small></span></div><div class="profile-social-actions"><a class="button soft" href="#social/people">${({ru:"Найти пользователя",en:"Find people",ja:"ユーザー検索"})[lang]}</a><a class="button soft" href="#social/friends">${({ru:"Друзья",en:"Friends",ja:"友達"})[lang]}</a></div><a class="button soft profile-achievements-link" href="#achievements">${({ru:"Достижения",en:"Achievements",ja:"実績"})[lang]} ${icon("arrow")}</a></div>${appearanceHTML()}<div class="profile-preferences"><h2>${t("playerSettings")}</h2>${preferencesHTML()}${window.YORU_CONFIG?.accountDeletion?`<button class="text-button danger" data-action="delete-account">${t("deleteAccount")}</button>`:""}<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button></div></div><div class="profile-main"><div class="profile-fields"><h2>${t("personalDetails")}</h2><form id="profile-form"><label>${t("nickname")}<input name="name" value="${esc(draft.name ?? user.user_metadata?.name ?? "")}" maxlength="40" required placeholder="${t("nameHint")}"></label><p class="form-error" data-nickname-message role="status" aria-live="polite"></p><label>${t("bio")}<textarea name="bio" maxlength="240" rows="3">${esc(draft.bio)}</textarea></label><button class="button primary">${t("save")}</button></form></div>${historyHTML()}${eveningHTML()}</div></div></section>`;
+let ownListsCleanup,ownListsOwner,ownListView={};
+function profileHTML(){
+ if(!user)return guestHTML();
+ if(!ready&&!cachedProfileVisible&&!dataError)return `<p role="status">${t('loading')}</p>`;
+ return ownProfileView({p:state.preferences,name:state.preferences.name||user.user_metadata?.name||'yomiku',avatar:avatarUrl,banner:bannerUrl,stats:profileStats(state),saved:savedCount(),t,lang,error:dataError?`<p class="form-error">${t('readError')}</p><button class="button soft" data-action="reload-profile">${t('retry')}</button>`:''});
+}
+function mountProfileLists(){
+ ownListsCleanup?.();ownListsCleanup=null;const root=$('#profile-saved'),owner=user?.id;
+ if(!root||!owner)return;
+ if(ownListsOwner!==owner){ownListView={};ownListsOwner=owner;}
+ ownListsCleanup=mountOwnLists(root,{state,view:ownListView,t,lang,statusName,title,cover,lookup:id=>displayCards.get(id)||byId(id),resolve:resolveDisplayCard,remember:rememberDisplayCard,live:()=>page==='profile'&&user?.id===owner,reveal:revealSurfaces,enhance:()=>enhanceSelects(root)});
+}
+function profileSettings(){
+ if(!requireUser())return;
+ let d=$('#profile-settings');if(!d){d=document.createElement('dialog');d.id='profile-settings';d.className='profile-settings-dialog liquid-glass';document.body.append(d);d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}});}
+ d.innerHTML=settingsView({draft:{...state.preferences,name:state.preferences.name||user.user_metadata?.name||'',...profileDraft.get(user.id)},p:state.preferences,t,lang,preferences:preferencesHTML(),appearance:appearanceHTML(),avatar:avatarUrl,banner:bannerUrl,deletion:window.YORU_CONFIG?.accountDeletion,close:closeButton('profile-settings')});
+ d.showModal();enhanceSelects(d);
 }
 function appearanceHTML() {
  return `<section class="profile-appearance glass-panel"><div class="panel-heading"><span class="overline">${t('yourAtmosphere')}</span><h2>${t('siteStyle')}</h2></div><div class="style-options" role="group" aria-label="${t('siteStyle')}">${styles.map(id=>`<button class="style-option" data-style-choice="${id}" aria-pressed="${appearance===id}"><span class="style-swatch" data-style="${id}" aria-hidden="true"><i></i><i></i><i></i></span><span>${t('style_'+id)}</span><span class="style-selected" aria-hidden="true">${icon('check')}</span></button>`).join('')}</div></section>`;
-}
-let planKey='',planCards=new Map(),planBusy=false,planFailed=false;
-function ensurePlanCards(){
- const ids=[...new Set([...Object.keys(state.entries),...Object.values(state.progress).map(p=>p.id).filter(Boolean)])];
- const key=JSON.stringify([user?.id,ids]);if(key===planKey)return;
- planKey=key;planCards=new Map();planBusy=true;planFailed=false;
- const paint=()=>{if(page==='profile'&&$('#evening-plan'))$('#evening-plan').outerHTML=eveningHTML();};paint();
- void loadSavedCards(ids,resolveDisplayCard,{current:()=>planKey===key&&page==='profile',onCard:a=>{planCards.set(a.id,a);rememberDisplayCard(a);}}).then(failed=>{
-  if(planKey!==key)return;planBusy=false;planFailed=failed.length>0;
-  if(page==='profile')paint();else planKey='';
- });
-}
-function eveningHTML() {
- const choices=eveningPlan(state,id=>planCards.get(id)||byId(id),eveningMinutes,eveningMode).filter(p=>isPublished(p.id));
- return `<section class="profile-evening glass-panel" id="evening-plan"><div class="panel-heading"><span class="overline">${t('aLittleTime')}</span><h2>${t('eveningPlan')}</h2></div><p class="panel-description">${t('eveningHint')}</p><div class="plan-modes" role="group" aria-label="${t('planMode')}">${['all','continue','new','finish'].map(id=>`<button class="chip" data-plan-mode="${id}" aria-pressed="${eveningMode===id}">${t('plan_'+id)}</button>`).join('')}</div><div class="time-options" role="group" aria-label="${t('availableTime')}">${[15,30,60,90,120].map(n=>`<button class="chip" data-plan-minutes="${n}" aria-pressed="${n===eveningMinutes}">${n} ${t('minutesShort')}</button>`).join('')}</div><label class="plan-custom-time">${t('planCustomTime')} <input id="plan-time" type="number" inputmode="numeric" min="1" max="240" value="${eveningMinutes}"> ${t('minutesShort')}</label><div class="evening-results" aria-live="polite" aria-busy="${planBusy}">${choices.length?choices.map(plan=>{const a=planCards.get(plan.id)||byId(plan.id)||state.entries[plan.id]?.anime||Object.values(state.progress).find(p=>p.id===plan.id)?.anime;return `<button class="evening-option" data-watch="${esc(plan.id)}" data-episode="${plan.start}"><img src="${esc(cover(a))}" alt="" loading="lazy" decoding="async"><span><strong>${esc(title(a))}</strong><small>${t(plan.count>1?'episodes':'episode')} ${plan.ordinal}${plan.count>1?'–'+plan.lastOrdinal:''}</small><small>${plan.estimated?'≈ ':''}${plan.minutes} ${t('minutesShort')}${plan.speed!==1?' · '+plan.speed+'×':''}</small><small class="plan-reason">${t(plan.finishes?'planFinishes':plan.resume?'planResume':plan.started?'plan_continue':'plan_new')}${plan.resume?' · '+timeLabel(plan.resumeSeconds):''}</small><small class="plan-spare">${t('planSpare')} ${plan.spareMinutes} ${t('minutesShort')}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t(planBusy?'loading':eveningMode==='finish'?'planFinishEmpty':'eveningEmpty')}</p>`}</div>${planFailed?`<button class="text-button" data-action="reload-plan">${t('retry')}</button>`:''}${choices.some(c=>c.estimated)?`<p class="plan-estimate">${t('eveningEstimate')}</p>`:''}</section>`;
 }
 let historyVisible=40,historyLoadKey='';
 function profileSectionHTML(){if(!user)return guestHTML();return `<section class="profile-detail-page"><a class="text-button profile-return" href="#profile">← ${t('profile')}</a>${page==='achievements'?'<div id="profile-activity"></div>':historyHTML(true)}</section>`;}
 function historyHTML(full=false){
  const history=recentHistory(state.progress),shown=history.slice(0,full?historyVisible:5),more=({ru:'Ещё',en:'More',ja:'もっと見る'})[lang];
- return `<section class="profile-history" id="profile-history-list" data-history-stamp="${esc(history.map(p=>p.id+':'+p.updated).join('|'))}"><div class="profile-history-heading"><${full?'h1':'h3'}>${t('history')}</${full?'h1':'h3'}><span data-section-visibility="history"></span></div><div class="profile-history-items">${shown.length?shown.map(p=>{const a=displayCards.get(p.id)||byId(p.id)||p.anime;return `<button class="history-item" data-watch="${esc(p.id)}" data-episode="${Number(p.episode)||1}">${a?`<img src="${esc(cover(a))}" alt="" loading="lazy" decoding="async">`:''}<span><strong>${a?esc(title(a)):t('loading')}</strong><small>${t('episode')} ${esc(savedEpisodeNumber(p))} · ${timeLabel(p.time)} · ${new Date(Number(p.updated)).toLocaleDateString(lang)}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('historyEmpty')}</p>`}</div>${!full&&history.length>5?`<a class="button soft history-more" href="#history">${more} ${icon('arrow')}</a>`:full&&history.length>shown.length?`<button class="button soft history-more" data-action="history-more">${more}</button>`:''}</section>`;
+ return `<section class="profile-history" id="profile-history-list" data-history-stamp="${esc(history.map(p=>p.id+':'+p.updated).join('|'))}"><div class="profile-history-heading"><${full?'h1':'h3'}>${t('history')}</${full?'h1':'h3'}></div><div class="profile-history-items">${shown.length?shown.map(p=>{const a=displayCards.get(p.id)||byId(p.id)||p.anime;return `<button class="history-item" data-watch="${esc(p.id)}" data-episode="${Number(p.episode)||1}">${a?`<img src="${esc(cover(a))}" alt="" loading="lazy" decoding="async">`:''}<span><strong>${a?esc(title(a)):t('loading')}</strong><small>${t('episode')} ${esc(savedEpisodeNumber(p))} · ${timeLabel(p.time)} · ${new Date(Number(p.updated)).toLocaleDateString(lang)}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('historyEmpty')}</p>`}</div>${!full&&history.length>5?`<a class="button soft history-more" href="#history">${more} ${icon('arrow')}</a>`:full&&history.length>shown.length?`<button class="button soft history-more" data-action="history-more">${more}</button>`:''}</section>`;
 }
 function refreshHistorySection(full){
  const root=$('#profile-history-list');if(!root)return;root.outerHTML=historyHTML(full);
@@ -809,7 +806,7 @@ const bannerLoader=createAvatarLoader({
  cache:uiCache,
  identity:()=>({uid:user?.id,path:state.preferences.banner}),
  sign:async path=>{const {data,error}=await client.storage.from('avatars').createSignedUrl(path,3600);if(error)throw error;return data?.signedUrl;},
- display:url=>{bannerUrl=url;const img=$('#profile-banner-image');if(img){img.hidden=!url;if(url)img.src=url;else img.removeAttribute('src');}}
+ display:url=>{bannerUrl=url;for(const img of $$('#profile-banner-image,[data-settings-banner]')){img.hidden=!url;if(url)img.src=url;else img.removeAttribute('src');}}
 });
 const avatarLoad = () => Promise.all([avatarLoader.refresh(),bannerLoader.refresh()]);
 async function loadProfile() {
@@ -873,7 +870,7 @@ async function handleSession(session, event) {
 
   unifiedProfileKey='';
   profileDraft.clear();
-  avatarLoader.reset();bannerLoader.reset();
+  $("#profile-settings")?.close();avatarLoader.reset();bannerLoader.reset();
   socialModule?.clearCache?.(client);
   user = next;
   void startNotifications();
@@ -1300,7 +1297,7 @@ async function submitAccountDeletion(form){
     }
     try{sessionStorage.removeItem('yooickuu.pending.'+uid);localStorage.removeItem('yooickuu.pending.'+uid);}catch{}
     uiCache.remove(uid);
-    operations=[];profileDraft.clear();avatarLoader.reset();bannerLoader.reset();
+    operations=[];profileDraft.clear();$("#profile-settings")?.close();avatarLoader.reset();bannerLoader.reset();
     accounts.forget(uid);
     await client.auth.signOut({scope:'local'});
     await handleSession(null,'SIGNED_OUT');
@@ -1338,8 +1335,6 @@ document.addEventListener("click", async (event) => {
       $$('[data-style-choice]').forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.styleChoice===next)));
       return;
     }
-    if(b.dataset.planMode){eveningMode=['all','continue','new','finish'].includes(b.dataset.planMode)?b.dataset.planMode:'all';$('#evening-plan').outerHTML=eveningHTML();$('#evening-plan [data-plan-mode="'+eveningMode+'"]').focus({preventScroll:true});return;}
-    if(b.dataset.planMinutes){eveningMinutes=Number(b.dataset.planMinutes);$('#evening-plan').outerHTML=eveningHTML();$('#evening-plan [data-plan-minutes="'+eveningMinutes+'"]').focus({preventScroll:true});return;}
     if(b.dataset.account){b.disabled=true;try{await switchAccount(b.dataset.account);}finally{b.disabled=false;}return;}
     if (b.dataset.close) $("#" + b.dataset.close).close();
     if(b.dataset.discover){catalogueView=b.dataset.discover;const preset=discoveryOptions(catalogueView);catalogScope='all';query='';genre='all';typeFilter=preset.type||'all';yearFilter='all';ratingFilter=String(preset.minRating||0);ratingMaxFilter='10';statusFilter=preset.ongoing?'airing':'all';ongoingOnly=!!preset.ongoing;sort=preset.sort;navigate('catalog');}
@@ -1378,6 +1373,7 @@ document.addEventListener("click", async (event) => {
       openDetails(b.dataset.removeEntry);
       renderGrid();
     }
+    if(b.dataset.settingsTab){const d=$('#profile-settings');d.querySelectorAll('[data-settings-tab]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));d.querySelectorAll('[role="tabpanel"]').forEach(x=>x.hidden=x.id!=='settings-panel-'+b.dataset.settingsTab);return;}
     if (b.dataset.authMode) authDialog(b.dataset.authMode);
     if (b.dataset.authMethod) {
       authMethod = b.dataset.authMethod;
@@ -1406,7 +1402,8 @@ document.addEventListener("click", async (event) => {
       case "register":
         authDialog("register");
         break;
-      case "switch-account": accountDialog();break;
+      case "profile-settings": profileSettings();break;
+      case "switch-account": $("#profile-settings")?.close();accountDialog();break;
       case "add-account": $("#collection-dialog").close();authDialog();break;
       case "logout":
         recordProgress();
@@ -1435,7 +1432,7 @@ document.addEventListener("click", async (event) => {
         b.setAttribute('aria-pressed',String(show));b.setAttribute('aria-label',t(show?'hidePassword':'showPassword'));
         b.innerHTML=icon(show?'eyeOff':'eye');break;
       }
-      case 'delete-account':deleteAccountDialog();break;
+      case 'delete-account':$('#profile-settings')?.close();deleteAccountDialog();break;
       case "random":
         {
           if(randomBusy)break;randomBusy=true;b.disabled=true;
@@ -1455,7 +1452,7 @@ document.addEventListener("click", async (event) => {
       case "about":
         showAbout();
         break;
-      case "reload-plan": planKey="";ensurePlanCards();break;
+
       case "reload-library": libraryKey="";renderGrid();break;
       case "load-more":
         loadCatalogue(true);
@@ -1565,10 +1562,6 @@ document.addEventListener("input", (event) => {
 });
 document.addEventListener("change", (event) => {
   const input = event.target;
-  if(input.id==='plan-time'){
-    if(!input.value||!input.checkValidity())return;
-    eveningMinutes=Number(input.value);$('#evening-plan').outerHTML=eveningHTML();$('#plan-time').focus({preventScroll:true});return;
-  }
   if(input.id==='genre-filter'){genre=input.value;if(page==='library')renderGrid();else loadCatalogue();}
   if(input.id==='catalog-view'){catalogueView=input.value;loadCatalogue();}
   if(input.id==='year-filter'){yearFilter=input.value;loadCatalogue();}
@@ -1689,7 +1682,7 @@ document.addEventListener("submit", async (event) => {
       const next=await saveOperation(uid,{type:'preferences',patch});
       if(user?.id!==uid)return;
       state=operations.reduce((s,o)=>applyOperation(s,o),next);
-      profileDraft.clear();persistDraft();render();
+      profileDraft.clear();persistDraft();$("#profile-settings")?.close();render();
     }catch(error){
       if(user?.id===uid){const message=form.querySelector('[data-nickname-message]');if(message)message.textContent=errorText(error);}
     }finally{button.disabled=false;}

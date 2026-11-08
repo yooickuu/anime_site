@@ -660,3 +660,11 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - Existing guest-accessible nickname search retained with avatars and #user routes, faster debounce, stale response protection and clear loading/empty/error states. No SQL migration needed.
 - Verification: 367 tests passed, npm run check, build: 8921/8921 titles, 0 rejected. Canonical publication equals remote archive byte-for-byte after decompression; latest ten ongoing-update commits fast-forwarded before final build. HLS/proxy/auth/storage modules unchanged.
 - Browser: desktop Safari homepage/search exercised; capture then failed with ScreenCaptureKit -3811. Final mobile visual check / physical iPhone playback not claimed. Responsive layout reviewed; native media logic not modified.
+
+## 2026-11-08 — Stage 3 profile redesign completed
+- Own profile: banner/avatar/bio, four compact statistics; saved-list tabs, local list search, format/sort and bounded pagination using existing account-scoped display cache. No user-state migration.
+- Glass Settings dialog contains the existing validated nickname/bio form, avatar/banner uploads, playback preferences, styles, switch-account/logout/deletion actions.
+- Public profile: lists, friends, achievements and history tabs; real friendship request/cancel/accept/remove state and DM action. Email remains excluded.
+- Removed watch-clock/session credit implementation and planner UI. Existing earned badges retained; achievement-only cache and sync replace time accumulation. Existing progress/resume unchanged.
+- social-11.sql tested with PGlite and applied by user. Public friends RPC confirmed HTTP 200. Visibility enforced public; private lists/progress and chats remain protected. Legacy clients cannot accrue additional seconds.
+- 368 tests passed; build 8921/8921, 0 rejected; canonical catalogue equals HEAD byte-for-byte after decompression. Native Safari capture unavailable; physical-device QA not claimed.
