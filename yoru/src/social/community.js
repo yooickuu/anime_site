@@ -1,17 +1,21 @@
 import {h,tr,scope,member,person,status,imageURL} from './common.js';
 import {api} from './api.js';
 export function mount(root,ctx,initial='chats'){
- const life=scope(root,ctx),db=api(ctx,life);let searchTimer,version=0,friends=[],chatQuery='';
+ const life=scope(root,ctx),db=api(ctx,life);let searchTimer,version=0,friends=[],chatQuery='',friendTab='accepted';
  const section=['people','friends','chats'].includes(initial)?initial:'chats';
  root.innerHTML=`<section class="social-panel social-directory"><div class="social-heading"><h1>${tr(ctx,section)}</h1><a class="text-button" href="#profile">${tr(ctx,'back')}</a></div><div data-content></div><p data-status role="status"></p></section>`;
  const box=root.querySelector('[data-content]');
+ const label=(ru,en,ja)=>({ru,en,ja})[ctx.lang()]||en;
+ const actionIcon=kind=>`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">${kind==='mail'?'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3 6 9 7 9-7"/>':'<path d="M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/>'}</svg>`;
+ function friendNav(){return `<nav class="friend-tabs" aria-label="${tr(ctx,'friends')}">${[['accepted',label('Список друзей','Friends','友達一覧')],['find',label('Найти друга','Find a friend','友達を探す')],['incoming',label('Заявки в друзья','Requests','受信リクエスト')],['outgoing',label('Отправленные запросы','Sent requests','送信リクエスト')]].map(([id,name])=>`<button class="button soft ${friendTab===id?'active':''}" data-friend-tab="${id}" aria-pressed="${friendTab===id}">${name}</button>`).join('')}</nav>`;}
+
  function filterChats(){const q=chatQuery.normalize('NFKC').toLocaleLowerCase().trim();let found=0;for(const row of box.querySelectorAll('.social-room-row,.social-friend')){const name=row.querySelector('strong')?.textContent||'';row.hidden=!name.normalize('NFKC').toLocaleLowerCase().includes(q);if(!row.hidden)found++;}const empty=box.querySelector('[data-chat-empty]');if(empty)empty.hidden=!q||found>0;}
  root.addEventListener('input',event=>{if(event.target.hasAttribute('data-chat-filter')){chatQuery=event.target.value;filterChats();}},{signal:life.signal});
  async function tab(name){const own=++version;clearTimeout(searchTimer);if(name!=='people'&&!member(ctx)){box.innerHTML=`<button class="button primary" data-login>${tr(ctx,'login')}</button>`;return;}
   box.innerHTML=`<p>${tr(ctx,'loading')}</p>`;
   try{
-   if(name==='people'){
-    box.innerHTML=`<label class="people-search">${tr(ctx,'people')}<input type="search" data-people maxlength="40" autocomplete="off" placeholder="${tr(ctx,'people')}"></label><p data-search-state role="status"></p><div data-results class="social-people"></div>`;
+   if(name==='people'||name==='friends'&&friendTab==='find'){
+    box.innerHTML=`${name==='friends'?friendNav():''}<label class="people-search">${tr(ctx,'people')}<input type="search" data-people maxlength="40" autocomplete="off" placeholder="${tr(ctx,'people')}"></label><p data-search-state role="status"></p><div data-results class="social-people"></div>`;
     box.querySelector('input').addEventListener('input',event=>{
      const q=event.target.value.trim();clearTimeout(searchTimer);const request=++version;
      const results=box.querySelector('[data-results]'),notice=box.querySelector('[data-search-state]');
@@ -22,7 +26,7 @@ export function mount(root,ctx,initial='chats'){
    }else if(name==='friends'){
     friends=await db.friends();if(!life.live()||own!==version)return;
     const uid=ctx.user().id;
-    box.innerHTML=['accepted','incoming','outgoing'].map(group=>`<h2>${tr(ctx,group==='accepted'?'friends':group)}</h2>`+friends.filter(f=>group==='accepted'?f.status==='accepted':f.status==='pending'&&(group==='incoming'?f.recipient===uid:f.requester===uid)).map(f=>{const p=f.requester===uid?f.to:f.from;return `<div class="social-friend">${person(ctx,p)}<div class="social-actions">${group==='accepted'?`<button class="button soft" data-dm="${p.user_id}">${tr(ctx,'message')}</button><button class="text-button" data-friend="${p.user_id}" data-do="remove">${tr(ctx,'remove')}</button>`:group==='incoming'?`<button class="button primary" data-friend="${p.user_id}" data-do="accept">${tr(ctx,'accept')}</button><button class="text-button" data-friend="${p.user_id}" data-do="reject">${tr(ctx,'reject')}</button>`:`<button class="text-button" data-friend="${p.user_id}" data-do="cancel">${tr(ctx,'cancel')}</button>`}</div></div>`;}).join('')).join('');
+    box.innerHTML=friendNav()+[friendTab].map(group=>friends.filter(f=>group==='accepted'?f.status==='accepted':f.status==='pending'&&(group==='incoming'?f.recipient===uid:f.requester===uid)).map(f=>{const p=f.requester===uid?f.to:f.from;return `<div class="social-friend">${person(ctx,p)}<div class="social-actions">${group==='accepted'?`<button class="friend-icon" data-dm="${p.user_id}" aria-label="${tr(ctx,'message')}" title="${tr(ctx,'message')}">${actionIcon('mail')}</button><button class="friend-icon" data-friend="${p.user_id}" data-do="remove" aria-label="${tr(ctx,'remove')}" title="${tr(ctx,'remove')}">${actionIcon('trash')}</button>`:group==='incoming'?`<button class="button primary" data-friend="${p.user_id}" data-do="accept">${tr(ctx,'accept')}</button><button class="text-button" data-friend="${p.user_id}" data-do="reject">${tr(ctx,'reject')}</button>`:`<button class="text-button" data-friend="${p.user_id}" data-do="cancel">${tr(ctx,'cancel')}</button>`}</div></div>`;}).join('')||`<p class="social-empty">${tr(ctx,'empty')}</p>`).join('');
    }else{
     await db.cachedChats(({rooms,friendships})=>{if(!life.live()||own!==version||box.querySelector('[data-group-form] form'))return;
     const chatting=new Set(rooms.filter(r=>r.room?.kind==='dm').flatMap(r=>(r.peers||[]).map(p=>p.user_id)));
@@ -36,6 +40,7 @@ export function mount(root,ctx,initial='chats'){
  root.addEventListener('click',async event=>{const b=event.target.closest('button');if(!b)return;try{b.disabled=true;status(root,ctx);
   if(b.hasAttribute('data-login'))ctx.login();
   if(b.hasAttribute('data-cancel-group'))box.querySelector('[data-group-form]').innerHTML='';
+  if(b.dataset.friendTab){friendTab=b.dataset.friendTab;await tab('friends');return;}
   if(b.dataset.tab)await tab(b.dataset.tab);
   if(b.dataset.friend&&member(ctx)){await db.friend(b.dataset.friend,b.dataset.do);document.dispatchEvent(new window.Event('yomiku:activity-change'));if(life.live())await tab('friends');}
   if(b.dataset.removeChat&&member(ctx)&&await ctx.confirm(tr(ctx,b.dataset.kind==='group'?'leaveGroupConfirm':'removeChatConfirm'))){await db.removeChat(b.dataset.removeChat);if(life.live()){document.dispatchEvent(new window.Event('yomiku:chat-read'));await tab('chats');}}

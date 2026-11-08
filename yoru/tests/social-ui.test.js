@@ -155,3 +155,11 @@ test('section visibility toggles stay at their heading and write only the select
  }
  assert.equal(e.root.querySelector('.profile-sharing'),null);
 });
+test('friend directory separates accepted/incoming/outgoing and search; actions retain the selected tab',async()=>{
+ const {mount}=await import('../src/social/community.js');const e=environment();const peer=id=>({user_id:id,nickname:id});
+ e.tables.yoru_friendships=[{status:'accepted',requester:uid,recipient:'Friend',from:author,to:peer('Friend')},{status:'pending',requester:'Incoming',recipient:uid,from:peer('Incoming'),to:author},{status:'pending',requester:uid,recipient:'Outgoing',from:author,to:peer('Outgoing')}];
+ cleanup=mount(e.root,e.ctx,'friends');await pause();assert.equal(e.root.querySelectorAll('[data-friend-tab]').length,4);assert.equal(e.root.querySelectorAll('.social-friend').length,1);assert.ok(e.root.querySelector('[data-dm="Friend"] svg'));assert.ok(e.root.querySelector('[data-do="remove"] svg'));
+ e.root.querySelector('[data-friend-tab="incoming"]').click();await pause();assert.ok(e.root.querySelector('[data-friend="Incoming"][data-do="accept"]'));assert.equal(e.root.querySelector('[data-do="remove"]'),null);
+ e.root.querySelector('[data-friend-tab="outgoing"]').click();await pause();e.root.querySelector('[data-do="cancel"]').click();await pause();assert.ok(e.calls.some(c=>c.rpc==='yoru_social_friend'&&c.args.p_action==='cancel'&&c.args.p_user==='Outgoing'));assert.equal(e.root.querySelector('[data-friend-tab="outgoing"]').getAttribute('aria-pressed'),'true');
+ e.root.querySelector('[data-friend-tab="find"]').click();await pause();assert.ok(e.root.querySelector('[data-people]'));assert.equal(e.root.querySelectorAll('[data-friend-tab]').length,4);
+});

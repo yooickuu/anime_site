@@ -310,3 +310,23 @@ test('stage 3 exposes only public tabs, disables time accrual and preserves priv
  await db.exec(await readFile('supabase/social-11.sql','utf8'));
  assert.deepEqual((await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data,before);
 });
+test('stage 4 derives new awards without changing saved state, legacy badges or time and denies guest credit',async()=>{
+ await db.exec(await readFile('supabase/social-12.sql','utf8'));
+ const previous=(await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data;
+ const snapshot={...previous,preferences:{...previous.preferences,appearance:'sakura'},collections:[{id:'test',name:'Test',items:[]}],entries:Object.fromEntries(Array.from({length:26},(_,i)=>['mal-'+i,{favorite:true,rating:8,status:'completed'}]))};
+ await as(A,'update yoru_state set data=$2 where user_id=$1',[A,snapshot]);
+ const seconds=(await db.query('select seconds from yoru_watch_metrics where user_id=$1',[A])).rows[0].seconds;
+ const beforeBadges=(await db.query('select badges from yoru_watch_metrics where user_id=$1',[A])).rows[0].badges;
+ const result=(await as(A,'select yoru_activity_sync(null,999999,999999) d'))[0].d;
+ for(const id of ['theme_sakura','saved_25','favorite_25','rating_10','title_25','collection'])assert.ok(result.badges[id],id);
+ assert.equal(result.badges.saved_50,undefined);assert.equal(result.badges.theme_forest,undefined);
+ for(const [id,stamp] of Object.entries(beforeBadges))assert.equal(result.badges[id],stamp);
+ assert.equal((await db.query('select seconds from yoru_watch_metrics where user_id=$1',[A])).rows[0].seconds,seconds);
+ assert.deepEqual((await as(A,'select data from yoru_state where user_id=$1',[A]))[0].data,snapshot);
+ await assert.rejects(as(null,'select yoru_badge_night(0)'),/permission/);
+ await assert.rejects(as(A,'select yoru_badge_night(9999)'),/invalid_offset/);
+ await assert.rejects(as(A,'select yoru_badge_night(0)',[],true),/login_required/);
+ await db.exec(await readFile('supabase/social-12.sql','utf8'));
+ assert.deepEqual((await as(A,'select yoru_activity_sync() d'))[0].d.badges,result.badges);
+ await as(A,'update yoru_state set data=$2 where user_id=$1',[A,previous]);
+});

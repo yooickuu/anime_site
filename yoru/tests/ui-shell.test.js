@@ -12,7 +12,7 @@ test('header routes through logo/catalog/drawer and search does not navigate or 
  document.querySelector('[data-shell="catalog"]').click();assert.equal(document.querySelector('.shell-catalog [href="#social/people"]').textContent.includes('Пользователи'),true);shell.close();
  document.querySelector('[data-shell="search"]').click();assert.equal(document.activeElement.id,'shell-search');assert.match(document.querySelector('.shell-rating').textContent,/8/);assert.equal(window.location.hash,'#watch/mal-1/1');
  const input=document.querySelector('#shell-search');input.value='New';input.dispatchEvent(new window.Event('input',{bubbles:true}));assert.equal(window.location.hash,'#watch/mal-1/1');shell.close();assert.equal(document.activeElement.dataset.shell,'search');
- document.querySelector('[data-shell="drawer"]').click();assert.ok(document.querySelector('.shell-drawer [data-nav="library"]'));shell.close();
+ document.querySelector('[data-shell="drawer"]').click();assert.ok(document.querySelector('.shell-drawer [data-nav="history"]'));shell.close();
 });
 test('search discards slow stale responses and supports dismissal without pending updates',async()=>{
  const pending=[];const shell=setup((query,{current})=>new Promise(resolve=>pending.push({query,current,resolve})));
@@ -26,4 +26,12 @@ test('recent row respects a rolling week, avoids future premieres and deduplicat
  const now=Date.parse('2026-11-08T12:00:00+05:00'),fresh={id:'mal-1',ongoing:true,catalogUpdatedAt:now-1000};
  const rows=recentReleases([fresh,fresh,{id:'mal-2',airedAt:'2026-11-05'},{id:'mal-3',ongoing:true,catalogUpdatedAt:now-WEEK-1},{id:'mal-4',airedAt:'2027-01-01'},{id:'mal-5',ongoing:false,catalogUpdatedAt:now}],now);
  assert.deepEqual(rows.map(a=>a.id),['mal-1','mal-2']);
+});
+test('drawer exposes all destinations, switches nested panels, and language dismissal restores focus',()=>{
+ const shell=setup();document.querySelector('[data-shell="drawer"]').click();
+ for(const selector of ['[data-nav="achievements"]','[data-nav="history"]','[href="#social/friends"]','[data-drawer-panel="style"]','[data-drawer-panel="language"]','[data-action="login"]'])assert.ok(document.querySelector('.shell-drawer '+selector),selector);
+ document.querySelector('[data-drawer-panel="language"]').click();assert.equal(document.querySelector('.drawer-main').hidden,true);assert.equal(document.querySelectorAll('#language').length,1);assert.equal(document.querySelectorAll('#language option').length,3);
+ document.querySelector('[data-drawer-back]').click();assert.equal(document.querySelector('.drawer-main').hidden,false);
+ document.querySelector('[data-drawer-panel="style"]').click();assert.equal(document.querySelector('#language'),null);
+ document.querySelector('[data-drawer-back]').click();document.querySelector('[data-drawer-panel="language"]').click();document.querySelector('#language').dispatchEvent(new window.Event('change',{bubbles:true}));assert.equal(document.querySelector('.shell-dialog'),null);assert.equal(document.activeElement.dataset.shell,'drawer');shell.close();
 });

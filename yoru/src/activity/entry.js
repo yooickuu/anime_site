@@ -5,7 +5,7 @@ function css(){if(document.querySelector('[data-activity-css]'))return;const lin
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function start(ctx){
  css();const uid=ctx.user()?.id,life=new AbortController();let storage;try{storage=ctx.storage||localStorage;}catch{}
- const cache=badgeCache(storage,uid);let snapshot=cache.snapshot,alive=true,pending=null,first=true,toastTimer,queue=[],currentToast=null;
+ const cache=badgeCache(storage,uid);let nightPending=false;let snapshot=cache.snapshot,alive=true,pending=null,first=true,toastTimer,queue=[],currentToast=null;
  const live=()=>alive&&ctx.user()?.id===uid&&!ctx.user()?.is_anonymous;
 
  function paint(){if(!live())return;const lang=ctx.lang(),count=Object.keys(snapshot.badges||{}).filter(id=>badges.some(b=>b[0]===id)).length;document.querySelectorAll('[data-badge-count]').forEach(el=>{if(el.textContent!==String(count))el.textContent=count;});
@@ -29,6 +29,10 @@ export function start(ctx){
   if(!first)for(const badge of badges)if(data.badges?.[badge[0]]&&!snapshot.badges?.[badge[0]])queue.push(badge);
   cache.accept(data);snapshot=cache.snapshot;first=false;paint();showNext();
  })().catch(()=>{}).finally(()=>{pending=null;});return pending;}
+ // Listen only: never seek, play, pause, or alter the media pipeline.
+ document.addEventListener('playing',async e=>{const video=e.target;if(!live()||document.hidden||video?.id!=='video'||video.paused||video.ended||new Date().getHours()>=5||snapshot.badges?.night||nightPending)return;
+ nightPending=true;try{const {data,error}=await ctx.client.rpc('yoru_badge_night',{p_offset:new Date().getTimezoneOffset()});if(!error&&live()&&data?.badges?.night){if(!snapshot.badges?.night)queue.push(badges.find(b=>b[0]==='night'));cache.accept(data);snapshot=cache.snapshot;paint();showNext();}}catch{}finally{nightPending=false;}
+ },{capture:true,signal:life.signal});
  const observer=new MutationObserver(()=>paint());observer.observe(document.querySelector('#app')||document.body,{childList:true,subtree:true});
  document.addEventListener('yomiku:activity-change',()=>void sync(),{signal:life.signal});
  document.addEventListener('yomiku:navigation',()=>{paint();void sync();},{signal:life.signal});

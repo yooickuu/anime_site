@@ -668,3 +668,12 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - Removed watch-clock/session credit implementation and planner UI. Existing earned badges retained; achievement-only cache and sync replace time accumulation. Existing progress/resume unchanged.
 - social-11.sql tested with PGlite and applied by user. Public friends RPC confirmed HTTP 200. Visibility enforced public; private lists/progress and chats remain protected. Legacy clients cannot accrue additional seconds.
 - 368 tests passed; build 8921/8921, 0 rejected; canonical catalogue equals HEAD byte-for-byte after decompression. Native Safari capture unavailable; physical-device QA not claimed.
+
+## 2026-11-08 — Stage 4 drawer, friends and achievements
+- Drawer now contains Achievements, Watch History, 10-theme selector, language selector, Friends and login/logout. Native dialog focus/ESC, dimmed backdrop, slide/fade exit, safe-area scrolling and reduced-motion support retained. Guest theme changes remain local; authenticated changes use the existing save pipeline.
+- Friends directory has four horizontal tabs: accepted friends, nickname search, incoming and outgoing requests. Accepted friends have accessible message/trash icons; existing authorized friendship/DM RPCs unchanged.
+- History adds season and localized relative time, retaining bounded display pagination and saved progress. Visibility remains permanently public from Stage 3; no hide control.
+- Achievement collection expanded to 66 unique definitions with server-derived milestones and all ten theme awards. Eight historical watch-duration badges remain explicitly marked as archived; no duration tracking restarted. Night badge listens to actual visible video playing events only, without changing media behavior. Compact toast and theme accent remain.
+- social-12.sql tested on isolated database and applied by user. Anonymous new night-badge RPC responds 401/42501 (function exists, guest credit denied). No RLS/auth/catalog/schema changes; old awards and account data preserved.
+- Verification: 373 tests passed, npm run check, build 8921/8921 (zero rejected); catalogue decompressed equality verified and original archive bytes restored. Startup bundle 1,267,613 bytes, badge/friend modules stay lazy. New drawer/friend navigation and history labels covered by DOM tests.
+- Browser host and native pipe unavailable; no claim of physical iPhone/desktop visual QA. Generated SDK string literals include upstream trailing whitespace; source diff check excludes generated bundles.

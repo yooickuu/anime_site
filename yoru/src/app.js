@@ -1,3 +1,4 @@
+import {historyAgo} from './history-display.js';
 import {ownProfileView,settingsView,mountOwnLists} from './profile-redesign.js';
 import {catalogView} from './catalog-view.js';
 import {similarTitles} from './recommendations.js';
@@ -508,7 +509,7 @@ let historyVisible=40,historyLoadKey='';
 function profileSectionHTML(){if(!user)return guestHTML();return `<section class="profile-detail-page"><a class="text-button profile-return" href="#profile">← ${t('profile')}</a>${page==='achievements'?'<div id="profile-activity"></div>':historyHTML(true)}</section>`;}
 function historyHTML(full=false){
  const history=recentHistory(state.progress),shown=history.slice(0,full?historyVisible:5),more=({ru:'Ещё',en:'More',ja:'もっと見る'})[lang];
- return `<section class="profile-history" id="profile-history-list" data-history-stamp="${esc(history.map(p=>p.id+':'+p.updated).join('|'))}"><div class="profile-history-heading"><${full?'h1':'h3'}>${t('history')}</${full?'h1':'h3'}></div><div class="profile-history-items">${shown.length?shown.map(p=>{const a=displayCards.get(p.id)||byId(p.id)||p.anime;return `<button class="history-item" data-watch="${esc(p.id)}" data-episode="${Number(p.episode)||1}">${a?`<img src="${esc(cover(a))}" alt="" loading="lazy" decoding="async">`:''}<span><strong>${a?esc(title(a)):t('loading')}</strong><small>${t('episode')} ${esc(savedEpisodeNumber(p))} · ${timeLabel(p.time)} · ${new Date(Number(p.updated)).toLocaleDateString(lang)}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('historyEmpty')}</p>`}</div>${!full&&history.length>5?`<a class="button soft history-more" href="#history">${more} ${icon('arrow')}</a>`:full&&history.length>shown.length?`<button class="button soft history-more" data-action="history-more">${more}</button>`:''}</section>`;
+ return `<section class="profile-history" id="profile-history-list" data-history-stamp="${esc(history.map(p=>p.id+':'+p.updated).join('|'))}"><div class="profile-history-heading"><${full?'h1':'h3'}>${t('history')}</${full?'h1':'h3'}></div><div class="profile-history-items">${shown.length?shown.map(p=>{const a=displayCards.get(p.id)||byId(p.id)||p.anime;return `<button class="history-item" data-watch="${esc(p.id)}" data-episode="${Number(p.episode)||1}">${a?`<img src="${esc(cover(a))}" alt="" loading="lazy" decoding="async">`:''}<span><strong>${a?esc(title(a)):t('loading')}</strong><small>${t('episode')} ${esc(savedEpisodeNumber(p))} · ${t('season')} ${Math.max(1,Number(p.season)||1)} · ${historyAgo(p.updated,lang)}</small></span>${icon('play')}</button>`;}).join(''):`<p class="notice">${t('historyEmpty')}</p>`}</div>${!full&&history.length>5?`<a class="button soft history-more" href="#history">${more} ${icon('arrow')}</a>`:full&&history.length>shown.length?`<button class="button soft history-more" data-action="history-more">${more}</button>`:''}</section>`;
 }
 function refreshHistorySection(full){
  const root=$('#profile-history-list');if(!root)return;root.outerHTML=historyHTML(full);
@@ -1330,8 +1331,8 @@ document.addEventListener("click", async (event) => {
     }
     if(b.dataset.styleChoice){
       const next=normalizeStyle(b.dataset.styleChoice);
-      if(!mutate({type:'preferences',patch:{appearance:next,theme:'dark'}}))return;
-      appearance=next;applyAppearance();
+      if(user&&!mutate({type:'preferences',patch:{appearance:next,theme:'dark'}}))return;
+      appearance=next;applyAppearance();if(user)void flush().then(()=>document.dispatchEvent(new Event('yomiku:activity-change')));
       $$('[data-style-choice]').forEach(node=>node.setAttribute('aria-pressed',String(node.dataset.styleChoice===next)));
       return;
     }
@@ -1847,5 +1848,5 @@ function warmSocial(event){const element=event.target.closest?.('[data-nav="prof
 document.addEventListener('pointerover',warmSocial,{passive:true});document.addEventListener('focusin',warmSocial);document.addEventListener('touchstart',warmSocial,{passive:true});
 async function interfacePending(element,action){const notice=document.createElement('span');notice.className='ui-pending';notice.role='status';notice.textContent=t('loading');element.setAttribute('aria-busy','true');element.classList.add('ui-busy');element.append(notice);try{await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));return await action();}finally{notice.remove();element.removeAttribute('aria-busy');element.classList.remove('ui-busy');}}
 
-installShell({lang:()=>lang,title,cover,search:searchCatalogue,local:q=>q.trim()?suggestions(publishedItems,q):publishedItems.slice(0,6),subtitle:key=>({titles:{ru:'Найди свою следующую историю',en:'Find your next story',ja:'次の物語を探す'},people:{ru:'Найти по никнейму',en:'Search by nickname',ja:'ニックネームで検索'},chats:{ru:'Друзья и групповые чаты',en:'Friends and group chats',ja:'友達とグループチャット'}})[key][lang]});
+installShell({user:()=>user,appearance:appearanceHTML,lang:()=>lang,title,cover,search:searchCatalogue,local:q=>q.trim()?suggestions(publishedItems,q):publishedItems.slice(0,6),subtitle:key=>({titles:{ru:'Найди свою следующую историю',en:'Find your next story',ja:'次の物語を探す'},people:{ru:'Найти по никнейму',en:'Search by nickname',ja:'ニックネームで検索'},chats:{ru:'Друзья и групповые чаты',en:'Friends and group chats',ja:'友達とグループチャット'}})[key][lang]});
 installLiquidMotion();
