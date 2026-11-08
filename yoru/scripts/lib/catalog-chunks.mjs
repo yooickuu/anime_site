@@ -1,8 +1,9 @@
+import {recentReleases} from '../../src/recent-releases.js';
 import {queryCatalogue} from '../../src/catalog-query.js';
 import {withMetadata} from '../../src/catalog-metadata.js';
 // Display/search records never carry episode manifests or video source URLs.
 export function catalogueCard(a){
- const keys=['id','ids','title','originalTitle','alt','year','type','genres','description','ongoing','translations','relatedMalIds','franchiseId','airedAt','relations','catalogUpdatedAt','popularity','views','members','audienceRating','rating','score','malId','image','banner','detailsBanner','episodes'];
+ const keys=['id','ids','title','originalTitle','alt','year','type','genres','description','ongoing','status','releaseStatus','translations','relatedMalIds','franchiseId','airedAt','relations','catalogUpdatedAt','popularity','views','members','audienceRating','rating','score','malId','image','banner','detailsBanner','episodes'];
  return {...Object.fromEntries(keys.filter(k=>a[k]!==undefined).map(k=>[k,a[k]])),catalogApproved:true,catalogOnly:false,...(Number.isInteger(a.availableEpisodeCount)?{episodes:a.availableEpisodeCount}:{} )};
 }
 export function summaryCard(a){
@@ -21,5 +22,5 @@ export function prepareChunks(items,metadata={},revision=''){
  for(const a of cards)a.relatedCatalogIds=groups.get(root(a.id));
  const summaries=cards.map(summaryCard),byId=new Map(cards.map(a=>[a.id,a])),orders={};
  for(const sort of ['picked','hiddenGems','latest','topRated','newest','oldest','alphabetical'])orders[sort]=queryCatalogue(summaries,{sort});
- return {cards,orders,identities,bootstrap:{revision,total:cards.length,chunkSize:120,chunks:Math.ceil(cards.length/120),years:[...new Set(cards.map(a=>a.year).filter(Boolean))].sort((a,b)=>b-a),items:orders.picked.slice(0,120).map(a=>({...a,description:String(byId.get(a.id).description||'').slice(0,300),translations:Object.fromEntries(Object.entries(byId.get(a.id).translations||{}).map(([lang,v])=>[lang,[v?.[0]||'',String(v?.[1]||'').slice(0,300)]]))}))}};
+ return {cards,orders,identities,recent:recentReleases(summaries,Date.now(),120),bootstrap:{revision,total:cards.length,chunkSize:120,chunks:Math.ceil(cards.length/120),years:[...new Set(cards.map(a=>a.year).filter(Boolean))].sort((a,b)=>b-a),items:orders.picked.slice(0,120).map(a=>({...a,description:String(byId.get(a.id).description||'').slice(0,300),translations:Object.fromEntries(Object.entries(byId.get(a.id).translations||{}).map(([lang,v])=>[lang,[v?.[0]||'',String(v?.[1]||'').slice(0,300)]]))}))}};
 }

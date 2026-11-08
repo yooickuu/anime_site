@@ -21,6 +21,7 @@ await writeFile('src/catalog-bootstrap.json',JSON.stringify(chunks.bootstrap));
 for(const base of ['dist/data/catalog','../data/catalog']){
  await mkdir(base+'/cards',{recursive:true});await mkdir(base+'/browse',{recursive:true});
  await writeFile(base+'/identities.json',JSON.stringify(chunks.identities));
+ await writeFile(base+'/recent.json',JSON.stringify(chunks.recent));
  for(const item of chunks.cards)await writeFile(`${base}/cards/${item.id}.json`,JSON.stringify(item));
  for(const [sort,items] of Object.entries(chunks.orders))for(let i=0;i<items.length;i+=120)await writeFile(`${base}/browse/${sort}-${i/120}.json`,JSON.stringify(items.slice(i,i+120)));
 }
@@ -77,7 +78,7 @@ console.log(`Catalogue: ${visible}/${publication.items.length} visible (${public
 await copyFile('src/published-catalog.json','dist/published-catalog.json');
 const hash=createHash('sha256').update(await readFile('dist/app.js')).digest('hex').slice(0,12);
 let html=(await readFile('dist/index.html','utf8')).replace(/app\.js(?:\?v=[^"']*)?/g,`app.js?v=${hash}`);
-for(const file of ['style.css','redesign.css','scenes.css']){const version=createHash('sha256').update(await readFile('dist/'+file)).digest('hex').slice(0,12);html=html.replace(new RegExp(file.replace('.', '\\.')+'(?:\\?v=[^\"\']*)?','g'),file+'?v='+version);}
+for(const file of ['style.css','redesign.css','scenes.css','liquid.css']){const version=createHash('sha256').update(await readFile('dist/'+file)).digest('hex').slice(0,12);html=html.replace(new RegExp(file.replace('.', '\\.')+'(?:\\?v=[^\"\']*)?','g'),file+'?v='+version);}
 await writeFile('dist/index.html',html);
 await writeFile('dist/catalog-build.json',JSON.stringify({total:publication.items.length,visible,bundle:hash,updatedAt:publication.updatedAt},null,2));
 // Keep branch-based Pages fresh too; Actions deploys dist directly.
@@ -91,4 +92,4 @@ for(const item of publication.items){
  const name=item.id;if(!/^(mal|shikimori|lib)-\d+$/.test(name))throw Error('Invalid Kodik title ID');
  await writeFile(`dist/data/kodik/${name}.json`,JSON.stringify(data));await copyFile(`dist/data/kodik/${name}.json`,`../data/kodik/${name}.json`);
 }
-for(const file of ['style.css','redesign.css','scenes.css'])await copyFile(`dist/${file}`,`../${file}`);
+for(const file of ['style.css','redesign.css','scenes.css','liquid.css'])await copyFile(`dist/${file}`,`../${file}`);

@@ -11,8 +11,14 @@ export function mount(root,ctx,initial='chats'){
   box.innerHTML=`<p>${tr(ctx,'loading')}</p>`;
   try{
    if(name==='people'){
-    box.innerHTML=`<label>${tr(ctx,'people')}<input type="search" data-people maxlength="40" autocomplete="off"></label><div data-results class="social-people"></div>`;
-    box.querySelector('input').addEventListener('input',event=>{const q=event.target.value;clearTimeout(searchTimer);const request=++version;searchTimer=setTimeout(async()=>{try{const rows=q.trim()?await db.people(q):[];if(life.live()&&request===version)box.querySelector('[data-results]').innerHTML=rows.map(p=>person(ctx,p)).join('')||tr(ctx,'empty');}catch(e){if(life.live()&&request===version)status(root,ctx,e);}},300);},{signal:life.signal});
+    box.innerHTML=`<label class="people-search">${tr(ctx,'people')}<input type="search" data-people maxlength="40" autocomplete="off" placeholder="${tr(ctx,'people')}"></label><p data-search-state role="status"></p><div data-results class="social-people"></div>`;
+    box.querySelector('input').addEventListener('input',event=>{
+     const q=event.target.value.trim();clearTimeout(searchTimer);const request=++version;
+     const results=box.querySelector('[data-results]'),notice=box.querySelector('[data-search-state]');
+     results.innerHTML='';status(root,ctx);notice.textContent=q?tr(ctx,'loading'):'';
+     if(!q)return;
+     searchTimer=setTimeout(async()=>{try{const rows=await db.people(q);if(life.live()&&request===version){results.innerHTML=rows.map(p=>person(ctx,p)).join('');notice.textContent=rows.length?'':tr(ctx,'notFound');}}catch(e){if(life.live()&&request===version){notice.textContent='';status(root,ctx,e);}}},180);
+    },{signal:life.signal});
    }else if(name==='friends'){
     friends=await db.friends();if(!life.live()||own!==version)return;
     const uid=ctx.user().id;

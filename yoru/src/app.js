@@ -1,3 +1,7 @@
+import {catalogView} from './catalog-view.js';
+import {similarTitles} from './recommendations.js';
+import {headerHTML,installShell} from './ui-shell.js';
+import {installLiquidMotion} from './liquid-motion.js';
 import {recentHistory} from './profile-history.js';
 import {createUiCache} from './ui-cache.js';
 import {requestCache} from './request-cache.js';
@@ -95,7 +99,7 @@ import {initSelectMenus, enhanceSelects, closeSelectMenu} from './select-menu.js
 import {createPlayback} from './playback.js';
 import {cropAvatar,cropBanner} from './avatar-crop.js';
 import {authErrorKey} from "./public-config.js";
-import {combinedCatalogue, searchCatalogue, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons, knownSeasons, catalogueYears} from "./sources.js";
+import {combinedCatalogue, searchCatalogue, recentTitles, resolveRelease, videoEpisode, findWatchRelease, discoveryIndex, prepareEpisodeAudio, publishedItems, isPublished, releaseSeasons, knownSeasons, catalogueYears} from "./sources.js";
 import {icon} from "./icons.js";
 import {controlsHTML, attachControls} from "./player-controls.js";
 import { chooseQuality } from "./provider.js";
@@ -146,7 +150,7 @@ let onlineItems = [],
   catalogGeneration = 0,
   searchTimer, headerSearchTimer,
   headerQuery = "", searchSuggestionsVersion = 0,
-  typeFilter = "all", yearFilter = "all", ratingFilter = "0",
+  typeFilter = "all", yearFilter = "all", ratingFilter = "0", ratingMaxFilter = "10", statusFilter = "all",
   ongoingOnly = false,
   playback = null,
   controlsCleanup = null,
@@ -272,24 +276,13 @@ function render(newWatch=false) {
   clearInterval(heroTimer);
   applyAppearance();
   const markup =
-    `<header class="header">${brand()}<nav aria-label="${t("catalog")}">${["home", "catalog", "library"].map((v) => `<button class="nav-link ${page === v ? "active" : ""}" data-nav="${v}">${icon({home:"screen",catalog:"search",library:"bookmark"}[v])}<span>${t(v)}</span></button>`).join("")}<a class="nav-link ${page==='social'&&location.hash.includes('chat')?'active':''}" href="#social/chats">${chatsLabel()}<span id="chat-unread" class="chat-unread" ${unreadCount?'':'hidden'}>${unreadCount||''}</span></a></nav><div class="header-tools"><label class="search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><input id="search" type="search" placeholder="${t("search")}" aria-label="${t("search")}" value="${esc(headerQuery)}"><kbd>⌘ K</kbd></label><select id="language" aria-label="${t("language")}">${[
-      ["ru", "RU"],
-      ["en", "EN"],
-      ["ja", "日本語"],
-    ]
-      .map(
-        ([v, n]) =>
-          `<option value="${v}" ${lang === v ? "selected" : ""}>${n}</option>`,
-      )
-      .join(
-        "",
-      )}</select>${user ? `<button class="avatar" data-nav="profile" aria-label="${t("profile")}">${avatarUrl ? `<img fetchpriority="high" decoding="async" src="${esc(avatarUrl)}" alt="">` : esc((state.preferences.name || user.email || "u").slice(0, 1).toUpperCase())}</button>` : `<button class="button primary login-button" data-action="login">${t("login")}</button>`}</div></header><main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='social'?`<div id="social-root">${t('loading')}</div>`:page==='watch' ? (current ? playerHTML() : `<p class="watch-loading">${t('loading')}</p>`) : page === "profile" ? profileHTML() : ["achievements","history"].includes(page) ? profileSectionHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
+    `${headerHTML({brand:brand(),lang,user,avatarUrl,page,unreadCount,t})}<main class="page-${page} ${page==='watch'?'watch-container':page==='home'?'home-container':''}">${page === "home" ? homeHTML() : ""}${page==='social'?`<div id="social-root">${t('loading')}</div>`:page==='watch' ? (current ? playerHTML() : `<p class="watch-loading">${t('loading')}</p>`) : page === "profile" ? profileHTML() : ["achievements","history"].includes(page) ? profileSectionHTML() : page === "library" && !user ? guestHTML() : page==='home'?recommendationsShell():catalogShell()}</main><footer>${brand()}<button data-action="about">${t("about")}</button></footer>`;
   if(preservedWatch){
     // Replacing the app root detaches the fullscreen element, even if reinserted.
     const template=document.createElement('template');template.innerHTML=markup;
     for(const tag of ['header','footer'])$('#app > '+tag)?.replaceWith(template.content.querySelector(tag));
   }else $("#app").innerHTML=markup;
-  if(page==='home')startHero();
+  if(page==='home'){startHero();void renderRecent();}
   if (page !== 'social' && page !== 'watch' && !(["profile","achievements","history"].includes(page)) && !(page === "library" && !user)) renderGrid();
   if(page==='social'){const own=socialPageVersion,root=$('#social-root'),ctx=socialContext(()=>own===socialPageVersion);loadSocial().then(async module=>{if(ctx.active()){const cleanup=await module.mountPage(root,ctx,location.hash.slice(1));if(ctx.active())socialPageCleanup=cleanup;else cleanup();}}).catch(()=>{if(ctx.active())root.textContent=t('providerError');});}
   if(page==='profile'&&user&&ready){void syncMainProfile().catch(()=>{});ensurePlanCards();}
@@ -301,7 +294,15 @@ function render(newWatch=false) {
   document.dispatchEvent(new Event('yomiku:navigation'));
 }
 function homeHTML() {
- return `<section class="cinematic-hero" id="hero-art">${heroArtHTML()}</section><section class="section"><div class="section-head"><h2>${t('continue')}</h2>${user?'<button class="sync-state" id="sync-state" hidden data-action="retry-sync"></button>':''}</div><div class="continue-grid" id="continue-grid">${continueHTML()}</div></section>`;
+ return `<section class="cinematic-hero" id="hero-art">${heroArtHTML()}</section><section class="recent-section" id="recent-section" aria-label="${({ru:'Новые серии и премьеры за неделю',en:'New episodes and premieres this week',ja:'今週の新着エピソードと作品'})[lang]}" hidden><div class="recent-strip" id="recent-strip" tabindex="0"></div></section>`;
+}
+let recentPromise;
+async function renderRecent(){
+ const node=$('#recent-strip');if(!node)return;
+ try{recentPromise??=recentTitles().catch(e=>{recentPromise=null;throw e;});const items=await recentPromise;if(!node.isConnected||page!=='home')return;
+ node.innerHTML=items.map(a=>`<article class="recent-card"><button class="recent-poster" data-details="${esc(a.id)}" aria-label="${esc(title(a))}"><img src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="" loading="lazy" decoding="async"><span class="recent-rating">${Number(a.audienceRating)>0?'☆ '+Number(a.audienceRating).toLocaleString(lang,{maximumFractionDigits:1}):a.year||''}</span></button><button class="recent-title" data-details="${esc(a.id)}">${esc(title(a))}</button></article>`).join('');
+ $('#recent-section').hidden=!items.length;revealSurfaces(node);
+ }catch{/* The popular grid remains available when the optional recent feed is offline. */}
 }
 function bannerFor(a){return a?.catalogApproved?detailArtwork(a):(artwork[a?.malId]?.banner||a?.banner||'');}
 const spotlightItems=promoSlides;
@@ -374,9 +375,10 @@ function guestHTML() {
   return `<section class="guest-panel"><span class="guest-symbol">${icon("bookmark")}</span><h1>${t("libraryGuest")}</h1><p>${t("guestCopy")}</p><button class="button primary" data-action="login">${t("login")}</button><button class="button soft" data-action="register">${t("register")}</button></section>`;
 }
 function recommendationsShell(){
- return `<section class="section recommendations"><div class="section-head"><h2>${t('recommended')}</h2><button class="text-button" data-nav="catalog">${t('exploreCatalog')} ${icon('arrow')}</button></div><div class="anime-grid" id="anime-grid"></div><div id="catalog-status" class="catalog-status" aria-live="polite"></div><div id="results-caption" hidden></div><div id="empty" class="empty" hidden>${t('empty')}</div></section>`;
+ return `<section class="section recommendations"><div class="section-head"><h2>${({ru:'Популярное',en:'Popular anime',ja:'人気のアニメ'})[lang]}</h2><button class="text-button" data-nav="catalog">${t('exploreCatalog')} ${icon('arrow')}</button></div><div class="anime-grid" id="anime-grid"></div><div id="catalog-status" class="catalog-status" aria-live="polite"></div><div id="results-caption" hidden></div><div id="empty" class="empty" hidden>${t('empty')}</div></section>`;
 }
 function catalogShell() {
+  if(page==='catalog')return catalogView({t,lang,query,sort,genre,type:typeFilter,year:yearFilter,minRating:ratingFilter,maxRating:ratingMaxFilter,status:statusFilter,years:catalogueYears,genres:Object.entries(genreLabels).map(([id,n])=>[id,n[langIndex(lang)]])});
   const collection = state.collections.find((c) => c.id === list),
     status = state.statuses.find((s) => s.id === list);
   const heading =
@@ -421,9 +423,9 @@ function renderGrid() {
   let items = (
     page === "library"
       ? savedCards(state,list,id=>libraryCards.get(id)||byId(id))
-      : onlineItems.length
-        ? onlineItems
-        : []
+      : page === "home"
+        ? publishedItems
+        : onlineItems
   ).filter((a) => {
     const e = state.entries[a.id],
       c = state.collections.find((c) => c.id === list);
@@ -436,7 +438,7 @@ function renderGrid() {
             : list === "favorites"
               ? !!e?.favorite
               : (e?.status === list || e?.legacyLists?.includes(list)))) &&
-      (page !== "library" && !catalogError || (
+      (page === "home" || page !== "library" && !catalogError || (
         (genre === "all" || a.genres.some(g=>normalizeGenre(g)===normalizeGenre(genre))) &&
         (!ongoingOnly || a.ongoing) &&
         matchesType(a,typeFilter) &&
@@ -949,8 +951,8 @@ function latestProgress(id) {
     .sort((a, b) => b.updated - a.updated)[0];
 }
 function playerHTML() {
-  const related=[...new Map([...playerSeasons,...onlineItems].filter(a=>a.id!==current.id&&!a.catalogOnly).map(a=>[a.id,a])).values()].slice(0,5);
-  return watchView({a:current,t,title,cover,lang,speed:state.preferences.speed,preferencesHTML:preferencesHTML(),related});
+  const related=similarTitles(current,[...publishedItems,...onlineItems,...playerSeasons],7);
+  return watchView({a:current,t,title,cover,lang,speed:state.preferences.speed,related});
 }
 async function openPlayer(id, requested, pushRoute=true) {
   if (playerOpening || (user && !ready)) return;
@@ -1340,7 +1342,7 @@ document.addEventListener("click", async (event) => {
     if(b.dataset.planMinutes){eveningMinutes=Number(b.dataset.planMinutes);$('#evening-plan').outerHTML=eveningHTML();$('#evening-plan [data-plan-minutes="'+eveningMinutes+'"]').focus({preventScroll:true});return;}
     if(b.dataset.account){b.disabled=true;try{await switchAccount(b.dataset.account);}finally{b.disabled=false;}return;}
     if (b.dataset.close) $("#" + b.dataset.close).close();
-    if(b.dataset.discover){catalogueView=b.dataset.discover;const preset=discoveryOptions(catalogueView);catalogScope='all';query='';genre='all';typeFilter=preset.type||'all';yearFilter='all';ratingFilter=String(preset.minRating||0);ongoingOnly=!!preset.ongoing;sort=preset.sort;navigate('catalog');}
+    if(b.dataset.discover){catalogueView=b.dataset.discover;const preset=discoveryOptions(catalogueView);catalogScope='all';query='';genre='all';typeFilter=preset.type||'all';yearFilter='all';ratingFilter=String(preset.minRating||0);ratingMaxFilter='10';statusFilter=preset.ongoing?'airing':'all';ongoingOnly=!!preset.ongoing;sort=preset.sort;navigate('catalog');}
     if (b.dataset.nav) navigate(b.dataset.nav);
     if (b.dataset.list) navigate("library", b.dataset.list);
     if (b.dataset.details) {b.disabled=true;try{await openDetails(b.dataset.details);}finally{b.disabled=false;}}
@@ -1464,7 +1466,7 @@ document.addEventListener("click", async (event) => {
       case "reset":
         query = "";
         genre = "all";
-        typeFilter = "all"; yearFilter = "all"; ratingFilter = "0";
+        typeFilter = "all"; yearFilter = "all"; ratingFilter = "0"; ratingMaxFilter = "10"; statusFilter = "all";
         ongoingOnly = false;
         catalogueView = "all";
         loadCatalogue();
@@ -1570,7 +1572,12 @@ document.addEventListener("change", (event) => {
   if(input.id==='genre-filter'){genre=input.value;if(page==='library')renderGrid();else loadCatalogue();}
   if(input.id==='catalog-view'){catalogueView=input.value;loadCatalogue();}
   if(input.id==='year-filter'){yearFilter=input.value;loadCatalogue();}
-  if(input.id==='rating-filter'){ratingFilter=input.value;loadCatalogue();}
+  if(input.id==='rating-filter'||input.id==='rating-max-filter'){
+    if(input.id==='rating-filter'){ratingFilter=input.value;if(Number(ratingFilter)>Number(ratingMaxFilter))ratingMaxFilter=ratingFilter;}
+    else{ratingMaxFilter=input.value;if(Number(ratingMaxFilter)<Number(ratingFilter))ratingFilter=ratingMaxFilter;}
+    render();loadCatalogue();
+  }
+  if(input.id==='status-filter'){statusFilter=input.value;ongoingOnly=false;loadCatalogue();}
   if (input.id === "language") {
     lang = input.value;
     if (user && ready)
@@ -1692,7 +1699,7 @@ document.addEventListener("submit", async (event) => {
 document.addEventListener("keydown", (event) => {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();
-    if (!$$("dialog").some((d) => d.open)) $("#search")?.focus();
+    // The shell owns the search overlay and its focus.
     return;
   }
   if(page!=='watch'||document.querySelector('dialog[open]'))return;
@@ -1763,7 +1770,7 @@ async function loadCatalogue(more = false, targetPage = 1) {
       genre,
       sort,
       type: typeFilter,
-      ongoing: ongoingOnly, year: yearFilter, minRating: Number(ratingFilter),
+      ongoing: ongoingOnly, year: yearFilter, minRating: Number(ratingFilter), maxRating: Number(ratingMaxFilter), status: statusFilter,
     });
     if (generation !== catalogGeneration) return;
     onlineItems = more ? [...new Map([...onlineItems, ...result.items].map(a=>[a.id,a])).values()].slice(-120) : result.items;
@@ -1846,3 +1853,6 @@ const socialWarm=new Set();
 function warmSocial(event){const element=event.target.closest?.('[data-nav="profile"],a[href^="#user/"],a[href^="#social/chats"]');if(!element||navigator.connection?.saveData)return;const kind=element.matches('[data-nav="profile"],a[href^="#user/"]')?'profile':'chats';if(socialWarm.has(kind))return;socialWarm.add(kind);loadSocial().then(m=>m.prefetch(kind)).catch(()=>socialWarm.delete(kind));}
 document.addEventListener('pointerover',warmSocial,{passive:true});document.addEventListener('focusin',warmSocial);document.addEventListener('touchstart',warmSocial,{passive:true});
 async function interfacePending(element,action){const notice=document.createElement('span');notice.className='ui-pending';notice.role='status';notice.textContent=t('loading');element.setAttribute('aria-busy','true');element.classList.add('ui-busy');element.append(notice);try{await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));return await action();}finally{notice.remove();element.removeAttribute('aria-busy');element.classList.remove('ui-busy');}}
+
+installShell({lang:()=>lang,title,cover,search:searchCatalogue,local:q=>q.trim()?suggestions(publishedItems,q):publishedItems.slice(0,6),subtitle:key=>({titles:{ru:'Найди свою следующую историю',en:'Find your next story',ja:'次の物語を探す'},people:{ru:'Найти по никнейму',en:'Search by nickname',ja:'ニックネームで検索'},chats:{ru:'Друзья и групповые чаты',en:'Friends and group chats',ja:'友達とグループチャット'}})[key][lang]});
+installLiquidMotion();

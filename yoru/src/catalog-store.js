@@ -1,3 +1,4 @@
+import {recentReleases} from './recent-releases.js';
 import {queryCatalogue} from './catalog-query.js';
 // A bounded cache; scanning a search never retains the full catalogue.
 export function createCatalogueStore(bootstrap,{fetcher=(...args)=>fetch(...args),base=()=>globalThis.document?.baseURI||'https://yomiku.site/'}={}){
@@ -17,7 +18,7 @@ export function createCatalogueStore(bootstrap,{fetcher=(...args)=>fetch(...args
  function remember(rows){for(const a of rows)admitted.add(a.id);return rows;}
  async function query(options={}, {current=()=>true}={}){
   const page=Math.max(1,Number(options.page)||1),limit=Math.min(24,Number(options.limit)||24),offset=(page-1)*limit;
-  const filtered=!!(options.query?.trim()||(options.genre&&options.genre!=='all')||(options.type&&options.type!=='all')||(options.year&&options.year!=='all')||Number(options.minRating)||options.ongoing);
+  const filtered=!!(options.query?.trim()||(options.genre&&options.genre!=='all')||(options.type&&options.type!=='all')||(options.year&&options.year!=='all')||Number(options.minRating)||options.ongoing||(options.maxRating!==undefined&&Number(options.maxRating)<10)||(options.status&&options.status!=='all'));
   let rows=[],total=bootstrap.total;
   if(!filtered){
    const sort=options.sort||'picked';
@@ -40,5 +41,6 @@ export function createCatalogueStore(bootstrap,{fetcher=(...args)=>fetch(...args
  async function random(){if(!bootstrap.chunks)return [];return remember(await chunk('picked',Math.floor(Math.random()*bootstrap.chunks)));}
  let identityPromise;
  async function related(ids){identityPromise??=read('identities.json').catch(e=>{identityPromise=null;throw e;});const identities=await identityPromise;return [...new Set(ids.map(id=>identities?.[id]).filter(Boolean))];}
- return {query,card,random,related,isPublished:id=>admitted.has(id),cacheSize:()=>({chunks:chunks.size,cards:cards.size})};
+ async function recent(){const rows=await cached(chunks,'recent.json',4,()=>read('recent.json'));if(!Array.isArray(rows)||rows.length>120)throw Error('invalid_manifest');return remember(recentReleases(rows));}
+ return {query,card,random,related,recent,isPublished:id=>admitted.has(id),cacheSize:()=>({chunks:chunks.size,cards:cards.size})};
 }

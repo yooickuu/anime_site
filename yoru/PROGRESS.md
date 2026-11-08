@@ -649,3 +649,14 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - social-10.sql returns a strict display whitelist (title, image, year/type, original title, MAL ID) from saved snapshots. No private state writes, ratings/notes/email/media links exposed. User confirmed Run after local server restart.
 - Social-only resolver uses current card first, exact MAL identity next, unique full title+year+type match last; ambiguity preserves saved display and does not link a wrong title. Stored IDs/memberships remain unchanged. Unavailable records never render raw IDs.
 - 360 tests passed; build passed (8921/8921, zero rejected). Incorporated ongoing update 299fd238 before rebuilding; catalog archive equality checked/restored. Playback/import paths unchanged.
+
+## 2026-11-08 — Liquid Glass stages 1 and 2
+- Stage 1: left home logo, Search overlay with poster/rating results, Catalog menu (Titles / People / Chats), avatar and drawer scaffold. Header Home/Lists removed; My Lists retained in drawer.
+- Homepage: hero, unlabelled recent-release horizontal row, popular cards. Continue Watching removed from homepage only. Recent feed generated as a separate <=120-summary file; browser shows <=24 and rechecks last-week dates. Dates use premiere metadata and source revisions for ongoing releases.
+- Fine-pointer card tilt / accent glow, glass CSS variables and surfaces, reduced-motion support and responsive header/search.
+- Stage 2: title/year/episode and Watch Together above video. Season/episode/audio selectors and previous/next actions directly below; comments remain below. Watch settings stay in profile. Existing video, skip overlay, control IDs and playback event handlers retained.
+- Similar sidebar ranks seven already-loaded light cards by normalized genre overlap and synopsis terms; never fetches media or the whole catalogue.
+- Titles: glass filter sidebar (genre, TV/movie/OVA/ONA/special, year, score range 0–10, airing/finished/announced); popular/update/rating sorting. Announcements may be empty in the playable catalogue. Personal lists untouched.
+- Existing guest-accessible nickname search retained with avatars and #user routes, faster debounce, stale response protection and clear loading/empty/error states. No SQL migration needed.
+- Verification: 367 tests passed, npm run check, build: 8921/8921 titles, 0 rejected. Canonical publication equals remote archive byte-for-byte after decompression; latest ten ongoing-update commits fast-forwarded before final build. HLS/proxy/auth/storage modules unchanged.
+- Browser: desktop Safari homepage/search exercised; capture then failed with ScreenCaptureKit -3811. Final mobile visual check / physical iPhone playback not claimed. Responsive layout reviewed; native media logic not modified.

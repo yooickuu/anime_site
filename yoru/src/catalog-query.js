@@ -51,8 +51,16 @@ export function discoveryOptions(view){
 const rating=a=>Number(a.audienceRating||a.rating||a.score)||0;
 const popularity=a=>Number(a.popularity||a.views||a.members)||0;
 const updated=a=>{const value=a.catalogUpdatedAt||a.updatedAt||a.updated_at||a.lastEpisodeAt;return typeof value==='number'?value:Date.parse(value)||0;};
+export function catalogueStatus(item,now=Date.now()){
+ const status=String(item.status||item.releaseStatus||'').toLowerCase();
+ if(['announced','not_yet_aired','anons','planned'].includes(status))return 'announced';
+ if(['airing','ongoing','releasing'].includes(status)||item.ongoing)return 'airing';
+ if(['finished','released','completed'].includes(status))return 'finished';
+ if(Date.parse(item.airedAt)>now)return 'announced';
+ return 'finished';
+}
 export function queryCatalogue(items,options={}){
- const rows=items.map((item,index)=>({item,index,score:searchScore(item,options.query)})).filter(({item,score})=>score>0&&(!options.year||options.year==='all'||Number(item.year)===Number(options.year))&&(!options.minRating||rating(item)>=Number(options.minRating))&&matchesType(item,options.type)&&(!options.ongoing||item.ongoing)&&(!options.genre||options.genre==='all'||item.genres?.some(g=>normalizeGenre(g)===normalizeGenre(options.genre))));
+ const rows=items.map((item,index)=>({item,index,score:searchScore(item,options.query)})).filter(({item,score})=>score>0&&(!options.year||options.year==='all'||Number(item.year)===Number(options.year))&&(!options.minRating||rating(item)>=Number(options.minRating))&&(options.maxRating===undefined||rating(item)<=Number(options.maxRating))&&(!options.status||options.status==='all'||catalogueStatus(item)===options.status)&&matchesType(item,options.type)&&(!options.ongoing||item.ongoing)&&(!options.genre||options.genre==='all'||item.genres?.some(g=>normalizeGenre(g)===normalizeGenre(options.genre))));
  const compare=(a,b)=>{
   const x=a.item,y=b.item;
   if(options.sort==='newest')return (y.year||0)-(x.year||0);

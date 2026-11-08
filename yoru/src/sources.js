@@ -71,3 +71,5 @@ export async function videoEpisode(a,index,refresh=false,audioId){
  const config=globalThis.window?.YORU_CONFIG;if(!config?.supabaseUrl)throw Error('providerError');
  return refreshKodikMedia(media,config,a.id,index);
 }
+
+export async function recentTitles(){return (await store.recent()).map(registerAnime);}

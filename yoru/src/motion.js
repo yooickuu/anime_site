@@ -10,7 +10,7 @@ export function revealSurfaces(root){
   }
  },{threshold:.06});
  for(const node of pending)if(!node.isConnected){observer.unobserve(node);pending.delete(node);}
- root.querySelectorAll('.anime-card,.continue-card,.discovery-tile,.profile-fields,.profile-history,.profile-preferences,.profile-appearance,.profile-evening,.library-sidebar').forEach((node,i)=>{
+ root.querySelectorAll('.anime-card,.recent-card,.continue-card,.discovery-tile,.profile-fields,.profile-history,.profile-preferences,.profile-appearance,.profile-evening,.library-sidebar').forEach((node,i)=>{
   if(seen.has(node))return;seen.add(node);
   node.style.setProperty('--reveal-delay',`${Math.min(i%6,5)*35}ms`);observer.observe(node);pending.add(node);
  });
