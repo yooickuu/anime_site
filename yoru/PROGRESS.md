@@ -677,3 +677,11 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - social-12.sql tested on isolated database and applied by user. Anonymous new night-badge RPC responds 401/42501 (function exists, guest credit denied). No RLS/auth/catalog/schema changes; old awards and account data preserved.
 - Verification: 373 tests passed, npm run check, build 8921/8921 (zero rejected); catalogue decompressed equality verified and original archive bytes restored. Startup bundle 1,267,613 bytes, badge/friend modules stay lazy. New drawer/friend navigation and history labels covered by DOM tests.
 - Browser host and native pipe unavailable; no claim of physical iPhone/desktop visual QA. Generated SDK string literals include upstream trailing whitespace; source diff check excludes generated bundles.
+
+## 2026-11-09 — Desktop glass polish
+- Settings: removed duplicate logout; avatar has a bounded circular preview and separate Change avatar button; style grid now contains its frame/swatches and selection indicator without overflowing.
+- Drawer language selector is inline (three compact options), stays in the same drawer, uses existing preference saving and language handling. No separate language panel; drawer labels update on selection.
+- Shared theme-aware glass surfaces for People/Friends/Chats and messages, settings, dropdowns and room panel; static accent edges, 24px desktop/18px mobile backdrop blur, short composited transitions and reduced-motion fallbacks.
+- Only the active room panel is moved above season/material selectors. Closing returns the original order; video and selectors remain the same DOM nodes. Room synchronization/playback algorithms unchanged.
+- 374 tests pass (~3 seconds), npm run check and build pass (8921/8921). Latest ongoing update f8ab8fd0 incorporated; catalogue JSON equality and original archive bytes preserved. Auth, Supabase schema/RLS, import and HLS modules untouched.
+- Browser/native host unavailable; no desktop/iPhone visual QA claim. No SQL step required.

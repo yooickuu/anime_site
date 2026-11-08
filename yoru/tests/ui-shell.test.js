@@ -27,11 +27,10 @@ test('recent row respects a rolling week, avoids future premieres and deduplicat
  const rows=recentReleases([fresh,fresh,{id:'mal-2',airedAt:'2026-11-05'},{id:'mal-3',ongoing:true,catalogUpdatedAt:now-WEEK-1},{id:'mal-4',airedAt:'2027-01-01'},{id:'mal-5',ongoing:false,catalogUpdatedAt:now}],now);
  assert.deepEqual(rows.map(a=>a.id),['mal-1','mal-2']);
 });
-test('drawer exposes all destinations, switches nested panels, and language dismissal restores focus',()=>{
+test('drawer switches language inline without opening a subpanel or closing the drawer',()=>{
  const shell=setup();document.querySelector('[data-shell="drawer"]').click();
- for(const selector of ['[data-nav="achievements"]','[data-nav="history"]','[href="#social/friends"]','[data-drawer-panel="style"]','[data-drawer-panel="language"]','[data-action="login"]'])assert.ok(document.querySelector('.shell-drawer '+selector),selector);
- document.querySelector('[data-drawer-panel="language"]').click();assert.equal(document.querySelector('.drawer-main').hidden,true);assert.equal(document.querySelectorAll('#language').length,1);assert.equal(document.querySelectorAll('#language option').length,3);
- document.querySelector('[data-drawer-back]').click();assert.equal(document.querySelector('.drawer-main').hidden,false);
- document.querySelector('[data-drawer-panel="style"]').click();assert.equal(document.querySelector('#language'),null);
- document.querySelector('[data-drawer-back]').click();document.querySelector('[data-drawer-panel="language"]').click();document.querySelector('#language').dispatchEvent(new window.Event('change',{bubbles:true}));assert.equal(document.querySelector('.shell-dialog'),null);assert.equal(document.activeElement.dataset.shell,'drawer');shell.close();
+ for(const selector of ['[data-nav="achievements"]','[data-nav="history"]','[href="#social/friends"]','[data-drawer-panel="style"]','.drawer-language #language','[data-action="login"]'])assert.ok(document.querySelector('.shell-drawer '+selector),selector);
+ assert.equal(document.querySelectorAll('#language').length,1);assert.equal(document.querySelectorAll('#language option').length,3);
+ const select=document.querySelector('#language');select.value='en';select.dispatchEvent(new window.Event('change',{bubbles:true}));assert.equal(document.querySelectorAll('dialog[open]').length,1);assert.equal(document.querySelector('.drawer-main').hidden,false);assert.equal(document.querySelector('.drawer-subpanel').hidden,true);
+ document.querySelector('[data-drawer-panel="style"]').click();assert.equal(document.querySelector('.drawer-main').hidden,true);document.querySelector('[data-drawer-back]').click();assert.equal(document.querySelector('.drawer-main').hidden,false);assert.equal(select.value,'en');shell.close();assert.equal(document.activeElement.dataset.shell,'drawer');
 });

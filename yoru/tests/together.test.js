@@ -49,3 +49,9 @@ test('room synchronization and public sharing remain lazy and preserve standalon
  assert.match(app,/timing:skipTiming,preferences:roomPreferences\(\),episode/);
  const buildScript=await readFile('scripts/build.mjs','utf8');assert.match(buildScript,/p.includes\('\/together\/'\)/);
 });
+test('active room moves above season controls and leaving restores its slot without remounting video or selectors',async()=>{
+ const {placeRoomPanel}=await import('../src/together/layout.js');const dom=new JSDOM('<div class="watch-main"><div class="video-shell"><video src="test.m3u8"></video></div><div class="season-tabs"></div><div class="player-pickers"><select><option>One</option></select></div><div class="episode-nav"></div><div id="watch-together"><input value="draft"></div><section id="episode-comments"></section></div>');
+ const d=dom.window.document,panel=d.querySelector('#watch-together'),video=d.querySelector('video'),select=d.querySelector('select');const before=[...panel.parentNode.children];let changes=0;select.addEventListener('change',()=>changes++);
+ placeRoomPanel(panel,true);assert.equal(panel.nextElementSibling.className,'season-tabs');assert.equal(panel.previousElementSibling.className,'video-shell');placeRoomPanel(panel,true);assert.equal(d.querySelector('video'),video);assert.equal(d.querySelector('select'),select);assert.equal(panel.querySelector('input').value,'draft');
+ placeRoomPanel(panel,false);assert.deepEqual([...panel.parentNode.children],before);select.dispatchEvent(new dom.window.Event('change'));assert.equal(changes,1);assert.equal(video.getAttribute('src'),'test.m3u8');dom.window.close();
+});
