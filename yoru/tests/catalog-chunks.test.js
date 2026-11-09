@@ -5,6 +5,7 @@ const items=Array.from({length:721},(_,i)=>({id:'mal-'+(i+1),ids:{mal:i+1},title
 function fixture(){
  const data=prepareChunks(items,{},'revision-1'),calls=[];const store=createCatalogueStore(data.bootstrap,{fetcher:async input=>{
   const u=new URL(input);calls.push(u.pathname);assert.equal(u.searchParams.get('v'),'revision-1');
+  if(u.pathname.endsWith('/search.json'))return Response.json(data.search);
   if(u.pathname.endsWith('/identities.json'))return Response.json(data.identities);
   const match=u.pathname.match(/browse\/([A-Za-z]+)-(\d+)\.json/);if(match)return Response.json(data.orders[match[1]].slice(Number(match[2])*120,(Number(match[2])+1)*120));
   const id=u.pathname.match(/cards\/(mal-\d+)\.json/)?.[1],card=data.cards.find(a=>a.id===id);return card?Response.json(card):new Response('',{status:404});
@@ -29,5 +30,14 @@ test('individual title and identities load on demand; foreign URLs and unknown i
  for(let i=1;i<40;i++)await store.card('mal-'+i);assert.equal(store.cacheSize().cards,24);
 });
 test('obsolete search stops between chunks instead of loading the rest in the background',async()=>{
- const {store,calls}=fixture();let checks=0;await assert.rejects(store.query({query:'Title'},{current:()=>++checks<3}),/staleCatalogue/);assert.equal(calls.length,2);
+ const {store,calls}=fixture();let checks=0;await assert.rejects(store.query({query:'Title'},{current:()=>++checks<3}),/staleCatalogue/);assert.equal(calls.length,1);
+});
+
+test('search uses one reusable metadata index, not dozens of browse chunks',async()=>{
+ const {store,calls,data}=fixture();
+ assert.ok(data.search.every(a=>!a.image&&!a.description&&!a.episodeManifest&&!a.relatedCatalogIds));
+ await store.query({query:'Title 720'});await store.query({query:'Title 719'});
+ assert.equal(calls.filter(p=>p.endsWith('/search.json')).length,1);
+ assert.equal(calls.filter(p=>p.includes('/browse/')).length,0);
+ assert.ok(store.cacheSize().cards<=24);
 });

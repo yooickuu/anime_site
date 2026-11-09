@@ -20,6 +20,8 @@ const chunks=prepareChunks(runtime.items,JSON.parse(await readFile('src/catalog-
 await writeFile('src/catalog-bootstrap.json',JSON.stringify(chunks.bootstrap));
 for(const base of ['dist/data/catalog','../data/catalog']){
  await mkdir(base+'/cards',{recursive:true});await mkdir(base+'/browse',{recursive:true});
+ if(Buffer.byteLength(JSON.stringify(chunks.search))>8*1024*1024)throw Error('Search index exceeds mobile budget');
+ await writeFile(base+'/search.json',JSON.stringify(chunks.search));
  await writeFile(base+'/identities.json',JSON.stringify(chunks.identities));
  await writeFile(base+'/recent.json',JSON.stringify(chunks.recent));
  for(const item of chunks.cards)await writeFile(`${base}/cards/${item.id}.json`,JSON.stringify(item));

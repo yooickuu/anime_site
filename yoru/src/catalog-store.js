@@ -1,6 +1,6 @@
 import {recentReleases} from './recent-releases.js';
 import {queryCatalogue} from './catalog-query.js';
-// A bounded cache; scanning a search never retains the full catalogue.
+// Bounded display caches plus an on-demand text-only search index; no media manifests.
 export function createCatalogueStore(bootstrap,{fetcher=(...args)=>fetch(...args),base=()=>globalThis.document?.baseURI||'https://yomiku.site/'}={}){
  const chunks=new Map(),cards=new Map(),pending=new Map(),admitted=new Set(bootstrap.items.map(a=>a.id));
  const valid=id=>/^(mal|shikimori|lib)-\d+$/.test(id);
@@ -15,6 +15,16 @@ export function createCatalogueStore(bootstrap,{fetcher=(...args)=>fetch(...args
   return cached(chunks,`browse/${sort}-${index}.json`,4,async()=>{const rows=await read(`browse/${sort}-${index}.json`);if(!Array.isArray(rows)||rows.length>bootstrap.chunkSize)throw Error('invalid_manifest');return rows;});
  }
  async function card(id){if(!valid(id))return null;return cached(cards,`cards/${id}.json`,24,async()=>{const a=await read(`cards/${id}.json`);if(!a)return null;if(a.id!==id||!a.catalogApproved||a.episodeManifest)throw Error('invalid_manifest');admitted.add(id);return a;});}
+ let searchPromise;
+ async function searchIndex(){
+  searchPromise??=read('search.json').then(rows=>{if(!Array.isArray(rows)||rows.length!==bootstrap.total||rows.some(a=>!valid(a.id)||a.episodeManifest))throw Error('invalid_manifest');return rows;}).catch(error=>{searchPromise=null;throw error;});
+  return searchPromise;
+ }
+ async function displayRows(rows,current){
+  const result=new Array(rows.length);let next=0;
+  await Promise.all(Array.from({length:Math.min(4,rows.length)},async()=>{while(next<rows.length){if(!current())throw Error('staleCatalogue');const i=next++;result[i]=await card(rows[i].id);}}));
+  return result.filter(Boolean);
+ }
  function remember(rows){for(const a of rows)admitted.add(a.id);return rows;}
  async function query(options={}, {current=()=>true}={}){
   const page=Math.max(1,Number(options.page)||1),limit=Math.min(24,Number(options.limit)||24),offset=(page-1)*limit;
@@ -24,6 +34,16 @@ export function createCatalogueStore(bootstrap,{fetcher=(...args)=>fetch(...args
    const sort=options.sort||'picked';
    if(sort==='picked'&&offset+limit<=bootstrap.items.length)rows=bootstrap.items.slice(offset,offset+limit);
    else if(offset<total){const first=Math.floor(offset/bootstrap.chunkSize),last=Math.floor(Math.min(total-1,offset+limit-1)/bootstrap.chunkSize);let loaded=[];for(let i=first;i<=last;i++){if(!current())throw Error('staleCatalogue');loaded.push(...await chunk(sort,i));}rows=loaded.slice(offset%bootstrap.chunkSize,offset%bootstrap.chunkSize+limit);}
+  }else if(bootstrap.searchIndex){
+   if(!current())throw Error('staleCatalogue');
+   const index=await searchIndex();let best=[];total=0;
+   for(let i=0;i<index.length;i+=250){
+    if(!current())throw Error('staleCatalogue');
+    const matches=queryCatalogue(index.slice(i,i+250),options);total+=matches.length;
+    best=queryCatalogue([...best,...matches],options).slice(0,offset+limit);
+    await new Promise(resolve=>setTimeout(resolve,0));
+   }
+   rows=await displayRows(best.slice(offset,offset+limit),current);
   }else{
    total=0;let best=[];
    for(let i=0;i<bootstrap.chunks;i++){

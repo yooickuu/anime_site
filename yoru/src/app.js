@@ -232,6 +232,8 @@ function applyAppearance() {
   document.querySelector('link[rel="icon"]')?.setAttribute('href',mark);
   document.querySelector('link[rel="apple-touch-icon"]')?.setAttribute('href',`assets/yomiku-touch.png?v=2`);
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content',styleColors[appearance]);
+  document.documentElement.style.setProperty('--browser-chrome',styleColors[appearance]);
+  document.documentElement.style.backgroundColor=styleColors[appearance];
   document.title = "yomiku — " + ({ru:"аниме, фильмы и личные списки",en:"anime, films and personal lists",ja:"アニメ・映画・マイリスト"}[lang]);
   try {
     localStorage.setItem("yooickuu.language", JSON.stringify(lang));

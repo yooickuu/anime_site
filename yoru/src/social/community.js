@@ -1,3 +1,4 @@
+import {unreadCounts,paintUnread} from './unread-counts.js';
 import {h,tr,scope,member,person,status,imageURL} from './common.js';
 import {api} from './api.js';
 export function mount(root,ctx,initial='chats'){
@@ -5,6 +6,9 @@ export function mount(root,ctx,initial='chats'){
  const section=['people','friends','chats'].includes(initial)?initial:'chats';
  root.innerHTML=`<section class="social-panel social-directory"><div class="social-heading"><h1>${tr(ctx,section)}</h1><a class="text-button" href="#profile">${tr(ctx,'back')}</a></div><div data-content></div><p data-status role="status"></p></section>`;
  const box=root.querySelector('[data-content]');
+ let unreadTimer,unreadBusy=false,unread=new Map();
+ async function refreshUnread(){clearTimeout(unreadTimer);if(!life.live()||section!=='chats'||!ctx.user()?.id)return;if(unreadBusy)return;unreadBusy=true;try{if(!document.hidden){const ids=[...box.querySelectorAll('[data-room-unread]')].map(b=>b.dataset.roomUnread);const next=await unreadCounts(ctx,life,ids);if(life.live()){unread=next;paintUnread(box,unread,ctx.lang());}}}catch{}finally{unreadBusy=false;if(life.live())unreadTimer=setTimeout(refreshUnread,15000);}}
+ document.addEventListener('visibilitychange',refreshUnread,{signal:life.signal});document.addEventListener('yomiku:chat-read',refreshUnread,{signal:life.signal});
  const label=(ru,en,ja)=>({ru,en,ja})[ctx.lang()]||en;
  const actionIcon=kind=>`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">${kind==='mail'?'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3 6 9 7 9-7"/>':'<path d="M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/>'}</svg>`;
  function friendNav(){return `<nav class="friend-tabs" aria-label="${tr(ctx,'friends')}">${[['accepted',label('Список друзей','Friends','友達一覧')],['find',label('Найти друга','Find a friend','友達を探す')],['incoming',label('Заявки в друзья','Requests','受信リクエスト')],['outgoing',label('Отправленные запросы','Sent requests','送信リクエスト')]].map(([id,name])=>`<button class="button soft ${friendTab===id?'active':''}" data-friend-tab="${id}" aria-pressed="${friendTab===id}">${name}</button>`).join('')}</nav>`;}
@@ -31,8 +35,8 @@ export function mount(root,ctx,initial='chats'){
     await db.cachedChats(({rooms,friendships})=>{if(!life.live()||own!==version||box.querySelector('[data-group-form] form'))return;
     const chatting=new Set(rooms.filter(r=>r.room?.kind==='dm').flatMap(r=>(r.peers||[]).map(p=>p.user_id)));
     const contacts=friendships.filter(f=>f.status==='accepted').map(f=>f.requester===ctx.user().id?f.to:f.from).filter(p=>p&&!chatting.has(p.user_id));
-    box.innerHTML=`<button class="button primary" data-group>${tr(ctx,'group')}</button><div data-group-form></div><label class="social-chat-search"><input type="search" data-chat-filter value="${h(chatQuery)}" placeholder="${tr(ctx,'chatSearch')}" aria-label="${tr(ctx,'chatSearch')}"></label><p class="social-empty" data-chat-empty hidden>${tr(ctx,'empty')}</p><div class="social-room-list">${rooms.map(r=>`<div class="social-room-row"><a class="social-room" href="#chat/${r.room_id}"><span class="social-room-avatars">${(r.peers||[]).slice(0,2).map(p=>`<span class="social-avatar">${p.avatar_path?`<img src="${h(imageURL(ctx,p.avatar_path))}" alt="" loading="lazy">`:h(p.nickname?.slice(0,1)||'?')}</span>`).join('')}</span><strong>${h(r.room?.title||r.label||tr(ctx,'chats'))}</strong></a><button class="text-button" data-remove-chat="${r.room_id}" data-kind="${r.room?.kind||'dm'}">${tr(ctx,'remove')}</button></div>`).join('')||(!contacts.length?tr(ctx,'empty'):'')}</div>${contacts.map(p=>`<div class="social-friend">${person(ctx,p)}<button class="button soft" data-dm="${p.user_id}">${tr(ctx,'message')}</button></div>`).join('')}`;
-    filterChats();
+    box.innerHTML=`<button class="button primary" data-group>${tr(ctx,'group')}</button><div data-group-form></div><label class="social-chat-search"><input type="search" data-chat-filter value="${h(chatQuery)}" placeholder="${tr(ctx,'chatSearch')}" aria-label="${tr(ctx,'chatSearch')}"></label><p class="social-empty" data-chat-empty hidden>${tr(ctx,'empty')}</p><div class="social-room-list">${rooms.map(r=>`<div class="social-room-row"><a class="social-room" href="#chat/${r.room_id}"><span class="social-room-avatars">${(r.peers||[]).slice(0,2).map(p=>`<span class="social-avatar">${p.avatar_path?`<img src="${h(imageURL(ctx,p.avatar_path))}" alt="" loading="lazy">`:h(p.nickname?.slice(0,1)||'?')}</span>`).join('')}</span><strong>${h(r.room?.title||r.label||tr(ctx,'chats'))}</strong><span class="social-unread-count" data-room-unread="${h(r.room_id)}" hidden></span></a><button class="text-button" data-remove-chat="${r.room_id}" data-kind="${r.room?.kind||'dm'}">${tr(ctx,'remove')}</button></div>`).join('')||(!contacts.length?tr(ctx,'empty'):'')}</div>${contacts.map(p=>`<div class="social-friend">${person(ctx,p)}<button class="button soft" data-dm="${p.user_id}">${tr(ctx,'message')}</button></div>`).join('')}`;
+    filterChats();paintUnread(box,unread,ctx.lang());void refreshUnread();
     });
    }
   }catch(e){if(life.live()&&own===version){if(!box.querySelector('.social-room-row,[data-dm]'))box.innerHTML='';status(root,ctx,e);}}
@@ -51,5 +55,5 @@ export function mount(root,ctx,initial='chats'){
    target.querySelector('form').addEventListener('submit',async e=>{e.preventDefault();const submit=e.target.querySelector('button');submit.disabled=true;try{const users=[...e.target.querySelectorAll('input[name=members]:checked')].map(x=>x.value);if(!users.length){status(root,ctx,new Error('choose_friends'));return;}const room=await db.room(users,e.target.elements.title.value);if(life.live())location.hash='chat/'+room;}catch(err){if(life.live())status(root,ctx,err);}finally{submit.disabled=false;}},{signal:life.signal});
   }
  }catch(e){if(life.live())status(root,ctx,e);}finally{b.disabled=false;}},{signal:life.signal});
- tab(section);return ()=>{clearTimeout(searchTimer);++version;life.dispose();};
+ tab(section);return ()=>{clearTimeout(unreadTimer);clearTimeout(searchTimer);++version;life.dispose();};
 }
