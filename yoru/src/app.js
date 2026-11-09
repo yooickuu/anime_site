@@ -1,3 +1,4 @@
+import {installMobileShell} from './mobile-shell.js';
 import {historyAgo} from './history-display.js';
 import {ownProfileView,settingsView,mountOwnLists} from './profile-redesign.js';
 import {catalogView} from './catalog-view.js';
@@ -281,7 +282,7 @@ function render(newWatch=false) {
   if(preservedWatch){
     // Replacing the app root detaches the fullscreen element, even if reinserted.
     const template=document.createElement('template');template.innerHTML=markup;
-    for(const tag of ['header','footer'])$('#app > '+tag)?.replaceWith(template.content.querySelector(tag));
+    for(const tag of ['header','footer','.mobile-bottom-nav'])$('#app > '+tag)?.replaceWith(template.content.querySelector(tag));
   }else $("#app").innerHTML=markup;
   if(page==='home'){startHero();void renderRecent();}
   if (page !== 'social' && page !== 'watch' && !(["profile","achievements","history"].includes(page)) && !(page === "library" && !user)) renderGrid();
@@ -1848,5 +1849,6 @@ function warmSocial(event){const element=event.target.closest?.('[data-nav="prof
 document.addEventListener('pointerover',warmSocial,{passive:true});document.addEventListener('focusin',warmSocial);document.addEventListener('touchstart',warmSocial,{passive:true});
 async function interfacePending(element,action){const notice=document.createElement('span');notice.className='ui-pending';notice.role='status';notice.textContent=t('loading');element.setAttribute('aria-busy','true');element.classList.add('ui-busy');element.append(notice);try{await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));return await action();}finally{notice.remove();element.removeAttribute('aria-busy');element.classList.remove('ui-busy');}}
 
-installShell({user:()=>user,appearance:appearanceHTML,lang:()=>lang,title,cover,search:searchCatalogue,local:q=>q.trim()?suggestions(publishedItems,q):publishedItems.slice(0,6),subtitle:key=>({titles:{ru:'Найди свою следующую историю',en:'Find your next story',ja:'次の物語を探す'},people:{ru:'Найти по никнейму',en:'Search by nickname',ja:'ニックネームで検索'},chats:{ru:'Друзья и групповые чаты',en:'Friends and group chats',ja:'友達とグループチャット'}})[key][lang]});
+installMobileShell({lang:()=>lang});
+installShell({user:()=>user,displayName:()=>state.preferences.name||user?.user_metadata?.name,avatar:()=>avatarUrl,appearance:appearanceHTML,lang:()=>lang,title,cover,search:searchCatalogue,local:q=>q.trim()?suggestions(publishedItems,q):publishedItems.slice(0,6),subtitle:key=>({titles:{ru:'Найди свою следующую историю',en:'Find your next story',ja:'次の物語を探す'},people:{ru:'Найти по никнейму',en:'Search by nickname',ja:'ニックネームで検索'},chats:{ru:'Друзья и групповые чаты',en:'Friends and group chats',ja:'友達とグループチャット'}})[key][lang]});
 installLiquidMotion();

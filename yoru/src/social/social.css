@@ -118,3 +118,23 @@ body.dark[data-style] .social-panel :is(input,textarea)::placeholder{color:#c5c0
 .social-directory :is(.social-friend,.social-room-row,.social-people>.social-person){padding:14px;border:1px solid #ffffff12;border-radius:18px;background:linear-gradient(120deg,#ffffff09,#ffffff02);box-shadow:inset 0 1px #ffffff0d}.social-directory .social-room-row .social-room{background:transparent;box-shadow:none;border:0}.social-directory .social-friend+.social-friend{margin-top:10px}.social-directory .social-heading,.social-chat .social-heading{align-items:center;gap:12px}.social-panel:is(.social-directory,.social-chat) :is(input:not([type=checkbox]):not([type=file]),textarea){color:var(--text);background:rgba(var(--surface-rgb),.38);border:1px solid #ffffff20;box-shadow:inset 0 1px 8px #0001;font-size:16px}.social-chat .social-input-row{background:#ffffff07;border-color:#ffffff24;box-shadow:inset 0 1px #ffffff14}.social-chat .social-input-row textarea{border:0;background:transparent;box-shadow:none}.social-chat .social-bubble{background:linear-gradient(135deg,#ffffff0c,#ffffff03),rgba(var(--surface-rgb),.44);border:1px solid #ffffff14;box-shadow:inset 0 1px #ffffff0c,0 4px 14px #0001}.social-chat .is-own .social-bubble{background:linear-gradient(130deg,rgba(var(--accent-rgb),.22),rgba(var(--accent-rgb),.11));border-color:rgba(var(--accent-rgb),.22)}.social-chat :is([data-members-panel],[data-search]):not([hidden]){padding:14px;border:1px solid #ffffff1a;border-radius:16px;background:rgba(var(--surface-rgb),.45);margin-block:10px}
 @media(prefers-reduced-motion:no-preference){.social-directory :is(.social-friend,.social-room-row,.social-people>.social-person){transition:transform .22s cubic-bezier(.22,1,.36,1),background .22s,border-color .22s}.social-directory :is(.social-friend,.social-room-row,.social-people>.social-person):hover{border-color:rgba(var(--accent-rgb),.3);background-color:#ffffff05;transform:translateY(-2px)}.social-panel:is(.social-directory,.social-chat){animation:social-enter .32s cubic-bezier(.22,1,.36,1)}}
 @media(max-width:600px){.social-panel.social-chat{border:0;border-radius:0;background:linear-gradient(130deg,#ffffff06,transparent),rgba(var(--surface-rgb,25,24,32),.9)}.social-directory :is(.social-friend,.social-room-row,.social-people>.social-person){padding:10px}}
+/* Phone keyboard uses the visual viewport; the dock never competes with the composer. */
+@media(max-width:700px){
+ body.chat-open #app>.mobile-bottom-nav{display:none!important}
+ body.chat-open #app{padding:0!important}
+ .social-panel.social-chat{min-height:0;transition:none!important;animation:none!important}
+ .social-chat .social-heading{gap:6px}.social-chat .social-compose,.social-chat .social-input-row{min-width:0;width:100%;box-sizing:border-box}
+ .social-chat .social-input-row textarea{min-width:0;font-size:16px;line-height:1.4;scroll-margin:0}
+ .social-chat .social-messages{min-width:0;scroll-behavior:auto;scrollbar-gutter:auto}
+ .social-directory .social-heading{flex-wrap:wrap}.social-directory .social-heading h1{font-size:22px;min-width:0}
+ .social-directory .social-actions{flex-wrap:wrap}.social-directory .friend-tabs{flex-wrap:wrap;overflow:visible}.social-directory .friend-tabs>button{flex:1 1 40%;white-space:normal;font-size:12px;padding:9px 6px}
+ .public-profile-v3 .social-profile-info{min-width:0;padding:16px}.public-profile-v3 .social-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.public-profile-v3 .social-stats>div{min-width:0;padding:12px 6px}.public-profile-v3 .social-stats strong{font-size:24px}.public-profile-v3 .social-stats span{font-size:11px}
+ .public-profile-v3 .public-tabs{display:flex;flex-wrap:wrap;overflow:visible}.public-profile-v3 .public-tabs>button{flex:1 1 40%;font-size:12px;white-space:normal}
+}
+@media(max-width:700px){
+ .social-chat .social-heading{grid-template-columns:auto minmax(0,1fr) auto auto;gap:5px}
+ .social-chat .social-heading>a,.social-chat .social-heading>[data-members],.social-chat .social-heading>[data-remove-chat]{font-size:11px!important;padding:7px 5px!important;min-width:0;min-height:40px;white-space:nowrap}
+ .social-chat .social-heading h1{min-width:0;margin:0;font-size:16px}
+ .social-chat .social-compose>.social-actions{display:flex;flex-wrap:nowrap;gap:6px}
+ .social-chat .social-compose>.social-actions .button{font-size:11px;min-height:32px;padding:6px 8px;white-space:nowrap}
+}

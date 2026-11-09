@@ -685,3 +685,12 @@ New scripts refresh-kodik-catalog.mjs, enrich-catalog.mjs, lib/player-audit.mjs;
 - Only the active room panel is moved above season/material selectors. Closing returns the original order; video and selectors remain the same DOM nodes. Room synchronization/playback algorithms unchanged.
 - 374 tests pass (~3 seconds), npm run check and build pass (8921/8921). Latest ongoing update f8ab8fd0 incorporated; catalogue JSON equality and original archive bytes preserved. Auth, Supabase schema/RLS, import and HLS modules untouched.
 - Browser/native host unavailable; no desktop/iPhone visual QA claim. No SQL step required.
+
+## 2026-11-09 — Mobile-only navigation and layout
+- Added a presentation-only `mobile-shell.js`: fixed phone top search, catalog back/filter/sort buttons, bottom Catalog / Yomiku / Menu dock. Breakpoint <=700px; desktop header and right drawer retain their existing layout.
+- Phone drawer opens at the left, 85vw, with account identity, People/Chats and existing destinations. Catalog sheets move the original filter/sort controls and restore them on dismissal/resizing/navigation; no duplicate IDs or new catalog/query logic.
+- Mobile CSS makes profile tabs/lists wrap, compacts profile/settings, and uses stable player-control rows. No HLS, source, import, auth, database or user-storage changes.
+- Chat retains the existing visualViewport adapter; dock disappears in chat, composer remains inside the visible viewport. Fixed narrow header/action spacing. Physical iOS keyboard was not available; validated isolated Chrome mobile viewports and a controlled visualViewport resize instead.
+- Validation: npm run check, 377 tests, npm run build passed; 8921/8921 catalogue entries, 0 rejected. Canonical gzip restored byte-for-byte after verifying decompressed equality.
+- Browser QA: phone home/search/drawer/themes/catalog/filter/sort at 360/390/430/700px; original-module watch/profile/chat fixtures at 360/390/700px; no document horizontal overflow or JS errors. Keyboard fixture at 430px visible height keeps composer bottom at 422px and hides dock. Desktop live/local header geometry and visible drawer destinations compared.
+- UI fixture files and screenshots are under /tmp/yomiku-ui-audit (not repository assets, no real account data written).
