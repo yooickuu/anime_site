@@ -127,7 +127,7 @@ body.dark[data-style] .social-panel :is(input,textarea)::placeholder{color:#c5c0
  .social-chat .social-input-row textarea{min-width:0;font-size:16px;line-height:1.4;scroll-margin:0}
  .social-chat .social-messages{min-width:0;scroll-behavior:auto;scrollbar-gutter:auto}
  .social-directory .social-heading{flex-wrap:wrap}.social-directory .social-heading h1{font-size:22px;min-width:0}
- .social-directory .social-actions{flex-wrap:wrap}.social-directory .friend-tabs{flex-wrap:wrap;overflow:visible}.social-directory .friend-tabs>button{flex:1 1 40%;white-space:normal;font-size:12px;padding:9px 6px}
+ .social-directory .social-actions{flex-wrap:wrap}.social-directory .friend-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));height:auto;min-height:0;max-height:none;flex-basis:auto;gap:8px;padding:4px 0 0;margin:0 0 16px;overflow:visible;align-items:stretch}.social-directory .friend-tabs>button{min-width:0;width:100%;height:auto;min-height:44px;white-space:normal;overflow-wrap:anywhere;line-height:1.35;font-size:12px;padding:9px 6px}
  .public-profile-v3 .social-profile-info{min-width:0;padding:16px}.public-profile-v3 .social-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.public-profile-v3 .social-stats>div{min-width:0;padding:12px 6px}.public-profile-v3 .social-stats strong{font-size:24px}.public-profile-v3 .social-stats span{font-size:11px}
  .public-profile-v3 .public-tabs{display:flex;flex-wrap:wrap;overflow:visible}.public-profile-v3 .public-tabs>button{flex:1 1 40%;font-size:12px;white-space:normal}
 }
