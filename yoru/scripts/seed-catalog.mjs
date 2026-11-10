@@ -56,8 +56,8 @@ export async function assembleRelease(release,{getMetadata=metadata,imageProbe=p
  const mal=Number(sh?.malId||al?.idMal)||null;
  return {...metadataFromAniList(al),id:mal?`mal-${mal}`:`shikimori-${shiki}`,ids:{shikimori:shiki,mal,anilist:al?.id||null,kodik:String(release.id)},kodikIds:[String(release.id)],kodikRevisions:{[release.id]:release.updated_at||String(release.episodes_count)},title:sh?.russian||release.title,originalTitle:release.title_orig||al?.title?.romaji||'',alt:[release.other_title,al?.title?.english,al?.title?.native].filter(Boolean).join(' '),description:clean(sh?.description||m.description||al?.description),year:release.year,type,genres:(sh?.genres?.map(g=>g.russian||g.name)||m.anime_genres||al?.genres||[]).map(normalizeGenre),rating:Number(sh?.score||m.shikimori_rating||Number(al?.averageScore)/10)||null,popularity:al?.popularity||0,ongoing:(m.anime_status||sh?.status)==='ongoing',relatedMalIds:(al?.relations?.edges||[]).filter(e=>['PREQUEL','SEQUEL'].includes(e.relationType)&&e.node.type==='ANIME').map(e=>e.node.idMal).filter(Boolean),artwork:{poster,backdrop},releasedEpisodes:episodes.map(e=>e.number),episodes};
 }
-export async function popularAnimePage(page,{fetcher=fetch}={}){
- const url=new URL('https://shikimori.io/api/animes');url.search=new URLSearchParams({order:'popularity',limit:'50',page:String(page),censored:'true'});
+export async function popularAnimePage(page,{fetcher=fetch,order='popularity'}={}){
+ const url=new URL('https://shikimori.io/api/animes');url.search=new URLSearchParams({order,limit:'50',page:String(page),censored:'true'});
  const response=await fetcher(url,{headers:{'User-Agent':'yomiku/1.0 (+https://yomiku.site/)'},signal:AbortSignal.timeout(15000)});
  if(!response.ok)throw Error(`popularity_http_${response.status}`);
  const rows=await response.json();if(!Array.isArray(rows)||rows.some(a=>!Number.isSafeInteger(Number(a.id))||Number(a.id)<=0))throw Error('invalid_popularity_page');
@@ -74,7 +74,7 @@ export function allocateCatalogueId(incoming,byId){
  throw Error('catalogue_id_conflict');
 }
 export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetCount*10),retryLimit=3,token,api,assemble=assembleRelease,order='updated',getPopular=popularAnimePage}={}){
- if(!['updated','popular'].includes(order))throw Error('invalid_import_order');
+ if(!['updated','popular','ranked','aired_on','id_desc'].includes(order))throw Error('invalid_import_order');
  if(!Number.isSafeInteger(targetCount)||targetCount<1)throw Error('Количество должно быть положительным целым числом');
  api||=new KodikAPI(token||await loadToken());
  const catalog=await loadJSON(catalogPath,{policyVersion:3,items:[]});
@@ -144,12 +144,22 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
    report.pending.push({id:key,reason:error.message});console.warn(`Пропущен ${key}: ${error.message}`);
   }
  }
- if(order==='popular'){
-  progress.popular??={page:1,index:0};let scanned=0;
-  console.log('Приоритет: популярные аниме Shikimori, которых ещё нет в каталоге.');
+ if(['popular','ranked','aired_on','id_desc'].includes(order)){
+  const stateKey=order==='popular'?'popular':order;
+  progress[stateKey]??={page:1,index:0};
+  const state=progress[stateKey];
+  let scanned=0;
+  const orderTitles={popular:'популярные',ranked:'по рейтингу',aired_on:'по дате премьеры',id_desc:'по новинкам базы'};
+  console.log(`Приоритет: аниме Shikimori (${orderTitles[order]||order}), которых ещё нет в каталоге.`);
   while(!stop()&&scanned<maxChecks){
-   const rows=await getPopular(progress.popular.page);if(!rows.length)break;
-   for(let i=progress.popular.index;i<rows.length;){
+   const rows=await getPopular(state.page,{order:order==='popular'?'popularity':order});
+   if(!rows.length){
+    console.log(`Страницы ${order} исчерпаны, сброс на начало.`);
+    state.page=1;state.index=0;
+    await persist(progress.next);
+    break;
+   }
+   for(let i=state.index;i<rows.length;){
     const size=Math.min(2,targetCount-report.added,maxChecks-scanned,maxChecks-report.checked);if(size<1)return report;
     const batch=rows.slice(i,i+size);scanned+=batch.length;
     await mapLimit(batch,2,async row=>{
@@ -162,10 +172,10 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
       }
      }
     });
-    i+=batch.length;progress.popular.index=i;await persist(progress.next);
+    i+=batch.length;state.index=i;await persist(progress.next);
     if(stop()||scanned>=maxChecks)return report;
    }
-   progress.popular={page:progress.popular.page+1,index:0};await persist(progress.next);
+   state.page=state.page+1;state.index=0;await persist(progress.next);
   }
   return report;
  }
@@ -188,4 +198,7 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
  }
  console.log(`Готово: новых ${report.added}, дополнено ${report.merged}, на проверку позже ${report.pending.length}`);return report;
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)seedCatalog({targetCount:Number(process.argv[2]||30),order:process.argv.includes('--popular')?'popular':'updated'}).catch(e=>{console.error(e.message);process.exitCode=1;});
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
+ const order=process.argv.includes('--ranked')?'ranked':process.argv.includes('--aired')?'aired_on':process.argv.includes('--new')?'id_desc':process.argv.includes('--updated')?'updated':'popular';
+ seedCatalog({targetCount:Number(process.argv[2]||30),order}).catch(e=>{console.error(e.message);process.exitCode=1;});
+}

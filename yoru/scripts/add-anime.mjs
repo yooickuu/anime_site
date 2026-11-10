@@ -17,12 +17,19 @@ try{
  const branch=gitText('branch','--show-current');
  if(branch!=='main')throw Error('Открой ветку main перед публикацией.');
  run('git',['fetch','origin']);
- if(gitText('rev-list','--count','HEAD..origin/main')!=='0')run('git',['merge','--ff-only','origin/main']);
- run(process.execPath,[anilibria?'scripts/seed-anilibria.mjs':'scripts/seed-catalog.mjs',String(count),...(anilibria?(process.argv.includes('--new-only')?['--new-only']:[]):(process.argv.includes('--popular')?['--popular']:[]))]);
+ if(gitText('rev-list','--count','HEAD..origin/main')!=='0'){
+  try{run('git',['pull','--rebase','origin','main']);}
+  catch(e){run('git',['rebase','--abort']);throw Error('Не удалось автоматически объединить ветку main с GitHub. Проверьте git status.');}
+ }
+ const extraArgs=anilibria?['--new-only']:(process.argv.slice(2).some(a=>['--updated','--popular','--ranked','--aired','--new'].includes(a))?process.argv.slice(2).filter(a=>a.startsWith('--')):['--popular',...process.argv.slice(2).filter(a=>a.startsWith('--')&&a!=='--anilibria')]);
+ run(process.execPath,[anilibria?'scripts/seed-anilibria.mjs':'scripts/seed-catalog.mjs',String(count),...extraArgs]);
  run('npm',['run','build']);
  const files=['dist/social','../social','dist/providers','../providers','src/catalog-bootstrap.json','dist/data/catalog','../data/catalog','src/runtime-catalog.json','dist/data/media','../data/media','src/published-catalog.json.gz','src/kodik-progress.json',...(anilibria?['src/anilibria-progress.json']:[]),'dist/app.js','dist/index.html','dist/catalog-build.json','dist/data/kodik','../app.js','../index.html','../catalog-build.json','../data/kodik'];
  run('git',['add','--',...files.filter(existsSync)]);
- if(gitText('diff','--cached','--name-only'))run('git',['commit','-m',`Import validated ${anilibria?'AniLibria':'Kodik'} batch (target ${count})`]);
- run('git',['push','origin','main']);
+ if(gitText('diff','--cached','--name-only')){
+  run('git',['commit','-m',`Import validated ${anilibria?'AniLibria':'Kodik'} batch (target ${count})`]);
+  try{run('git',['pull','--rebase','origin','main']);}catch{}
+  run('git',['push','origin','main']);
+ }
  console.log('Отправлено в GitHub. Pages опубликует сайт после завершения Actions.');
 }catch(error){console.error(error.message);process.exitCode=1;}
