@@ -21163,8 +21163,8 @@
     "serial-78853"
   ],
   "popular": {
-    "page": 4,
-    "index": 50
+    "page": 88,
+    "index": 36
   },
   "deferred": {
     "movie-106276": {
@@ -21425,7 +21425,7 @@
     "movie-98776": {
       "revision": "2023-10-25T19:06:15Z",
       "reason": "translation_language_unknown",
-      "retryAfter": "2026-10-29T05:39:40.533Z"
+      "retryAfter": "2026-11-10T06:10:48.652Z"
     },
     "serial-54916": {
       "revision": "2023-10-20T16:49:35Z",
@@ -21455,7 +21455,7 @@
     "serial-53846": {
       "revision": "2023-09-24T15:16:46Z",
       "reason": "invalid_episode_number",
-      "retryAfter": "2026-10-29T05:41:23.010Z"
+      "retryAfter": "2026-11-10T08:18:08.079Z"
     },
     "movie-98071": {
       "revision": "2023-09-21T13:52:29Z",
@@ -21665,7 +21665,7 @@
     "movie-90893": {
       "revision": "2022-11-20T13:48:12Z",
       "reason": "translation_language_unknown",
-      "retryAfter": "2026-10-29T05:53:44.795Z"
+      "retryAfter": "2026-11-10T06:08:34.036Z"
     },
     "serial-33596": {
       "revision": "2022-11-15T17:02:18Z",
@@ -22315,7 +22315,7 @@
     "serial-7692": {
       "revision": "2019-12-07T12:40:58Z",
       "reason": "invalid_episode_number",
-      "retryAfter": "2026-11-01T06:20:15.933Z"
+      "retryAfter": "2026-11-10T08:18:08.078Z"
     },
     "serial-7841": {
       "revision": "2019-11-24T10:15:26Z",
