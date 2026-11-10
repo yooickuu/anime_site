@@ -160,11 +160,14 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
     break;
    }
    for(let i=state.index;i<rows.length;){
-    const size=Math.min(2,targetCount-report.added,maxChecks-scanned,maxChecks-report.checked);if(size<1)return report;
-    const batch=rows.slice(i,i+size);scanned+=batch.length;
+    if(stop()||report.added>=targetCount||scanned>=maxChecks)return report;
+    const size=Math.min(2,targetCount-report.added);
+    const batch=rows.slice(i,i+size);
     await mapLimit(batch,2,async row=>{
      const id=Number(row.id);
      if(!byIdentity.has(`shikimori:${id}`)&&!byIdentity.has(`mal:${id}`)){
+      scanned++;
+      if(scanned>maxChecks||stop())return;
       for(const release of await variantsFor(id)){
        if(Number(release.shikimori_id)!==id)continue;
        await ingest(release);
@@ -173,7 +176,7 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
      }
     });
     i+=batch.length;state.index=i;await persist(progress.next);
-    if(stop()||scanned>=maxChecks)return report;
+    if(stop())return report;
    }
    state.page=state.page+1;state.index=0;await persist(progress.next);
   }
