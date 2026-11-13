@@ -1,43 +1,43 @@
 /* Liquid Glass finish. Appearance only; no media geometry or interaction overrides. */
-:root{
- --glass-reflection:linear-gradient(118deg,#ffffff19 0%,#ffffff05 24%,transparent 47%,rgba(var(--accent-rgb),.09) 76%,#ffffff0c 100%);
- --glass-surface:rgba(var(--surface-rgb,24,26,30),.78);
- --glass-stroke:rgba(var(--accent-rgb),.26);
- --glass-depth:inset 0 1px 0 #ffffff32,inset 1px 0 0 #ffffff0b,inset 0 -1px 0 #ffffff07,0 14px 36px #0003;
+:root,body[data-style]{
+ --glass-reflection:radial-gradient(ellipse 110% 80% at 12% -28%,#ffffff2b,transparent 62%),radial-gradient(ellipse 90% 65% at 115% 118%,rgba(var(--accent-rgb),.16),transparent 70%),linear-gradient(125deg,#ffffff08,transparent 38%,#ffffff03 64%,#ffffff0c);
+ --glass-surface:rgba(var(--surface-rgb,24,26,30),.66);
+ --glass-stroke:transparent;
+ --glass-depth:inset 0 1px 1px #ffffff25,inset 1px 0 3px #ffffff08,inset 0 -2px 3px #0003,0 3px 8px #0002,0 18px 38px #0003;
  --glass-motion:cubic-bezier(.22,1,.36,1);
  --polish-glass:var(--glass-reflection),var(--glass-surface);
- --polish-border:var(--glass-stroke);--polish-shadow:var(--glass-depth);--polish-blur:20px;
+ --polish-border:var(--glass-stroke);--polish-shadow:var(--glass-depth);--polish-blur:14px;
 }
 /* One backdrop per panel; inner elements use reflections without stacked blur. */
 body.dark :is(.liquid-glass,.profile-settings-dialog,.shell-dialog,.catalog-filter-panel,.library-sidebar,.guest-panel,.social-panel:not(.social-comments)){
  background:var(--glass-reflection),var(--glass-surface);border-color:var(--glass-stroke);box-shadow:var(--glass-depth);
- backdrop-filter:blur(var(--polish-blur)) saturate(150%);-webkit-backdrop-filter:blur(var(--polish-blur)) saturate(150%);
+ backdrop-filter:blur(var(--polish-blur)) saturate(155%) brightness(1.04);-webkit-backdrop-filter:blur(var(--polish-blur)) saturate(155%) brightness(1.04);
 }
 body.dark :is(#auth-dialog,#collection-dialog,#about-dialog){
  background:var(--glass-reflection),rgba(var(--surface-rgb),.92);color:var(--text);border:1px solid var(--glass-stroke);box-shadow:var(--glass-depth);
  backdrop-filter:blur(20px) saturate(145%);-webkit-backdrop-filter:blur(20px) saturate(145%);
 }
 body.dark :is(.profile-v3-stats>div,.social-stats>div,.achievement,.public-badge,.social-friend,.social-room-row,.public-friends-grid>.social-person){
- background-image:var(--glass-reflection);border-color:#ffffff1c;box-shadow:inset 0 1px #ffffff27,0 5px 18px #0001;
+ background-image:var(--glass-reflection);border-color:transparent;box-shadow:inset 0 1px #ffffff27,0 5px 18px #0001;
 }
 body.dark .achievement.is-unlocked,body.dark .public-badge{
- border-color:rgba(var(--accent-rgb),.62);background-image:var(--glass-reflection),linear-gradient(130deg,rgba(var(--accent-rgb),.14),transparent);
+ border-color:transparent;background-image:var(--glass-reflection),linear-gradient(130deg,rgba(var(--accent-rgb),.14),transparent);
  box-shadow:inset 0 1px rgba(var(--accent-rgb),.36),0 0 18px rgba(var(--accent-rgb),.15);
 }
 /* Shared controls. Deliberately exclude the video toolbar and seek surfaces. */
 body.dark :is(.shell-dialog,.profile-settings-dialog,.profile-v3,.social-panel,.catalog-v2,.library-sidebar,.hero-buttons,.together-panel) :is(.button.soft,.glass-button,.friend-icon,.style-option,.shell-nav,.social-tabs>button,.profile-v3-tabs>button,.profile-list-nav>button,.profile-settings-tabs>button){
- background-image:var(--glass-reflection);background-size:220% 100%;background-position:100% 50%;border-color:#ffffff24;box-shadow:inset 0 1px #ffffff29,0 3px 12px #0001;
+ background-image:var(--glass-reflection);background-size:220% 100%;background-position:100% 50%;border-color:transparent;box-shadow:inset 0 1px #ffffff29,0 3px 12px #0001;
 }
 body.dark :is(.shell-dialog,.profile-settings-dialog,.profile-v3,.social-panel,.catalog-v2,.library-sidebar,.hero-buttons,.together-panel) :is(.button.soft,.glass-button,.friend-icon,.style-option,.social-tabs>button,.profile-v3-tabs>button,.profile-list-nav>button,.profile-settings-tabs>button):is(:hover,:focus-visible){
- background-position:0 50%;border-color:rgba(var(--accent-rgb),.5);box-shadow:inset 0 1px #ffffff45,0 0 18px rgba(var(--accent-rgb),.12);
+ background-position:0 50%;border-color:transparent;box-shadow:inset 0 1px #ffffff45,0 0 18px rgba(var(--accent-rgb),.12);
 }
 body.dark :is(.profile-list-nav,.profile-v3-tabs,.profile-settings-tabs,.social-tabs)>:is(button,a)[aria-selected=true],body.dark .style-option[aria-pressed=true]{
- border-color:rgba(var(--accent-rgb),.6);box-shadow:inset 0 1px rgba(var(--accent-rgb),.45),0 0 16px rgba(var(--accent-rgb),.13);
+ border-color:transparent;box-shadow:inset 0 1px rgba(var(--accent-rgb),.45),0 0 16px rgba(var(--accent-rgb),.13);
 }
 body.dark .select-menu{background:var(--polish-glass);border-color:var(--glass-stroke);box-shadow:var(--glass-depth)}
 body.dark :is(.profile-list-filters,.catalog-search,.shell-search-top,.social-panel,.profile-settings-dialog) :is(input:not([type=checkbox]):not([type=radio]),textarea){color:var(--text);caret-color:var(--accent)}
-body.dark .social-chat .social-bubble{background:var(--glass-reflection),rgba(var(--surface-rgb),.55);border-color:#ffffff1f;box-shadow:inset 0 1px #ffffff20,0 4px 14px #0002}
-body.dark .social-chat .is-own .social-bubble{background:var(--glass-reflection),rgba(var(--accent-rgb),.19);border-color:rgba(var(--accent-rgb),.3)}
+body.dark .social-chat .social-bubble{background:var(--glass-reflection),rgba(var(--surface-rgb),.55);border-color:transparent;box-shadow:inset 0 1px #ffffff20,0 4px 14px #0002}
+body.dark .social-chat .is-own .social-bubble{background:var(--glass-reflection),rgba(var(--accent-rgb),.19);border-color:transparent}
 body.dark .social-chat .social-input-row{background:var(--glass-reflection),rgba(var(--surface-rgb),.68);border-color:#ffffff30;box-shadow:inset 0 1px #ffffff24}
 body.dark .social-comments{background:transparent;box-shadow:none;border:0;backdrop-filter:none;-webkit-backdrop-filter:none}
 body.dark .social-comment{border-bottom-color:rgba(var(--accent-rgb),.15)}
@@ -45,7 +45,7 @@ body.dark :is(.shell-dialog,.profile-settings-dialog,#auth-dialog,#collection-di
 /* Subtle refraction on artwork is driven by the existing single pointer RAF. */
 @media(hover:hover) and (pointer:fine){
  .anime-card.is-tilting .poster-button,.recent-card.is-tilting .recent-poster{box-shadow:0 10px 28px #0004,0 0 0 1px rgba(var(--accent-rgb),.4),0 0 22px rgba(var(--accent-rgb),.13)}
- .social-room-row:hover,.social-friend:hover{border-color:rgba(var(--accent-rgb),.32)}
+ .social-room-row:hover,.social-friend:hover{border-color:transparent}
 }
 @media(prefers-reduced-motion:no-preference){
  body.dark :is(.shell-dialog,.profile-settings-dialog,.profile-v3,.social-panel,.catalog-v2,.library-sidebar,.hero-buttons,.together-panel) :is(.button.soft,.glass-button,.friend-icon,.style-option,.social-tabs>button,.profile-v3-tabs>button,.profile-list-nav>button,.profile-settings-tabs>button){transition:background-position .65s var(--glass-motion),border-color .22s,box-shadow .3s,transform .22s var(--glass-motion)}
@@ -65,10 +65,49 @@ body.dark :is(.shell-dialog,.profile-settings-dialog,#auth-dialog,#collection-di
  @keyframes glass-bubble{from{opacity:0;translate:var(--bubble-offset,0px) 5px}to{opacity:1;translate:0 0}}
 }
 /* Phone: fewer backdrop layers, readable inputs, no hover-only layout. */
-@media(max-width:700px){:root{--polish-blur:16px;--glass-surface:rgba(var(--surface-rgb),.86)}
+@media(max-width:700px){:root,body[data-style]{--polish-blur:12px;--glass-surface:rgba(var(--surface-rgb),.78)}
  body.dark :is(.profile-list-nav,.catalog-filter-panel){backdrop-filter:none;-webkit-backdrop-filter:none}
  body.dark :is(.social-panel,.profile-settings-dialog,.shell-dialog,#auth-dialog,#collection-dialog) :is(input:not([type=checkbox]):not([type=radio]),textarea){font-size:16px}
 }
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root{--glass-surface:rgba(var(--surface-rgb),.97)}}
-@media(prefers-reduced-transparency:reduce){:root{--glass-surface:rgb(var(--surface-rgb))}body.dark :is(.liquid-glass,.social-panel,.profile-settings-dialog,.shell-dialog,#auth-dialog,#collection-dialog,#about-dialog){backdrop-filter:none;-webkit-backdrop-filter:none}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){:root,body[data-style]{--glass-surface:rgba(var(--surface-rgb),.97)}}
+@media(prefers-reduced-transparency:reduce){:root,body[data-style]{--glass-surface:rgb(var(--surface-rgb))}body.dark :is(.liquid-glass,.social-panel,.profile-settings-dialog,.shell-dialog,#auth-dialog,#collection-dialog,#about-dialog){backdrop-filter:none;-webkit-backdrop-filter:none}}
 @media(prefers-reduced-motion:reduce){body.dark :is(.shell-dialog,.profile-settings-dialog,.achievement,.public-badge,.social-message,.social-comment,.select-menu){animation:none!important;transition:none!important}.anime-card.is-tilting .poster-button,.recent-card.is-tilting .recent-poster{box-shadow:none}}
+/* A broad specular highlight follows the existing desktop pointer frame.
+   This is opt-in to hovered glass only, never a timer or a video overlay. */
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ body.dark :is(.shell-dialog,.profile-v3-identity,.catalog-filter-panel,.social-panel:not(.social-comments)).is-tilting{
+  background:radial-gradient(ellipse 260px 200px at var(--glow-x,50%) var(--glow-y,0%),#ffffff0e,transparent 85%),var(--glass-reflection),var(--glass-surface);
+  box-shadow:inset 0 1px 2px #ffffff35,inset 1px 0 5px #ffffff0a,inset 0 -2px 4px #0003,0 4px 10px #0002,0 18px 38px #0003;
+ }
+}
+/* Preserve contrast over busy promotional artwork on a small screen. */
+@media(max-width:700px){.home-container .hero-content h1{text-shadow:0 2px 18px #0007}.home-container .hero-content>p{color:#f0eef4;opacity:.94;text-shadow:0 1px 7px #0009}}
+/* Keep identity and actions on the same row, including tablet widths. */
+body.dark .social-directory .social-friend{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;min-width:0}
+body.dark .social-directory .social-friend>.social-person{min-width:0;max-width:100%}
+body.dark .social-directory .social-friend>.social-person strong{min-width:0;overflow-wrap:anywhere}
+body.dark .social-directory .social-friend>.social-actions{grid-column:auto;display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin:0;gap:6px}
+body.dark .social-directory .friend-icon{display:inline-grid;place-items:center;width:42px;height:42px;min-width:42px;min-height:42px;padding:0;flex:0 0 42px;box-sizing:border-box}
+@media(max-width:420px){body.dark .social-directory .social-friend:has([data-do=accept])>.social-actions{grid-column:1/-1;justify-content:flex-start}}
+
+/* Rounded statistic lenses: all four tiles retain the original grid and content. */
+body.dark :is(.profile-v3-stats,.social-stats)>div{border-radius:20px;border:0;min-width:0;justify-content:center;align-items:center;background:var(--glass-reflection),rgba(var(--surface-rgb),.25);box-shadow:inset 0 1px 1px #ffffff19,inset 0 -2px 3px #0002,0 5px 16px #0001}
+body.dark .profile-v3-stats>div{padding:14px 12px;gap:8px}
+body.dark :is(.profile-v3-stats,.social-stats)>div>span{max-width:100%;line-height:1.4;overflow-wrap:anywhere}
+/* A single full-width sheet, never a second glass rectangle inside the filters. */
+@media(max-width:700px){
+ body.dark .mobile-catalog-dialog{box-sizing:border-box;width:100%;max-width:100%;min-width:0;inset:auto 0 0;margin:0;border:0;border-radius:26px 26px 0 0;padding:18px 18px calc(24px + env(safe-area-inset-bottom,0px));background:var(--glass-reflection),rgba(var(--surface-rgb),.92);box-shadow:inset 0 1px 1px #ffffff25,0 -12px 40px #0004}
+ body.dark .mobile-catalog-dialog .catalog-filter-panel{width:100%;max-width:none;min-width:0;box-sizing:border-box;padding:0;margin:0;background:none;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+ body.dark .mobile-catalog-dialog :is(.catalog-field,.catalog-rating,.site-select){min-width:0;max-width:100%;box-sizing:border-box}
+ body.dark .mobile-catalog-dialog :is(.catalog-field>.site-select,.select-trigger){width:100%}
+ body.dark .mobile-catalog-dialog .select-trigger{min-height:46px;padding:11px 12px;font-size:14px}
+ body.dark .mobile-catalog-dialog .mobile-panel-heading{margin-bottom:20px}
+ body.dark :is(.profile-v3-stats,.social-stats)>div{border-radius:16px}
+}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ .profile-v3-stats>div{transition:transform .38s var(--glass-motion),box-shadow .38s;transform:perspective(600px) translateY(0) rotateX(0deg)}
+ .profile-v3-stats>div:hover{transform:perspective(600px) translateY(-2px) rotateX(2deg);box-shadow:inset 0 1px #ffffff30,inset 0 -2px 4px #0002,0 9px 22px #0002}
+ .shell-destinations>:is(a,button){transition:background-position .5s var(--glass-motion),transform .28s var(--glass-motion),box-shadow .3s}
+ .shell-destinations>:is(a,button):hover{transform:translateX(3px);box-shadow:inset 0 1px #ffffff20,0 4px 14px #0001}
+ :is(.profile-settings-dialog,.shell-dialog,.social-panel) .button:active{transform:scale(.98)}
+}
