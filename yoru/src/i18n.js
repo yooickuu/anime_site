@@ -122,9 +122,9 @@ const rows = {
   none: ["Не в списке", "Not in a list", "未登録"],
   myCollections: ["Мои подборки", "My collections", "マイコレクション"],
   createCollection: [
-    "Создать страницу",
-    "Create a list page",
-    "リストページを作成",
+    "Создать список",
+    "Create list",
+    "リストを作成",
   ],
   collectionName: ["Название страницы", "Page name", "ページ名"],
   create: ["Создать", "Create", "作成"],

@@ -111,3 +111,15 @@ body.dark :is(.profile-v3-stats,.social-stats)>div>span{max-width:100%;line-heig
  .shell-destinations>:is(a,button):hover{transform:translateX(3px);box-shadow:inset 0 1px #ffffff20,0 4px 14px #0001}
  :is(.profile-settings-dialog,.shell-dialog,.social-panel) .button:active{transform:scale(.98)}
 }
+/* Compact mobile list tabs; the menu uses the same read-only selection and actions. */
+body .profile-list-nav>.profile-list-edit{display:none}
+.profile-lists-dialog{width:min(420px,calc(100vw - 24px));max-height:80dvh;box-sizing:border-box;padding:18px;border-radius:24px;overflow:auto;color:var(--text)}
+.profile-lists-dialog>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.profile-lists-dialog h2{margin:0;font-size:20px}
+.profile-list-menu-items{display:flex;flex-direction:column;gap:6px}.profile-list-menu-items>button{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:12px;border:0;border-radius:12px;background:transparent;color:var(--text);font:inherit;text-align:left}.profile-list-menu-items>button[aria-pressed=true]{background:rgba(var(--accent-rgb),.15);color:var(--accent)}.profile-list-menu-items small{padding:3px 8px;border-radius:8px;background:#0002}.profile-list-menu-items>[data-action]{color:var(--accent)}.profile-list-menu-items>[data-action="manage-statuses"]{margin-top:12px}
+@media(max-width:700px){
+ body .profile-v3 .profile-list-nav{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;max-width:100%;padding:6px!important;gap:6px!important;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ body .profile-v3 .profile-list-nav::-webkit-scrollbar{display:none}
+ body .profile-v3 .profile-list-nav>button{flex:0 0 auto!important;white-space:nowrap!important;min-height:44px;padding:10px 12px!important}
+ body .profile-v3 .profile-list-nav>[data-action]{display:none}
+ body .profile-v3 .profile-list-nav>.profile-list-edit{display:flex;align-items:center;justify-content:center;width:44px;min-width:44px;padding:10px!important}
+}

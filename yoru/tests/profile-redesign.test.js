@@ -13,6 +13,12 @@ test('profile lists render cache immediately, paginate all saved IDs and search 
  const dom=new JSDOM('<div id="root"></div>'),original=globalThis.AbortController;globalThis.AbortController=dom.window.AbortController;
  const state={entries:Object.fromEntries(Array.from({length:75},(_,i)=>['mal-'+i,{favorite:i<2,status:'watching',anime:{title:'Anime '+i,genres:[],image:'/art.jpg'}}])),statuses:[{id:'favorites',name:'Favorites'},{id:'watching',name:'Watching'}],collections:[]},before=JSON.stringify(state);let active=true;const root=dom.window.document.querySelector('#root');let cleanup;
  try{cleanup=mountOwnLists(root,{state,view:{},t,lang:'ru',statusName:s=>s.name,title:a=>a.title,cover:a=>a.image,lookup:()=>null,resolve:async()=>null,remember:()=>{},live:()=>active});
+ const menu=root.querySelector('.profile-lists-dialog');menu.showModal=()=>menu.setAttribute('open','');menu.close=()=>menu.removeAttribute('open');
+ root.querySelector('[data-list-menu-open]').click();assert.equal(menu.open,true);
+ menu.querySelector('[data-profile-list="favorites"]').click();assert.equal(menu.open,false);assert.equal(root.querySelectorAll('.anime-card').length,2);
+ root.querySelector('[data-list-menu-open]').click();menu.querySelector('[data-action="manage-statuses"]').click();assert.equal(menu.open,false);assert.equal(JSON.stringify(state),before);
+ assert.equal(menu.querySelector('[data-action="create-status"]').textContent,'createStatus');
+ root.querySelector('.profile-list-nav [data-profile-list="all"]').click();
  assert.equal(root.querySelectorAll('.anime-card').length,60);root.querySelector('[data-profile-more]').click();assert.equal(root.querySelectorAll('.anime-card').length,75);
  root.querySelector('[data-profile-list="favorites"]').click();assert.equal(root.querySelectorAll('.anime-card').length,2);
  const search=root.querySelector('[data-profile-query]');search.value='Anime 74';search.dispatchEvent(new dom.window.Event('input',{bubbles:true}));assert.equal(root.querySelectorAll('.anime-card').length,0);assert.equal(root.querySelector('[data-profile-count]').textContent,'0 / 2');assert.equal(JSON.stringify(state),before);
