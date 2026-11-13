@@ -1,3 +1,3 @@
 export const styles = ['graphite', 'iris', 'lagoon', 'ember', 'midnight', 'forest', 'wine', 'slate', 'sakura', 'sand'];
-export const styleColors = {graphite:'#121216',iris:'#19131e',lagoon:'#0d1919',ember:'#1b1512',midnight:'#111724',forest:'#141c16',wine:'#211319',slate:'#181d22',sakura:'#21171f',sand:'#201c16'};
+export const styleColors = {graphite:'#131517',iris:'#191224',lagoon:'#0b1d24',ember:'#25170f',midnight:'#0e1529',forest:'#101e17',wine:'#271019',slate:'#1c2226',sakura:'#281a27',sand:'#282113'};
 export const normalizeStyle = value => styles.includes(value) ? value : 'graphite';

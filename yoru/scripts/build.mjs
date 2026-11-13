@@ -63,7 +63,7 @@ await cp('dist/activity','../activity',{recursive:true});
 await build({entryPoints:['src/social/entry.js'],bundle:true,splitting:true,outdir:'dist/social',format:'esm',target:['es2022'],minify:true});
 const socialHash=createHash('sha256').update(await readFile('dist/social/entry.js')).update(await readFile('dist/social/entry.css')).digest('hex').slice(0,12);
 await cp('dist/social','../social',{recursive:true});
-for(const file of ['social-01.sql','social-02.sql','social-03.sql','social-04.sql','social-05.sql','social-06.sql','social-07.sql','social-08.sql','social-09.sql','social-10.sql','social-11.sql','social-12.sql']){await copyFile('supabase/'+file,'dist/'+file);await copyFile('supabase/'+file,'../'+file);}
+for(const file of ['social-01.sql','social-02.sql','social-03.sql','social-04.sql','social-05.sql','social-06.sql','social-07.sql','social-08.sql','social-09.sql','social-10.sql','social-11.sql','social-12.sql','social-13.sql']){await copyFile('supabase/'+file,'dist/'+file);await copyFile('supabase/'+file,'../'+file);}
 const browserBuild=await build({define:{__TOGETHER_ASSET__:JSON.stringify('together/entry.js?v='+togetherHash),__ACTIVITY_ASSET__:JSON.stringify('activity/entry.js?v='+activityHash),__DETAIL_ART_ASSET__:JSON.stringify(lazyAssets['detail-image-quality']),__SOCIAL_ASSET__:JSON.stringify('social/entry.js?v='+socialHash),__CONSUMET_ASSET__:JSON.stringify(lazyAssets['consumet-provider']),__WATCH_VIEW_ASSET__:JSON.stringify(lazyAssets['watch-view'])},metafile:true,entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',charset:'utf8',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
 if(Object.keys(browserBuild.metafile.inputs).some(p=>p.includes('/social/')||p.includes('/activity/')||p.includes('/together/')||p.includes('pglite')))throw Error('Social code must stay lazy');
 if(Object.keys(browserBuild.metafile.inputs).some(p=>p.endsWith('detail-image-quality.js')))throw Error('Detail image upgrades must stay on demand');
@@ -80,7 +80,7 @@ console.log(`Catalogue: ${visible}/${publication.items.length} visible (${public
 await copyFile('src/published-catalog.json','dist/published-catalog.json');
 const hash=createHash('sha256').update(await readFile('dist/app.js')).digest('hex').slice(0,12);
 let html=(await readFile('dist/index.html','utf8')).replace(/app\.js(?:\?v=[^"']*)?/g,`app.js?v=${hash}`);
-for(const file of ['style.css','redesign.css','scenes.css','liquid.css']){const version=createHash('sha256').update(await readFile('dist/'+file)).digest('hex').slice(0,12);html=html.replace(new RegExp(file.replace('.', '\\.')+'(?:\\?v=[^\"\']*)?','g'),file+'?v='+version);}
+for(const file of ['style.css','redesign.css','scenes.css','liquid.css','glass-polish.css']){const version=createHash('sha256').update(await readFile('dist/'+file)).digest('hex').slice(0,12);html=html.replace(new RegExp(file.replace('.', '\\.')+'(?:\\?v=[^\"\']*)?','g'),file+'?v='+version);}
 await writeFile('dist/index.html',html);
 await writeFile('dist/catalog-build.json',JSON.stringify({total:publication.items.length,visible,bundle:hash,updatedAt:publication.updatedAt},null,2));
 // Keep branch-based Pages fresh too; Actions deploys dist directly.
@@ -94,4 +94,4 @@ for(const item of publication.items){
  const name=item.id;if(!/^(mal|shikimori|lib)-\d+$/.test(name))throw Error('Invalid Kodik title ID');
  await writeFile(`dist/data/kodik/${name}.json`,JSON.stringify(data));await copyFile(`dist/data/kodik/${name}.json`,`../data/kodik/${name}.json`);
 }
-for(const file of ['style.css','redesign.css','scenes.css','liquid.css'])await copyFile(`dist/${file}`,`../${file}`);
+for(const file of ['style.css','redesign.css','scenes.css','liquid.css','glass-polish.css'])await copyFile(`dist/${file}`,`../${file}`);
