@@ -23,7 +23,7 @@ export async function loadToken(){
 
 const metaCache=new Map();
 async function metadata(id){if(!metaCache.has(id))metaCache.set(id,Promise.all([fetchShikimori(id),fetchAniListMetadata(id)]));const result=await metaCache.get(id);if(!result.some(Boolean))metaCache.delete(id);return result;}
-async function retry(work){let error;for(let n=0;n<2;n++){try{return await work();}catch(e){error=e;if(/(?:media_http_|segment_http_|upstream_)(?:400|401|403|404|410|422)$/.test(e.message))throw e;if(n===0)await new Promise(r=>setTimeout(r,500));}}throw error;}
+async function retry(work){let error;for(let n=0;n<4;n++){try{return await work();}catch(e){error=e;if(/(?:media_http_|segment_http_|upstream_)(?:400|401|403|404|410|422)$/.test(e.message))throw e;await new Promise(r=>setTimeout(r,1000*(n+1)));}}throw error;}
 export function requireEpisodeCoverage(rows,metadata){
  const expected=Number(metadata?.status==='ongoing'?metadata.episodesAired:metadata?.status==='released'?metadata.episodes:0)||0;
  const main=rows.filter(e=>e.season!==0).length||rows.length;
