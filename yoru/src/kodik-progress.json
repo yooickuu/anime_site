@@ -1,5 +1,5 @@
 {
-  "next": "/list?types=anime%2Canime-serial&with_material_data=true&with_seasons=true&with_episodes=true&with_episodes_data=true&limit=100&sort=updated_at&order=desc&next=WzE3OTMzNTI0NzcwMDAsInNlcmlhbC03OTE5NyJd",
+  "next": "/list?types=anime%2Canime-serial&with_material_data=true&with_seasons=true&with_episodes=true&with_episodes_data=true&limit=100&sort=updated_at&order=desc&next=WzE3NzUwMTkyMzkwMDAsInNlcmlhbC03Mjc2MiJd",
   "processed": {
     "serial-74321": "2026-10-24T11:23:58Z",
     "serial-74022": "2026-09-19T18:03:55Z",
@@ -20620,9 +20620,6 @@
     "serial-79536": "2026-11-13T13:27:25Z"
   },
   "pending": [
-    "serial-79003",
-    "serial-45852",
-    "serial-46896",
     "serial-34847",
     "serial-6900",
     "movie-66074",
@@ -21163,7 +21160,10 @@
     "serial-78853",
     "serial-78862",
     "serial-37499",
-    "serial-59967"
+    "serial-59967",
+    "serial-79003",
+    "serial-45852",
+    "serial-46896"
   ],
   "popular": {
     "page": 88,
@@ -22346,9 +22346,9 @@
       "retryAfter": "2026-11-02T05:33:37.627Z"
     },
     "serial-77483": {
-      "revision": "2026-10-30T08:09:13Z",
+      "revision": "2026-11-13T10:38:46Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-11-03T10:55:37.207Z"
+      "retryAfter": "2026-11-15T04:48:02.003Z"
     },
     "serial-78622": {
       "revision": "2026-10-27T15:00:52Z",
@@ -22361,9 +22361,9 @@
       "retryAfter": "2026-11-03T10:50:16.879Z"
     },
     "serial-41245": {
-      "revision": "2026-11-02T08:42:12Z",
+      "revision": "2026-11-13T10:22:14Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-11-03T10:50:14.565Z"
+      "retryAfter": "2026-11-15T04:48:02.003Z"
     },
     "serial-79119": {
       "revision": "2026-10-31T21:03:10Z",
@@ -22378,12 +22378,12 @@
     "serial-52936": {
       "revision": "2026-10-23T14:19:19Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T03:52:53.119Z"
+      "retryAfter": "2026-11-15T04:49:02.707Z"
     },
     "serial-74885": {
       "revision": "2026-10-23T06:57:35Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T03:52:53.474Z"
+      "retryAfter": "2026-11-15T04:49:02.707Z"
     },
     "movie-119788": {
       "revision": "2026-10-19T16:25:57Z",
@@ -22398,12 +22398,12 @@
     "movie-119713": {
       "revision": "2026-10-14T15:13:55Z",
       "reason": "short_special_without_shikimori_description",
-      "retryAfter": "2026-10-29T04:53:32.926Z"
+      "retryAfter": "2026-11-14T05:49:32.969Z"
     },
     "serial-78789": {
       "revision": "2026-10-09T16:03:24Z",
       "reason": "short_special_without_shikimori_description",
-      "retryAfter": "2026-10-29T04:54:10.923Z"
+      "retryAfter": "2026-11-14T05:50:06.029Z"
     },
     "serial-79003": {
       "revision": "2026-10-13T23:42:43Z",
@@ -22413,67 +22413,67 @@
     "movie-119486": {
       "revision": "2026-09-26T19:01:47Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T03:55:33.480Z"
+      "retryAfter": "2026-11-15T04:51:35.801Z"
     },
     "serial-78216": {
       "revision": "2026-09-25T10:42:51Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T03:55:33.480Z"
+      "retryAfter": "2026-11-15T04:52:07.068Z"
     },
     "movie-118868": {
       "revision": "2026-08-13T15:07:17Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T03:57:36.267Z"
+      "retryAfter": "2026-11-15T04:55:03.109Z"
     },
     "movie-118997": {
       "revision": "2026-08-21T19:07:28Z",
       "reason": "broken_poster",
-      "retryAfter": "2026-10-29T04:57:36.676Z"
+      "retryAfter": "2026-11-14T05:54:33.885Z"
     },
     "movie-118578": {
       "revision": "2026-07-28T03:08:11Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T03:57:58.087Z"
+      "retryAfter": "2026-11-15T04:55:32.372Z"
     },
     "serial-77298": {
       "revision": "2026-07-21T13:52:00Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T03:58:19.119Z"
+      "retryAfter": "2026-11-15T04:55:32.953Z"
     },
     "movie-118023": {
       "revision": "2026-06-25T21:18:37Z",
       "reason": "broken_poster",
-      "retryAfter": "2026-10-29T04:59:41.869Z"
+      "retryAfter": "2026-11-14T05:59:04.141Z"
     },
     "movie-117615": {
       "revision": "2026-05-28T08:00:44Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T04:01:10.773Z"
+      "retryAfter": "2026-11-15T05:16:17.619Z"
     },
     "movie-117614": {
       "revision": "2026-05-28T07:47:13Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T04:01:13.071Z"
+      "retryAfter": "2026-11-15T05:16:18.715Z"
     },
     "movie-117608": {
       "revision": "2026-05-28T07:32:23Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T04:01:13.071Z"
+      "retryAfter": "2026-11-15T05:16:49.386Z"
     },
     "serial-60983": {
       "revision": "2026-05-27T09:24:18Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T04:01:13.395Z"
+      "retryAfter": "2026-11-15T05:16:49.386Z"
     },
     "serial-74918": {
       "revision": "2026-05-27T09:23:58Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T04:01:13.395Z"
+      "retryAfter": "2026-11-15T05:16:49.985Z"
     },
     "serial-61465": {
       "revision": "2026-05-27T09:23:22Z",
       "reason": "shikimori_identity_missing",
-      "retryAfter": "2026-10-30T04:01:13.728Z"
+      "retryAfter": "2026-11-15T05:16:49.985Z"
     },
     "movie-116140": {
       "revision": "2026-02-23T14:48:11Z",
