@@ -7,7 +7,7 @@ import {registerAnime} from './catalog.js';
 import {requestCache} from './request-cache.js';
 const store=createCatalogueStore(bootstrap);
 let announcementsModule;
-const announcements=()=>announcementsModule??=import(new URL(__ANNOUNCEMENTS_ASSET__,globalThis.document?.baseURI||'https://yomiku.site/').href).catch(e=>{announcementsModule=null;throw e;});
+const announcements=()=>announcementsModule??=(typeof __ANNOUNCEMENTS_ASSET__==='string'?import(new URL(__ANNOUNCEMENTS_ASSET__,globalThis.document?.baseURI||'https://yomiku.site/').href):import(new URL('./announcements/client.js', import.meta.url).href)).catch(e=>{announcementsModule=null;throw e;});
 async function announcementExtras(query=''){try{const module=await announcements();const [items,index]=await Promise.all([module.announcementItems(query),store.searchIndex()]);return module.reconcile(items,index).map(registerAnime);}catch{return [];}}
 export const publishedItems=bootstrap.items;
 export const catalogueYears=[...new Set([...bootstrap.years,...Array.from({length:6},(_,i)=>new Date().getFullYear()+i)])].sort((a,b)=>b-a);
