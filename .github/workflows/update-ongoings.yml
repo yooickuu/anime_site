@@ -33,11 +33,18 @@ jobs:
         env:
           KODIK_API_TOKEN: ${{ secrets.KODIK_API_TOKEN || secrets.KODIK_TOKEN }}
         run: npm run update:ongoings
+      - name: Refresh announcements and admit released titles
+        continue-on-error: true
+        env:
+          KODIK_API_TOKEN: ${{ secrets.KODIK_API_TOKEN || secrets.KODIK_TOKEN }}
+        run: node scripts/update-announcements.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ongoing-update-report
-          path: yoru/checks/ongoing-update.json
+          path: |
+            yoru/checks/ongoing-update.json
+            yoru/checks/announcements.json
           if-no-files-found: ignore
           retention-days: 7
       - name: Validate and build
@@ -45,10 +52,10 @@ jobs:
       - name: Commit complete publication
         id: commit
         run: |
-          if ! git diff --quiet -- src/published-catalog.json.gz src/ongoing-retries.json; then
+          if ! git diff --quiet -- src/published-catalog.json.gz src/ongoing-retries.json src/announcements.json; then
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git config user.name "github-actions[bot]"
-            git add src/ongoing-retries.json src/catalog-bootstrap.json ../data/catalog/ src/published-catalog.json.gz src/runtime-catalog.json dist/ ../app.js ../index.html ../catalog-build.json ../style.css ../redesign.css ../scenes.css ../liquid.css ../social/ ../providers/ ../activity/ ../together/ ../data/kodik/ ../data/media/
+            git add src/announcements.json ../data/announcements.json src/ongoing-retries.json src/catalog-bootstrap.json ../data/catalog/ src/published-catalog.json.gz src/runtime-catalog.json dist/ ../app.js ../index.html ../catalog-build.json ../style.css ../redesign.css ../scenes.css ../liquid.css ../social/ ../providers/ ../activity/ ../together/ ../data/kodik/ ../data/media/
             git commit -m "Update ongoing episodes and publication"
             git push origin HEAD:main
             echo "changed=true" >> "$GITHUB_OUTPUT"

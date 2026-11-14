@@ -53,7 +53,7 @@ const popularity=a=>Number(a.popularity||a.views||a.members)||0;
 const updated=a=>{const value=a.catalogUpdatedAt||a.updatedAt||a.updated_at||a.lastEpisodeAt;return typeof value==='number'?value:Date.parse(value)||0;};
 export function catalogueStatus(item,now=Date.now()){
  const status=String(item.status||item.releaseStatus||'').toLowerCase();
- if(['announced','not_yet_aired','anons','planned'].includes(status))return 'announced';
+ if(['announced','not_yet_aired','not_yet_released','anons','planned'].includes(status))return 'announced';
  if(['airing','ongoing','releasing'].includes(status)||item.ongoing)return 'airing';
  if(['finished','released','completed'].includes(status))return 'finished';
  if(Date.parse(item.airedAt)>now)return 'announced';

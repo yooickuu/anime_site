@@ -20,13 +20,13 @@ export function createCatalogueStore(bootstrap,{fetcher=(...args)=>fetch(...args
   searchPromise??=read('search.json').then(rows=>{if(!Array.isArray(rows)||rows.length!==bootstrap.total||rows.some(a=>!valid(a.id)||a.episodeManifest))throw Error('invalid_manifest');return rows;}).catch(error=>{searchPromise=null;throw error;});
   return searchPromise;
  }
- async function displayRows(rows,current){
+ async function displayRows(rows,current,extra=new Map()){
   const result=new Array(rows.length);let next=0;
-  await Promise.all(Array.from({length:Math.min(4,rows.length)},async()=>{while(next<rows.length){if(!current())throw Error('staleCatalogue');const i=next++;result[i]=await card(rows[i].id);}}));
+  await Promise.all(Array.from({length:Math.min(4,rows.length)},async()=>{while(next<rows.length){if(!current())throw Error('staleCatalogue');const i=next++;result[i]=extra.get(rows[i].id)||await card(rows[i].id);}}));
   return result.filter(Boolean);
  }
  function remember(rows){for(const a of rows)admitted.add(a.id);return rows;}
- async function query(options={}, {current=()=>true}={}){
+ async function query(options={}, {current=()=>true,extra=[]}={}){
   const page=Math.max(1,Number(options.page)||1),limit=Math.min(24,Number(options.limit)||24),offset=(page-1)*limit;
   const filtered=!!(options.query?.trim()||(options.genre&&options.genre!=='all')||(options.type&&options.type!=='all')||(options.year&&options.year!=='all')||Number(options.minRating)||options.ongoing||(options.maxRating!==undefined&&Number(options.maxRating)<10)||(options.status&&options.status!=='all'));
   let rows=[],total=bootstrap.total;
@@ -36,14 +36,15 @@ export function createCatalogueStore(bootstrap,{fetcher=(...args)=>fetch(...args
    else if(offset<total){const first=Math.floor(offset/bootstrap.chunkSize),last=Math.floor(Math.min(total-1,offset+limit-1)/bootstrap.chunkSize);let loaded=[];for(let i=first;i<=last;i++){if(!current())throw Error('staleCatalogue');loaded.push(...await chunk(sort,i));}rows=loaded.slice(offset%bootstrap.chunkSize,offset%bootstrap.chunkSize+limit);}
   }else if(bootstrap.searchIndex){
    if(!current())throw Error('staleCatalogue');
-   const index=await searchIndex();let best=[];total=0;
+   const index=[...await searchIndex(),...extra];let best=[];total=0;
    for(let i=0;i<index.length;i+=250){
     if(!current())throw Error('staleCatalogue');
     const matches=queryCatalogue(index.slice(i,i+250),options);total+=matches.length;
     best=queryCatalogue([...best,...matches],options).slice(0,offset+limit);
     await new Promise(resolve=>setTimeout(resolve,0));
    }
-   rows=await displayRows(best.slice(offset,offset+limit),current);
+   const added=new Map(extra.map(a=>[a.id,a]));
+   rows=await displayRows(best.slice(offset,offset+limit),current,added);
   }else{
    total=0;let best=[];
    for(let i=0;i<bootstrap.chunks;i++){
@@ -55,12 +56,14 @@ export function createCatalogueStore(bootstrap,{fetcher=(...args)=>fetch(...args
    }
    rows=best.slice(offset,offset+limit);
   }
+  if(!filtered&&extra.length){const ordered=queryCatalogue(extra,options);rows.push(...ordered.slice(Math.max(0,offset-bootstrap.total),Math.max(0,offset+limit-bootstrap.total)));total+=ordered.length;}
   if(!current())throw Error('staleCatalogue');
-  return {items:remember(rows),total,pages:Math.max(1,Math.ceil(total/limit)),partial:false};
+  remember(rows.filter(a=>!a.announcement));
+  return {items:rows,total,pages:Math.max(1,Math.ceil(total/limit)),partial:false};
  }
  async function random(){if(!bootstrap.chunks)return [];return remember(await chunk('picked',Math.floor(Math.random()*bootstrap.chunks)));}
  let identityPromise;
  async function related(ids){identityPromise??=read('identities.json').catch(e=>{identityPromise=null;throw e;});const identities=await identityPromise;return [...new Set(ids.map(id=>identities?.[id]).filter(Boolean))];}
  async function recent(){const rows=await cached(chunks,'recent.json',4,()=>read('recent.json'));if(!Array.isArray(rows)||rows.length>120)throw Error('invalid_manifest');return remember(recentReleases(rows));}
- return {query,card,random,related,recent,isPublished:id=>admitted.has(id),cacheSize:()=>({chunks:chunks.size,cards:cards.size})};
+ return {query,card,random,related,recent,searchIndex,isPublished:id=>admitted.has(id),cacheSize:()=>({chunks:chunks.size,cards:cards.size})};
 }

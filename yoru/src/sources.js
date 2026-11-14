@@ -6,8 +6,11 @@ import {createApprovedCatalogue} from './approved-catalog.js';
 import {registerAnime} from './catalog.js';
 import {requestCache} from './request-cache.js';
 const store=createCatalogueStore(bootstrap);
+let announcementsModule;
+const announcements=()=>announcementsModule??=import(new URL(__ANNOUNCEMENTS_ASSET__,globalThis.document?.baseURI||'https://yomiku.site/').href).catch(e=>{announcementsModule=null;throw e;});
+async function announcementExtras(query=''){try{const module=await announcements();const [items,index]=await Promise.all([module.announcementItems(query),store.searchIndex()]);return module.reconcile(items,index).map(registerAnime);}catch{return [];}}
 export const publishedItems=bootstrap.items;
-export const catalogueYears=bootstrap.years;
+export const catalogueYears=[...new Set([...bootstrap.years,...Array.from({length:6},(_,i)=>new Date().getFullYear()+i)])].sort((a,b)=>b-a);
 export const isPublished=store.isPublished;
 const mediaCatalogue=requestCache(async id=>{
  if(!await store.card(id))throw Error('notAdmitted');
@@ -18,23 +21,30 @@ const mediaCatalogue=requestCache(async id=>{
 },{ttl:3600000,max:2});
 let queryGeneration=0;
 export async function combinedCatalogue(options={}){
- const own=++queryGeneration,result=await store.query(options,{current:()=>own===queryGeneration});
+ const own=++queryGeneration;
+ const extra=options.scope==='watchable'?[]:await announcementExtras(options.query||'');
+ const result=await store.query(options,{current:()=>own===queryGeneration,extra});
  return {...result,items:result.items.map(registerAnime)};
 }
 combinedCatalogue.clear=()=>{queryGeneration++;};
 // Header suggestions have their own lifetime and never cancel the visible catalogue query.
 export async function searchCatalogue(query,{current=()=>true}={}){
- const result=await store.query({query,page:1,limit:7},{current});
+ const extra=await announcementExtras(query);
+ const result=await store.query({query,page:1,limit:7},{current,extra});
  return {...result,items:result.items.map(registerAnime)};
 }
 export async function resolveRelease(a){
- const card=await store.card(a.id);if(!card)throw Error('notAdmitted');registerAnime(card);
+ let card=await store.card(a.id);
+ if(!card){const module=await announcements();const meta=await module.announcementById(a.id);if(meta?.publishedId)card=await store.card(meta.publishedId);else card=meta|| (a.announcement?a:null);}
+ if(!card)throw Error('notAdmitted');registerAnime(card);
  // Preserve a playing title's episode manifest, but never load one for a grid card.
  return {...a,...card};
 }
 resolveRelease.clear=()=>{};
 export const findWatchRelease=requestCache(async id=>{
- const card=await store.card(id);if(!card)return null;
+ let card=await store.card(id);
+ if(!card&&/^anilist-\d+$/.test(id)){const meta=await (await announcements()).announcementById(id);if(meta?.publishedId)card=await store.card(meta.publishedId);}
+ if(!card||card.catalogOnly)return null;id=card.id;
  const item=(await mediaCatalogue(id)).find(id);registerAnime(card);return {...item,...card};
 },{max:3});
 export async function discoveryIndex(){return (await store.random()).map(registerAnime);}

@@ -1,3 +1,4 @@
+import {reconcile,identityMatcher} from '../src/announcements/model.js';
 import {repairDisplayMetadata} from './lib/catalog-display.mjs';
 import {prepareChunks} from './lib/catalog-chunks.mjs';
 import {readCatalogueText,archiveCatalogue} from './lib/catalog-storage.mjs';
@@ -46,6 +47,19 @@ await copyFile('supabase/functions/login-nickname/index.ts','dist/login-nickname
 await copyFile('supabase/unique-nicknames.sql','dist/unique-nicknames.sql');
 await copyFile('supabase/account-deletion.sql', 'dist/account-deletion.sql');
 await copyFile('supabase/functions/delete-account/index.ts', 'dist/delete-account.ts');
+// Metadata-only announcements stay outside the video catalogue and startup bundle.
+let announcementFeed={version:1,items:[],aliases:{}};
+try{announcementFeed=JSON.parse(await readFile('src/announcements.json','utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+announcementFeed.aliases??={};
+const releasedMatch=identityMatcher(chunks.cards);
+for(const a of announcementFeed.items){const published=releasedMatch(a);if(published)announcementFeed.aliases[a.id]=published.id;}
+announcementFeed.items=reconcile(announcementFeed.items,chunks.cards);
+const announcementJSON=JSON.stringify(announcementFeed),announcementRevision=createHash('sha256').update(announcementJSON).digest('hex').slice(0,12);
+for(const base of ['dist/data','../data']){await mkdir(base,{recursive:true});await writeFile(base+'/announcements.json',announcementJSON);}
+await copyFile('../assets/announcement-poster.svg','dist/assets/announcement-poster.svg');
+await build({entryPoints:['src/announcements/client.js'],bundle:true,outfile:'dist/providers/announcements.js',format:'esm',target:['es2022'],minify:true,define:{__ANNOUNCEMENT_REVISION__:JSON.stringify(announcementRevision)}});
+await copyFile('dist/providers/announcements.js','../providers/announcements.js');
+const announcementHash=createHash('sha256').update(await readFile('dist/providers/announcements.js')).digest('hex').slice(0,12);
 // Optional English transport and watch markup do not enter the startup bundle.
 const lazyAssets={};
 for(const name of ['consumet-provider','watch-view','detail-image-quality']){
@@ -64,7 +78,8 @@ await build({entryPoints:['src/social/entry.js'],bundle:true,splitting:true,outd
 const socialHash=createHash('sha256').update(await readFile('dist/social/entry.js')).update(await readFile('dist/social/entry.css')).digest('hex').slice(0,12);
 await cp('dist/social','../social',{recursive:true});
 for(const file of ['social-01.sql','social-02.sql','social-03.sql','social-04.sql','social-05.sql','social-06.sql','social-07.sql','social-08.sql','social-09.sql','social-10.sql','social-11.sql','social-12.sql','social-13.sql']){await copyFile('supabase/'+file,'dist/'+file);await copyFile('supabase/'+file,'../'+file);}
-const browserBuild=await build({define:{__TOGETHER_ASSET__:JSON.stringify('together/entry.js?v='+togetherHash),__ACTIVITY_ASSET__:JSON.stringify('activity/entry.js?v='+activityHash),__DETAIL_ART_ASSET__:JSON.stringify(lazyAssets['detail-image-quality']),__SOCIAL_ASSET__:JSON.stringify('social/entry.js?v='+socialHash),__CONSUMET_ASSET__:JSON.stringify(lazyAssets['consumet-provider']),__WATCH_VIEW_ASSET__:JSON.stringify(lazyAssets['watch-view'])},metafile:true,entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',charset:'utf8',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
+const browserBuild=await build({define:{__ANNOUNCEMENTS_ASSET__:JSON.stringify('providers/announcements.js?v='+announcementHash),__TOGETHER_ASSET__:JSON.stringify('together/entry.js?v='+togetherHash),__ACTIVITY_ASSET__:JSON.stringify('activity/entry.js?v='+activityHash),__DETAIL_ART_ASSET__:JSON.stringify(lazyAssets['detail-image-quality']),__SOCIAL_ASSET__:JSON.stringify('social/entry.js?v='+socialHash),__CONSUMET_ASSET__:JSON.stringify(lazyAssets['consumet-provider']),__WATCH_VIEW_ASSET__:JSON.stringify(lazyAssets['watch-view'])},metafile:true,entryPoints:['src/app.js'],bundle:true,outfile:'dist/app.js',charset:'utf8',format:'iife',target:['es2022'],minify:true,legalComments:'eof'});
+if(Object.keys(browserBuild.metafile.inputs).some(p=>p.includes('/announcements/')))throw Error('Announcements must stay lazy');
 if(Object.keys(browserBuild.metafile.inputs).some(p=>p.includes('/social/')||p.includes('/activity/')||p.includes('/together/')||p.includes('pglite')))throw Error('Social code must stay lazy');
 if(Object.keys(browserBuild.metafile.inputs).some(p=>p.endsWith('detail-image-quality.js')))throw Error('Detail image upgrades must stay on demand');
 if(Object.keys(browserBuild.metafile.inputs).some(p=>p.endsWith('consumet-provider.js')))throw Error('Consumet must stay on demand');

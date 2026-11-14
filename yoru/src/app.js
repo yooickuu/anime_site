@@ -464,7 +464,7 @@ function renderGrid() {
   const cardMarkup = renderItems
     .map((a,index) => {
       const e = state.entries[a.id];
-      return `<article class="anime-card"><button class="poster-button" data-details="${a.id}" aria-label="${t("details")}: ${esc(title(a))}"><img src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}" decoding="async" loading="${page!=='home'&&index<(matchMedia('(max-width: 600px)').matches?2:6)?'eager':'lazy'}" fetchpriority="${page!=='home'&&index<(matchMedia('(max-width: 600px)').matches?2:6)?'high':'auto'}">${a.ongoing ? `<span class="ongoing-badge" title="${t("ongoingTooltip")}" aria-label="${t("ongoingTooltip")}"><i></i>${t("airing")}</span>` : ""}${a.catalogOnly ? `<span class="catalog-only-badge">${t("catalogOnly")}</span>` : ""}<span class="poster-play">${icon("play")}</span><span class="poster-label">${matchesType(a,"MOVIE") ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span></button><button class="save-button ${e ? "saved" : ""}" data-details="${a.id}" aria-label="${t("status")}: ${esc(title(a))}">${bookmark}</button><button class="anime-title" data-details="${a.id}">${esc(title(a))}</button>${audienceHTML(a)}<p class="anime-meta">${a.year} · ${esc(genreText(a.genres[0]))}${e?.rating ? " · " + e.rating + "/10" : ""}</p></article>`;
+      return `<article class="anime-card"><button class="poster-button" data-details="${a.id}" aria-label="${t("details")}: ${esc(title(a))}"><img src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}" decoding="async" loading="${page!=='home'&&index<(matchMedia('(max-width: 600px)').matches?2:6)?'eager':'lazy'}" fetchpriority="${page!=='home'&&index<(matchMedia('(max-width: 600px)').matches?2:6)?'high':'auto'}">${a.ongoing ? `<span class="ongoing-badge" title="${t("ongoingTooltip")}" aria-label="${t("ongoingTooltip")}"><i></i>${t("airing")}</span>` : ""}${a.catalogOnly ? `<span class="catalog-only-badge">${a.announcement&&a.status==='announced'?t("announced"):t("catalogOnly")}</span>` : ""}${a.catalogOnly?'':`<span class="poster-play">${icon("play")}</span>`}<span class="poster-label">${matchesType(a,"MOVIE") ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t(a.announcement&&a.status==='airing'?"airing":"announced")}</span></button><button class="save-button ${e ? "saved" : ""}" data-details="${a.id}" aria-label="${t("status")}: ${esc(title(a))}">${bookmark}</button><button class="anime-title" data-details="${a.id}">${esc(title(a))}</button>${audienceHTML(a)}<p class="anime-meta">${a.announcement?esc(announcementDate(a)):a.year} · ${esc(genreText(a.genres[0]||''))}${e?.rating ? " · " + e.rating + "/10" : ""}</p></article>`;
     })
     .join("");
   if(grid._cardsMarkup!==cardMarkup){grid.innerHTML=cardMarkup;grid._cardsMarkup=cardMarkup;revealSurfaces(grid);}
@@ -533,6 +533,12 @@ function audienceHTML(a){
 function preferencesHTML() {
   return `<div class="preferences-list">${["autoSkip", "autoNext", "autoPlay"].map((k) => `<label class="toggle-row"><span>${t(k)}</span><input type="checkbox" data-preference="${k}" ${state.preferences[k] ? "checked" : ""}><span class="toggle-track"></span></label>`).join("")}</div>`;
 }
+function announcementDate(a){
+ const d=a.releaseDate||{},season=({WINTER:['Зима','Winter','冬'],SPRING:['Весна','Spring','春'],SUMMER:['Лето','Summer','夏'],FALL:['Осень','Fall','秋']})[a.season];
+ if(d.year&&d.month&&d.day)return new Date(d.year,d.month-1,d.day).toLocaleDateString(lang);
+ if(d.year&&d.month)return new Date(d.year,d.month-1,1).toLocaleDateString(lang,{year:'numeric',month:'long'});
+ return [season?.[langIndex(lang)],d.year||a.year].filter(Boolean).join(' · ')||({ru:'Дата пока не объявлена',en:'Date to be announced',ja:'放送日未定'})[lang];
+}
 async function openDetails(id) {
   let a = byId(id);
   if (!a) return;
@@ -543,7 +549,7 @@ async function openDetails(id) {
   $("#details").className = "details-dialog";
   $("#details").innerHTML =
     `<div class="details-toolbar">${closeButton("details")}</div>` +
-    `<div class="details-artwork ${bannerFor(a)?'':'portrait-art'}" aria-hidden="true"><img decoding="async" fetchpriority="high" class="details-manga" data-details-art="${esc(a.id)}" src="${esc(detailArtwork(a,artwork))}" alt=""><div class="details-art-shade"></div></div><div class="details-layout"><aside class="details-visual"><img decoding="async" fetchpriority="high" class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.year} · ${matchesType(a,"MOVIE") ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
+    `<div ${a.announcement&&!a.banner?'hidden':''} class="details-artwork ${bannerFor(a)?'':'portrait-art'}" aria-hidden="true"><img decoding="async" fetchpriority="high" class="details-manga" data-details-art="${esc(a.id)}" src="${esc(detailArtwork(a,artwork))}" alt=""><div class="details-art-shade"></div></div><div class="details-layout"><aside class="details-visual"><img decoding="async" fetchpriority="high" class="details-poster" src="${esc(cover(a))}" data-poster="${esc(a.id)}" alt="${esc(title(a))}">${!a.catalogOnly?`<button class="button primary full-width" data-watch="${a.id}">${icon("play")} ${t("watch")}</button>`:""}<p class="poster-caption">${esc(title(a))}</p></aside><div class="details-copy"><span class="overline">${a.announcement?esc(announcementDate(a)):a.year} · ${a.announcement?t(a.status==='announced'?'announced':'airing'):matchesType(a,"MOVIE") ? t("movie") : a.episodes ? a.episodes + " " + t("episodes") : t("announced")}</span><h2>${esc(title(a))}</h2>${audienceHTML(a)}<div class="details-tags">${a.genres.map((g) => `<span>${esc(genreText(g))}</span>`).join("")}</div><section class="details-story"><h3>${t("synopsis")}</h3><p class="details-description">${esc(descriptionFor(a, lang))}</p></section>${a.ongoing ? `<p class="airing-line"><i></i>${t("ongoingTooltip")}</p>` : ""}${a.catalogOnly ? `<p class="availability-note">${t("catalogNoVideo")}</p>` : ""}${
       user && ready
         ? `<div class="detail-library"><label>${t("status")}<select id="detail-status"><option value="">${t("none")}</option>${state.statuses
             .filter((s) => s.id !== "favorites")
@@ -564,7 +570,7 @@ async function openDetails(id) {
       const button=document.createElement('button');button.className='button primary full-width';button.dataset.watch=updated.id;button.textContent=t('watch');$('#details .details-visual').append(button);
       $('#details .availability-note')?.remove();
     }
-    const overline=$('#details .details-copy > .overline');if(overline)overline.textContent=`${updated.year} · ${matchesType(updated,'MOVIE')?t('movie'):updated.episodes?updated.episodes+' '+t('episodes'):t('announced')}`;
+    const overline=$('#details .details-copy > .overline');if(overline)overline.textContent=`${updated.announcement?announcementDate(updated):updated.year} · ${updated.announcement?t(updated.status==='announced'?'announced':'airing'):matchesType(updated,'MOVIE')?t('movie'):updated.episodes?updated.episodes+' '+t('episodes'):t('announced')}`;
     const story=$('#details .details-description');if(story&&descriptionFor(updated,lang))story.textContent=descriptionFor(updated,lang);
   }).catch(()=>{});
 
@@ -1793,6 +1799,7 @@ document.addEventListener("error", event => {
   if(img.dataset.artFill){img.hidden=true;return;}
   if(img.dataset.detailsArt){
     const a=byId(img.dataset.detailsArt);
+    if(a?.announcement){img.closest('.details-artwork').hidden=true;return;}
     if(a&&!img.dataset.artFallback){img.dataset.artFallback='true';img.dataset.poster=a.id;img.src=cover(a);img.closest('.details-artwork')?.classList.add('portrait-art');}
     return;
   }

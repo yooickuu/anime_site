@@ -22,6 +22,6 @@ export function prepareChunks(items,metadata={},revision=''){
  for(const a of cards)a.relatedCatalogIds=groups.get(root(a.id));
  const summaries=cards.map(summaryCard),byId=new Map(cards.map(a=>[a.id,a])),orders={};
  for(const sort of ['picked','hiddenGems','latest','topRated','newest','oldest','alphabetical'])orders[sort]=queryCatalogue(summaries,{sort});
- const search=orders.picked.map(a=>Object.fromEntries(['id','title','originalTitle','alt','translations','year','type','genres','ongoing','status','releaseStatus','airedAt','catalogUpdatedAt','popularity','views','members','audienceRating','rating','score'].filter(k=>a[k]!==undefined).map(k=>[k,a[k]])));
+ const search=orders.picked.map(a=>Object.fromEntries(['id','ids','title','originalTitle','alt','translations','year','type','genres','ongoing','status','releaseStatus','airedAt','catalogUpdatedAt','popularity','views','members','audienceRating','rating','score'].filter(k=>a[k]!==undefined).map(k=>[k,a[k]])));
  return {cards,orders,identities,search,recent:recentReleases(summaries,Date.now(),120),bootstrap:{revision,searchIndex:true,total:cards.length,chunkSize:120,chunks:Math.ceil(cards.length/120),years:[...new Set(cards.map(a=>a.year).filter(Boolean))].sort((a,b)=>b-a),items:orders.picked.slice(0,120).map(a=>({...a,description:String(byId.get(a.id).description||'').slice(0,300),translations:Object.fromEntries(Object.entries(byId.get(a.id).translations||{}).map(([lang,v])=>[lang,[v?.[0]||'',String(v?.[1]||'').slice(0,300)]]))}))}};
 }
