@@ -1,5 +1,5 @@
 import {mapLimit} from './concurrency.mjs';
-import {probeImage,probeStream} from './media-probe.mjs';
+import {probeImage,probeStream,retryMedia} from './media-probe.mjs';
 import {identityKeys,auditAdmission} from '../../src/catalog-admission.js';
 import {identityTitle} from '../../src/catalog-match.js';
 import {normalizeType,normalizeGenre} from '../../src/catalog-query.js';
@@ -71,20 +71,21 @@ async function probeMP4(source,duration){
  if(!data||!Buffer.from(data).subarray(0,64).includes(Buffer.from('ftyp')))throw Error('invalid_mp4');
  return [{...source,duration,checkedAt:new Date().toISOString()}];
 }
-export async function checkAniLibriaStream(source,duration){return source.stream?probeStream(source):probeMP4(source,duration);}
+export async function checkAniLibriaStream(source,duration){return source.stream?probeStream(source):retryMedia(()=>probeMP4(source,duration));}
 function skip(mark,duration){const start=mark?.start,end=mark?.stop;return Number.isFinite(start)&&Number.isFinite(end)&&start>=0&&end>start&&end<=duration?{start,end}:null;}
 export async function assembleAniLibria(release,{existing=null,getMetadata=async()=>[null,null],imageProbe=probeImage,streamProbe=checkAniLibriaStream}={}){
  const identity=releaseIdentity(release);if(!identity.ids.anilibria||!identity.title)throw Error('release_identity_missing');
  const rows=releaseEpisodes(release);
  const [sh,al]=existing?[null,null]:await getMetadata(identity.ids);
  for(const [key,value]of Object.entries({mal:positive(sh?.malId||al?.idMal),anilist:positive(al?.id)})){if(identity.ids[key]&&value&&identity.ids[key]!==value)throw Error('metadata_identity_conflict');if(value)identity.ids[key]=value;}
- const episodes=await mapLimit(rows,3,async({ordinal,sources,episode:ep})=>{
-  const verified=await mapLimit(sources,2,async source=>{try{return await streamProbe(source,Number(ep.duration));}catch{return [];}});
+ const episodes=await mapLimit(rows,2,async({ordinal,sources,episode:ep})=>{
+  const failures=[];
+  const verified=await mapLimit(sources,1,async source=>{try{return await streamProbe(source,Number(ep.duration));}catch(error){failures.push(`${source.quality}:${String(error.message).replace(/https?:\/\/\S+/g,'[url]').slice(0,100)}`);return [];}});
   const valid=[];let duration=0;
   for(const source of verified.flat())if([360,480,720,1080].includes(source.quality)&&mediaURL(source.url)&&Number.isFinite(source.duration)&&source.duration>0&&!valid.some(s=>s.quality===source.quality)){
    duration=Math.max(duration,source.duration);valid.push({quality:source.quality,url:source.url,stream:source.stream!==false,checkedAt:source.checkedAt});
   }
-  if(!valid.length)throw Error(`no_working_stream_episode_${ordinal}`);
+  if(!valid.length)throw Error(`no_working_stream_episode_${ordinal} (${failures.join('; ')})`);
   if(identity.type==='SPECIAL'&&duration<180&&!cleanSynopsis(sh?.description||existing?.description))throw Error('short_special_without_description');
   return {number:ordinal,ordinal,season:1,audio:[{id:'anilibria',dubId:'AniLibria',label:'AniLibria · русская',language:'ru',original:false,duration,sources:valid,subtitles:[],opening:skip(ep.opening,duration),ending:skip(ep.ending,duration)}]};
  });
@@ -104,10 +105,12 @@ export async function assembleAniLibria(release,{existing=null,getMetadata=async
 export function mergeAniLibria(existing,incoming){
  if(!existing)return incoming;
  if(!compatible(existing,incoming))throw Error('conflicting_catalogue_identity');
- const result=structuredClone(existing),seasons=new Set(result.episodes.map(e=>e.season??1));
+ const result=structuredClone(existing),seasons=new Set(result.episodes.map(e=>e.season??1).filter(s=>s>0));
  const targetSeason=seasons.size===1?[...seasons][0]:null;
  for(const e of incoming.episodes){
-  const matches=result.episodes.filter(p=>(p.ordinal??p.number)===e.ordinal);
+  const candidates=result.episodes.filter(p=>(p.season??1)>0&&(p.ordinal??p.number)===e.ordinal);
+  const linked=candidates.filter(p=>p.audio.some(t=>t.id==='anilibria'));
+  const matches=linked.length?linked:candidates;
   if(matches.length>1||!matches.length&&targetSeason===null)throw Error('ambiguous_episode_mapping');
   const prior=matches[0];if(prior){const index=prior.audio.findIndex(t=>t.id==='anilibria');if(index>=0)prior.audio[index]=structuredClone(e.audio[0]);else prior.audio.push(structuredClone(e.audio[0]));}
   else{if(result.episodes.some(p=>p.number===e.ordinal))throw Error('episode_number_conflict');result.episodes.push({...structuredClone(e),season:targetSeason});}

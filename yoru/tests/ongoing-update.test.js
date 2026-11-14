@@ -23,3 +23,25 @@ test('authorization failures and unmatched titles are not reported as successful
  await assert.rejects(refreshOngoingKodik(item,{async *pages(){yield {results:[{...release,shikimori_id:'99'}]};}}),/no_matching/);
  assert.equal(item.episodes.length,1);
 });
+import {updateOngoings} from '../scripts/update-ongoings.mjs';
+import {mkdtemp,writeFile,readFile,rm} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join} from 'node:path';
+test('partial source failure preserves existing tracks and retries even after the other provider finishes',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'ongoing-safe-'));try{
+ const paths={catalogPath:join(dir,'catalog.json'),reportPath:join(dir,'report.json'),retryPath:join(dir,'retries.json')};
+ const original={...structuredClone(item),ids:{...item.ids,anilibria:10}};
+ await writeFile(paths.catalogPath,JSON.stringify({policyVersion:3,items:[original]}));
+ const report=await updateOngoings({...paths,api:{},anilibria:{},kodikRefresh:async a=>({...a,ongoing:false}),anilibriaRefresh:async()=>{throw Error('segment_http_503');}});
+ assert.equal(report.failures.length,1);assert.deepEqual(JSON.parse(await readFile(paths.retryPath)).ids,[item.id]);
+ const saved=JSON.parse(await readFile(paths.catalogPath));assert.deepEqual(saved.items[0].episodes,item.episodes);assert.equal(saved.items[0].ongoing,false);
+ let retried=0;await updateOngoings({...paths,api:{},anilibria:{},kodikRefresh:async a=>a,anilibriaRefresh:async a=>{retried++;return a;}});
+ assert.equal(retried,1);assert.deepEqual(JSON.parse(await readFile(paths.retryPath)).ids,[]);
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+test('ongoing update refuses to overwrite a concurrent catalogue import',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'ongoing-cas-'));try{
+ const paths={catalogPath:join(dir,'catalog.json'),reportPath:join(dir,'report.json'),retryPath:join(dir,'retries.json')};
+ await writeFile(paths.catalogPath,JSON.stringify({policyVersion:3,items:[item]}));const external='{"policyVersion":3,"items":[],"updatedAt":"external"}';
+ await assert.rejects(updateOngoings({...paths,api:{},anilibria:{},kodikRefresh:async a=>{await writeFile(paths.catalogPath,external);return {...a,ongoing:false};}}),/catalogue_changed/);
+ assert.equal(await readFile(paths.catalogPath,'utf8'),external);
+ }finally{await rm(dir,{recursive:true,force:true});}
+});

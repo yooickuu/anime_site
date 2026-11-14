@@ -129,5 +129,5 @@ export async function seedCatalog({targetCount=20,maxChecks=Math.max(100,targetC
  return report;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
- seedCatalog({targetCount:process.argv[2]===undefined?20:Number(process.argv[2]),newOnly:process.argv.includes('--new-only')}).catch(error=>{console.error(error.message);process.exitCode=1;});
+ seedCatalog({targetCount:process.argv[2]===undefined?20:Number(process.argv[2]),newOnly:process.argv.includes('--new-only'),...(process.argv.find(a=>a.startsWith('--max-checks='))?{maxChecks:Number(process.argv.find(a=>a.startsWith('--max-checks=')).split('=')[1])}:{})}).catch(error=>{console.error(error.message);process.exitCode=1;});
 }

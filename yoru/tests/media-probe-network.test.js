@@ -15,3 +15,12 @@ test('stream validation checks playlist, segment and site CORS; does not approve
   await assert.rejects(probeImage('https://image.test/broken.jpg'));
  }finally{globalThis.fetch=previous;}
 });
+import {retryMedia} from '../scripts/lib/media-probe.mjs';
+test('temporary CDN failures retry three times without admitting invalid media',async()=>{
+ let calls=0;const waits=[];
+ assert.equal(await retryMedia(async()=>{if(++calls<3)throw Error('segment_http_503');return 'checked';},{pause:async ms=>waits.push(ms)}),'checked');
+ assert.equal(calls,3);assert.deepEqual(waits,[1500,3000]);
+ calls=0;await assert.rejects(retryMedia(async()=>{calls++;throw Error('media_http_404');},{pause:async()=>{}}),/404/);assert.equal(calls,1);
+ calls=0;await assert.rejects(retryMedia(async()=>{calls++;throw TypeError('fetch failed');},{pause:async()=>{}}),/fetch failed/);assert.equal(calls,3);
+ calls=0;await assert.rejects(retryMedia(async()=>{calls++;throw Error('invalid_media_segment');},{pause:async()=>{}}),/invalid_media/);assert.equal(calls,1);
+});

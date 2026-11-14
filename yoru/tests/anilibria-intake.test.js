@@ -83,3 +83,10 @@ test('repeating an API page cannot create an endless catalogue scan',async()=>fi
  const api={page:async()=>({data:[release]}),release:async()=>release};
  await assert.rejects(seedCatalog({...paths,targetCount:2,newOnly:true,api,assemble,log:()=>{}}),/pagination_loop/);
 }));
+test('special episode 1 does not make the main episode 1 ambiguous during an update',async()=>{
+ const a=await item(),existing={...structuredClone(a),episodes:[{...structuredClone(a.episodes[0]),number:9,season:0,audio:[{...a.episodes[0].audio[0],id:'special'}]},...structuredClone(a.episodes)]};
+ const merged=mergeAniLibria(existing,a);assert.equal(merged.episodes.length,3);assert.equal(merged.episodes.find(e=>e.season===0).audio[0].id,'special');assert.equal(merged.episodes.find(e=>e.number===1).audio.length,1);
+});
+test('all failed qualities retain their diagnostic reasons without accepting the release',async()=>{
+ await assert.rejects(assembleAniLibria(release,{...dependencies,streamProbe:async()=>{throw Error('segment_http_503');}}),/no_working_stream_episode_[12].*720:segment_http_503/);
+});

@@ -73,11 +73,13 @@ export function allocateCatalogueId(incoming,byId){
  }
  throw Error('catalogue_id_conflict');
 }
-export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetCount*10),retryLimit=3,token,api,assemble=assembleRelease,order='updated',getPopular=popularAnimePage}={}){
+export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetCount*10),retryLimit=3,token,api,assemble=assembleRelease,order='updated',getPopular=popularAnimePage,newOnly=false}={}){
  if(!['updated','popular','ranked','aired_on','id_desc'].includes(order))throw Error('invalid_import_order');
+ if(!Number.isSafeInteger(maxChecks)||maxChecks<1)throw Error('maxChecks must be a positive integer');
  if(!Number.isSafeInteger(targetCount)||targetCount<1)throw Error('Количество должно быть положительным целым числом');
  api||=new KodikAPI(token||await loadToken());
- const catalog=await loadJSON(catalogPath,{policyVersion:3,items:[]});
+ let lastSaved;try{lastSaved=await readCatalogueText(catalogPath);}catch(e){if(e.code!=='ENOENT')throw e;lastSaved='';}
+ const catalog=lastSaved?JSON.parse(lastSaved):{policyVersion:3,items:[]};
  const progress=await loadJSON(cursorPath,{next:'/list',processed:{},pending:[]});
  progress.deferred??={};
  const stop=()=>report.added>=targetCount||report.checked>=maxChecks;
@@ -92,16 +94,17 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
   if(!variantsCache.has(id))variantsCache.set(id,(async()=>{const rows=[];for await(const batch of api.pages('/search',{...catalogParams,shikimori_id:id}))rows.push(...batch.results);return rows;})().catch(error=>{variantsCache.delete(id);throw error;}));
   return variantsCache.get(id);
  }
- const report={startedAt:new Date().toISOString(),checked:0,added:0,merged:0,skipped:0,pending:[]};
+ const report={source:'Kodik',order,newOnly,startedAt:new Date().toISOString(),checked:0,added:0,merged:0,skipped:0,pending:[]};
  const byIdentity=new Map(catalog.items.flatMap(a=>[a.ids?.shikimori&&[`shikimori:${a.ids.shikimori}`,a],a.ids?.mal&&[`mal:${a.ids.mal}`,a]].filter(Boolean)));
  const byId=new Map(catalog.items.map(a=>[a.id,a]));
- const persist=async next=>{catalog.updatedAt=new Date().toISOString();await saveJSON(catalogPath,catalog);await saveJSON(cursorPath,{...progress,next});await mkdir('checks',{recursive:true});await saveJSON('checks/kodik-last-report.json',report);};
+ const persist=async next=>{let current;try{current=await readCatalogueText(catalogPath);}catch(e){if(e.code!=='ENOENT')throw e;current='';}if(current!==lastSaved)throw Error('catalogue_changed_during_import_retry');catalog.updatedAt=new Date().toISOString();await saveJSON(catalogPath,catalog);lastSaved=JSON.stringify(catalog);progress.next=next;await saveJSON(cursorPath,progress);await mkdir('checks',{recursive:true});await saveJSON('checks/kodik-last-report.json',report);};
  async function ingest(release,expand=true){
   const key=String(release.id),revision=release.updated_at||release.episodes_count||'unknown';
   if(progress.processed[key]===revision||attempted.has(key)){report.skipped++;return;}
   const deferred=progress.deferred[key];
   if(deferred?.revision===revision&&Date.parse(deferred.retryAfter)>Date.now()){report.skipped++;return;}
   const known=byIdentity.get(`shikimori:${release.shikimori_id}`);
+  if(newOnly&&known&&expand){report.skipped++;return;}
   // Extra translations must not keep a batch busy once all episodes already have three.
   const knownRows=new Set((known?.episodes||[]).map(e=>`${e.season??1}:${e.ordinal??e.number}`));
   let fullyCovered=false;try{fullyCovered=allEpisodes(release).every(e=>knownRows.has(`${e.season}:${e.ordinal}`));}catch{}
@@ -144,6 +147,7 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
    report.pending.push({id:key,reason:error.message});console.warn(`Пропущен ${key}: ${error.message}`);
   }
  }
+ try{
  if(['popular','ranked','aired_on','id_desc'].includes(order)){
   const stateKey=order==='popular'?'popular':order;
   progress[stateKey]??={page:1,index:0};
@@ -180,7 +184,8 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
    }
    state.page=state.page+1;state.index=0;await persist(progress.next);
   }
-  return report;
+  if(stop())return report;
+  console.log('Список приоритета пройден. Продолжаю прямой обход Kodik с сохранённого места.');
  }
  // Retry a bounded part of the queue; failures must not starve unseen pages.
  const retryIds=progress.pending.splice(0,retryLimit);progress.pending.push(...retryIds);
@@ -189,7 +194,12 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
   await persist(progress.next);if(stop())return report;
  }
  // New identities first within a page; translations are still merged by exact IDs.
- for await(const batch of api.pages(progress.next||'/list',catalogParams)){
+ async function* directPages(){
+  const start=progress.next||'/list';
+  if(newOnly&&start!=='/list'){const head=await api.request('/list',catalogParams);yield {...head,page:start,next_page:start};}
+  yield* api.pages(start,catalogParams);
+ }
+ for await(const batch of directPages()){
   const releases=[...batch.results].sort((a,b)=>Number(byIdentity.has(`shikimori:${a.shikimori_id}`))-Number(byIdentity.has(`shikimori:${b.shikimori_id}`)));
   for(let i=0;i<releases.length;){
    const size=Math.min(2,targetCount-report.added,maxChecks-report.checked);
@@ -199,9 +209,11 @@ export async function seedCatalog({targetCount=30,maxChecks=Math.max(100,targetC
   }
   await persist(batch.next_page||'/list');
  }
+ report.exhausted=true;
  console.log(`Готово: новых ${report.added}, дополнено ${report.merged}, на проверку позже ${report.pending.length}`);return report;
+ }catch(error){await persist(progress.next);throw error;}
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const order=process.argv.includes('--ranked')?'ranked':process.argv.includes('--aired')?'aired_on':process.argv.includes('--new')?'id_desc':process.argv.includes('--updated')?'updated':'popular';
- seedCatalog({targetCount:Number(process.argv[2]||30),order}).catch(e=>{console.error(e.message);process.exitCode=1;});
+ seedCatalog({targetCount:Number(process.argv[2]||30),order,newOnly:process.argv.includes('--new-only'),...(process.argv.find(a=>a.startsWith('--max-checks='))?{maxChecks:Number(process.argv.find(a=>a.startsWith('--max-checks=')).split('=')[1])}:{})}).then(r=>console.log(`Kodik: новых ${r.added}, озвучек дополнено ${r.merged}, проверено ${r.checked}, пропущено ${r.skipped}, отложено ${r.pending.length}.${r.exhausted?' Обход источника завершён.':''}`)).catch(e=>{console.error(e.message);process.exitCode=1;});
 }

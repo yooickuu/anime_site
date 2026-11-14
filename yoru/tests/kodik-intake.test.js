@@ -342,3 +342,26 @@ test('Kodik POST referrer is decoded once before form serialization; signatures 
  assert.equal(form.get('d_sign'),'domain:123');assert.equal(kodikRequestParameters({}).ref,'');
  assert.throws(()=>kodikRequestParameters({ref:'%XX'}),/invalid_referrer_encoding/);
 });
+test('exhausted popularity feed falls back to direct Kodik pages without relaxing admission',async()=>{
+ const cwd=process.cwd(),dir=await mkdtemp(join(tmpdir(),'kodik-fallback-'));
+ try{process.chdir(dir);await mkdir('src');let listCalls=0;
+ const api={async *pages(path){if(path==='/list')listCalls++;yield {results:[release],page:path,next_page:null};}};
+ const report=await seedCatalog({targetCount:1,order:'popular',api,getPopular:async()=>[],assemble:r=>assembleRelease(r,dependencies)});
+ assert.equal(report.added,1);assert.equal(listCalls,1);
+ }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
+});
+test('new-only direct scan skips known identities but still adds multiple voices to a new title',async()=>{
+ const cwd=process.cwd(),dir=await mkdtemp(join(tmpdir(),'kodik-new-only-'));
+ try{process.chdir(dir);await mkdir('src');const known=await assembleRelease(release,dependencies);await import('node:fs/promises').then(fs=>fs.writeFile('src/published-catalog.json',JSON.stringify({policyVersion:3,items:[known]})));let calls=0;
+ const api={async *pages(){yield {results:[release],page:'/list',next_page:null};}};
+ const r=await seedCatalog({targetCount:1,newOnly:true,api,assemble:async()=>{calls++;throw Error('must not probe known title');}});assert.equal(calls,0);assert.equal(r.added,0);assert.equal(r.skipped,1);
+ }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
+});
+test('network failure saves admitted Kodik titles and keeps the latest page cursor',async()=>{
+ const cwd=process.cwd(),dir=await mkdtemp(join(tmpdir(),'kodik-checkpoint-'));
+ try{process.chdir(dir);await mkdir('src');const api={async *pages(path){if(path==='/search'){yield {results:[release]};return;}yield {results:[release],page:'/list',next_page:'/list?cursor=second'};throw Error('kodik_network_unavailable');}};
+ await assert.rejects(seedCatalog({targetCount:2,api,assemble:r=>assembleRelease(r,dependencies)}),/network_unavailable/);
+ assert.equal(JSON.parse(await readFile('src/published-catalog.json')).items.length,1);
+ assert.equal(JSON.parse(await readFile('src/kodik-progress.json')).next,'/list?cursor=second');
+ }finally{process.chdir(cwd);await rm(dir,{recursive:true,force:true});}
+});
