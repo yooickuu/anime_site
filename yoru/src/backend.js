@@ -76,4 +76,4 @@ export async function mediaSource(id, episode) {
   return data.signedUrl;
 }
 
-configureAnimeGo(async body=>{if(!client)throw Error('loginRequired');const {data,error}=await client.functions.invoke('anime-source',{body});if(error||data?.error)throw Error('providerError');return data;});
+configureAnimeGo(async body=>{if(!client)throw Error('loginRequired');const {data,error}=await client.functions.invoke('anime-source?forceFunctionRegion=us-east-1',{body});if(error||data?.error)throw Error('providerError');return data;});

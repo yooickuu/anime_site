@@ -9,7 +9,7 @@ export async function animeGoReady(){
  if(!config?.animeGo||!config.supabaseUrl)return false;
  if(!healthPromise||Date.now()>healthUntil){
   healthUntil=Date.now()+60000;
-  healthPromise=fetch(config.supabaseUrl+'/functions/v1/anime-source',{headers:{apikey:config.supabaseKey},signal:AbortSignal.timeout(5000)}).then(async r=>r.ok&&(await r.json()).ready===true).catch(()=>false).then(value=>{
+  healthPromise=fetch(config.supabaseUrl+'/functions/v1/anime-source?forceFunctionRegion=us-east-1',{headers:{apikey:config.supabaseKey},signal:AbortSignal.timeout(5000)}).then(async r=>r.ok&&(await r.json()).ready===true).catch(()=>false).then(value=>{
    const changed=value!==healthValue;healthValue=value;healthUntil=Date.now()+(value?60000:15000);
    if(changed)globalThis.window?.dispatchEvent?.(new Event('yoru:source-ready'));
    return value;
