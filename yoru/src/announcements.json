@@ -1,7 +1,53 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-15T13:41:25.555Z",
+  "updatedAt": "2026-11-15T22:42:03.638Z",
   "items": [
+    {
+      "id": "anilist-203368",
+      "ids": {
+        "mal": null,
+        "anilist": 203368
+      },
+      "title": "Onegai☆Teacher OVA",
+      "originalTitle": "Onegai☆Teacher OVA",
+      "alt": "おねがい☆ティーチャー OVA",
+      "description": "New Onegai☆Teacher anime project initiated after the 20th anniversary of the series and the closure of Lake Kizaki Capeground.",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "Onegai☆Teacher OVA",
+          "New Onegai☆Teacher anime project initiated after the 20th anniversary of the series and the closure of Lake Kizaki Capeground."
+        ],
+        "ja": [
+          "おねがい☆ティーチャー OVA",
+          ""
+        ]
+      },
+      "year": 2026,
+      "releaseDate": {
+        "year": 2026,
+        "month": 11,
+        "day": 12
+      },
+      "season": "FALL",
+      "type": "OVA",
+      "genres": [
+        "Комедия",
+        "Драма",
+        "Романтика",
+        "Фантастика"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx203368-jHT4lwmXFxFU.jpg",
+      "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/203368-mjIduArSwsZS.jpg",
+      "audienceRating": 0,
+      "popularity": 311,
+      "status": "finished",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
     {
       "id": "mal-62516",
       "ids": {
@@ -3180,10 +3226,10 @@
           ""
         ]
       },
-      "year": null,
+      "year": 2027,
       "airedAt": null,
       "releaseDate": {
-        "year": null,
+        "year": 2027,
         "month": null,
         "day": null
       },
@@ -3195,7 +3241,7 @@
         "Фэнтези",
         "городское фэнтези"
       ],
-      "image": "https://shikimori.io/uploads/poster/animes/62650/3af51606690d362beda653cf82d9bd9f.jpeg",
+      "image": "https://shikimori.io/uploads/poster/animes/62650/605682bbe84f9e098bca1f52cad858ee.jpeg",
       "audienceRating": 0,
       "popularity": 10799,
       "status": "announced",
@@ -3204,7 +3250,7 @@
       "episodes": 0,
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
+      "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/199793-AGp4pywG2OD3.jpg"
     },
     {
       "id": "mal-63368",
@@ -17688,17 +17734,16 @@
       "id": "mal-63167",
       "ids": {
         "mal": 63167,
-        "anilist": 204561,
-        "shikimori": 63167
+        "anilist": 204561
       },
-      "title": "Принцесса-волшебница Минки Момо: К заветной мечте — Дуэт искренних сердец",
-      "originalTitle": "Mahou no Princess Minky Momo: Akogare no Yume e - Magokoro no Duo",
-      "alt": "Mahou no Princess Minky Momo: Akogare no Yume e - Magokoro no Duo 魔法のプリンセス　ミンキーモモ 憧れの夢へ　まごころの二重奏（デュオ）",
+      "title": "Mahou no Princess Minky Momo - Akogare no Yume he, Magokoro no Duo",
+      "originalTitle": "Mahou no Princess Minky Momo - Akogare no Yume he, Magokoro no Duo",
+      "alt": "魔法のプリンセス　ミンキーモモ 憧れの夢へ　まごころの二重奏（デュオ）",
       "description": "A new original video anime for Mahou no Princess Minky Momo.\n\n\n\nNote: Title and Relations are provisional and will be updated when more info is announced.",
-      "descriptionLanguage": "ru",
+      "descriptionLanguage": "en",
       "translations": {
         "en": [
-          "Mahou no Princess Minky Momo: Akogare no Yume e - Magokoro no Duo",
+          "Mahou no Princess Minky Momo - Akogare no Yume he, Magokoro no Duo",
           "A new original video anime for Mahou no Princess Minky Momo.\n\n\n\nNote: Title and Relations are provisional and will be updated when more info is announced."
         ],
         "ja": [
@@ -17706,19 +17751,19 @@
           ""
         ]
       },
-      "year": 2026,
-      "airedAt": null,
+      "year": null,
       "releaseDate": {
-        "year": 2026,
-        "month": 11,
-        "day": 13
+        "year": null,
+        "month": null,
+        "day": null
       },
       "season": null,
       "type": "OVA",
       "genres": [
-        "махо седзе"
+        "mahou shoujo"
       ],
-      "image": "https://shikimori.io/uploads/poster/animes/63167/5e3f656c61e95bf65e2f0434ac0e43a3.jpeg",
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx204561-imS3wIfV2xoa.jpg",
+      "banner": null,
       "audienceRating": 0,
       "popularity": 574,
       "status": "announced",
@@ -17726,8 +17771,7 @@
       "announcement": true,
       "episodes": 0,
       "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
+      "posterFallback": "assets/announcement-poster.svg"
     },
     {
       "id": "anilist-130787",
@@ -20182,52 +20226,6 @@
       "banner": null,
       "audienceRating": 0,
       "popularity": 315,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "anilist-203368",
-      "ids": {
-        "mal": null,
-        "anilist": 203368
-      },
-      "title": "Onegai☆Teacher Shinsaku Animation (Provisional Title)",
-      "originalTitle": "Onegai☆Teacher Shinsaku Animation (Provisional Title)",
-      "alt": "おねがい☆ティーチャー 新作アニメーション（仮）",
-      "description": "New Onegai☆Teacher anime project initiated after the 20th anniversary of the series and the closure of Lake Kizaki Capeground.",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "Onegai☆Teacher Shinsaku Animation (Provisional Title)",
-          "New Onegai☆Teacher anime project initiated after the 20th anniversary of the series and the closure of Lake Kizaki Capeground."
-        ],
-        "ja": [
-          "おねがい☆ティーチャー 新作アニメーション（仮）",
-          ""
-        ]
-      },
-      "year": 2026,
-      "releaseDate": {
-        "year": 2026,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "OVA",
-      "genres": [
-        "Комедия",
-        "Драма",
-        "Романтика",
-        "Фантастика"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx203368-tZl53bKgcxWN.jpg",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 311,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
