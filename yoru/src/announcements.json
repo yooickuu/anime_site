@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-15T22:42:03.638Z",
+  "updatedAt": "2026-11-16T04:35:38.083Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -17734,16 +17734,17 @@
       "id": "mal-63167",
       "ids": {
         "mal": 63167,
-        "anilist": 204561
+        "anilist": 204561,
+        "shikimori": 63167
       },
-      "title": "Mahou no Princess Minky Momo - Akogare no Yume he, Magokoro no Duo",
-      "originalTitle": "Mahou no Princess Minky Momo - Akogare no Yume he, Magokoro no Duo",
-      "alt": "魔法のプリンセス　ミンキーモモ 憧れの夢へ　まごころの二重奏（デュオ）",
+      "title": "Принцесса-волшебница Минки Момо: К заветной мечте — Дуэт искренних сердец",
+      "originalTitle": "Mahou no Princess Minky Momo: Akogare no Yume e - Magokoro no Duo",
+      "alt": "Mahou no Princess Minky Momo: Akogare no Yume e - Magokoro no Duo 魔法のプリンセス　ミンキーモモ 憧れの夢へ　まごころの二重奏（デュオ）",
       "description": "A new original video anime for Mahou no Princess Minky Momo.\n\n\n\nNote: Title and Relations are provisional and will be updated when more info is announced.",
-      "descriptionLanguage": "en",
+      "descriptionLanguage": "ru",
       "translations": {
         "en": [
-          "Mahou no Princess Minky Momo - Akogare no Yume he, Magokoro no Duo",
+          "Mahou no Princess Minky Momo: Akogare no Yume e - Magokoro no Duo",
           "A new original video anime for Mahou no Princess Minky Momo.\n\n\n\nNote: Title and Relations are provisional and will be updated when more info is announced."
         ],
         "ja": [
@@ -17751,19 +17752,19 @@
           ""
         ]
       },
-      "year": null,
+      "year": 2026,
+      "airedAt": null,
       "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
+        "year": 2026,
+        "month": 11,
+        "day": 13
       },
       "season": null,
       "type": "OVA",
       "genres": [
-        "mahou shoujo"
+        "махо седзе"
       ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx204561-imS3wIfV2xoa.jpg",
-      "banner": null,
+      "image": "https://shikimori.io/uploads/poster/animes/63167/5e3f656c61e95bf65e2f0434ac0e43a3.jpeg",
       "audienceRating": 0,
       "popularity": 574,
       "status": "announced",
@@ -17771,7 +17772,8 @@
       "announcement": true,
       "episodes": 0,
       "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
     },
     {
       "id": "anilist-130787",
