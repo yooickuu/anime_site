@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-16T14:53:28.112Z",
+  "updatedAt": "2026-11-17T01:49:30.722Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -17752,12 +17752,12 @@
           ""
         ]
       },
-      "year": 2026,
+      "year": null,
       "airedAt": null,
       "releaseDate": {
-        "year": 2026,
-        "month": 11,
-        "day": 13
+        "year": null,
+        "month": null,
+        "day": null
       },
       "season": null,
       "type": "OVA",
