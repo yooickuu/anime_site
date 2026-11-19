@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-18T15:20:15.530Z",
+  "updatedAt": "2026-11-19T00:10:07.230Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -20812,14 +20812,14 @@
           ""
         ]
       },
-      "year": null,
+      "year": 2027,
       "releaseDate": {
-        "year": null,
-        "month": null,
+        "year": 2027,
+        "month": 1,
         "day": null
       },
-      "season": null,
-      "type": "",
+      "season": "WINTER",
+      "type": "TV",
       "genres": [
         "Драма",
         "Романтика",
