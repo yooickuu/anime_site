@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-19T15:26:28.697Z",
+  "updatedAt": "2026-11-20T00:33:25.976Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -41,6 +41,46 @@
       "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/203368-mjIduArSwsZS.jpg",
       "audienceRating": 0,
       "popularity": 318,
+      "status": "finished",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
+      "id": "mal-50668",
+      "ids": {
+        "mal": 50668,
+        "shikimori": 50668
+      },
+      "title": "Ночь ведьм",
+      "originalTitle": "Mahoutsukai no Yoru",
+      "alt": "Mahoutsukai no Yoru",
+      "description": "Когда дедушка Аоко Аодзаки решил, что она будет следующей главой семьи, девушка внезапно узнала о существовании магии. Кроме того, выяснилось, что отныне ей придётся с головой погрузиться в мир колдовства под руководством Алисы Куондзи, которую в городе давно окрестили ведьмой. И не просто обучаться у Алисы азам волшебства, а перебраться на жительство в её особняк. Всё это не слишком обрадовало Аоко, но так как выбора у неё в общем-то не было, девушка приступила к занятиям с чародейкой. Однако мирные учебные будни Аоко были нарушены появлением Содзюро Сидзуки, который стал случайным свидетелем применения магии.",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Mahoutsukai no Yoru",
+          ""
+        ]
+      },
+      "year": 2026,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2026,
+        "month": 11,
+        "day": 20
+      },
+      "season": null,
+      "type": "MOVIE",
+      "genres": [
+        "тайна",
+        "Сверхъестественное"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/50668/14dc8b09e149895273466d3cd3533994.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
       "status": "finished",
       "catalogOnly": true,
       "announcement": true,
@@ -11576,7 +11616,7 @@
       "releaseDate": {
         "year": 2027,
         "month": 1,
-        "day": null
+        "day": 8
       },
       "season": "WINTER",
       "type": "TV",
@@ -11585,7 +11625,7 @@
         "Приключения",
         "Фэнтези"
       ],
-      "image": "https://shikimori.io/uploads/poster/animes/63256/cf7b44d0d8c88c50bd5aface43dcaf2e.jpeg",
+      "image": "https://shikimori.io/uploads/poster/animes/63256/97cbe357673adcecee8e25874ac99fa0.jpeg",
       "audienceRating": 0,
       "popularity": 1977,
       "status": "announced",
@@ -23224,46 +23264,6 @@
       "banner": null,
       "audienceRating": 0,
       "popularity": 174,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "mal-50668",
-      "ids": {
-        "mal": 50668,
-        "shikimori": 50668
-      },
-      "title": "Ночь ведьм",
-      "originalTitle": "Mahoutsukai no Yoru",
-      "alt": "Mahoutsukai no Yoru",
-      "description": "Когда дедушка Аоко Аодзаки решил, что она будет следующей главой семьи, девушка внезапно узнала о существовании магии. Кроме того, выяснилось, что отныне ей придётся с головой погрузиться в мир колдовства под руководством Алисы Куондзи, которую в городе давно окрестили ведьмой. И не просто обучаться у Алисы азам волшебства, а перебраться на жительство в её особняк. Всё это не слишком обрадовало Аоко, но так как выбора у неё в общем-то не было, девушка приступила к занятиям с чародейкой. Однако мирные учебные будни Аоко были нарушены появлением Содзюро Сидзуки, который стал случайным свидетелем применения магии.",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Mahoutsukai no Yoru",
-          ""
-        ]
-      },
-      "year": 2026,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2026,
-        "month": 11,
-        "day": 20
-      },
-      "season": null,
-      "type": "MOVIE",
-      "genres": [
-        "тайна",
-        "Сверхъестественное"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/50668/14dc8b09e149895273466d3cd3533994.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
