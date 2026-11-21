@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-20T23:58:05.812Z",
+  "updatedAt": "2026-11-21T05:33:12.947Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -7626,7 +7626,11 @@
       },
       "season": "WINTER",
       "type": "TV",
-      "genres": [],
+      "genres": [
+        "Экшен",
+        "Комедия",
+        "Сверхъестественное"
+      ],
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx213877-NK48aPaVO29y.jpg",
       "banner": null,
       "audienceRating": 0,
