@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-22T14:17:12.192Z",
+  "updatedAt": "2026-11-22T23:26:29.712Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -4798,7 +4798,7 @@
       "releaseDate": {
         "year": 2027,
         "month": 1,
-        "day": null
+        "day": 9
       },
       "season": "WINTER",
       "type": "TV",
@@ -14180,9 +14180,9 @@
       "banner": null
     },
     {
-      "id": "anilist-176859",
+      "id": "mal-65522",
       "ids": {
-        "mal": null,
+        "mal": 65522,
         "anilist": 176859
       },
       "title": "Wu Shan Wu Xing: Feng Jie Da Zhan",
@@ -23322,6 +23322,7 @@
     }
   ],
   "aliases": {
-    "mal-59878": "mal-59878"
+    "mal-59878": "mal-59878",
+    "anilist-176859": "mal-65522"
   }
 }
