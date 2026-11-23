@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-22T23:26:29.712Z",
+  "updatedAt": "2026-11-23T05:36:37.334Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -14183,16 +14183,17 @@
       "id": "mal-65522",
       "ids": {
         "mal": 65522,
-        "anilist": 176859
+        "anilist": 176859,
+        "shikimori": 65522
       },
-      "title": "Wu Shan Wu Xing: Feng Jie Da Zhan",
-      "originalTitle": "Wu Shan Wu Xing: Feng Jie Da Zhan",
-      "alt": "雾山五行·封界大战",
+      "title": "Wu Shan Wu Xing: Feng Jie Dazhan",
+      "originalTitle": "Wu Shan Wu Xing: Feng Jie Dazhan",
+      "alt": "Wu Shan Wu Xing: Feng Jie Dazhan 雾山五行·封界大战",
       "description": "Final chapter of Wu Shan Wu Xing.",
-      "descriptionLanguage": "en",
+      "descriptionLanguage": "ru",
       "translations": {
         "en": [
-          "Wu Shan Wu Xing: Feng Jie Da Zhan",
+          "Wu Shan Wu Xing: Feng Jie Dazhan",
           "Final chapter of Wu Shan Wu Xing."
         ],
         "ja": [
@@ -14201,20 +14202,21 @@
         ]
       },
       "year": null,
+      "airedAt": null,
       "releaseDate": {
         "year": null,
         "month": null,
         "day": null
       },
       "season": null,
-      "type": "",
+      "type": "ONA",
       "genres": [
         "Экшен",
-        "Драма",
-        "Фэнтези"
+        "Фэнтези",
+        "исторический",
+        "боевые искусства"
       ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx176859-ZBvodnWNxlST.jpg",
-      "banner": null,
+      "image": "https://shikimori.io/uploads/poster/animes/65522/a4281a8c724abb1587c5157624d714c7.jpeg",
       "audienceRating": 0,
       "popularity": 1272,
       "status": "announced",
@@ -14222,7 +14224,8 @@
       "announcement": true,
       "episodes": 0,
       "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
     },
     {
       "id": "mal-61301",
@@ -15519,10 +15522,10 @@
           ""
         ]
       },
-      "year": 2028,
+      "year": 2027,
       "airedAt": null,
       "releaseDate": {
-        "year": 2028,
+        "year": 2027,
         "month": null,
         "day": null
       },
@@ -22081,10 +22084,10 @@
           ""
         ]
       },
-      "year": null,
+      "year": 2027,
       "airedAt": null,
       "releaseDate": {
-        "year": null,
+        "year": 2027,
         "month": null,
         "day": null
       },
