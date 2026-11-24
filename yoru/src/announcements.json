@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-23T17:25:07.769Z",
+  "updatedAt": "2026-11-24T04:06:15.454Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -14184,7 +14184,7 @@
         "anilist": 176859,
         "shikimori": 65522
       },
-      "title": "Wu Shan Wu Xing: Feng Jie Dazhan",
+      "title": "Туманный холм пяти стихий 3",
       "originalTitle": "Wu Shan Wu Xing: Feng Jie Dazhan",
       "alt": "Wu Shan Wu Xing: Feng Jie Dazhan 雾山五行·封界大战",
       "description": "Final chapter of Wu Shan Wu Xing.",
@@ -18156,7 +18156,7 @@
         "anilist": 220180,
         "shikimori": 65519
       },
-      "title": "Xian Wang de Richang Shenghuo 6",
+      "title": "Повседневная жизнь бессмертного короля 6",
       "originalTitle": "Xian Wang de Richang Shenghuo 6",
       "alt": "Xian Wang de Richang Shenghuo 6 仙王的日常生活 第六季",
       "description": "Sixth season of Xian Wang de Richang Shenghuo.",
@@ -21916,7 +21916,7 @@
         "month": 12,
         "day": 11
       },
-      "season": null,
+      "season": "WINTER",
       "type": "ONA",
       "genres": [
         "Экшен",
@@ -23179,7 +23179,7 @@
         "month": 5,
         "day": null
       },
-      "season": null,
+      "season": "SPRING",
       "type": "ONA",
       "genres": [
         "Экшен",
