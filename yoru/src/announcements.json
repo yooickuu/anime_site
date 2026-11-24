@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-24T09:30:28.593Z",
+  "updatedAt": "2026-11-24T16:58:20.191Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -174,7 +174,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/59873/e32e78ede257257d59cbb82710fc03a9.jpeg",
       "audienceRating": 0,
-      "popularity": 52954,
+      "popularity": 52990,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -223,7 +223,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/57584/5509201ef72fdc7f3e1e7d59101d695a.jpeg",
       "audienceRating": 0,
-      "popularity": 51651,
+      "popularity": 51686,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -320,7 +320,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/59068/ccf3725e79b9a0a4c716c3e4a6246ad5.jpeg",
       "audienceRating": 0,
-      "popularity": 48247,
+      "popularity": 48277,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -371,7 +371,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/58934/4592eb7b3ba322303ca47afc1f1e9dee.jpeg",
       "audienceRating": 0,
-      "popularity": 44757,
+      "popularity": 44940,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -418,7 +418,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61006/35483e7b41c17c20ab0da12ef32c2a99.jpeg",
       "audienceRating": 0,
-      "popularity": 43530,
+      "popularity": 43556,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -467,7 +467,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61338/45df30032b9c630f4f3e7d9e921f21da.jpeg",
       "audienceRating": 0,
-      "popularity": 41540,
+      "popularity": 41652,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -523,6 +523,50 @@
       "banner": null
     },
     {
+      "id": "mal-61035",
+      "ids": {
+        "mal": 61035,
+        "anilist": 186822
+      },
+      "title": "Ki ni Natteru Hito ga Otoko ja Nakatta",
+      "originalTitle": "Ki ni Natteru Hito ga Otoko ja Nakatta",
+      "alt": "The Guy She Was Interested In Wasn't a Guy At All 気になってる人が男じゃなかった",
+      "description": "Fashionable and upbeat high schooler Aya falls head over heels for an employee at a local CD shop. He's got an air of mystery about him, great style, and an impeccable music taste. Little does she know—this supposedly male employee is actually her female classmate Mitsuki! Mitsuki generally keeps to herself, but since her seat is right next to Aya's, she can't help but be extremely aware of the other's crush. Revealing the truth is out of the question for Mitsuki—but perhaps getting closer to Aya wouldn't be so bad...\n\n\n\n(Source: Yen Press)",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "The Guy She Was Interested In Wasn't a Guy At All",
+          "Fashionable and upbeat high schooler Aya falls head over heels for an employee at a local CD shop. He's got an air of mystery about him, great style, and an impeccable music taste. Little does she know—this supposedly male employee is actually her female classmate Mitsuki! Mitsuki generally keeps to herself, but since her seat is right next to Aya's, she can't help but be extremely aware of the other's crush. Revealing the truth is out of the question for Mitsuki—but perhaps getting closer to Aya wouldn't be so bad...\n\n\n\n(Source: Yen Press)"
+        ],
+        "ja": [
+          "気になってる人が男じゃなかった",
+          ""
+        ]
+      },
+      "year": 2027,
+      "releaseDate": {
+        "year": 2027,
+        "month": 1,
+        "day": 8
+      },
+      "season": "WINTER",
+      "type": "TV",
+      "genres": [
+        "Музыка",
+        "Романтика"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx186822-9zsR5NtOP0yJ.jpg",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 37145,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-62546",
       "ids": {
         "mal": 62546,
@@ -561,7 +605,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62546/b5e3f013c05a810d90e15f9d40a89658.jpeg",
       "audienceRating": 0,
-      "popularity": 37008,
+      "popularity": 37056,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -569,50 +613,6 @@
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg",
       "banner": null
-    },
-    {
-      "id": "mal-61035",
-      "ids": {
-        "mal": 61035,
-        "anilist": 186822
-      },
-      "title": "Ki ni Natteru Hito ga Otoko ja Nakatta",
-      "originalTitle": "Ki ni Natteru Hito ga Otoko ja Nakatta",
-      "alt": "The Guy She Was Interested In Wasn't a Guy At All 気になってる人が男じゃなかった",
-      "description": "Fashionable and upbeat high schooler Aya falls head over heels for an employee at a local CD shop. He's got an air of mystery about him, great style, and an impeccable music taste. Little does she know—this supposedly male employee is actually her female classmate Mitsuki! Mitsuki generally keeps to herself, but since her seat is right next to Aya's, she can't help but be extremely aware of the other's crush. Revealing the truth is out of the question for Mitsuki—but perhaps getting closer to Aya wouldn't be so bad...\n\n\n\n(Source: Yen Press)",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "The Guy She Was Interested In Wasn't a Guy At All",
-          "Fashionable and upbeat high schooler Aya falls head over heels for an employee at a local CD shop. He's got an air of mystery about him, great style, and an impeccable music taste. Little does she know—this supposedly male employee is actually her female classmate Mitsuki! Mitsuki generally keeps to herself, but since her seat is right next to Aya's, she can't help but be extremely aware of the other's crush. Revealing the truth is out of the question for Mitsuki—but perhaps getting closer to Aya wouldn't be so bad...\n\n\n\n(Source: Yen Press)"
-        ],
-        "ja": [
-          "気になってる人が男じゃなかった",
-          ""
-        ]
-      },
-      "year": 2027,
-      "releaseDate": {
-        "year": 2027,
-        "month": 1,
-        "day": 8
-      },
-      "season": "WINTER",
-      "type": "TV",
-      "genres": [
-        "Музыка",
-        "Романтика"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx186822-9zsR5NtOP0yJ.jpg",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 36999,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
     },
     {
       "id": "mal-62844",
@@ -849,7 +849,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/56732/22dc190859c94623e1a221f5ee7ce4dc.jpeg",
       "audienceRating": 0,
-      "popularity": 31641,
+      "popularity": 31696,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -897,7 +897,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/57557/5b553e45a855e5c38afe163744a3ad91.jpeg",
       "audienceRating": 0,
-      "popularity": 31474,
+      "popularity": 31535,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -1043,7 +1043,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/59139/444949754cd1e2366cce9538e29deec3.jpeg",
       "audienceRating": 0,
-      "popularity": 31001,
+      "popularity": 31026,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -1138,7 +1138,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/59230/341ccdfedec783aa5399055b77bd6b3f.jpeg",
       "audienceRating": 0,
-      "popularity": 29209,
+      "popularity": 29226,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -1331,7 +1331,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61203/d343f747d076e7fc8b64184979ca8a9d.jpeg",
       "audienceRating": 0,
-      "popularity": 24431,
+      "popularity": 24469,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -1378,7 +1378,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61398/8d799b1ef9084a110c76cf80b437d7bd.jpeg",
       "audienceRating": 0,
-      "popularity": 24256,
+      "popularity": 24275,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -1426,7 +1426,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/59467/1f39d6e471b15d5d616a00dc08510ec8.jpeg",
       "audienceRating": 0,
-      "popularity": 24134,
+      "popularity": 24159,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -1522,7 +1522,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/58967/1e0d6c0b1636ce37f4a8bb2c7968dd17.jpeg",
       "audienceRating": 0,
-      "popularity": 22379,
+      "popularity": 22389,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -1569,7 +1569,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx197620-COEsbB1otIdR.png",
       "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/197620-G1ENu89amdst.jpg",
       "audienceRating": 0,
-      "popularity": 22047,
+      "popularity": 22129,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -1615,7 +1615,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/60548/13c2186de2d4fa0e7c144e9c8f1b08df.jpeg",
       "audienceRating": 0,
-      "popularity": 21602,
+      "popularity": 21617,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -1754,7 +1754,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx161410-KoPOBuyPm0yS.png",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 19539,
+      "popularity": 19545,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -2038,7 +2038,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b154765-RhfBamIEdCN0.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 18648,
+      "popularity": 18644,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -2083,7 +2083,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/52750/161579850c1f9813b54585c59296480b.jpeg",
       "audienceRating": 0,
-      "popularity": 18183,
+      "popularity": 18191,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -2181,7 +2181,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/59928/841e31df90e9dcbe7c45fe7636485624.jpeg",
       "audienceRating": 0,
-      "popularity": 17824,
+      "popularity": 17880,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -2375,7 +2375,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/54688/ceaf20b946333bebd3c9e0f0ecde515e.jpeg",
       "audienceRating": 0,
-      "popularity": 16017,
+      "popularity": 16019,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -2422,7 +2422,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/60525/839d119235744c54b5dceae88234ead9.jpeg",
       "audienceRating": 0,
-      "popularity": 15940,
+      "popularity": 15950,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -2616,7 +2616,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62547/7dd3274678f368cf0c6fb871b463b401.jpeg",
       "audienceRating": 0,
-      "popularity": 14692,
+      "popularity": 14709,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -2710,7 +2710,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx182544-F8C9VLtD7Mtq.png",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 14614,
+      "popularity": 14626,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -2758,7 +2758,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx126016-9PaIQHxFyyho.png",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 14613,
+      "popularity": 14616,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -2953,7 +2953,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/53529/6809cdfd5a19e9b27d49ab36536a26e6.jpeg",
       "audienceRating": 0,
-      "popularity": 13843,
+      "popularity": 13856,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -3287,7 +3287,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61968/eb66667d3397ebba94eab934ab8d0b20.jpeg",
       "audienceRating": 0,
-      "popularity": 10889,
+      "popularity": 10896,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -3471,56 +3471,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/56008/2dfb62648fd2e88cfb6cf10ce803cef7.jpeg",
       "audienceRating": 0,
-      "popularity": 10532,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
-    },
-    {
-      "id": "mal-54687",
-      "ids": {
-        "mal": 54687,
-        "anilist": 165523,
-        "shikimori": 54687
-      },
-      "title": "Боруто: Новое поколение Наруто. Часть 2",
-      "originalTitle": "Boruto: Naruto Next Generations Part 2",
-      "alt": "Boruto: Naruto Next Generations Part 2 BORUTO-ボルト- NARUTO NEXT GENERATIONS 第二部",
-      "description": "The second part of BORUTO: NARUTO NEXT GENERATIONS.",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Boruto: Naruto Next Generations Part 2",
-          "The second part of BORUTO: NARUTO NEXT GENERATIONS."
-        ],
-        "ja": [
-          "BORUTO-ボルト- NARUTO NEXT GENERATIONS 第二部",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "TV",
-      "genres": [
-        "Сёнен",
-        "Экшен",
-        "Приключения",
-        "Фэнтези",
-        "боевые искусства"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/54687/1d958496eaa4b0271518b0acf19889d5.jpeg",
-      "audienceRating": 0,
-      "popularity": 10369,
+      "popularity": 10534,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -3569,7 +3520,56 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61304/644f6834fa98800b004276c1f86b730f.jpeg",
       "audienceRating": 0,
-      "popularity": 10366,
+      "popularity": 10398,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
+    },
+    {
+      "id": "mal-54687",
+      "ids": {
+        "mal": 54687,
+        "anilist": 165523,
+        "shikimori": 54687
+      },
+      "title": "Боруто: Новое поколение Наруто. Часть 2",
+      "originalTitle": "Boruto: Naruto Next Generations Part 2",
+      "alt": "Boruto: Naruto Next Generations Part 2 BORUTO-ボルト- NARUTO NEXT GENERATIONS 第二部",
+      "description": "The second part of BORUTO: NARUTO NEXT GENERATIONS.",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Boruto: Naruto Next Generations Part 2",
+          "The second part of BORUTO: NARUTO NEXT GENERATIONS."
+        ],
+        "ja": [
+          "BORUTO-ボルト- NARUTO NEXT GENERATIONS 第二部",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "TV",
+      "genres": [
+        "Сёнен",
+        "Экшен",
+        "Приключения",
+        "Фэнтези",
+        "боевые искусства"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/54687/1d958496eaa4b0271518b0acf19889d5.jpeg",
+      "audienceRating": 0,
+      "popularity": 10375,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -3616,7 +3616,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/60267/7c8bbb5b536678bfe567528f9720f706.jpeg",
       "audienceRating": 0,
-      "popularity": 10206,
+      "popularity": 10211,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -3666,7 +3666,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/60510/c73768285691160a7b461cffbae84f67.jpeg",
       "audienceRating": 0,
-      "popularity": 10172,
+      "popularity": 10181,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -3715,7 +3715,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61973/56a6e6e6e28479d36da06946623c9807.jpeg",
       "audienceRating": 0,
-      "popularity": 10112,
+      "popularity": 10120,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -3762,7 +3762,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62081/76ac550b4cc27b3b35da206ef2130f7c.jpeg",
       "audienceRating": 0,
-      "popularity": 9961,
+      "popularity": 9974,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -4241,7 +4241,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61012/0a00e8613715a8a1061a87246d7c7ac7.jpeg",
       "audienceRating": 0,
-      "popularity": 9115,
+      "popularity": 9119,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -4336,7 +4336,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/63934/cfbee625264cc980b8435ca8452ec496.jpeg",
       "audienceRating": 0,
-      "popularity": 8727,
+      "popularity": 8750,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -4529,7 +4529,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx184321-NMRDVG3iNXxh.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 8375,
+      "popularity": 8388,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -4575,7 +4575,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62100/3a02ffcd8b38f85d501f21423a68baee.jpeg",
       "audienceRating": 0,
-      "popularity": 8272,
+      "popularity": 8304,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -4583,6 +4583,53 @@
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg",
       "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/196333-EmXZBmnr8clg.jpg"
+    },
+    {
+      "id": "mal-61015",
+      "ids": {
+        "mal": 61015,
+        "anilist": 186741,
+        "shikimori": 61015
+      },
+      "title": "Содержанец принцессы-рыцаря",
+      "originalTitle": "Himekishi-sama no Himo",
+      "alt": "Himekishi-sama no Himo 姫騎士様のヒモ",
+      "description": "Подземный город — порочное место, где царят преступность, разврат и смерть. Единственный луч света в этой тьме — прекрасная Багровая Принцесса-рыцарь Арвин Мейбл Примроуз Мактарод. Вместе со своим отважным отрядом искателей приключений она спускается в подземелье, что раскинулось в самом сердце города, в поисках легендарного сокровища, способного возродить павшее королевство принцессы. Многие мечтают оказаться рядом с ней, но это место уже занято — Мэттью, человеком, которого весь город презирает как трусливого слабака. Все считают его никчёмным прощелыгой, что спускает её тяжким трудом заработанные деньги на выпивку, женщин и азартные игры. И никто в городе — даже сама принцесса-рыцарь — не подозревает, на что на самом деле способен Мэттью.",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Himekishi-sama no Himo",
+          "Matthew is just another parasite in the chaotic dungeon city of Gray Neighbor. People say he's a lazy weakling who gambles and drinks away all the money he gets from his keeper, princess knight Arwin. But the truth is, no one in this town knows what he's really like—a ruthless protector who works in the shadows and will do whatever it takes for the sake of his mistress.\n\n\n\n(Source: Yen Press)"
+        ],
+        "ja": [
+          "姫騎士様のヒモ",
+          ""
+        ]
+      },
+      "year": 2027,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2027,
+        "month": 1,
+        "day": null
+      },
+      "season": "WINTER",
+      "type": "TV",
+      "genres": [
+        "Экшен",
+        "Приключения",
+        "Фэнтези"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/61015/ad88ed8f23a460234cd1aba928497e6c.jpeg",
+      "audienceRating": 0,
+      "popularity": 8249,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
     },
     {
       "id": "anilist-209984",
@@ -4632,53 +4679,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "mal-61015",
-      "ids": {
-        "mal": 61015,
-        "anilist": 186741,
-        "shikimori": 61015
-      },
-      "title": "Содержанец принцессы-рыцаря",
-      "originalTitle": "Himekishi-sama no Himo",
-      "alt": "Himekishi-sama no Himo 姫騎士様のヒモ",
-      "description": "Подземный город — порочное место, где царят преступность, разврат и смерть. Единственный луч света в этой тьме — прекрасная Багровая Принцесса-рыцарь Арвин Мейбл Примроуз Мактарод. Вместе со своим отважным отрядом искателей приключений она спускается в подземелье, что раскинулось в самом сердце города, в поисках легендарного сокровища, способного возродить павшее королевство принцессы. Многие мечтают оказаться рядом с ней, но это место уже занято — Мэттью, человеком, которого весь город презирает как трусливого слабака. Все считают его никчёмным прощелыгой, что спускает её тяжким трудом заработанные деньги на выпивку, женщин и азартные игры. И никто в городе — даже сама принцесса-рыцарь — не подозревает, на что на самом деле способен Мэттью.",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Himekishi-sama no Himo",
-          "Matthew is just another parasite in the chaotic dungeon city of Gray Neighbor. People say he's a lazy weakling who gambles and drinks away all the money he gets from his keeper, princess knight Arwin. But the truth is, no one in this town knows what he's really like—a ruthless protector who works in the shadows and will do whatever it takes for the sake of his mistress.\n\n\n\n(Source: Yen Press)"
-        ],
-        "ja": [
-          "姫騎士様のヒモ",
-          ""
-        ]
-      },
-      "year": 2027,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2027,
-        "month": 1,
-        "day": null
-      },
-      "season": "WINTER",
-      "type": "TV",
-      "genres": [
-        "Экшен",
-        "Приключения",
-        "Фэнтези"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/61015/ad88ed8f23a460234cd1aba928497e6c.jpeg",
-      "audienceRating": 0,
-      "popularity": 8207,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
-    },
-    {
       "id": "mal-61813",
       "ids": {
         "mal": 61813,
@@ -4714,7 +4714,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61813/4c097090b15ca4312134e1c02147890f.jpeg",
       "audienceRating": 0,
-      "popularity": 8148,
+      "popularity": 8205,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -4946,7 +4946,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61125/9513e854cf0089e2a25876c32c437290.jpeg",
       "audienceRating": 0,
-      "popularity": 7672,
+      "popularity": 7674,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -5089,7 +5089,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/60253/15f773f34f2c54c83a8c96459df7eeeb.jpeg",
       "audienceRating": 0,
-      "popularity": 7530,
+      "popularity": 7556,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -5194,6 +5194,53 @@
       "banner": null
     },
     {
+      "id": "mal-62469",
+      "ids": {
+        "mal": 62469,
+        "anilist": 198692,
+        "shikimori": 62469
+      },
+      "title": "Однажды я стану величайшим алхимиком? 2",
+      "originalTitle": "Izure Saikyou no Renkinjutsushi? 2nd Season",
+      "alt": "Izure Saikyou no Renkinjutsushi? 2nd Season いずれ最強の錬金術師？ 第2期",
+      "description": "Второй сезон «Величайший алхимик»?.",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Izure Saikyou no Renkinjutsushi? 2nd Season",
+          "The second season of Izure Saikyou no Renkinjutsushi?"
+        ],
+        "ja": [
+          "いずれ最強の錬金術師？ 第2期",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "TV",
+      "genres": [
+        "Приключения",
+        "Фэнтези",
+        "исэкай"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/62469/084f80c52c5b95a70b95acd6f0d98de6.jpeg",
+      "audienceRating": 0,
+      "popularity": 7194,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
+    },
+    {
       "id": "mal-62865",
       "ids": {
         "mal": 62865,
@@ -5242,53 +5289,6 @@
       "banner": null
     },
     {
-      "id": "mal-62469",
-      "ids": {
-        "mal": 62469,
-        "anilist": 198692,
-        "shikimori": 62469
-      },
-      "title": "Однажды я стану величайшим алхимиком? 2",
-      "originalTitle": "Izure Saikyou no Renkinjutsushi? 2nd Season",
-      "alt": "Izure Saikyou no Renkinjutsushi? 2nd Season いずれ最強の錬金術師？ 第2期",
-      "description": "Второй сезон «Величайший алхимик»?.",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Izure Saikyou no Renkinjutsushi? 2nd Season",
-          "The second season of Izure Saikyou no Renkinjutsushi?"
-        ],
-        "ja": [
-          "いずれ最強の錬金術師？ 第2期",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "TV",
-      "genres": [
-        "Приключения",
-        "Фэнтези",
-        "исэкай"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/62469/084f80c52c5b95a70b95acd6f0d98de6.jpeg",
-      "audienceRating": 0,
-      "popularity": 7185,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
-    },
-    {
       "id": "mal-65144",
       "ids": {
         "mal": 65144,
@@ -5326,7 +5326,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/65144/3e67cecd0f6157b1bb04607647153541.jpeg",
       "audienceRating": 0,
-      "popularity": 7090,
+      "popularity": 7113,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -5375,7 +5375,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61925/3be0e0e68bf375b7b4fcbef543c68205.jpeg",
       "audienceRating": 0,
-      "popularity": 7008,
+      "popularity": 7014,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -5797,7 +5797,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx148316-1NEqvHUGczKY.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 6629,
+      "popularity": 6630,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -5844,7 +5844,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b114441-DkWOy3ykZxmt.png",
       "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/114441-AZcxoW9W4YaG.jpg",
       "audienceRating": 0,
-      "popularity": 6598,
+      "popularity": 6597,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -5985,7 +5985,53 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61944/30c58686a48be12eaba86758ed33c7f8.jpeg",
       "audienceRating": 0,
-      "popularity": 6449,
+      "popularity": 6451,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
+    },
+    {
+      "id": "mal-62311",
+      "ids": {
+        "mal": 62311,
+        "anilist": 197619,
+        "shikimori": 62311
+      },
+      "title": "Цветочный круг мастера барьеров",
+      "originalTitle": "Kekkaishi no Ichirinka",
+      "alt": "Kekkaishi no Ichirinka Bride of the Barrier Master 結界師の一輪華",
+      "description": "Давным-давно Японию защищали пять хрустальных столпов. Восемнадцатилетняя Хана Итисэ появилась на свет в одной из младших ветвей семьи, хранящей эти столпы с помощью сверхъестественных способностей, однако с детства жила в тени своей одарённой сестры-близнеца Хадзуки. Когда однажды в Хане наконец пробуждается собственная сила, девушка решает скрывать её, желая спокойно доучиться в старшей школе. Но всё меняется, когда Саку Итиномия — высокомерный, но могущественный глава главной ветви семьи — влюбляется в Хану и вынуждает её подписать брачный контракт. Сможет ли Хана раскрыть свой истинный потенциал под крылом будущего мужа?",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Kekkaishi no Ichirinka",
+          "Hana Ichise is from a branch family to one of five barrier-weaving magical clans who protect and support Japan. But in the eyes of her mother and father, she’s an afterthought compared to her talented older twin sister. When Hana’s true potential awakens at age fifteen, she decides to keep her newfound abilities a secret—including from her parents—so she can have a quiet life. But the powerful new head of the elite Ichinomiya clan, Saku Ichinomiya, is looking for a bride…and he has his eyes on Hana!\n\n\n\n(Source: Yen Press)"
+        ],
+        "ja": [
+          "結界師の一輪華",
+          ""
+        ]
+      },
+      "year": 2027,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2027,
+        "month": 1,
+        "day": 6
+      },
+      "season": "WINTER",
+      "type": "TV",
+      "genres": [
+        "Романтика",
+        "Сверхъестественное"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/62311/ef5f64361c8fb4868b2fd6ed29c5e80a.jpeg",
+      "audienceRating": 0,
+      "popularity": 6441,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -6044,52 +6090,6 @@
       "banner": null
     },
     {
-      "id": "mal-62311",
-      "ids": {
-        "mal": 62311,
-        "anilist": 197619,
-        "shikimori": 62311
-      },
-      "title": "Цветочный круг мастера барьеров",
-      "originalTitle": "Kekkaishi no Ichirinka",
-      "alt": "Kekkaishi no Ichirinka Bride of the Barrier Master 結界師の一輪華",
-      "description": "Давным-давно Японию защищали пять хрустальных столпов. Восемнадцатилетняя Хана Итисэ появилась на свет в одной из младших ветвей семьи, хранящей эти столпы с помощью сверхъестественных способностей, однако с детства жила в тени своей одарённой сестры-близнеца Хадзуки. Когда однажды в Хане наконец пробуждается собственная сила, девушка решает скрывать её, желая спокойно доучиться в старшей школе. Но всё меняется, когда Саку Итиномия — высокомерный, но могущественный глава главной ветви семьи — влюбляется в Хану и вынуждает её подписать брачный контракт. Сможет ли Хана раскрыть свой истинный потенциал под крылом будущего мужа?",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Kekkaishi no Ichirinka",
-          "Hana Ichise is from a branch family to one of five barrier-weaving magical clans who protect and support Japan. But in the eyes of her mother and father, she’s an afterthought compared to her talented older twin sister. When Hana’s true potential awakens at age fifteen, she decides to keep her newfound abilities a secret—including from her parents—so she can have a quiet life. But the powerful new head of the elite Ichinomiya clan, Saku Ichinomiya, is looking for a bride…and he has his eyes on Hana!\n\n\n\n(Source: Yen Press)"
-        ],
-        "ja": [
-          "結界師の一輪華",
-          ""
-        ]
-      },
-      "year": 2027,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2027,
-        "month": 1,
-        "day": 6
-      },
-      "season": "WINTER",
-      "type": "TV",
-      "genres": [
-        "Романтика",
-        "Сверхъестественное"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/62311/ef5f64361c8fb4868b2fd6ed29c5e80a.jpeg",
-      "audienceRating": 0,
-      "popularity": 6387,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
-    },
-    {
       "id": "mal-61758",
       "ids": {
         "mal": 61758,
@@ -6126,7 +6126,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61758/467aac312b7e2af8e8cfac96b1890f11.jpeg",
       "audienceRating": 0,
-      "popularity": 6368,
+      "popularity": 6374,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -6464,7 +6464,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/64427/c93aaafdcd1a263f9acc3d6f86a4ce25.jpeg",
       "audienceRating": 0,
-      "popularity": 6142,
+      "popularity": 6145,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -6702,7 +6702,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/49703/99c6ff76a2f0a45222f248ccc6b67884.jpeg",
       "audienceRating": 0,
-      "popularity": 5750,
+      "popularity": 5752,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -6929,7 +6929,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx101635-AeukManfmb3t.jpg",
       "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/101635-UGRWsNdmVxts.jpg",
       "audienceRating": 0,
-      "popularity": 5329,
+      "popularity": 5332,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -7022,7 +7022,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61324/58aabb5169ffed80952188601717143d.jpeg",
       "audienceRating": 0,
-      "popularity": 5243,
+      "popularity": 5248,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -7402,7 +7402,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/64583/0d212063733725a24abee1cfebacf2de.jpeg",
       "audienceRating": 0,
-      "popularity": 4911,
+      "popularity": 4912,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -7495,7 +7495,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/20456.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 4783,
+      "popularity": 4784,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -7541,7 +7541,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx163326-WlLIqflphZoj.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 4774,
+      "popularity": 4778,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -7812,7 +7812,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/nx10089-OoG8qY6kAzJO.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 4462,
+      "popularity": 4463,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -7857,7 +7857,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/53130/f576f53e3308328efdfa3b7d74834856.jpeg",
       "audienceRating": 0,
-      "popularity": 4453,
+      "popularity": 4454,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -7947,7 +7947,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61872/1bdb494b9fcbe59f40f253f13ce97729.jpeg",
       "audienceRating": 0,
-      "popularity": 4253,
+      "popularity": 4258,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -8131,7 +8131,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx184376-kbLx8djmty4t.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 4012,
+      "popularity": 4017,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -8319,7 +8319,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/63997/16f0c739bbf9b2393d5f2684d4737c9e.jpeg",
       "audienceRating": 0,
-      "popularity": 3947,
+      "popularity": 3951,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -8365,7 +8365,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx183272-4B1Fdw3subQ9.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 3910,
+      "popularity": 3915,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -8505,7 +8505,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx174427-ozv3bFtwB08m.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 3754,
+      "popularity": 3767,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -8552,7 +8552,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61199/9e9610af8c205b65cbb1e5c7fd5d0a58.jpeg",
       "audienceRating": 0,
-      "popularity": 3753,
+      "popularity": 3758,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -8790,7 +8790,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx186007-XSjs3txISX5U.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 3602,
+      "popularity": 3603,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -8837,7 +8837,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61966/2504ba8c3ebddde37c6c317d6facd595.jpeg",
       "audienceRating": 0,
-      "popularity": 3589,
+      "popularity": 3596,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -8882,7 +8882,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx6504-hZ8PYSEFN8l7.jpg",
       "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/6504-gHr7UdQ57oD1.jpg",
       "audienceRating": 0,
-      "popularity": 3543,
+      "popularity": 3544,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -9024,7 +9024,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/58756/f9ae7541ce0bffef5adb13f125acaae4.jpeg",
       "audienceRating": 0,
-      "popularity": 3497,
+      "popularity": 3496,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -9116,7 +9116,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61135/661be95a735852d0d89d9d8eb3239ac9.jpeg",
       "audienceRating": 0,
-      "popularity": 3438,
+      "popularity": 3455,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -9257,7 +9257,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61756/f7f23cb7bb19813207182009835d41fb.jpeg",
       "audienceRating": 0,
-      "popularity": 3360,
+      "popularity": 3376,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -9305,7 +9305,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62188/29cdd618f54673f91169f11ded8517a9.jpeg",
       "audienceRating": 0,
-      "popularity": 3337,
+      "popularity": 3356,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -9500,7 +9500,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62483/4015e9e2b0cda864362625edc306b0a9.jpeg",
       "audienceRating": 0,
-      "popularity": 3231,
+      "popularity": 3242,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -9689,6 +9689,51 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "mal-55566",
+      "ids": {
+        "mal": 55566,
+        "anilist": 165670,
+        "shikimori": 55566
+      },
+      "title": "Расточительный шеф",
+      "originalTitle": "Wasted Chef",
+      "alt": "Wasted Chef WASTED CHEF",
+      "description": "Молодой повар, пытающийся вернуть утраченный вкус, попадает в разрушенный город, лишённый всяких ощущений. Его спасает Касуми, и его кулинария начинает пробуждать в жителях давно забытые воспоминания. Но тёмная сила угрожает стереть все желания без остатка, и теперь его поиски становятся последней надеждой на спасение обоих миров.",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Wasted Chef",
+          "A young chef chasing a lost flavor lands in a ruined city without taste. Saved by Kasumi, his cooking awakens forgotten memories. But a dark force threatens to erase all desire — making his quest the last hope to save both worlds.\n\n\n(Source: Variety)\n\n\n\nNote: Title is provisional and subject to change."
+        ],
+        "ja": [
+          "WASTED CHEF",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "MOVIE",
+      "genres": [
+        "гурман"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/55566/b79e71a880be9151cb6edb50e6af62c1.jpeg",
+      "audienceRating": 0,
+      "popularity": 2957,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
+    },
+    {
       "id": "anilist-110356",
       "ids": {
         "mal": null,
@@ -9731,51 +9776,6 @@
       "episodes": 0,
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "mal-55566",
-      "ids": {
-        "mal": 55566,
-        "anilist": 165670,
-        "shikimori": 55566
-      },
-      "title": "Расточительный шеф",
-      "originalTitle": "Wasted Chef",
-      "alt": "Wasted Chef WASTED CHEF",
-      "description": "Молодой повар, пытающийся вернуть утраченный вкус, попадает в разрушенный город, лишённый всяких ощущений. Его спасает Касуми, и его кулинария начинает пробуждать в жителях давно забытые воспоминания. Но тёмная сила угрожает стереть все желания без остатка, и теперь его поиски становятся последней надеждой на спасение обоих миров.",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Wasted Chef",
-          "A young chef chasing a lost flavor lands in a ruined city without taste. Saved by Kasumi, his cooking awakens forgotten memories. But a dark force threatens to erase all desire — making his quest the last hope to save both worlds.\n\n\n(Source: Variety)\n\n\n\nNote: Title is provisional and subject to change."
-        ],
-        "ja": [
-          "WASTED CHEF",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "MOVIE",
-      "genres": [
-        "гурман"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/55566/b79e71a880be9151cb6edb50e6af62c1.jpeg",
-      "audienceRating": 0,
-      "popularity": 2955,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
     },
     {
       "id": "mal-62605",
@@ -9912,7 +9912,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b194453-rBPR7dRP6NeT.png",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 2848,
+      "popularity": 2849,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -10004,7 +10004,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62024/0de978952b0ccc76019446f1357eb269.jpeg",
       "audienceRating": 0,
-      "popularity": 2777,
+      "popularity": 2780,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -10702,7 +10702,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61115/bbfedc4a2c08e523aa8bdd7a412b4537.jpeg",
       "audienceRating": 0,
-      "popularity": 2514,
+      "popularity": 2515,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -10844,6 +10844,52 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "mal-62244",
+      "ids": {
+        "mal": 62244,
+        "anilist": 198705,
+        "shikimori": 62244
+      },
+      "title": "Аватар короля 4",
+      "originalTitle": "Quanzhi Gaoshou 4",
+      "alt": "Quanzhi Gaoshou 4 全职高手4",
+      "description": "Четвёртый сезон «Аватар короля».",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Quanzhi Gaoshou 4",
+          "The fourth season of Quanzhi Gaoshou."
+        ],
+        "ja": [
+          "全职高手4",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "видеоигры"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/62244/803092834d5654b7ce8539e765d31d58.jpeg",
+      "audienceRating": 0,
+      "popularity": 2429,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
+    },
+    {
       "id": "mal-63601",
       "ids": {
         "mal": 63601,
@@ -10882,52 +10928,6 @@
       "image": "https://shikimori.io/uploads/poster/animes/63601/33db936fb0c3d9867dd735df4f95a5b0.jpeg",
       "audienceRating": 0,
       "popularity": 2429,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
-    },
-    {
-      "id": "mal-62244",
-      "ids": {
-        "mal": 62244,
-        "anilist": 198705,
-        "shikimori": 62244
-      },
-      "title": "Аватар короля 4",
-      "originalTitle": "Quanzhi Gaoshou 4",
-      "alt": "Quanzhi Gaoshou 4 全职高手4",
-      "description": "Четвёртый сезон «Аватар короля».",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Quanzhi Gaoshou 4",
-          "The fourth season of Quanzhi Gaoshou."
-        ],
-        "ja": [
-          "全职高手4",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "видеоигры"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/62244/803092834d5654b7ce8539e765d31d58.jpeg",
-      "audienceRating": 0,
-      "popularity": 2424,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -11161,7 +11161,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/60739/172084c2e30e5038312a53f3a3c9f0ee.jpeg",
       "audienceRating": 0,
-      "popularity": 2264,
+      "popularity": 2274,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -11726,7 +11726,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/38717/42d7845661aceac5f3a8d1af66ce0e8c.jpeg",
       "audienceRating": 0,
-      "popularity": 1987,
+      "popularity": 1989,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -12094,7 +12094,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx188546-unC9pna5yjl7.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 1860,
+      "popularity": 1869,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -12427,7 +12427,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/default.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 1787,
+      "popularity": 1788,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -12520,7 +12520,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62194/bba8574b92d3d7c0ac0777bab787ee61.jpeg",
       "audienceRating": 0,
-      "popularity": 1765,
+      "popularity": 1766,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -12617,7 +12617,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b163991-l1SNf7Q5SfBG.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 1759,
+      "popularity": 1760,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -12662,7 +12662,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/57005/b6523b20515eadd4b63f30aac4257207.jpeg",
       "audienceRating": 0,
-      "popularity": 1748,
+      "popularity": 1751,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -12805,7 +12805,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/55075/9832c83f3b8729883a7f59c56535d304.jpeg",
       "audienceRating": 0,
-      "popularity": 1699,
+      "popularity": 1700,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -12947,7 +12947,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62002/a438ee31f2891aba3c8dad567ced2d50.jpeg",
       "audienceRating": 0,
-      "popularity": 1640,
+      "popularity": 1644,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -13005,6 +13005,49 @@
       "banner": null
     },
     {
+      "id": "mal-60549",
+      "ids": {
+        "mal": 60549,
+        "anilist": 185697,
+        "shikimori": 60549
+      },
+      "title": "Арканадия",
+      "originalTitle": "Arcanadea",
+      "alt": "Arcanadea アルカナディア",
+      "description": "Действие франшизы \"sci-fi x fantasy\" происходит в недалеком будущем, где мир переживает стремительное технологическое развитие благодаря новой энергии под названием \"Тайные частицы\", которая была обнаружена компанией Eden Industries. Новая технология включает в себя крупнейший сервер виртуального пространства под названием Eden. VRMMO \"ARCANADEA\" - это игра, в которую люди могут играть на сервере Eden, и в ней представлен фантастический мир. После того, как однажды ночью во время технического обслуживания \"Эдем Индастриз\" произошел взрыв, мир изменился, включая аномальную погоду, проблемы со связью, странные исчезновения и увеличение физических способностей людей.",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Arcanadea",
+          ""
+        ],
+        "ja": [
+          "アルカナディア",
+          ""
+        ]
+      },
+      "year": 2027,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2027,
+        "month": 1,
+        "day": null
+      },
+      "season": "WINTER",
+      "type": "TV",
+      "genres": [],
+      "image": "https://shikimori.io/uploads/poster/animes/60549/e68f841fd7ffe5e721a0fc2daedeeb65.jpeg",
+      "audienceRating": 0,
+      "popularity": 1621,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/185697-wvEOagVz38ck.jpg"
+    },
+    {
       "id": "mal-63573",
       "ids": {
         "mal": 63573,
@@ -13050,49 +13093,6 @@
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg",
       "banner": null
-    },
-    {
-      "id": "mal-60549",
-      "ids": {
-        "mal": 60549,
-        "anilist": 185697,
-        "shikimori": 60549
-      },
-      "title": "Арканадия",
-      "originalTitle": "Arcanadea",
-      "alt": "Arcanadea アルカナディア",
-      "description": "Действие франшизы \"sci-fi x fantasy\" происходит в недалеком будущем, где мир переживает стремительное технологическое развитие благодаря новой энергии под названием \"Тайные частицы\", которая была обнаружена компанией Eden Industries. Новая технология включает в себя крупнейший сервер виртуального пространства под названием Eden. VRMMO \"ARCANADEA\" - это игра, в которую люди могут играть на сервере Eden, и в ней представлен фантастический мир. После того, как однажды ночью во время технического обслуживания \"Эдем Индастриз\" произошел взрыв, мир изменился, включая аномальную погоду, проблемы со связью, странные исчезновения и увеличение физических способностей людей.",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Arcanadea",
-          ""
-        ],
-        "ja": [
-          "アルカナディア",
-          ""
-        ]
-      },
-      "year": 2027,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2027,
-        "month": 1,
-        "day": null
-      },
-      "season": "WINTER",
-      "type": "TV",
-      "genres": [],
-      "image": "https://shikimori.io/uploads/poster/animes/60549/e68f841fd7ffe5e721a0fc2daedeeb65.jpeg",
-      "audienceRating": 0,
-      "popularity": 1617,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/185697-wvEOagVz38ck.jpg"
     },
     {
       "id": "mal-64892",
@@ -13223,7 +13223,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/55359/7def3a835b08d730e5083a7923588ab8.jpeg",
       "audienceRating": 0,
-      "popularity": 1553,
+      "popularity": 1555,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -13326,54 +13326,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "mal-63706",
-      "ids": {
-        "mal": 63706,
-        "anilist": 209224,
-        "shikimori": 63706
-      },
-      "title": "Реинкарнация в игровом мире «Жизнь в подземелье»: Геймер проходит «Руководство по трудоустройству в подземельях» с самого начала",
-      "originalTitle": "Game Sekai Tensei \"Dankatsu\": Gamer wa \"Dungeon Shuukatsu no Susume\" wo \"Hajime kara\" Play suru",
-      "alt": "Game Sekai Tensei \"Dankatsu\": Gamer wa \"Dungeon Shuukatsu no Susume\" wo \"Hajime kara\" Play suru ゲーム世界転生〈ダン活〉～ゲーマーは【ダンジョン就活のススメ】を〈はじめから〉プレイする～",
-      "description": "Обнаружив, что переродился в главном герое суперпопулярной игры «Рекомендации по поиску подземельной работы», также известной как «ДанКацу», Зефир вовсе не в панике. Наоборот, он в полном восторге! Как заядлый геймер, знающий этот мир вдоль и поперёк, теперь у него есть шанс жить внутри масштабной системы, включающей невероятные 1021 играбельный класс и более 400 различных концовок.Вооружённый энциклопедическими знаниями игровой механики, Зефир без промедления поступает в Академию Лабиринта — центральную сцену, где начинается настоящее приключение. Его цель одна: заполучить легендарный класс «Герой». Вместе со своей подругой детства, которую он направляет по пути Алхимика, Зефир готов собирать редкий лут и прокачиваться с головокружительной скоростью!",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Game Sekai Tensei \"Dankatsu\": Gamer wa \"Dungeon Shuukatsu no Susume\" wo \"Hajime kara\" Play suru",
-          "Dan-Katsu is a legendary role-playing game that allows you to play more than 1021 classes and has more than 400 possible endings! The more we delve into it, the more we discover new ways to enjoy it, new objects… A certain gamer (player name: Zephyrus) is reincarnated in the world of Dan-Katsu, of which he becomes the main character. Overjoyed, he joins the Labyrinth Academy, the place where the main story takes place. He quickly obtains the 'Hero' class, the best in the game, but discovers that the 'Muscle Warrior', a class considered 'for fun' where he comes from, is perceived in this world as a good class?! That the most difficult dungeons have never been conquered?! In other words… he will be able to enjoy this world as if it were a new game! Determined to show everyone what a good class is, he brings together classmates, allows his reserved childhood friend to become an Alchemist, transforms a selfish Princess into a Saint… Now that he has gathered powerful classes around from him, he is ready to conquer the dungeons!\n\n\n\n(Source: TO BOOKS press release)"
-        ],
-        "ja": [
-          "ゲーム世界転生〈ダン活〉～ゲーマーは【ダンジョン就活のススメ】を〈はじめから〉プレイする～",
-          ""
-        ]
-      },
-      "year": 2027,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2027,
-        "month": 1,
-        "day": null
-      },
-      "season": "WINTER",
-      "type": "TV",
-      "genres": [
-        "Экшен",
-        "Фэнтези",
-        "исэкай",
-        "реинкарнация"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/63706/e3145b430f6d91ff64016236d0eaa8b1.jpeg",
-      "audienceRating": 0,
-      "popularity": 1480,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
-    },
-    {
       "id": "mal-61461",
       "ids": {
         "mal": 61461,
@@ -13413,7 +13365,55 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61461/fbcda33e31f29d8be9c528f9e2bdcf5d.jpeg",
       "audienceRating": 0,
-      "popularity": 1478,
+      "popularity": 1482,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
+    },
+    {
+      "id": "mal-63706",
+      "ids": {
+        "mal": 63706,
+        "anilist": 209224,
+        "shikimori": 63706
+      },
+      "title": "Реинкарнация в игровом мире «Жизнь в подземелье»: Геймер проходит «Руководство по трудоустройству в подземельях» с самого начала",
+      "originalTitle": "Game Sekai Tensei \"Dankatsu\": Gamer wa \"Dungeon Shuukatsu no Susume\" wo \"Hajime kara\" Play suru",
+      "alt": "Game Sekai Tensei \"Dankatsu\": Gamer wa \"Dungeon Shuukatsu no Susume\" wo \"Hajime kara\" Play suru ゲーム世界転生〈ダン活〉～ゲーマーは【ダンジョン就活のススメ】を〈はじめから〉プレイする～",
+      "description": "Обнаружив, что переродился в главном герое суперпопулярной игры «Рекомендации по поиску подземельной работы», также известной как «ДанКацу», Зефир вовсе не в панике. Наоборот, он в полном восторге! Как заядлый геймер, знающий этот мир вдоль и поперёк, теперь у него есть шанс жить внутри масштабной системы, включающей невероятные 1021 играбельный класс и более 400 различных концовок.Вооружённый энциклопедическими знаниями игровой механики, Зефир без промедления поступает в Академию Лабиринта — центральную сцену, где начинается настоящее приключение. Его цель одна: заполучить легендарный класс «Герой». Вместе со своей подругой детства, которую он направляет по пути Алхимика, Зефир готов собирать редкий лут и прокачиваться с головокружительной скоростью!",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Game Sekai Tensei \"Dankatsu\": Gamer wa \"Dungeon Shuukatsu no Susume\" wo \"Hajime kara\" Play suru",
+          "Dan-Katsu is a legendary role-playing game that allows you to play more than 1021 classes and has more than 400 possible endings! The more we delve into it, the more we discover new ways to enjoy it, new objects… A certain gamer (player name: Zephyrus) is reincarnated in the world of Dan-Katsu, of which he becomes the main character. Overjoyed, he joins the Labyrinth Academy, the place where the main story takes place. He quickly obtains the 'Hero' class, the best in the game, but discovers that the 'Muscle Warrior', a class considered 'for fun' where he comes from, is perceived in this world as a good class?! That the most difficult dungeons have never been conquered?! In other words… he will be able to enjoy this world as if it were a new game! Determined to show everyone what a good class is, he brings together classmates, allows his reserved childhood friend to become an Alchemist, transforms a selfish Princess into a Saint… Now that he has gathered powerful classes around from him, he is ready to conquer the dungeons!\n\n\n\n(Source: TO BOOKS press release)"
+        ],
+        "ja": [
+          "ゲーム世界転生〈ダン活〉～ゲーマーは【ダンジョン就活のススメ】を〈はじめから〉プレイする～",
+          ""
+        ]
+      },
+      "year": 2027,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2027,
+        "month": 1,
+        "day": null
+      },
+      "season": "WINTER",
+      "type": "TV",
+      "genres": [
+        "Экшен",
+        "Фэнтези",
+        "исэкай",
+        "реинкарнация"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/63706/e3145b430f6d91ff64016236d0eaa8b1.jpeg",
+      "audienceRating": 0,
+      "popularity": 1480,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -13695,7 +13695,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/default.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 1433,
+      "popularity": 1434,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -13790,7 +13790,55 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/59235/6a7c51631e28eb54a94a167c4b189a00.jpeg",
       "audienceRating": 0,
-      "popularity": 1382,
+      "popularity": 1383,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
+    },
+    {
+      "id": "mal-60160",
+      "ids": {
+        "mal": 60160,
+        "anilist": 186603,
+        "shikimori": 60160
+      },
+      "title": "Живая любовь! Клуб идолов старшей школы Нидзигасаки: Финал — Заключительная глава",
+      "originalTitle": "Love Live! Nijigasaki Gakuen School Idol Doukoukai: Kanketsu-hen Saishuushou",
+      "alt": "Love Live! Nijigasaki Gakuen School Idol Doukoukai: Kanketsu-hen Saishuushou ラブライブ！虹ヶ咲学園スクールアイドル同好会 完結編 最終章",
+      "description": "Третья часть Love Live! Идол школы Нидзигасаки Гакуэн Дукукай Канкецу-хен.",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Love Live! Nijigasaki Gakuen School Idol Doukoukai: Kanketsu-hen Saishuushou",
+          "The final in the trilogy of Love Live! Nijigasaki Gakuen School Idol Doukoukai films that continues the story beyond season two and the OVA."
+        ],
+        "ja": [
+          "ラブライブ！虹ヶ咲学園スクールアイドル同好会 完結編 最終章",
+          ""
+        ]
+      },
+      "year": 2027,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2027,
+        "month": 2,
+        "day": 5
+      },
+      "season": null,
+      "type": "MOVIE",
+      "genres": [
+        "Повседневность",
+        "идолы жен",
+        "Музыка",
+        "Школа"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/60160/f3c8af4f0459c6645d353c695b02579a.jpeg",
+      "audienceRating": 0,
+      "popularity": 1370,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -13844,54 +13892,6 @@
       "episodes": 0,
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "mal-60160",
-      "ids": {
-        "mal": 60160,
-        "anilist": 186603,
-        "shikimori": 60160
-      },
-      "title": "Живая любовь! Клуб идолов старшей школы Нидзигасаки: Финал — Заключительная глава",
-      "originalTitle": "Love Live! Nijigasaki Gakuen School Idol Doukoukai: Kanketsu-hen Saishuushou",
-      "alt": "Love Live! Nijigasaki Gakuen School Idol Doukoukai: Kanketsu-hen Saishuushou ラブライブ！虹ヶ咲学園スクールアイドル同好会 完結編 最終章",
-      "description": "Третья часть Love Live! Идол школы Нидзигасаки Гакуэн Дукукай Канкецу-хен.",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Love Live! Nijigasaki Gakuen School Idol Doukoukai: Kanketsu-hen Saishuushou",
-          "The final in the trilogy of Love Live! Nijigasaki Gakuen School Idol Doukoukai films that continues the story beyond season two and the OVA."
-        ],
-        "ja": [
-          "ラブライブ！虹ヶ咲学園スクールアイドル同好会 完結編 最終章",
-          ""
-        ]
-      },
-      "year": 2027,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2027,
-        "month": 2,
-        "day": 5
-      },
-      "season": null,
-      "type": "MOVIE",
-      "genres": [
-        "Повседневность",
-        "идолы жен",
-        "Музыка",
-        "Школа"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/60160/f3c8af4f0459c6645d353c695b02579a.jpeg",
-      "audienceRating": 0,
-      "popularity": 1366,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
     },
     {
       "id": "mal-64751",
@@ -14121,7 +14121,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61535/a81a32e27249155e3ad8419a6d275763.jpeg",
       "audienceRating": 0,
-      "popularity": 1318,
+      "popularity": 1317,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -14216,7 +14216,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/65522/a4281a8c724abb1587c5157624d714c7.jpeg",
       "audienceRating": 0,
-      "popularity": 1291,
+      "popularity": 1296,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -14314,7 +14314,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61301/46dfd813da9f4b440a5c524f0e6362a3.jpeg",
       "audienceRating": 0,
-      "popularity": 1258,
+      "popularity": 1259,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -14506,50 +14506,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "anilist-162146",
-      "ids": {
-        "mal": null,
-        "anilist": 162146
-      },
-      "title": "ZAIYUKI",
-      "originalTitle": "ZAIYUKI",
-      "alt": "ZAIYUKI",
-      "description": "ZAIYUKI centers around a kappa boy who is thrust into an adventure of growing up after a treasure hunter comes along, based on the ever-inspiring \"Journey to the West\" story. \n\n\n(Source: Crunchyroll, edited)",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "ZAIYUKI",
-          "ZAIYUKI centers around a kappa boy who is thrust into an adventure of growing up after a treasure hunter comes along, based on the ever-inspiring \"Journey to the West\" story. \n\n\n(Source: Crunchyroll, edited)"
-        ],
-        "ja": [
-          "ZAIYUKI",
-          ""
-        ]
-      },
-      "year": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "",
-      "genres": [
-        "Приключения",
-        "Фэнтези"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx162146-4eTANomtlHBK.png",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 1216,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "mal-65188",
       "ids": {
         "mal": 65188,
@@ -14599,6 +14555,50 @@
       "banner": null
     },
     {
+      "id": "anilist-162146",
+      "ids": {
+        "mal": null,
+        "anilist": 162146
+      },
+      "title": "ZAIYUKI",
+      "originalTitle": "ZAIYUKI",
+      "alt": "ZAIYUKI",
+      "description": "ZAIYUKI centers around a kappa boy who is thrust into an adventure of growing up after a treasure hunter comes along, based on the ever-inspiring \"Journey to the West\" story. \n\n\n(Source: Crunchyroll, edited)",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "ZAIYUKI",
+          "ZAIYUKI centers around a kappa boy who is thrust into an adventure of growing up after a treasure hunter comes along, based on the ever-inspiring \"Journey to the West\" story. \n\n\n(Source: Crunchyroll, edited)"
+        ],
+        "ja": [
+          "ZAIYUKI",
+          ""
+        ]
+      },
+      "year": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "",
+      "genres": [
+        "Приключения",
+        "Фэнтези"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx162146-4eTANomtlHBK.png",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 1215,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-60555",
       "ids": {
         "mal": 60555,
@@ -14637,7 +14637,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/60555/7ed7c4f5a1f052e9c921952d6dff79d5.jpeg",
       "audienceRating": 0,
-      "popularity": 1199,
+      "popularity": 1201,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -14866,7 +14866,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/n106541-xy5HRXFUKsxa.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 1155,
+      "popularity": 1154,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -14919,6 +14919,50 @@
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg",
       "banner": null
+    },
+    {
+      "id": "anilist-121998",
+      "ids": {
+        "mal": null,
+        "anilist": 121998
+      },
+      "title": "Long Xin Shaonü",
+      "originalTitle": "Long Xin Shaonü",
+      "alt": "龙心少女",
+      "description": "In a cursed city, a human girl who holds the power of the giant dragon, shifts between light and darkness.\n\n\n\n(Source: Studio Tumble Youtube Channel, edited)",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "Long Xin Shaonü",
+          "In a cursed city, a human girl who holds the power of the giant dragon, shifts between light and darkness.\n\n\n\n(Source: Studio Tumble Youtube Channel, edited)"
+        ],
+        "ja": [
+          "龙心少女",
+          ""
+        ]
+      },
+      "year": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Фэнтези"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx121998-LTgfL3XonOr6.png",
+      "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/121998-hMpKrHhls9Fc.jpg",
+      "audienceRating": 0,
+      "popularity": 1119,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
     },
     {
       "id": "mal-49567",
@@ -15498,51 +15542,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx197022-Gs7n9bAcnlL0.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 1008,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "anilist-121998",
-      "ids": {
-        "mal": null,
-        "anilist": 121998
-      },
-      "title": "Long Xin Shaonü",
-      "originalTitle": "Long Xin Shaonü",
-      "alt": "龙心少女",
-      "description": "In a cursed city, a human girl who holds the power of the giant dragon, shifts between light and darkness.\n\n\n\n(Source: Studio Tumble Youtube Channel, edited)",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "Long Xin Shaonü",
-          "In a cursed city, a human girl who holds the power of the giant dragon, shifts between light and darkness.\n\n\n\n(Source: Studio Tumble Youtube Channel, edited)"
-        ],
-        "ja": [
-          "龙心少女",
-          ""
-        ]
-      },
-      "year": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Фэнтези"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx121998-LTgfL3XonOr6.png",
-      "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/121998-hMpKrHhls9Fc.jpg",
-      "audienceRating": 0,
-      "popularity": 999,
+      "popularity": 1010,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -15583,7 +15583,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b142278-kixcIocQg2Wf.png",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 996,
+      "popularity": 998,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -15769,7 +15769,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/59266/0b3b4d3f6842fc84ab29803a8f6a69f0.jpeg",
       "audienceRating": 0,
-      "popularity": 921,
+      "popularity": 923,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -16185,6 +16185,51 @@
       "banner": null
     },
     {
+      "id": "mal-58849",
+      "ids": {
+        "mal": 58849,
+        "anilist": 187361,
+        "shikimori": 58849
+      },
+      "title": "Free Fire Daybreak",
+      "originalTitle": "Free Fire Daybreak",
+      "alt": "Free Fire Daybreak フリーファイア デイブレイク",
+      "description": "Set in the futuristic metropolis of New Dawn, Free Fire Daybreak follows protagonist Kelly, who awakens with no memory of her past and is drawn into Horizon Corporation's mysterious \"Project Bloom\".\n\n\n\n(Source: Official Website)",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Free Fire Daybreak",
+          "Set in the futuristic metropolis of New Dawn, Free Fire Daybreak follows protagonist Kelly, who awakens with no memory of her past and is drawn into Horizon Corporation's mysterious \"Project Bloom\".\n\n\n\n(Source: Official Website)"
+        ],
+        "ja": [
+          "フリーファイア デイブレイク",
+          ""
+        ]
+      },
+      "year": 2027,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2027,
+        "month": 4,
+        "day": null
+      },
+      "season": "SPRING",
+      "type": "TV",
+      "genres": [
+        "Экшен"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/58849/de0d94e409a801eb144b3f17ae2c2e7e.jpeg",
+      "audienceRating": 0,
+      "popularity": 837,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
+    },
+    {
       "id": "mal-64341",
       "ids": {
         "mal": 64341,
@@ -16223,51 +16268,6 @@
       "image": "https://shikimori.io/uploads/poster/animes/64341/6216e9b0c4cc978b4b1e6cf6166d421b.jpeg",
       "audienceRating": 0,
       "popularity": 837,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
-    },
-    {
-      "id": "mal-58849",
-      "ids": {
-        "mal": 58849,
-        "anilist": 187361,
-        "shikimori": 58849
-      },
-      "title": "Free Fire Daybreak",
-      "originalTitle": "Free Fire Daybreak",
-      "alt": "Free Fire Daybreak フリーファイア デイブレイク",
-      "description": "Set in the futuristic metropolis of New Dawn, Free Fire Daybreak follows protagonist Kelly, who awakens with no memory of her past and is drawn into Horizon Corporation's mysterious \"Project Bloom\".\n\n\n\n(Source: Official Website)",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Free Fire Daybreak",
-          "Set in the futuristic metropolis of New Dawn, Free Fire Daybreak follows protagonist Kelly, who awakens with no memory of her past and is drawn into Horizon Corporation's mysterious \"Project Bloom\".\n\n\n\n(Source: Official Website)"
-        ],
-        "ja": [
-          "フリーファイア デイブレイク",
-          ""
-        ]
-      },
-      "year": 2027,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2027,
-        "month": 4,
-        "day": null
-      },
-      "season": "SPRING",
-      "type": "TV",
-      "genres": [
-        "Экшен"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/58849/de0d94e409a801eb144b3f17ae2c2e7e.jpeg",
-      "audienceRating": 0,
-      "popularity": 833,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -16678,7 +16678,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b112932-cLp5VIXLL1Pa.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 741,
+      "popularity": 742,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -16863,7 +16863,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61495/e6c332f9e726753876ea2cadc51a8bc7.jpeg",
       "audienceRating": 0,
-      "popularity": 733,
+      "popularity": 734,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -17919,7 +17919,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx122572-2q6g9HTomvR9.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 602,
+      "popularity": 603,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -18189,7 +18189,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/102674-RaZZEyERZWmK.png",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 566,
+      "popularity": 567,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -18280,7 +18280,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/55143/86403cf74b89001ed0761c3d024ee083.jpeg",
       "audienceRating": 0,
-      "popularity": 559,
+      "popularity": 558,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -18558,7 +18558,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx129896-ogdeDAIoJRrJ.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 539,
+      "popularity": 540,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -19375,7 +19375,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx167992-J6zlWxSYXuiP.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 446,
+      "popularity": 447,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -19761,6 +19761,50 @@
       "banner": null
     },
     {
+      "id": "mal-62507",
+      "ids": {
+        "mal": 62507,
+        "anilist": 198663
+      },
+      "title": "KAIJU DECODE: Aidara no Yubiwa",
+      "originalTitle": "KAIJU DECODE: Aidara no Yubiwa",
+      "alt": "怪獣デコード アイダラの指輪",
+      "description": "A youth named Maru lives in the peaceful City, a society freed from the restrictions of the body, mind, space, and time. In contrast, a girl named Coco, a member of the Aidara Tribe, resides in the Zone, a treacherous area also inhabited by incredible beasts. The story revolves around two opposing characters seeking a path into a shared future. \n\n\n\n(Source: Sakai Film Festival)",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "KAIJU DECODE: Aidara no Yubiwa",
+          "A youth named Maru lives in the peaceful City, a society freed from the restrictions of the body, mind, space, and time. In contrast, a girl named Coco, a member of the Aidara Tribe, resides in the Zone, a treacherous area also inhabited by incredible beasts. The story revolves around two opposing characters seeking a path into a shared future. \n\n\n\n(Source: Sakai Film Festival)"
+        ],
+        "ja": [
+          "怪獣デコード アイダラの指輪",
+          ""
+        ]
+      },
+      "year": 2027,
+      "releaseDate": {
+        "year": 2027,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "",
+      "genres": [
+        "Экшен",
+        "Фантастика"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx198663-53dCxLcNJ5EB.jpg",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 409,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-65107",
       "ids": {
         "mal": 65107,
@@ -19840,50 +19884,6 @@
         "Драма"
       ],
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b136205-OHyk4i03GO8H.png",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 408,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "mal-62507",
-      "ids": {
-        "mal": 62507,
-        "anilist": 198663
-      },
-      "title": "KAIJU DECODE: Aidara no Yubiwa",
-      "originalTitle": "KAIJU DECODE: Aidara no Yubiwa",
-      "alt": "怪獣デコード アイダラの指輪",
-      "description": "A youth named Maru lives in the peaceful City, a society freed from the restrictions of the body, mind, space, and time. In contrast, a girl named Coco, a member of the Aidara Tribe, resides in the Zone, a treacherous area also inhabited by incredible beasts. The story revolves around two opposing characters seeking a path into a shared future. \n\n\n\n(Source: Sakai Film Festival)",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "KAIJU DECODE: Aidara no Yubiwa",
-          "A youth named Maru lives in the peaceful City, a society freed from the restrictions of the body, mind, space, and time. In contrast, a girl named Coco, a member of the Aidara Tribe, resides in the Zone, a treacherous area also inhabited by incredible beasts. The story revolves around two opposing characters seeking a path into a shared future. \n\n\n\n(Source: Sakai Film Festival)"
-        ],
-        "ja": [
-          "怪獣デコード アイダラの指輪",
-          ""
-        ]
-      },
-      "year": 2027,
-      "releaseDate": {
-        "year": 2027,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "",
-      "genres": [
-        "Экшен",
-        "Фантастика"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx198663-53dCxLcNJ5EB.jpg",
       "banner": null,
       "audienceRating": 0,
       "popularity": 408,
@@ -20481,6 +20481,51 @@
       "banner": null
     },
     {
+      "id": "anilist-168247",
+      "ids": {
+        "mal": null,
+        "anilist": 168247
+      },
+      "title": "Tao Yu Mo Shi Zhi Shu",
+      "originalTitle": "Tao Yu Mo Shi Zhi Shu",
+      "alt": "桃与末世之书",
+      "description": "Sparked by scientific experiments gone awry, civilization had collapsed in the future world and most regions had regressed to the tribal level. The incident also caused irreversible mutations in people, splitting them into two species: those with mechanical integrations called Machines, and those who had animal genes, Beast Spirits. As a Machine, Black-Eyed Rock roamed the path between the two races, in search of the answers to this world and fighting for everyone’s beliefs!\n\n\n\n(Source: Webcomics)",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "Tao Yu Mo Shi Zhi Shu",
+          "Sparked by scientific experiments gone awry, civilization had collapsed in the future world and most regions had regressed to the tribal level. The incident also caused irreversible mutations in people, splitting them into two species: those with mechanical integrations called Machines, and those who had animal genes, Beast Spirits. As a Machine, Black-Eyed Rock roamed the path between the two races, in search of the answers to this world and fighting for everyone’s beliefs!\n\n\n\n(Source: Webcomics)"
+        ],
+        "ja": [
+          "桃与末世之书",
+          ""
+        ]
+      },
+      "year": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Приключения",
+        "Фэнтези"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx168247-Ph6aj4e2y52o.png",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 346,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-64906",
       "ids": {
         "mal": 64906,
@@ -20518,51 +20563,6 @@
       "banner": null,
       "audienceRating": 0,
       "popularity": 346,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "anilist-168247",
-      "ids": {
-        "mal": null,
-        "anilist": 168247
-      },
-      "title": "Tao Yu Mo Shi Zhi Shu",
-      "originalTitle": "Tao Yu Mo Shi Zhi Shu",
-      "alt": "桃与末世之书",
-      "description": "Sparked by scientific experiments gone awry, civilization had collapsed in the future world and most regions had regressed to the tribal level. The incident also caused irreversible mutations in people, splitting them into two species: those with mechanical integrations called Machines, and those who had animal genes, Beast Spirits. As a Machine, Black-Eyed Rock roamed the path between the two races, in search of the answers to this world and fighting for everyone’s beliefs!\n\n\n\n(Source: Webcomics)",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "Tao Yu Mo Shi Zhi Shu",
-          "Sparked by scientific experiments gone awry, civilization had collapsed in the future world and most regions had regressed to the tribal level. The incident also caused irreversible mutations in people, splitting them into two species: those with mechanical integrations called Machines, and those who had animal genes, Beast Spirits. As a Machine, Black-Eyed Rock roamed the path between the two races, in search of the answers to this world and fighting for everyone’s beliefs!\n\n\n\n(Source: Webcomics)"
-        ],
-        "ja": [
-          "桃与末世之书",
-          ""
-        ]
-      },
-      "year": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Приключения",
-        "Фэнтези"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx168247-Ph6aj4e2y52o.png",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 345,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -20699,7 +20699,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx115802-KeWzsaWwAN5b.png",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 316,
+      "popularity": 317,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -20787,7 +20787,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx141763-7Ka9S0JQOBC1.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 307,
+      "popularity": 309,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -20922,7 +20922,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62751/78588f2baf8b0404052049c14a66d631.jpeg",
       "audienceRating": 0,
-      "popularity": 297,
+      "popularity": 299,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -21156,7 +21156,7 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/57821/b3d20bb97dccc2fabb82fd86ebab8500.jpeg",
       "audienceRating": 0,
-      "popularity": 281,
+      "popularity": 282,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -21344,6 +21344,55 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "mal-61610",
+      "ids": {
+        "mal": 61610,
+        "anilist": 198707,
+        "shikimori": 61610
+      },
+      "title": "Почтенный Юань (2027)",
+      "originalTitle": "Yuan Zun: Nian Fan",
+      "alt": "Yuan Zun: Nian Fan Dragon Prince Yuan Remaked 元尊 3D动画重制版",
+      "description": "Remake of Dragon Prince Yuan 3D.",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Yuan Zun: Nian Fan",
+          "Remake of Dragon Prince Yuan 3D."
+        ],
+        "ja": [
+          "元尊 3D动画重制版",
+          ""
+        ]
+      },
+      "year": 2027,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2027,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Приключения",
+        "Фэнтези",
+        "исторический",
+        "боевые искусства"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/61610/ef668df7e078536cbf3e3d6fadb4d769.jpeg",
+      "audienceRating": 0,
+      "popularity": 265,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
+    },
+    {
       "id": "mal-65312",
       "ids": {
         "mal": 65312,
@@ -21385,55 +21434,6 @@
       "episodes": 0,
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "mal-61610",
-      "ids": {
-        "mal": 61610,
-        "anilist": 198707,
-        "shikimori": 61610
-      },
-      "title": "Почтенный Юань (2027)",
-      "originalTitle": "Yuan Zun: Nian Fan",
-      "alt": "Yuan Zun: Nian Fan Dragon Prince Yuan Remaked 元尊 3D动画重制版",
-      "description": "Remake of Dragon Prince Yuan 3D.",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Yuan Zun: Nian Fan",
-          "Remake of Dragon Prince Yuan 3D."
-        ],
-        "ja": [
-          "元尊 3D动画重制版",
-          ""
-        ]
-      },
-      "year": 2027,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2027,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Приключения",
-        "Фэнтези",
-        "исторический",
-        "боевые искусства"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/61610/ef668df7e078536cbf3e3d6fadb4d769.jpeg",
-      "audienceRating": 0,
-      "popularity": 264,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
     },
     {
       "id": "anilist-191979",
@@ -21749,6 +21749,55 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "mal-60563",
+      "ids": {
+        "mal": 60563,
+        "anilist": 198696,
+        "shikimori": 60563
+      },
+      "title": "Номенклатура ночи",
+      "originalTitle": "Ye de Mingming Shu",
+      "alt": "Ye de Mingming Shu 夜的命名术",
+      "description": "Родители Цинчэня развелись, когда он был совсем маленьким. Не желая обременять мать, он добровольно остался жить с отцом, одержимым азартными играми. Но однажды на руке юноши появился загадочный обратный отсчёт, и с этого момента жизнь Цинчэня изменилась навсегда. Этот отсчёт связал два совершенно разных мира — и в тот миг, когда цифры достигли нуля, время замерло, а пространство разлетелось на осколки. Так Цинчэнь оказался заброшен сквозь время и пространство в опасную Тюрьму №18, что находилась в другом мире. Под нависающим стальным небом он, полагаясь лишь на смелость и смекалку, шаг за шагом пробивал себе путь вперёд, преодолевая одно испытание за другим, пока не привлёк внимание полубога Ли Шутуна. В конце концов Цинчэнь удостоился чести стать его учеником — и теперь Ли Шутун поведёт юношу по самой длинной из всех дорог, что существуют среди кратчайших путей этого мира.",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Ye de Mingming Shu",
+          "After a difficult upbringing, Qingchen's life takes a drastic turn when a mysterious countdown emerges on his arm. He is taken to Prison No. 18, a dangerous parallel universe, when it reaches zero. He overcomes severe adversity and gains the respect of the demigod Li Shutong by using his cunning and bravery. He then becomes his disciple and embarks on a journey of genuine transformation."
+        ],
+        "ja": [
+          "夜的命名术",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Приключения",
+        "тайна",
+        "Фантастика",
+        "исэкай"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/60563/eaa9a464fa4c0f5c0cdada238162530d.jpeg",
+      "audienceRating": 0,
+      "popularity": 245,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
+    },
+    {
       "id": "anilist-141885",
       "ids": {
         "mal": null,
@@ -21791,55 +21840,6 @@
       "episodes": 0,
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "mal-60563",
-      "ids": {
-        "mal": 60563,
-        "anilist": 198696,
-        "shikimori": 60563
-      },
-      "title": "Номенклатура ночи",
-      "originalTitle": "Ye de Mingming Shu",
-      "alt": "Ye de Mingming Shu 夜的命名术",
-      "description": "Родители Цинчэня развелись, когда он был совсем маленьким. Не желая обременять мать, он добровольно остался жить с отцом, одержимым азартными играми. Но однажды на руке юноши появился загадочный обратный отсчёт, и с этого момента жизнь Цинчэня изменилась навсегда. Этот отсчёт связал два совершенно разных мира — и в тот миг, когда цифры достигли нуля, время замерло, а пространство разлетелось на осколки. Так Цинчэнь оказался заброшен сквозь время и пространство в опасную Тюрьму №18, что находилась в другом мире. Под нависающим стальным небом он, полагаясь лишь на смелость и смекалку, шаг за шагом пробивал себе путь вперёд, преодолевая одно испытание за другим, пока не привлёк внимание полубога Ли Шутуна. В конце концов Цинчэнь удостоился чести стать его учеником — и теперь Ли Шутун поведёт юношу по самой длинной из всех дорог, что существуют среди кратчайших путей этого мира.",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Ye de Mingming Shu",
-          "After a difficult upbringing, Qingchen's life takes a drastic turn when a mysterious countdown emerges on his arm. He is taken to Prison No. 18, a dangerous parallel universe, when it reaches zero. He overcomes severe adversity and gains the respect of the demigod Li Shutong by using his cunning and bravery. He then becomes his disciple and embarks on a journey of genuine transformation."
-        ],
-        "ja": [
-          "夜的命名术",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Приключения",
-        "тайна",
-        "Фантастика",
-        "исэкай"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/60563/eaa9a464fa4c0f5c0cdada238162530d.jpeg",
-      "audienceRating": 0,
-      "popularity": 243,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": null
     },
     {
       "id": "mal-62958",
@@ -22387,49 +22387,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "anilist-153484",
-      "ids": {
-        "mal": null,
-        "anilist": 153484
-      },
-      "title": "Diqiu Jintou",
-      "originalTitle": "Diqiu Jintou",
-      "alt": "地球尽头",
-      "description": "",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "Diqiu Jintou",
-          ""
-        ],
-        "ja": [
-          "地球尽头",
-          ""
-        ]
-      },
-      "year": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Приключения"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153484-8aSfGU0faRpL.png",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 222,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "anilist-166441",
       "ids": {
         "mal": null,
@@ -22462,6 +22419,49 @@
         "Экшен"
       ],
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx166441-rrRnDJE36AcP.jpg",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 223,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
+      "id": "anilist-153484",
+      "ids": {
+        "mal": null,
+        "anilist": 153484
+      },
+      "title": "Diqiu Jintou",
+      "originalTitle": "Diqiu Jintou",
+      "alt": "地球尽头",
+      "description": "",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "Diqiu Jintou",
+          ""
+        ],
+        "ja": [
+          "地球尽头",
+          ""
+        ]
+      },
+      "year": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Приключения"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153484-8aSfGU0faRpL.png",
       "banner": null,
       "audienceRating": 0,
       "popularity": 222,
@@ -22562,6 +22562,50 @@
       "banner": null
     },
     {
+      "id": "anilist-153454",
+      "ids": {
+        "mal": null,
+        "anilist": 153454
+      },
+      "title": "Jipin Quanneng Gaoshou",
+      "originalTitle": "Jipin Quanneng Gaoshou",
+      "alt": "极品全能高手",
+      "description": "The best all-rounder ever! A car accident changes my ordinary life, and after that, I score full marks in every exam, win all lottery prizes, have a genius for all sports, and encounter many beautiful girls... I'm just omnipotent.\n\n\n\n(Source: Webnovel)",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "Jipin Quanneng Gaoshou",
+          "The best all-rounder ever! A car accident changes my ordinary life, and after that, I score full marks in every exam, win all lottery prizes, have a genius for all sports, and encounter many beautiful girls... I'm just omnipotent.\n\n\n\n(Source: Webnovel)"
+        ],
+        "ja": [
+          "极品全能高手",
+          ""
+        ]
+      },
+      "year": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Фэнтези"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153454-wUNsmagNlv2l.png",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 219,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-62953",
       "ids": {
         "mal": 62953,
@@ -22608,50 +22652,6 @@
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg",
       "banner": null
-    },
-    {
-      "id": "anilist-153454",
-      "ids": {
-        "mal": null,
-        "anilist": 153454
-      },
-      "title": "Jipin Quanneng Gaoshou",
-      "originalTitle": "Jipin Quanneng Gaoshou",
-      "alt": "极品全能高手",
-      "description": "The best all-rounder ever! A car accident changes my ordinary life, and after that, I score full marks in every exam, win all lottery prizes, have a genius for all sports, and encounter many beautiful girls... I'm just omnipotent.\n\n\n\n(Source: Webnovel)",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "Jipin Quanneng Gaoshou",
-          "The best all-rounder ever! A car accident changes my ordinary life, and after that, I score full marks in every exam, win all lottery prizes, have a genius for all sports, and encounter many beautiful girls... I'm just omnipotent.\n\n\n\n(Source: Webnovel)"
-        ],
-        "ja": [
-          "极品全能高手",
-          ""
-        ]
-      },
-      "year": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Фэнтези"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153454-wUNsmagNlv2l.png",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 218,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
     },
     {
       "id": "mal-62747",
@@ -23106,6 +23106,51 @@
       "banner": null
     },
     {
+      "id": "anilist-195881",
+      "ids": {
+        "mal": null,
+        "anilist": 195881
+      },
+      "title": "Fanren Xiu Xian Zhuan Movie",
+      "originalTitle": "Fanren Xiu Xian Zhuan Movie",
+      "alt": "凡人修仙传之瀚海迷踪",
+      "description": "",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "Fanren Xiu Xian Zhuan Movie",
+          ""
+        ],
+        "ja": [
+          "凡人修仙传之瀚海迷踪",
+          ""
+        ]
+      },
+      "year": 2027,
+      "releaseDate": {
+        "year": 2027,
+        "month": 5,
+        "day": null
+      },
+      "season": "SPRING",
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Приключения",
+        "Фэнтези"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx195881-H1Jk9i7wc8Ac.png",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 191,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-62278",
       "ids": {
         "mal": 62278,
@@ -23151,51 +23196,6 @@
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg",
       "banner": null
-    },
-    {
-      "id": "anilist-195881",
-      "ids": {
-        "mal": null,
-        "anilist": 195881
-      },
-      "title": "Fanren Xiu Xian Zhuan Movie",
-      "originalTitle": "Fanren Xiu Xian Zhuan Movie",
-      "alt": "凡人修仙传之瀚海迷踪",
-      "description": "",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "Fanren Xiu Xian Zhuan Movie",
-          ""
-        ],
-        "ja": [
-          "凡人修仙传之瀚海迷踪",
-          ""
-        ]
-      },
-      "year": 2027,
-      "releaseDate": {
-        "year": 2027,
-        "month": 5,
-        "day": null
-      },
-      "season": "SPRING",
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Приключения",
-        "Фэнтези"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx195881-H1Jk9i7wc8Ac.png",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 190,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
     },
     {
       "id": "mal-64920",
@@ -24867,6 +24867,50 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "anilist-185859",
+      "ids": {
+        "mal": null,
+        "anilist": 185859
+      },
+      "title": "Qing Cheng Kuangma",
+      "originalTitle": "Qing Cheng Kuangma",
+      "alt": "青城狂马",
+      "description": "",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "Qing Cheng Kuangma",
+          ""
+        ],
+        "ja": [
+          "青城狂马",
+          ""
+        ]
+      },
+      "year": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "",
+      "genres": [
+        "Экшен",
+        "Фэнтези"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/default.jpg",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 145,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-50235",
       "ids": {
         "mal": 50235,
@@ -24946,50 +24990,6 @@
         "Повседневность"
       ],
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b141927-z8l2bo6AglQB.png",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 144,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "anilist-185859",
-      "ids": {
-        "mal": null,
-        "anilist": 185859
-      },
-      "title": "Qing Cheng Kuangma",
-      "originalTitle": "Qing Cheng Kuangma",
-      "alt": "青城狂马",
-      "description": "",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "Qing Cheng Kuangma",
-          ""
-        ],
-        "ja": [
-          "青城狂马",
-          ""
-        ]
-      },
-      "year": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "",
-      "genres": [
-        "Экшен",
-        "Фэнтези"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/default.jpg",
       "banner": null,
       "audienceRating": 0,
       "popularity": 144,
@@ -25315,6 +25315,49 @@
       "banner": null
     },
     {
+      "id": "anilist-122514",
+      "ids": {
+        "mal": null,
+        "anilist": 122514
+      },
+      "title": "Hui Jing Shaonü",
+      "originalTitle": "Hui Jing Shaonü",
+      "alt": "绘境少女",
+      "description": "",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "Hui Jing Shaonü",
+          ""
+        ],
+        "ja": [
+          "绘境少女",
+          ""
+        ]
+      },
+      "year": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx122514-0HjiYt15junF.png",
+      "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/122514-A1Pi4miS0V4A.jpg",
+      "audienceRating": 0,
+      "popularity": 136,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "anilist-129134",
       "ids": {
         "mal": null,
@@ -25351,49 +25394,6 @@
       "banner": null,
       "audienceRating": 0,
       "popularity": 136,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "anilist-122514",
-      "ids": {
-        "mal": null,
-        "anilist": 122514
-      },
-      "title": "Hui Jing Shaonü",
-      "originalTitle": "Hui Jing Shaonü",
-      "alt": "绘境少女",
-      "description": "",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "Hui Jing Shaonü",
-          ""
-        ],
-        "ja": [
-          "绘境少女",
-          ""
-        ]
-      },
-      "year": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx122514-0HjiYt15junF.png",
-      "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/122514-A1Pi4miS0V4A.jpg",
-      "audienceRating": 0,
-      "popularity": 135,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -26184,7 +26184,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx155334-URGtZ6s9myQX.png",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 113,
+      "popularity": 114,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -26355,7 +26355,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx137652-Vwl8vaIsVnrU.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 109,
+      "popularity": 110,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -26768,6 +26768,47 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "anilist-177463",
+      "ids": {
+        "mal": null,
+        "anilist": 177463
+      },
+      "title": "You Ming Zhi",
+      "originalTitle": "You Ming Zhi",
+      "alt": "幽明志",
+      "description": "Adapted from Chinese folk legend \"Zhou Chu & The Three Scourges\"",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "You Ming Zhi",
+          "Adapted from Chinese folk legend \"Zhou Chu & The Three Scourges\""
+        ],
+        "ja": [
+          "幽明志",
+          ""
+        ]
+      },
+      "year": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "",
+      "genres": [],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx177463-8FordvNAbHSk.jpg",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 102,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-62946",
       "ids": {
         "mal": 62946,
@@ -26848,47 +26889,6 @@
         "Фэнтези"
       ],
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx129267-XGe8FB1zb6RU.png",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 101,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "anilist-177463",
-      "ids": {
-        "mal": null,
-        "anilist": 177463
-      },
-      "title": "You Ming Zhi",
-      "originalTitle": "You Ming Zhi",
-      "alt": "幽明志",
-      "description": "Adapted from Chinese folk legend \"Zhou Chu & The Three Scourges\"",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "You Ming Zhi",
-          "Adapted from Chinese folk legend \"Zhou Chu & The Three Scourges\""
-        ],
-        "ja": [
-          "幽明志",
-          ""
-        ]
-      },
-      "year": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "",
-      "genres": [],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx177463-8FordvNAbHSk.jpg",
       "banner": null,
       "audienceRating": 0,
       "popularity": 101,
@@ -28590,6 +28590,49 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "anilist-156089",
+      "ids": {
+        "mal": null,
+        "anilist": 156089
+      },
+      "title": "Guaren Wu Ji",
+      "originalTitle": "Guaren Wu Ji",
+      "alt": "寡人无疾",
+      "description": "",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "Guaren Wu Ji",
+          ""
+        ],
+        "ja": [
+          "寡人无疾",
+          ""
+        ]
+      },
+      "year": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Романтика"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx156089-NLJQRWzJN01i.jpg",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 79,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "anilist-211189",
       "ids": {
         "mal": null,
@@ -28753,49 +28796,6 @@
         "Сверхъестественное"
       ],
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b141925-HWMRrNEwmIoS.png",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 78,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "anilist-156089",
-      "ids": {
-        "mal": null,
-        "anilist": 156089
-      },
-      "title": "Guaren Wu Ji",
-      "originalTitle": "Guaren Wu Ji",
-      "alt": "寡人无疾",
-      "description": "",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "Guaren Wu Ji",
-          ""
-        ],
-        "ja": [
-          "寡人无疾",
-          ""
-        ]
-      },
-      "year": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Романтика"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx156089-NLJQRWzJN01i.jpg",
       "banner": null,
       "audienceRating": 0,
       "popularity": 78,
@@ -29646,6 +29646,50 @@
       "banner": null
     },
     {
+      "id": "anilist-166448",
+      "ids": {
+        "mal": null,
+        "anilist": 166448
+      },
+      "title": "Zhanlüe Ji Tianshi",
+      "originalTitle": "Zhanlüe Ji Tianshi",
+      "alt": "战略级天使",
+      "description": "",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "Zhanlüe Ji Tianshi",
+          ""
+        ],
+        "ja": [
+          "战略级天使",
+          ""
+        ]
+      },
+      "year": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Фантастика",
+        "Сверхъестественное"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx166448-gi86E2PZ0NR5.jpg",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 70,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "anilist-141926",
       "ids": {
         "mal": null,
@@ -29725,7 +29769,7 @@
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx153480-5ZlWXHsLdV5t.png",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 69,
+      "popularity": 68,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -29734,23 +29778,23 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "anilist-166448",
+      "id": "anilist-166420",
       "ids": {
         "mal": null,
-        "anilist": 166448
+        "anilist": 166420
       },
-      "title": "Zhanlüe Ji Tianshi",
-      "originalTitle": "Zhanlüe Ji Tianshi",
-      "alt": "战略级天使",
+      "title": "Wu Kong Zhuan",
+      "originalTitle": "Wu Kong Zhuan",
+      "alt": "悟空传",
       "description": "",
       "descriptionLanguage": "en",
       "translations": {
         "en": [
-          "Zhanlüe Ji Tianshi",
+          "Wu Kong Zhuan",
           ""
         ],
         "ja": [
-          "战略级天使",
+          "悟空传",
           ""
         ]
       },
@@ -29763,13 +29807,14 @@
       "season": null,
       "type": "ONA",
       "genres": [
-        "Фантастика",
-        "Сверхъестественное"
+        "Экшен",
+        "Приключения",
+        "Фэнтези"
       ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx166448-gi86E2PZ0NR5.jpg",
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx166420-9H5K3BMTqzpO.jpg",
       "banner": null,
       "audienceRating": 0,
-      "popularity": 69,
+      "popularity": 68,
       "status": "announced",
       "catalogOnly": true,
       "announcement": true,
@@ -29896,51 +29941,6 @@
         "Фэнтези"
       ],
       "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx155312-hHKjDZZHCSt0.png",
-      "banner": null,
-      "audienceRating": 0,
-      "popularity": 67,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "anilist-166420",
-      "ids": {
-        "mal": null,
-        "anilist": 166420
-      },
-      "title": "Wu Kong Zhuan",
-      "originalTitle": "Wu Kong Zhuan",
-      "alt": "悟空传",
-      "description": "",
-      "descriptionLanguage": "en",
-      "translations": {
-        "en": [
-          "Wu Kong Zhuan",
-          ""
-        ],
-        "ja": [
-          "悟空传",
-          ""
-        ]
-      },
-      "year": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Приключения",
-        "Фэнтези"
-      ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx166420-9H5K3BMTqzpO.jpg",
       "banner": null,
       "audienceRating": 0,
       "popularity": 67,
@@ -31939,7 +31939,7 @@
         "month": 12,
         "day": 23
       },
-      "season": null,
+      "season": "WINTER",
       "type": "ONA",
       "genres": [
         "Фантастика"
@@ -34166,6 +34166,46 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "mal-65532",
+      "ids": {
+        "mal": 65532,
+        "shikimori": 65532
+      },
+      "title": "Long Xin Shaonu",
+      "originalTitle": "Long Xin Shaonu",
+      "alt": "Long Xin Shaonu",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Long Xin Shaonu",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "MOVIE",
+      "genres": [
+        "Экшен",
+        "Фэнтези"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/65532/d7d5e89c3c4ddeefe280fb67fc9dc3dc.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-62722",
       "ids": {
         "mal": 62722,
@@ -34501,49 +34541,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "mal-64454",
-      "ids": {
-        "mal": 64454,
-        "shikimori": 64454
-      },
-      "title": "Священные руины: Великий пожар на исходе дорог",
-      "originalTitle": "Sheng Xu Movie: Lu Jin Liaoyuan",
-      "alt": "Sheng Xu Movie: Lu Jin Liaoyuan",
-      "description": "",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Sheng Xu Movie: Lu Jin Liaoyuan",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Приключения",
-        "Фэнтези",
-        "исторический",
-        "боевые искусства"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/64454/4220f4378b022a31be0653fe7d4e826e.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "mal-65517",
       "ids": {
         "mal": 65517,
@@ -34578,6 +34575,49 @@
         "боевые искусства"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/65517/dbbf13998500f29f0e829d6871fb6a5d.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
+      "id": "mal-64454",
+      "ids": {
+        "mal": 64454,
+        "shikimori": 64454
+      },
+      "title": "Священные руины: Великий пожар на исходе дорог",
+      "originalTitle": "Sheng Xu Movie: Lu Jin Liaoyuan",
+      "alt": "Sheng Xu Movie: Lu Jin Liaoyuan",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Sheng Xu Movie: Lu Jin Liaoyuan",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Приключения",
+        "Фэнтези",
+        "исторический",
+        "боевые искусства"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/64454/4220f4378b022a31be0653fe7d4e826e.jpeg",
       "audienceRating": 0,
       "popularity": 0,
       "status": "announced",
@@ -35741,46 +35781,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "mal-65532",
-      "ids": {
-        "mal": 65532,
-        "shikimori": 65532
-      },
-      "title": "Long Xin Shaonu",
-      "originalTitle": "Long Xin Shaonu",
-      "alt": "Long Xin Shaonu",
-      "description": "",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Long Xin Shaonu",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "MOVIE",
-      "genres": [
-        "Экшен",
-        "Фэнтези"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/65532/d7d5e89c3c4ddeefe280fb67fc9dc3dc.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "mal-62796",
       "ids": {
         "mal": 62796,
@@ -36112,46 +36112,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "mal-65528",
-      "ids": {
-        "mal": 65528,
-        "shikimori": 65528
-      },
-      "title": "Проект капсул: Переворот",
-      "originalTitle": "Jiaonang Jihua: Nizhuan",
-      "alt": "Jiaonang Jihua: Nizhuan",
-      "description": "",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Jiaonang Jihua: Nizhuan",
-          ""
-        ]
-      },
-      "year": 2027,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2027,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Фэнтези",
-        "Фантастика"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/65528/eb04652ea06d44e30afcb5fa980823ff.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "mal-65524",
       "ids": {
         "mal": 65524,
@@ -36182,6 +36142,46 @@
         "Спорт"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/65524/9f0d3a07a285dc4566e3141806f0905d.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
+      "id": "mal-65528",
+      "ids": {
+        "mal": 65528,
+        "shikimori": 65528
+      },
+      "title": "Проект капсул: Переворот",
+      "originalTitle": "Jiaonang Jihua: Nizhuan",
+      "alt": "Jiaonang Jihua: Nizhuan",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Jiaonang Jihua: Nizhuan",
+          ""
+        ]
+      },
+      "year": 2027,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2027,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Фэнтези",
+        "Фантастика"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/65528/eb04652ea06d44e30afcb5fa980823ff.jpeg",
       "audienceRating": 0,
       "popularity": 0,
       "status": "announced",
