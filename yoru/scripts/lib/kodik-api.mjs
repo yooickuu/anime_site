@@ -111,5 +111,7 @@ export function mergeKodikRelease(existing,incoming){
  result.episodes.sort((a,b)=>(a.season??1)-(b.season??1)||(a.ordinal??a.number)-(b.ordinal??b.number));
  const multi=new Set(result.episodes.map(e=>e.season??1)).size>1;
  result.episodes.forEach((e,i)=>{e.ordinal??=e.number;e.number=multi?i+1:e.ordinal;});result.releasedEpisodes=result.episodes.map(e=>e.number);
- result.ongoing=added.ongoing;return result;
+ result.ongoing=added.ongoing;
+ if(added.status)result.status=added.status;
+ return result;
 }

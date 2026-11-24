@@ -14,7 +14,7 @@ import {dirname} from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const CATALOG_PATH = 'src/published-catalog.json';
-export async function updateOngoings({catalogPath=CATALOG_PATH,reportPath='checks/ongoing-update.json',retryPath='src/ongoing-retries.json',api:configuredAPI,anilibria:configuredAniLibria,kodikRefresh=refreshOngoingKodik,anilibriaRefresh=refreshAniLibria}={}) {
+export async function updateOngoings({catalogPath=CATALOG_PATH,reportPath='checks/ongoing-update.json',retryPath='src/ongoing-retries.json',api:configuredAPI,anilibria:configuredAniLibria,kodikRefresh=refreshOngoingKodik,anilibriaRefresh=refreshAniLibria,fetcher=fetch}={}) {
   console.log('Checking for ongoing anime updates...');
 
   const token=configuredAPI?null:await loadToken(),api=configuredAPI||(token?new KodikAPI(token):null);
@@ -54,6 +54,44 @@ export async function updateOngoings({catalogPath=CATALOG_PATH,reportPath='check
         catalog.items[catalog.items.indexOf(item)]=updated;updatedCount++;
       }
     }catch(error){failures++;failed.push({id:item.id,provider:'anilibria',reason:error.message});console.warn(`AniLibria update pending for ${item.id}: ${error.message}`);}
+  }
+
+  const stillOngoing = ongoings.filter(item => item.ongoing === true && (item.ids?.shikimori || item.ids?.mal));
+  if(stillOngoing.length){
+    try{
+      for(let i=0;i<stillOngoing.length;i+=50){
+        const chunk=stillOngoing.slice(i,i+50);
+        const ids=chunk.map(a=>a.ids?.shikimori||a.ids?.mal).filter(Boolean);
+        if(!ids.length)continue;
+        const res=await fetcher('https://shikimori.io/api/graphql',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','User-Agent':'Yomiku/2.0'},
+          body:JSON.stringify({query:`{animes(ids:${JSON.stringify(ids.join(','))},limit:50){id malId status episodes episodesAired airedOn{year month day}}}`}),
+          signal:AbortSignal.timeout(10000)
+        });
+        if(res.ok){
+          const data=await res.json();
+          const map=new Map((data.data?.animes||[]).map(a=>[String(a.id),a]));
+          for(const item of chunk){
+            const shikiId=String(item.ids?.shikimori||item.ids?.mal);
+            const info=map.get(shikiId);
+            if(info&&info.status==='released'){
+              const epCount=Number(info.episodes)||0;
+              if(item.episodes?.length&&(epCount===0||item.episodes.length>=epCount||item.releasedEpisodes?.length>=epCount)){
+                console.log(`Тайтл завершён (Shikimori): ${item.title}`);
+                item.ongoing=false;
+                item.status='released';
+                const idx=catalog.items.indexOf(item);
+                if(idx>=0)catalog.items[idx]=item;
+                updatedCount++;
+              }
+            }
+          }
+        }
+      }
+    }catch(e){
+      console.warn('Shikimori status check skipped:', e.message);
+    }
   }
 
   const report={checked:ongoings.length,attempted,succeeded,updated:updatedCount,newEpisodes:newEpisodesCount,failures:failed};

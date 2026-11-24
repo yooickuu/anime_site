@@ -4,10 +4,10 @@ const TTL=12*3600000,version=typeof __ANNOUNCEMENT_REVISION__==='undefined'?'dev
 export function createAnnouncements({fetcher=fetch,storage=()=>globalThis.localStorage,now=Date.now}={}){
  let memory,pending;const searches=new Map();
  const key='yomiku.announcements.v1';
- function read(){try{const d=JSON.parse(storage().getItem(key));return d?.version===version&&Array.isArray(d.items)&&d.items.length<=600&&d.items.every(a=>/^(mal|anilist)-\d+$/.test(a.id)&&a.catalogOnly===true)?d:null;}catch{return null;}}
+ function read(){try{const d=JSON.parse(storage().getItem(key));return d?.version===version&&Array.isArray(d.items)&&d.items.every(a=>/^(mal|anilist)-\d+$/.test(a.id)&&a.catalogOnly===true)?d:null;}catch{return null;}}
  async function feed(){
   if(memory?.until>now())return memory.items;if(pending)return pending;const saved=read();if(saved?.until>now()){memory=saved;return saved.items;}
-  pending=(async()=>{try{const r=await fetcher(new URL('data/announcements.json',globalThis.document?.baseURI||'https://yomiku.site/'),{cache:'no-cache',signal:AbortSignal.timeout(6000)});if(!r.ok)throw Error();const d=await r.json();if(!Array.isArray(d.items)||d.items.length>600||d.items.some(a=>!a?.id||!a.title||!Array.isArray(a.genres)||a.catalogOnly!==true))throw Error();memory={version,until:now()+TTL,items:d.items,aliases:d.aliases||{}};}
+  pending=(async()=>{try{const r=await fetcher(new URL('data/announcements.json',globalThis.document?.baseURI||'https://yomiku.site/'),{cache:'no-cache',signal:AbortSignal.timeout(6000)});if(!r.ok)throw Error();const d=await r.json();if(!Array.isArray(d.items)||d.items.some(a=>!a?.id||!a.title||!Array.isArray(a.genres)||a.catalogOnly!==true))throw Error();memory={version,until:now()+TTL,items:d.items,aliases:d.aliases||{}};}
    catch{let fallback;try{fallback=(await aniListPage(1,'',fetcher)).items;}catch{}memory={version,until:now()+60000,items:fallback||saved?.items||[]};}
    try{storage().setItem(key,JSON.stringify(memory));}catch{}return memory.items;})().finally(()=>{pending=null;});return pending;
  }

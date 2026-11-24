@@ -99,7 +99,8 @@ export async function assembleAniLibria(release,{existing=null,getMetadata=async
   if(!backdrop)throw Error('broken_backdrop');artwork={poster,backdrop};
  }
  const id=identity.ids.mal?`mal-${identity.ids.mal}`:identity.ids.shikimori?`shikimori-${identity.ids.shikimori}`:`lib-${identity.ids.anilibria}`;
- const item={...metadataFromAniList(al),...identity,id,title:sh?.russian||identity.title,originalTitle:sh?.name||identity.originalTitle,alt:[identity.originalTitle,...identity.names,al?.title?.native,al?.title?.english].filter(Boolean).join(' '),description:cleanSynopsis(sh?.description||release.description||al?.description),genres:(sh?.genres?.map(g=>g.russian||g.name)||release.genres?.map(g=>g.name)||[]).map(normalizeGenre),rating:Number(sh?.score||release.shikimori?.rating||release.mal?.rating)||null,popularity:al?.popularity||0,ongoing:release.is_ongoing===true,artwork,releasedEpisodes:episodes.map(e=>e.number),episodes,anilibriaRevision:release.updated_at||release.fresh_at||null,anilibriaCheckedAt:new Date().toISOString()};
+ const isOngoing=release.is_ongoing===true;
+ const item={...metadataFromAniList(al),...identity,id,title:sh?.russian||identity.title,originalTitle:sh?.name||identity.originalTitle,alt:[identity.originalTitle,...identity.names,al?.title?.native,al?.title?.english].filter(Boolean).join(' '),description:cleanSynopsis(sh?.description||release.description||al?.description),genres:(sh?.genres?.map(g=>g.russian||g.name)||release.genres?.map(g=>g.name)||[]).map(normalizeGenre),rating:Number(sh?.score||release.shikimori?.rating||release.mal?.rating)||null,popularity:al?.popularity||0,ongoing:isOngoing,status:isOngoing?'ongoing':'released',artwork,releasedEpisodes:episodes.map(e=>e.number),episodes,anilibriaRevision:release.updated_at||release.fresh_at||null,anilibriaCheckedAt:new Date().toISOString()};
  const check=auditAdmission(item,{strict:false});if(!check.passed)throw Error('anilibria_validation_'+check.issues.map(i=>i.code).join(','));return item;
 }
 export function mergeAniLibria(existing,incoming){
@@ -119,7 +120,7 @@ export function mergeAniLibria(existing,incoming){
  result.episodes.sort((a,b)=>a.number-b.number);result.releasedEpisodes=result.episodes.map(e=>e.number);
  result.anilibriaRevision=incoming.anilibriaRevision;result.anilibriaCheckedAt=incoming.anilibriaCheckedAt;
  // Existing ID, artwork, metadata, Kodik tracks and list references are untouched.
- if(!result.kodikIds?.length)result.ongoing=incoming.ongoing;
+ if(!result.kodikIds?.length){result.ongoing=incoming.ongoing;if(incoming.status)result.status=incoming.status;}
  const check=auditAdmission(result,{strict:false});if(!check.passed)throw Error('merged_catalogue_validation_failed');return result;
 }
 

@@ -7,14 +7,15 @@ import {loadToken,saveJSON,assembleRelease,allocateCatalogueId} from './seed-cat
 import {KodikAPI,catalogParams,completeRelease,mergeKodikRelease} from './lib/kodik-api.mjs';
 import {createApprovedCatalogue} from '../src/approved-catalog.js';
 import {mapLimit} from './lib/concurrency.mjs';
+import {announcementCandidates,sameAnnouncement} from './lib/announcement-match.mjs';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 export async function collectAnnouncements({wait=pause,primary=shikiDetails,secondary=aniListPage}={}){
  const feeds=[],errors=[];
  for(const [name,load] of [['shikimori',page=>primary({page})],['anilist',page=>secondary(page)]]){
-  const items=[];try{for(let page=1;page<=10;page++){const result=await load(page);items.push(...result.items);if(!result.next)break;await wait(800);}feeds.push(items);}catch(e){errors.push({source:name,reason:e.message});if(items.length)feeds.push(items);}
+  const items=[];try{for(let page=1;page<=60;page++){const result=await load(page);items.push(...result.items);if(!result.next)break;await wait(800);}feeds.push(items);}catch(e){errors.push({source:name,reason:e.message});if(items.length)feeds.push(items);}
  }
  if(!feeds.length)throw Error('announcement_sources_unavailable');
- return {items:mergeAnnouncements(feeds[0]||[],feeds[1]||[]).sort((a,b)=>(b.popularity||0)-(a.popularity||0)).slice(0,500),errors};
+ return {items:mergeAnnouncements(feeds[0]||[],feeds[1]||[]).sort((a,b)=>(b.popularity||0)-(a.popularity||0)),errors};
 }
 export async function updateAnnouncements({catalogPath='src/published-catalog.json',feedPath='src/announcements.json',reportPath='checks/announcements.json',api,assemble=assembleRelease,collect=collectAnnouncements,wait=pause,refreshDetails=shikiDetails,refreshAniList=aniListDetails}={}){
  const original=await readCatalogueText(catalogPath),catalog=JSON.parse(original);let previous={items:[],aliases:{}};try{previous=JSON.parse(await readFile(feedPath,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
@@ -30,16 +31,18 @@ export async function updateAnnouncements({catalogPath='src/published-catalog.js
   const id=card.ids?.shikimori||card.ids?.mal;if(!id&&!card.originalTitle)return;
   try{
    checked++;if(checked%50===0)console.log('Сверено анонсов с Kodik: '+checked+'/'+pending.length);let merged=null;const translations=new Set();
-   for await(const page of api.pages('/search',{...catalogParams,...(id?{shikimori_id:id}:{title:card.originalTitle})})){
-    for(const release of page.results){
+   const found=[];
+   for await(const page of api.pages('/search',{...catalogParams,...(id?{shikimori_id:id}:{title:card.originalTitle})}))found.push(...page.results);
+   // Kodik title search is broad. Reject unrelated matches BEFORE artwork and
+   // metadata requests, and require a unique identity across all pages.
+    for(const release of id?found:announcementCandidates(card,found)){
      if((id&&Number(release.shikimori_id)!==Number(id))||translations.has(String(release.translation?.id))||translations.size>=3)continue;
      if(!Number(release.episodes_count)&&release.type!=='anime')continue;
      try{const full=await completeRelease(api,release),incoming=await assemble(full);
-      if(id?Number(incoming.ids?.shikimori)!==Number(id):!identityMatcher([incoming])(card))throw Error('announcement_identity_mismatch');
+      if(id?Number(incoming.ids?.shikimori)!==Number(id):!sameAnnouncement(card,incoming))throw Error('announcement_identity_mismatch');
       const next=mergeKodikRelease(merged,incoming);if(!createApprovedCatalogue({policyVersion:3,items:[next]}).items.length)throw Error('announcement_admission_failed');merged=next;translations.add(String(release.translation?.id));
      }catch(e){failures.push({id:card.id,reason:e.message});}
     }
-   }
    if(merged){
     // A concurrent worker may have resolved an alternative announcement name.
     const existing=identityMatcher(catalog.items)(merged);if(existing){aliases[card.id]=existing.id;return;}
@@ -54,7 +57,7 @@ export async function updateAnnouncements({catalogPath='src/published-catalog.js
  if(promoted){if(await readCatalogueText(catalogPath)!==original)throw Error('catalogue_changed_during_announcement_update');catalog.updatedAt=new Date().toISOString();await saveJSON(catalogPath,catalog);}
  // Keep released-but-unavailable titles in the retry set and metadata-only UI.
  const remaining=reconcile(candidates,catalog.items),waiting=remaining.filter(a=>a.status!=='announced');
- const items=[...waiting.slice(0,100),...remaining.filter(a=>a.status==='announced').slice(0,500)].slice(0,600);
+ const items=[...waiting,...remaining.filter(a=>a.status==='announced')];
  const feed={version:1,updatedAt:new Date().toISOString(),items,aliases};await saveJSON(feedPath,feed);
  const report={checked,promoted,announced:items.filter(a=>a.status==='announced').length,waiting:waiting.length,errors:[...fetched.errors,...failures]};
  if(reportPath){await mkdir('checks',{recursive:true});await saveJSON(reportPath,report);}
