@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-24T16:58:20.191Z",
+  "updatedAt": "2026-11-25T01:57:33.407Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -79,7 +79,7 @@
         "Сверхъестественное"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/50668/14dc8b09e149895273466d3cd3533994.jpeg",
-      "audienceRating": 0,
+      "audienceRating": 7.17,
       "popularity": 0,
       "status": "finished",
       "catalogOnly": true,
@@ -30399,7 +30399,7 @@
         "anilist": 220182,
         "shikimori": 65521
       },
-      "title": "Ling Long: Luozi Wu Hui",
+      "title": "Клетка духа: Ход без сожалений",
       "originalTitle": "Ling Long: Luozi Wu Hui",
       "alt": "Ling Long: Luozi Wu Hui 灵笼:落子无悔",
       "description": "Following the events of Ling Long 2, Longgu Village has locked onto the crash site of the Swift and discovered traces of Mark. The convoy is about to enter an unfamiliar area, where the Mana Ecosystem is showing a completely different state.\n\n\n\n(Source: Weibo, translated)",
@@ -31822,7 +31822,7 @@
         "anilist": 220179,
         "shikimori": 65537
       },
-      "title": "You Shou Yan 7th Season",
+      "title": "Мифические звери 7",
       "originalTitle": "You Shou Yan 7th Season",
       "alt": "You Shou Yan 7th Season Fabulous Beasts 7 有兽焉 第七季",
       "description": "The seventh season of You Shou Yan.",
@@ -33755,6 +33755,46 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "mal-65532",
+      "ids": {
+        "mal": 65532,
+        "shikimori": 65532
+      },
+      "title": "Девушка с сердцем дракона",
+      "originalTitle": "Long Xin Shaonu",
+      "alt": "Long Xin Shaonu",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Long Xin Shaonu",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "MOVIE",
+      "genres": [
+        "Экшен",
+        "Фэнтези"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/65532/d7d5e89c3c4ddeefe280fb67fc9dc3dc.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-61658",
       "ids": {
         "mal": 61658,
@@ -34166,46 +34206,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "mal-65532",
-      "ids": {
-        "mal": 65532,
-        "shikimori": 65532
-      },
-      "title": "Long Xin Shaonu",
-      "originalTitle": "Long Xin Shaonu",
-      "alt": "Long Xin Shaonu",
-      "description": "",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Long Xin Shaonu",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "MOVIE",
-      "genres": [
-        "Экшен",
-        "Фэнтези"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/65532/d7d5e89c3c4ddeefe280fb67fc9dc3dc.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "mal-62722",
       "ids": {
         "mal": 62722,
@@ -34456,6 +34456,50 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "mal-65517",
+      "ids": {
+        "mal": 65517,
+        "shikimori": 65517
+      },
+      "title": "Великий правитель (2023) 3",
+      "originalTitle": "Da Zhuzai: Nian Fan 3",
+      "alt": "Da Zhuzai: Nian Fan 3",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Da Zhuzai: Nian Fan 3",
+          ""
+        ]
+      },
+      "year": 2026,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2026,
+        "month": 12,
+        "day": 25
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Приключения",
+        "Фэнтези",
+        "Романтика",
+        "исторический",
+        "боевые искусства"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/65517/dbbf13998500f29f0e829d6871fb6a5d.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-64799",
       "ids": {
         "mal": 64799,
@@ -34531,50 +34575,6 @@
         "боевые искусства"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62991/5075a9efda2b21c4c0e9b19bcad55a34.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "mal-65517",
-      "ids": {
-        "mal": 65517,
-        "shikimori": 65517
-      },
-      "title": "Da Zhuzai: Nian Fan 3",
-      "originalTitle": "Da Zhuzai: Nian Fan 3",
-      "alt": "Da Zhuzai: Nian Fan 3",
-      "description": "",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Da Zhuzai: Nian Fan 3",
-          ""
-        ]
-      },
-      "year": 2026,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2026,
-        "month": 12,
-        "day": 25
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Приключения",
-        "Фэнтези",
-        "Романтика",
-        "исторический",
-        "боевые искусства"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/65517/dbbf13998500f29f0e829d6871fb6a5d.jpeg",
       "audienceRating": 0,
       "popularity": 0,
       "status": "announced",
@@ -36073,45 +36073,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "mal-64230",
-      "ids": {
-        "mal": 64230,
-        "shikimori": 64230
-      },
-      "title": "Бедняжка! Театр",
-      "originalTitle": "Kawaisouni! Theater",
-      "alt": "Kawaisouni! Theater",
-      "description": "",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Kawaisouni! Theater",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "TV",
-      "genres": [
-        "Комедия"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/64230/4131c6bf541288a1d903614e8c69121a.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "mal-65524",
       "ids": {
         "mal": 65524,
@@ -36142,6 +36103,45 @@
         "Спорт"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/65524/9f0d3a07a285dc4566e3141806f0905d.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
+      "id": "mal-64230",
+      "ids": {
+        "mal": 64230,
+        "shikimori": 64230
+      },
+      "title": "Бедняжка! Театр",
+      "originalTitle": "Kawaisouni! Theater",
+      "alt": "Kawaisouni! Theater",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Kawaisouni! Theater",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "TV",
+      "genres": [
+        "Комедия"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/64230/4131c6bf541288a1d903614e8c69121a.jpeg",
       "audienceRating": 0,
       "popularity": 0,
       "status": "announced",
