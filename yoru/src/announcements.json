@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-25T16:51:48.925Z",
+  "updatedAt": "2026-11-26T01:34:28.005Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -1198,14 +1198,13 @@
       "id": "mal-64459",
       "ids": {
         "mal": 64459,
-        "anilist": 213457,
-        "shikimori": 64459
+        "anilist": 213457
       },
-      "title": "Ночь дурака",
+      "title": "Fool Night",
       "originalTitle": "Fool Night",
-      "alt": "Fool Night Fool Night フールナイト",
-      "description": "В будущем Земля погружена в вечную тьму: плотные облака скрыли солнце, растения погибли, а кислород стал роскошью. Чтобы выжить, человечество создало технологию флороморфоза — процедуру, превращающую людей в способные производить кислород растения всего за два года. Тем, кто проходит её, государство выплачивает десять миллионов иен.Для одних это спасение, для других — отказ от человеческой жизни. — бедный юноша, бросивший школу и работающий на заводе за гроши. Отчаянно пытаясь помочь больной матери, он решается пройти трансфлорацию ради денег, но неожиданно обретает способность слышать голоса тех, кто уже стал растением.Теперь ему предстоит сделать выбор: бороться за человеческую жизнь в умирающем мире или принять новую судьбу.",
-      "descriptionLanguage": "ru",
+      "alt": "Fool Night フールナイト",
+      "description": "The earth of the distant future is covered in thick clouds, and the sun no longer shines. Plants wither, and oxygen is thin. To fight extinction, humankind has developed a technology that turns humans into plants, providing a small amount of oxygen. Is this process sustainable? Is it ethical? Toshiro Kamiya must consider these questions as he’s faced with a difficult choice—save his family or save himself.\n\n\n\nKamiya is at the end of his rope. His mother is ill, and his job barely pays for her medication, much less food. With few options left, he considers the life-changing process of transfloration. Ready to give his body up for a payday, Kamiya is about to explore the limits of society’s waning humanity.\n\n\n\n(Source: VIZ Media)",
+      "descriptionLanguage": "en",
       "translations": {
         "en": [
           "Fool Night",
@@ -1217,7 +1216,6 @@
         ]
       },
       "year": 2026,
-      "airedAt": null,
       "releaseDate": {
         "year": 2026,
         "month": 11,
@@ -1226,12 +1224,13 @@
       "season": "FALL",
       "type": "ONA",
       "genres": [
-        "сэйнэн",
         "Драма",
+        "psychological",
         "Фантастика",
-        "взрослые персонажи"
+        "Триллер"
       ],
-      "image": "https://shikimori.io/uploads/poster/animes/64459/8a11d9c0c7466a4dc8c789d31fa0e6e8.jpeg",
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx213457-gN5p1GZjK3zi.jpg",
+      "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/213457-xUUdWSFdK8At.jpg",
       "audienceRating": 0,
       "popularity": 27594,
       "status": "announced",
@@ -1239,8 +1238,7 @@
       "announcement": true,
       "episodes": 0,
       "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg",
-      "banner": "https://s4.anilist.co/file/anilistcdn/media/anime/banner/213457-xUUdWSFdK8At.jpg"
+      "posterFallback": "assets/announcement-poster.svg"
     },
     {
       "id": "mal-64546",
@@ -21441,16 +21439,17 @@
       "id": "mal-65312",
       "ids": {
         "mal": 65312,
-        "anilist": 219346
+        "anilist": 219346,
+        "shikimori": 65312
       },
-      "title": "Chi ni Ueta Hanayome wa Ou o Kurau",
-      "originalTitle": "Chi ni Ueta Hanayome wa Ou o Kurau",
-      "alt": "血に飢えた花嫁は王を喰らう",
+      "title": "Кровожадная невеста пожирает короля",
+      "originalTitle": "Chi ni Ueta Hanayome wa Ou wo Kurau",
+      "alt": "Chi ni Ueta Hanayome wa Ou wo Kurau 血に飢えた花嫁は王を喰らう",
       "description": "\"The bloodthirsty bride devours the king\" light anime adaptation announced for 2027.",
-      "descriptionLanguage": "en",
+      "descriptionLanguage": "ru",
       "translations": {
         "en": [
-          "Chi ni Ueta Hanayome wa Ou o Kurau",
+          "Chi ni Ueta Hanayome wa Ou wo Kurau",
           "\"The bloodthirsty bride devours the king\" light anime adaptation announced for 2027."
         ],
         "ja": [
@@ -21459,18 +21458,19 @@
         ]
       },
       "year": 2027,
+      "airedAt": null,
       "releaseDate": {
         "year": 2027,
         "month": null,
         "day": null
       },
       "season": null,
-      "type": "",
+      "type": "TV",
       "genres": [
-        "Романтика"
+        "Фэнтези",
+        "вампиры"
       ],
-      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx219346-qip6iEa5qfrV.jpg",
-      "banner": null,
+      "image": "https://shikimori.io/uploads/poster/animes/65312/a4b7463c02bd7899dcc5cc1d7fcc87a7.jpeg",
       "audienceRating": 0,
       "popularity": 266,
       "status": "announced",
@@ -21478,7 +21478,8 @@
       "announcement": true,
       "episodes": 0,
       "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
+      "posterFallback": "assets/announcement-poster.svg",
+      "banner": null
     },
     {
       "id": "anilist-191979",
@@ -33301,6 +33302,46 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "mal-65532",
+      "ids": {
+        "mal": 65532,
+        "shikimori": 65532
+      },
+      "title": "Девушка с сердцем дракона",
+      "originalTitle": "Long Xin Shaonu",
+      "alt": "Long Xin Shaonu",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Long Xin Shaonu",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "MOVIE",
+      "genres": [
+        "Экшен",
+        "Фэнтези"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/65532/d7d5e89c3c4ddeefe280fb67fc9dc3dc.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-64458",
       "ids": {
         "mal": 64458,
@@ -33377,46 +33418,6 @@
         "боевые искусства"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/64387/27ce9c3206e06fd182420de76a3baf81.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "mal-65532",
-      "ids": {
-        "mal": 65532,
-        "shikimori": 65532
-      },
-      "title": "Девушка с сердцем дракона",
-      "originalTitle": "Long Xin Shaonu",
-      "alt": "Long Xin Shaonu",
-      "description": "",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Long Xin Shaonu",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "MOVIE",
-      "genres": [
-        "Экшен",
-        "Фэнтези"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/65532/d7d5e89c3c4ddeefe280fb67fc9dc3dc.jpeg",
       "audienceRating": 0,
       "popularity": 0,
       "status": "announced",
@@ -34412,50 +34413,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "mal-62748",
-      "ids": {
-        "mal": 62748,
-        "shikimori": 62748
-      },
-      "title": "Звёздные врата",
-      "originalTitle": "Xing Men",
-      "alt": "Xing Men",
-      "description": "Путь мести, свидетельство духа военного мира.",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Xing Men",
-          ""
-        ]
-      },
-      "year": 2026,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2026,
-        "month": 11,
-        "day": 26
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Приключения",
-        "Фэнтези",
-        "тайна",
-        "Триллер",
-        "городское фэнтези"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/62748/dbad5b6ba41b60c0995a44bde00d792b.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "mal-65517",
       "ids": {
         "mal": 65517,
@@ -34490,6 +34447,50 @@
         "боевые искусства"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/65517/dbbf13998500f29f0e829d6871fb6a5d.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
+      "id": "mal-62748",
+      "ids": {
+        "mal": 62748,
+        "shikimori": 62748
+      },
+      "title": "Звёздные врата",
+      "originalTitle": "Xing Men",
+      "alt": "Xing Men",
+      "description": "Путь мести, свидетельство духа военного мира.",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Xing Men",
+          ""
+        ]
+      },
+      "year": 2026,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2026,
+        "month": 11,
+        "day": 26
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Приключения",
+        "Фэнтези",
+        "тайна",
+        "Триллер",
+        "городское фэнтези"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/62748/dbad5b6ba41b60c0995a44bde00d792b.jpeg",
       "audienceRating": 0,
       "popularity": 0,
       "status": "announced",
@@ -36119,45 +36120,6 @@
       "banner": null
     },
     {
-      "id": "mal-64230",
-      "ids": {
-        "mal": 64230,
-        "shikimori": 64230
-      },
-      "title": "Бедняжка! Театр",
-      "originalTitle": "Kawaisouni! Theater",
-      "alt": "Kawaisouni! Theater",
-      "description": "",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Kawaisouni! Theater",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "TV",
-      "genres": [
-        "Комедия"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/64230/4131c6bf541288a1d903614e8c69121a.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "mal-65528",
       "ids": {
         "mal": 65528,
@@ -36188,6 +36150,45 @@
         "Фантастика"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/65528/eb04652ea06d44e30afcb5fa980823ff.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
+      "id": "mal-64230",
+      "ids": {
+        "mal": 64230,
+        "shikimori": 64230
+      },
+      "title": "Бедняжка! Театр",
+      "originalTitle": "Kawaisouni! Theater",
+      "alt": "Kawaisouni! Theater",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Kawaisouni! Theater",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "TV",
+      "genres": [
+        "Комедия"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/64230/4131c6bf541288a1d903614e8c69121a.jpeg",
       "audienceRating": 0,
       "popularity": 0,
       "status": "announced",
@@ -36317,9 +36318,9 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "anilist-220269",
+      "id": "mal-65551",
       "ids": {
-        "mal": null,
+        "mal": 65551,
         "anilist": 220269
       },
       "title": "25-ji, Akasaka de",
@@ -36359,11 +36360,55 @@
       "episodes": 0,
       "ongoing": false,
       "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
+      "id": "anilist-220286",
+      "ids": {
+        "mal": null,
+        "anilist": 220286
+      },
+      "title": "FUNtasic Precure!",
+      "originalTitle": "FUNtasic Precure!",
+      "alt": "ファンたじっくプリキュア！",
+      "description": "The 24th entry in the long-running Precure series.\n\n\nShine! Everyone's smiles!\n\nWelcome to the FUNtasic Party!",
+      "descriptionLanguage": "en",
+      "translations": {
+        "en": [
+          "FUNtasic Precure!",
+          "The 24th entry in the long-running Precure series.\n\n\nShine! Everyone's smiles!\n\nWelcome to the FUNtasic Party!"
+        ],
+        "ja": [
+          "ファンたじっくプリキュア！",
+          ""
+        ]
+      },
+      "year": 2027,
+      "releaseDate": {
+        "year": 2027,
+        "month": null,
+        "day": null
+      },
+      "season": "WINTER",
+      "type": "TV",
+      "genres": [
+        "mahou shoujo"
+      ],
+      "image": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx220286-7WsyFqfkLOz6.jpg",
+      "banner": null,
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
     }
   ],
   "aliases": {
     "mal-59878": "mal-59878",
     "anilist-176859": "mal-65522",
-    "mal-62750": "mal-62750"
+    "mal-62750": "mal-62750",
+    "anilist-220269": "mal-65551"
   }
 }
