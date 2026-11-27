@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-26T16:21:42.238Z",
+  "updatedAt": "2026-11-27T01:35:23.615Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -80,6 +80,49 @@
       ],
       "image": "https://shikimori.io/uploads/poster/animes/50668/14dc8b09e149895273466d3cd3533994.jpeg",
       "audienceRating": 7.17,
+      "popularity": 0,
+      "status": "finished",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
+      "id": "mal-64266",
+      "ids": {
+        "mal": 64266,
+        "shikimori": 64266
+      },
+      "title": "Первородный грех Такопи: Спасибо, увидимся завтра",
+      "originalTitle": "Takopii no Genzai Movie: Arigatou, Mata Ashita",
+      "alt": "Takopii no Genzai Movie: Arigatou, Mata Ashita",
+      "description": "Кинокомпиляция сериала «Такопи не может печалиться».",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Takopii no Genzai Movie: Arigatou, Mata Ashita",
+          ""
+        ]
+      },
+      "year": 2026,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2026,
+        "month": 11,
+        "day": 27
+      },
+      "season": null,
+      "type": "MOVIE",
+      "genres": [
+        "Сёнен",
+        "Драма",
+        "Фантастика",
+        "психологическое",
+        "путешествие во времени"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/64266/f25d15db1bdb5ed55e8ecfea4d5dad6c.jpeg",
+      "audienceRating": 0,
       "popularity": 0,
       "status": "finished",
       "catalogOnly": true,
@@ -7646,7 +7689,7 @@
       "title": "Маг поддержки на побегушках ещё не осознал, что он сильнейший",
       "originalTitle": "Zatsuyou Fuyo Jutsushi ga Jibun no Saikyou ni Kizuku made",
       "alt": "Zatsuyou Fuyo Jutsushi ga Jibun no Saikyou ni Kizuku made Magical Buffs: The Support Caster is Stronger Than He Realized! 雑用付与術師が自分の最強に気付くまで",
-      "description": "Уим Штраус — «одаряющий заклинатель», маг поддержки, способный усиливать своих союзников силой собственных заклинаний. Талант, безусловно, полезный, но поскольку применить его напрямую в бою невозможно, остальные члены отряда не видят в нём никакого толку. По их мнению, магия поддержки — это лишь мёртвый груз. Вскоре они без лишних церемоний выгоняют Уима из группы, и он всерьёз задумывается, не пришёл ли конец его карьере авантюриста.Но судьба даёт Уиму шанс: его подруга детства Хайдемари помогает ему получить приглашение на отбор в элитный отряд ранга А под названием «Нахтлибелле». Они оба знают, что его магия способна на большее, чем просто поддержка на задворках, — но теперь ему предстоит доказать это на деле. Настало время показать всему миру, что маги поддержки могут не только стоять в тени!",
+      "description": "Победу над очередным боссом этажа отряд авантюристов «Крыло дракона» отпраздновал тем, что прогнал своего мага поддержки Вима Штрауса. Депрессивный, необщительный и излишне осторожный, он давно раздражал товарищей. Пытаясь, выжать от его присутствия максимум, они свесили на него всю административную работу и почти не платили. В остальном он был совершенно им бесполезен со своим базовым зачарованием на усиление и прочими типичными бустами.\nКогда Вим, абсолютно уверенный, что больше его никто в команду не возьмёт, пытался примириться с мыслью, что придётся расстаться с карьерой авантюриста, его подруга Хайдемари позвала его в группу, где состоит сама. Хайдемари — обладательница редкой профессии «Мудрец» и группа «Ночная стрекоза», куда она вступила, тоже одна из лучших в городе.\nВ отличие от неуверенного в себе Вима, Хайдемари прекрасно знает, насколько он талантливый и могущественный чародей. Убедить в этом товарищей по «Ночной стрекозе» не составило Хайдемари большого труда, но вот чтоб уверить в этом самого Вима — придётся постараться!",
       "descriptionLanguage": "ru",
       "translations": {
         "en": [
@@ -8491,7 +8534,7 @@
       "releaseDate": {
         "year": 2027,
         "month": 1,
-        "day": null
+        "day": 1
       },
       "season": "WINTER",
       "type": "TV",
@@ -8501,7 +8544,7 @@
         "исэкай",
         "злодейка"
       ],
-      "image": "https://shikimori.io/uploads/poster/animes/63476/623e907264adbf16abc8d57961f856b7.jpeg",
+      "image": "https://shikimori.io/uploads/poster/animes/63476/fdd3dbbfa74750547867aa81237b578c.jpeg",
       "audienceRating": 0,
       "popularity": 3779,
       "status": "announced",
@@ -32524,49 +32567,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "mal-64266",
-      "ids": {
-        "mal": 64266,
-        "shikimori": 64266
-      },
-      "title": "Первородный грех Такопи: Спасибо, увидимся завтра",
-      "originalTitle": "Takopii no Genzai Movie: Arigatou, Mata Ashita",
-      "alt": "Takopii no Genzai Movie: Arigatou, Mata Ashita",
-      "description": "Кинокомпиляция сериала «Такопи не может печалиться».",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Takopii no Genzai Movie: Arigatou, Mata Ashita",
-          ""
-        ]
-      },
-      "year": 2026,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2026,
-        "month": 11,
-        "day": 27
-      },
-      "season": null,
-      "type": "MOVIE",
-      "genres": [
-        "Сёнен",
-        "Драма",
-        "Фантастика",
-        "психологическое",
-        "путешествие во времени"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/64266/f25d15db1bdb5ed55e8ecfea4d5dad6c.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "mal-39169",
       "ids": {
         "mal": 39169,
@@ -34415,6 +34415,50 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "mal-65517",
+      "ids": {
+        "mal": 65517,
+        "shikimori": 65517
+      },
+      "title": "Великий правитель (2023) 3",
+      "originalTitle": "Da Zhuzai: Nian Fan 3",
+      "alt": "Da Zhuzai: Nian Fan 3",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Da Zhuzai: Nian Fan 3",
+          ""
+        ]
+      },
+      "year": 2026,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2026,
+        "month": 12,
+        "day": 25
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Приключения",
+        "Фэнтези",
+        "Романтика",
+        "исторический",
+        "боевые искусства"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/65517/dbbf13998500f29f0e829d6871fb6a5d.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-61646",
       "ids": {
         "mal": 61646,
@@ -34486,50 +34530,6 @@
         "меха"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/61651/fc1c68239ef6fc3a30af3936f3ff8765.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "mal-65517",
-      "ids": {
-        "mal": 65517,
-        "shikimori": 65517
-      },
-      "title": "Великий правитель (2023) 3",
-      "originalTitle": "Da Zhuzai: Nian Fan 3",
-      "alt": "Da Zhuzai: Nian Fan 3",
-      "description": "",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Da Zhuzai: Nian Fan 3",
-          ""
-        ]
-      },
-      "year": 2026,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2026,
-        "month": 12,
-        "day": 25
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Приключения",
-        "Фэнтези",
-        "Романтика",
-        "исторический",
-        "боевые искусства"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/65517/dbbf13998500f29f0e829d6871fb6a5d.jpeg",
       "audienceRating": 0,
       "popularity": 0,
       "status": "announced",
@@ -35291,6 +35291,46 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "mal-65560",
+      "ids": {
+        "mal": 65560,
+        "shikimori": 65560
+      },
+      "title": "Акула-убийца в другом мире",
+      "originalTitle": "Isekai Kuimetsu no Same",
+      "alt": "Isekai Kuimetsu no Same",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Isekai Kuimetsu no Same",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "TV",
+      "genres": [
+        "Комедия",
+        "Фэнтези"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/65560/a87ecc2f9dbbb6a71c42148ed4bd2c4a.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-61653",
       "ids": {
         "mal": 61653,
@@ -35663,6 +35703,46 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
+      "id": "mal-61635",
+      "ids": {
+        "mal": 61635,
+        "shikimori": 61635
+      },
+      "title": "Галактика семи царств",
+      "originalTitle": "Qi Guo Yinhe",
+      "alt": "Qi Guo Yinhe",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Qi Guo Yinhe",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Фантастика"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/61635/f1347e205d19994239a5c61d85c00fa1.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
       "id": "mal-62783",
       "ids": {
         "mal": 62783,
@@ -35694,46 +35774,6 @@
         "боевые искусства"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/62783/6f8b47dfb2b04a5b1c48b65335f2041b.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
-      "id": "mal-61635",
-      "ids": {
-        "mal": 61635,
-        "shikimori": 61635
-      },
-      "title": "Галактика семи царств",
-      "originalTitle": "Qi Guo Yinhe",
-      "alt": "Qi Guo Yinhe",
-      "description": "",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Qi Guo Yinhe",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Фантастика"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/61635/f1347e205d19994239a5c61d85c00fa1.jpeg",
       "audienceRating": 0,
       "popularity": 0,
       "status": "announced",
