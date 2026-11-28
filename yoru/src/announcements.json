@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-27T16:06:28.930Z",
+  "updatedAt": "2026-11-28T01:06:52.455Z",
   "items": [
     {
       "id": "anilist-203368",
@@ -14688,13 +14688,13 @@
         "shikimori": 60555
       },
       "title": "Рамэнная рыжего кота 2",
-      "originalTitle": "Ramen Akaneko 2nd Season",
-      "alt": "Ramen Akaneko 2nd Season ラーメン赤猫 其の二",
+      "originalTitle": "Ramen Akaneko: Sono Ni",
+      "alt": "Ramen Akaneko: Sono Ni ラーメン赤猫 其の二",
       "description": "The second season of Ramen Aka Neko.",
       "descriptionLanguage": "ru",
       "translations": {
         "en": [
-          "Ramen Akaneko 2nd Season",
+          "Ramen Akaneko: Sono Ni",
           "The second season of Ramen Aka Neko."
         ],
         "ja": [
@@ -14707,7 +14707,7 @@
       "releaseDate": {
         "year": 2027,
         "month": 1,
-        "day": null
+        "day": 10
       },
       "season": "WINTER",
       "type": "TV",
@@ -34375,47 +34375,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "mal-62722",
-      "ids": {
-        "mal": 62722,
-        "shikimori": 62722
-      },
-      "title": "Огни морских глубин",
-      "originalTitle": "Shenhai Yujin",
-      "alt": "Shenhai Yujin",
-      "description": "Этот мир погрузился во мрак. В тот день, когда всё заволокло туманом, обычный человек по имени Чжоу Мин перенёсся в другое тело и стал капитаном корабля-призрака — ужасающего божества, известного как «Движущийся Бич».\nЦивилизация рухнула. Старый порядок исчез, и единственными островками жизни посреди бескрайнего океана остались изолированные города-государства. За их пределами, в густом тумане, обитают жуткие видения и чудовища, а тени прошлого скрываются в морской пучине, готовые поглотить умирающий мир. Мир, где грань между реальностью и безумием почти стёрта, а стимпанк переплетается с элементами жути и лавкрафтовских ужасов.\nНовоявленному капитану Дункану и его разношёрстной команде предстоит бороздить опасные воды, раскрывая мрачные тайны этого мира. Однако у нового капитана есть одна маленькая проблема... кто-нибудь знает, как управлять этим кораблём?",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Shenhai Yujin",
-          ""
-        ]
-      },
-      "year": 2026,
-      "airedAt": null,
-      "releaseDate": {
-        "year": 2026,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Экшен",
-        "Приключения",
-        "Фэнтези"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/62722/b29d9a0821034ddde87a54d044c7c231.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "mal-65517",
       "ids": {
         "mal": 65517,
@@ -34450,6 +34409,47 @@
         "боевые искусства"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/65517/dbbf13998500f29f0e829d6871fb6a5d.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
+      "id": "mal-62722",
+      "ids": {
+        "mal": 62722,
+        "shikimori": 62722
+      },
+      "title": "Огни морских глубин",
+      "originalTitle": "Shenhai Yujin",
+      "alt": "Shenhai Yujin",
+      "description": "Этот мир погрузился во мрак. В тот день, когда всё заволокло туманом, обычный человек по имени Чжоу Мин перенёсся в другое тело и стал капитаном корабля-призрака — ужасающего божества, известного как «Движущийся Бич».\nЦивилизация рухнула. Старый порядок исчез, и единственными островками жизни посреди бескрайнего океана остались изолированные города-государства. За их пределами, в густом тумане, обитают жуткие видения и чудовища, а тени прошлого скрываются в морской пучине, готовые поглотить умирающий мир. Мир, где грань между реальностью и безумием почти стёрта, а стимпанк переплетается с элементами жути и лавкрафтовских ужасов.\nНовоявленному капитану Дункану и его разношёрстной команде предстоит бороздить опасные воды, раскрывая мрачные тайны этого мира. Однако у нового капитана есть одна маленькая проблема... кто-нибудь знает, как управлять этим кораблём?",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Shenhai Yujin",
+          ""
+        ]
+      },
+      "year": 2026,
+      "airedAt": null,
+      "releaseDate": {
+        "year": 2026,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Экшен",
+        "Приключения",
+        "Фэнтези"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/62722/b29d9a0821034ddde87a54d044c7c231.jpeg",
       "audienceRating": 0,
       "popularity": 0,
       "status": "announced",
@@ -35296,46 +35296,6 @@
       "posterFallback": "assets/announcement-poster.svg"
     },
     {
-      "id": "mal-61645",
-      "ids": {
-        "mal": 61645,
-        "shikimori": 61645
-      },
-      "title": "Бог кулинарии",
-      "originalTitle": "Shi Shen",
-      "alt": "Shi Shen",
-      "description": "",
-      "descriptionLanguage": "ru",
-      "translations": {
-        "en": [
-          "Shi Shen",
-          ""
-        ]
-      },
-      "year": null,
-      "airedAt": null,
-      "releaseDate": {
-        "year": null,
-        "month": null,
-        "day": null
-      },
-      "season": null,
-      "type": "ONA",
-      "genres": [
-        "Фэнтези",
-        "гурман"
-      ],
-      "image": "https://shikimori.io/uploads/poster/animes/61645/904a387bfd56a9408b3b3996193dceb6.jpeg",
-      "audienceRating": 0,
-      "popularity": 0,
-      "status": "announced",
-      "catalogOnly": true,
-      "announcement": true,
-      "episodes": 0,
-      "ongoing": false,
-      "posterFallback": "assets/announcement-poster.svg"
-    },
-    {
       "id": "mal-63994",
       "ids": {
         "mal": 63994,
@@ -35366,6 +35326,46 @@
         "видеоигры"
       ],
       "image": "https://shikimori.io/uploads/poster/animes/63994/6664b4a6135226f4758a1fa73b8bdac4.jpeg",
+      "audienceRating": 0,
+      "popularity": 0,
+      "status": "announced",
+      "catalogOnly": true,
+      "announcement": true,
+      "episodes": 0,
+      "ongoing": false,
+      "posterFallback": "assets/announcement-poster.svg"
+    },
+    {
+      "id": "mal-61645",
+      "ids": {
+        "mal": 61645,
+        "shikimori": 61645
+      },
+      "title": "Бог кулинарии",
+      "originalTitle": "Shi Shen",
+      "alt": "Shi Shen",
+      "description": "",
+      "descriptionLanguage": "ru",
+      "translations": {
+        "en": [
+          "Shi Shen",
+          ""
+        ]
+      },
+      "year": null,
+      "airedAt": null,
+      "releaseDate": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "season": null,
+      "type": "ONA",
+      "genres": [
+        "Фэнтези",
+        "гурман"
+      ],
+      "image": "https://shikimori.io/uploads/poster/animes/61645/904a387bfd56a9408b3b3996193dceb6.jpeg",
       "audienceRating": 0,
       "popularity": 0,
       "status": "announced",
